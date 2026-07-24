@@ -155,13 +155,13 @@ async def handle_websocket(request):
                         release_all_steering_keys()
 
                     elif action == "MWHEEL_LEFT":
-                        print("▶ 관람차 (단일모터) 좌회전 발송 (h키 한번 탁 쳐서 가동)")
+                        print("▶ 관람차 (단일모터) 좌회전 발송 (H키 한번 탁 쳐서 가동)")
                         threading.Thread(target=lambda: safe_press('h'), daemon=True).start()
                     elif action == "MWHEEL_RIGHT":
-                        print("▶ 관람차 (단일모터) 우회전 발송 (j키 한번 탁 쳐서 가동)")
+                        print("▶ 관람차 (단일모터) 우회전 발송 (J키 한번 탁 쳐서 가동)")
                         threading.Thread(target=lambda: safe_press('j'), daemon=True).start()
                     elif action in ["STOP_MWHEEL_LEFT", "STOP_MWHEEL_RIGHT"]:
-                        print("▶ 관람차 (단일모터) 정지 스위치 수신 (K키 전송 제외 처리됨)")
+                        print("▶ 관람차 (단일모터) 정지 스위치 수신 (동작 완료 자동 제어로 키 전송 제외)")
 
                     elif action in ["SPEED_1", "SPEED_2", "SPEED_3", "SPEED_4"]:
                         speed_durations = {
@@ -233,7 +233,7 @@ async def handle_websocket(request):
         for d in steering_state: steering_state[d] = False
         try:
             with pydirectinput_lock:
-                for k in ['y', 'l', 'u', 'o', 'h', 'k', 'j', 't', '[', 'p', 'e', 'g', 'n']:
+                for k in ['y', 'l', 'u', 'o', 'h', 'k', 'j', 't', '[', ']', 'p', 'e', 'g', 'n']:
                     pydirectinput.keyUp(k)
         except Exception:
             pass
