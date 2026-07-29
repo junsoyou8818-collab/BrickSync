@@ -337,6 +337,53 @@
             z-index: 2;
         }
 
+        /* 포트나이트 맵 접속 버튼 */
+        .map-btn {
+            display: block;
+            width: 35%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .map-btn-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), brightness 0.3s;
+        }
+        .map-btn:hover .map-btn-img {
+            transform: scale(1.06);
+            filter: brightness(1.1);
+        }
+        .map-btn-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .map-btn:hover .map-btn-overlay {
+            opacity: 1;
+        }
+        .map-btn-label {
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: rgba(79,70,229,0.9);
+            padding: 5px 14px;
+            border-radius: 20px;
+        }
+
         /* 2) 섹션 구분 얇은 실선 */
         .divider {
             width: 100%;
@@ -798,10 +845,12 @@
                     <div class="banner-image-container">
                         <img src="./assets/fortnite_characters.png" class="banner-img" alt="Lego Fortnite Characters">
                     </div>
-                    <div class="banner-text" data-i18n="banner_intro_text">
-                        레고 포트나이트 앱 소개<br>
-                        및 학습 관련 가이드 내용
-                    </div>
+                    <a class="map-btn" href="https://www.fortnite.com/play/island/7603-2493-0825" target="_blank" rel="noopener" title="The Brick Island - 포트나이트 맵 접속">
+                        <img src="./assets/brick_siland.jpg" class="map-btn-img" alt="The Brick Island">
+                        <div class="map-btn-overlay">
+                            <span class="map-btn-label">▶ 맵 접속</span>
+                        </div>
+                    </a>
                 </div>
 
                 <!-- 가로선(디바이더) -->
