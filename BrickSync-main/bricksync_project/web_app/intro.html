@@ -322,7 +322,9 @@
 
                     // 0.4초 뒤에 메인 메뉴 앱(menu.html)으로 이동
                     setTimeout(() => {
-                        window.location.href = "app.html";
+                        // iframe 안에 있어도 항상 최상위 창 이동
+                        sessionStorage.removeItem('brickSyncLastPage');
+                        window.top.location.href = "app.html";
                     }, 400);
                 }
 
