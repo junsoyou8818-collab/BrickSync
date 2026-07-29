@@ -159,7 +159,7 @@ function showSection(section) {
   document.querySelectorAll('.nav-item').forEach((el, i) => el.classList.remove('active'));
   const navMap = ['overview','students','classcodes','parentcodes'];
   const idx = navMap.indexOf(section);
-  if (idx >= 0) document.querySelectorAll('.nav-item')[idx + 1]?.classList.add('active');
+  if (idx >= 0) document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
   SECTIONS[section]?.();
 }
 
