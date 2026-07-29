@@ -304,13 +304,7 @@
         }
 
         .banner-image-container {
-            width: 65%;
-            height: 100%;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-            padding-left: 20px; /* 좌측 캐릭터 잘림을 방지하기 위한 안전 여백 */
+            display: none; /* 왼쪽 캐릭터 이미지 숨김 */
         }
 
         .banner-img {
@@ -340,7 +334,7 @@
         /* 포트나이트 맵 접속 버튼 */
         .map-btn {
             display: block;
-            width: 35%;
+            width: 100%;  /* 풀 와이드 */
             height: 100%;
             position: relative;
             overflow: hidden;
@@ -352,36 +346,54 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center;
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), brightness 0.3s;
+            object-position: center top;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s;
         }
         .map-btn:hover .map-btn-img {
-            transform: scale(1.06);
+            transform: scale(1.04);
             filter: brightness(1.1);
         }
         .map-btn-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 60%);
+            background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, transparent 50%);
             display: flex;
-            align-items: flex-end;
+            flex-direction: column;
+            align-items: flex-start;
             justify-content: center;
-            padding-bottom: 12px;
-            opacity: 0;
+            padding: 0 36px;
             transition: opacity 0.3s;
-        }
-        .map-btn:hover .map-btn-overlay {
-            opacity: 1;
         }
         .map-btn-label {
             color: #fff;
-            font-size: 0.8rem;
+            font-size: 1.1rem;
             font-weight: 800;
+            letter-spacing: -0.3px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            margin-bottom: 6px;
+        }
+        .map-btn-code {
+            color: rgba(255,255,255,0.85);
+            font-size: 0.78rem;
+            font-weight: 600;
             letter-spacing: 1px;
-            text-transform: uppercase;
-            background: rgba(79,70,229,0.9);
-            padding: 5px 14px;
+            background: rgba(79,70,229,0.85);
+            padding: 4px 12px;
             border-radius: 20px;
+            margin-bottom: 10px;
+        }
+        .map-btn-cta {
+            color: #facc15;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .map-btn:hover .map-btn-cta {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         /* 2) 섹션 구분 얇은 실선 */
@@ -848,7 +860,9 @@
                     <a class="map-btn" href="https://www.fortnite.com/play/island/7603-2493-0825" target="_blank" rel="noopener" title="The Brick Island - 포트나이트 맵 접속">
                         <img src="./assets/brick_siland.jpg" class="map-btn-img" alt="The Brick Island">
                         <div class="map-btn-overlay">
-                            <span class="map-btn-label">▶ 맵 접속</span>
+                            <span class="map-btn-label">🎮 우리 학교 전용 레고 포트나이트 맵</span>
+                            <span class="map-btn-code">ISLAND CODE: 7603-2493-0825</span>
+                            <span class="map-btn-cta">▶ 클릭해서 지금 바로 입장!</span>
                         </div>
                     </a>
                 </div>
