@@ -203,13 +203,15 @@
                         lastActive: Date.now()
                     });
                 }).then(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'app.html';
                 }).catch(err => {
                     console.error("Firebase write/clear error:", err);
-                    window.location.href = 'index.html';
+                    sessionStorage.setItem('brickSyncLastPage', 'index.html');
+                    window.location.href = 'app.html';
                 });
             } else {
-                window.location.href = 'index.html';
+                sessionStorage.setItem('brickSyncLastPage', 'index.html');
+                window.location.href = 'app.html';
             }
         }
 
@@ -223,7 +225,8 @@
             try {
                 localStorage.setItem('bricksync_student_session', JSON.stringify(sessionData));
             } catch(e) {}
-            window.location.href = 'index.html';
+            sessionStorage.setItem('brickSyncLastPage', 'index.html');
+            window.location.href = 'app.html';
         }
     </script>
 </body>

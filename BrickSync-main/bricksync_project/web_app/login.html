@@ -357,7 +357,8 @@ function doGuestLogin() {
     loginTime: Date.now(),
     role: 'student'
   }));
-  window.location.href = 'index.html';
+  sessionStorage.setItem('brickSyncLastPage', 'index.html');
+  window.location.href = 'app.html';
 }
 
 // ── 엔터키 지원 ───────────────────────────────────────────────
@@ -377,7 +378,7 @@ document.addEventListener('keydown', e => {
     });
   } else {
     const legacy = BrickSyncAuth.getLegacySession();
-    if (legacy) window.location.href = 'index.html';
+    if (legacy) { sessionStorage.setItem('brickSyncLastPage', 'index.html'); window.location.href = 'app.html'; }
   }
 })();
 

@@ -8,7 +8,7 @@ const BrickSyncAuth = (() => {
 
     // ── 역할별 접근 허용 페이지 맵 ────────────────────────────────
     const ROLE_HOME = {
-        student: 'index.html',
+        student: 'app.html',
         teacher: 'teacher_dashboard.html',
         parent: 'parent_dashboard.html'
     };
@@ -236,7 +236,13 @@ const BrickSyncAuth = (() => {
      * 역할에 따라 홈 화면으로 리다이렉트
      */
     function redirectToHome(role) {
-        const target = ROLE_HOME[role] || 'index.html';
+        if (role === 'student') {
+            // app.html이 iframe에 index.html을 로드하도록 sessionStorage 설정
+            sessionStorage.setItem('brickSyncLastPage', 'index.html');
+            window.location.href = 'app.html';
+            return;
+        }
+        const target = ROLE_HOME[role] || 'app.html';
         window.location.href = target;
     }
 
