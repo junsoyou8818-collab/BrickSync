@@ -5,12 +5,8 @@
     <!-- 최상위 윈도우 자동 래핑 리다이렉트 스크립트 -->
     <script>
         if (window === window.parent) {
-            let currentPage = window.location.pathname.split('/').pop() + window.location.search;
-            if (!currentPage || currentPage.startsWith('?')) {
-                currentPage = 'index.html' + window.location.search;
-            }
-            sessionStorage.setItem('brickSyncLastPage', currentPage);
-            window.location.href = 'app.html';
+            // 첫 방문 시 항상 인트로 페이지로 이동
+            window.location.href = 'intro.html';
         }
     </script>
     <!-- Firebase SDK (Auth + Firestore + Realtime DB) -->
