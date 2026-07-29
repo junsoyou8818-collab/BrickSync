@@ -71,6 +71,94 @@
             lbl_mission_clear_desc: "아래의 핀(PIN) 코드를 레고 포트나이트 맵의<br><strong style=\"color:#0ea5e9;\">[비밀 제어 해제장치]</strong>에 입력하세요.",
             lbl_issued_code: "지급된 액세스 코드",
             btn_copy: "복사하기",
+            nav_dashboard_all: "교사/학부모용 대시보드",
+            nav_dashboard_teacher: "교사 대시보드",
+            nav_dashboard_parent: "학부모 대시보드",
+            lbl_coin_shelf: "코인 보상 진열대",
+            lbl_coin_shelf_subtitle: "코딩 미션을 성공할 때마다 황금 코인이 진열대에 하나씩 추가됩니다!",
+            banner_intro_text: "레고 포트나이트 앱 소개<br>및 학습 관련 가이드 내용",
+            btn_try_mission: "미션하러가기 🚀",
+            lbl_stamp_complete: "완 료",
+            lbl_reward_slot_coin: "코인",
+            lbl_hub_not_connected: "허브 연결 안 됨",
+            lbl_hub_connected: "허브 연결됨",
+            login_slogan: "AI 코딩 및 포트나이트 통합 플랫폼",
+            tab_student: "학생",
+            tab_teacher: "교사",
+            tab_parent: "학부모",
+            mode_login: "로그인",
+            mode_signup: "회원가입",
+            lbl_email: "이메일",
+            lbl_password: "비밀번호",
+            lbl_or: "또는",
+            btn_guest_entry: "로그인 없이 게스트로 입장",
+            info_student_signup: "담임 선생님께 클래스 코드를 받은 후 가입하세요.",
+            info_teacher_signup: "교사 계정으로 가입하면 클래스 코드를 발급할 수 있습니다.",
+            info_parent_signup: "담임 선생님께 학부모 연결 코드를 받은 후 가입하세요.",
+            lbl_name: "이름",
+            lbl_password_req: "비밀번호 (6자 이상)",
+            lbl_school_name: "학교/기관명",
+            lbl_class_code: "클래스 코드 (선생님 제공)",
+            lbl_parent_code: "학부모 연결 코드 (선생님 제공)",
+            btn_signup: "계정 만들기",
+
+            // Workspace & Dashboard UI Keys
+            lbl_device_sync: "디바이스 동기화",
+            lbl_code_injection: "코드 주입",
+            lbl_system_check: "시스템 확인",
+            lbl_local_server_connected: "로컬 서버(포트나이트 연동) 연결 완료",
+            lbl_log_start: "================ 로그 시작 ================",
+            lbl_status_waiting: "대기 중...",
+            dashboard_title: "교사/학부모 대시보드",
+            btn_reset_all_data: "전체 데이터 초기화",
+            lbl_select_student: "학생 선택",
+            lbl_focus_learning_time: "집중 학습 시간",
+            lbl_measuring_waiting: "측정 대기중",
+            lbl_block_execution_cnt: "블록 실행 횟수",
+            lbl_success_rate: "성공률",
+            lbl_self_error_resolution: "스스로 오류 해결",
+            lbl_analysis_pending: "- 분석 대기중",
+            lbl_fortnite_mission: "포트나이트 미션",
+            lbl_not_started: "시작 전",
+            lbl_block_usage_analysis: "블록 사용 분석",
+            lbl_motor_related: "모터 관련",
+            lbl_sensor_control_related: "센서/제어 관련",
+            lbl_other_actions: "기타 동작",
+            lbl_block_analysis_hint: "블록 실행 시 분석 데이터가 채워집니다.",
+            lbl_badge_skins: "스킨 3개",
+            lbl_badge_vbucks: "V-Bucks 150",
+            lbl_badge_master: "뱃지: 마스터",
+            lbl_today_concepts: "오늘 배운 개념",
+            concept_loops: "반복문",
+            concept_conditionals: "조건문",
+            concept_sensor_input: "센서 입력",
+            concept_motor_control: "모터 제어",
+            concept_ai_recog: "AI 인식",
+            concept_fn_sync: "포트나이트 연동",
+            lbl_growth_prev_class: "지난 수업 대비 성장",
+            lbl_coding_complexity: "코딩 복잡도",
+            lbl_mission_speed: "미션 완료 속도",
+            lbl_focus_time: "집중 시간",
+            lbl_realtime_log: "실시간 활동 로그",
+            lbl_log_waiting_hint: "대기 중... (학생이 코딩을 시작하면 기록됩니다)",
+            lbl_parent_report_title: "학부모 전송용 리포트",
+            btn_send_kakao: "카카오톡 전송",
+            lbl_today_summary_sub: "오늘의 학습 현황 요약표",
+            lbl_assembly_track_result: "조립 과정 탐지 결과",
+            lbl_waiting_active_data: "활성 데이터 대기중",
+            lbl_class_status_live: "수업 현황 (실시간 연동)",
+            lbl_tracked_block_cnt: "실행 추적 블록 수",
+            lbl_motor_sensor_fusion: "모터+센서 융합 활용",
+            lbl_measuring: "측정중",
+            lbl_sys_conn_integrity: "시스템 통신 무결성",
+            guest_anonymous: "익명",
+            unit_mins: "분",
+            unit_times: "회",
+            unit_blocks: "블록",
+            lbl_teacher_comment: "선생님 한마디 (AI 자동 분석)",
+            lbl_live: "실시간",
+            lbl_ai_comment_placeholder: "학생이 블록 코딩을 시작하면 해당 세션의 로그를 AI가 자동 분석하여 맞춤형 코멘트를 이곳에 작성합니다. (대기 중...)",
+            default_student_name: "김민준 학생",
 
             // Learning list
             lesson_1: "1. 탐험보트를 출발시켜요",
@@ -148,6 +236,94 @@
             lbl_mission_clear_desc: "Enter the PIN code below into the<br><strong style=\"color:#0ea5e9;\">[Secret Control Unlock Device]</strong> on the Lego Fortnite map.",
             lbl_issued_code: "Issued Access Code",
             btn_copy: "Copy",
+            nav_dashboard_all: "Teacher/Parent Dashboard",
+            nav_dashboard_teacher: "Teacher Dashboard",
+            nav_dashboard_parent: "Parent Dashboard",
+            lbl_coin_shelf: "Coin Reward Shelf",
+            lbl_coin_shelf_subtitle: "A golden coin is added to the shelf each time you complete a coding mission!",
+            banner_intro_text: "Lego Fortnite App Overview<br>& Learning Guide Content",
+            btn_try_mission: "Try Mission 🚀",
+            lbl_stamp_complete: "COMPLETE",
+            lbl_reward_slot_coin: "Coin",
+            lbl_hub_not_connected: "Hub Not Connected",
+            lbl_hub_connected: "Hub Connected",
+            login_slogan: "AI Coding & Fortnite Integrated Platform",
+            tab_student: "Student",
+            tab_teacher: "Teacher",
+            tab_parent: "Parent",
+            mode_login: "Log In",
+            mode_signup: "Sign Up",
+            lbl_email: "Email",
+            lbl_password: "Password",
+            lbl_or: "or",
+            btn_guest_entry: "Enter as Guest without Login",
+            info_student_signup: "Please sign up after receiving a Class Code from your teacher.",
+            info_teacher_signup: "Signing up as a teacher allows you to issue Class Codes.",
+            info_parent_signup: "Please sign up after receiving a Parent Link Code from your teacher.",
+            lbl_name: "Name",
+            lbl_password_req: "Password (6+ chars)",
+            lbl_school_name: "School/Organization Name",
+            lbl_class_code: "Class Code (From Teacher)",
+            lbl_parent_code: "Parent Link Code (From Teacher)",
+            btn_signup: "Create Account",
+
+            // Workspace & Dashboard UI Keys
+            lbl_device_sync: "Device Synchronization",
+            lbl_code_injection: "Code Injection",
+            lbl_system_check: "System Verification",
+            lbl_local_server_connected: "Local Server (Fortnite Sync) Connected",
+            lbl_log_start: "================ Log Started ================",
+            lbl_status_waiting: "Waiting...",
+            dashboard_title: "Teacher/Parent Dashboard",
+            btn_reset_all_data: "Reset All Data",
+            lbl_select_student: "Select Student",
+            lbl_focus_learning_time: "Focused Learning Time",
+            lbl_measuring_waiting: "Waiting for telemetry...",
+            lbl_block_execution_cnt: "Block Executions",
+            lbl_success_rate: "Success Rate",
+            lbl_self_error_resolution: "Self Error Resolution",
+            lbl_analysis_pending: "- Pending Analysis",
+            lbl_fortnite_mission: "Fortnite Missions",
+            lbl_not_started: "Not Started",
+            lbl_block_usage_analysis: "Block Usage Analysis",
+            lbl_motor_related: "Motor Related",
+            lbl_sensor_control_related: "Sensor/Control Related",
+            lbl_other_actions: "Other Actions",
+            lbl_block_analysis_hint: "Analysis data populates upon block execution.",
+            lbl_badge_skins: "3 Skins",
+            lbl_badge_vbucks: "V-Bucks 150",
+            lbl_badge_master: "Badge: Master",
+            lbl_today_concepts: "Concepts Learned Today",
+            concept_loops: "Loops",
+            concept_conditionals: "Conditionals",
+            concept_sensor_input: "Sensor Input",
+            concept_motor_control: "Motor Control",
+            concept_ai_recog: "AI Recognition",
+            concept_fn_sync: "Fortnite Integration",
+            lbl_growth_prev_class: "Growth vs Previous Class",
+            lbl_coding_complexity: "Coding Complexity",
+            lbl_mission_speed: "Mission Speed",
+            lbl_focus_time: "Focus Time",
+            lbl_realtime_log: "Live Activity Log",
+            lbl_log_waiting_hint: "Waiting... (Records when student starts coding)",
+            lbl_parent_report_title: "Parent Summary Report",
+            btn_send_kakao: "Send via KakaoTalk",
+            lbl_today_summary_sub: "Today's Learning Summary",
+            lbl_assembly_track_result: "Assembly Tracking Result",
+            lbl_waiting_active_data: "Waiting for Active Data",
+            lbl_class_status_live: "Class Status (Live Sync)",
+            lbl_tracked_block_cnt: "Tracked Block Count",
+            lbl_motor_sensor_fusion: "Motor+Sensor Fusion",
+            lbl_measuring: "Measuring...",
+            lbl_sys_conn_integrity: "System Connectivity Integrity",
+            guest_anonymous: "Anonymous",
+            unit_mins: " mins",
+            unit_times: " times",
+            unit_blocks: " blocks",
+            lbl_teacher_comment: "Teacher's Note (AI Auto-Analysis)",
+            lbl_live: "Live",
+            lbl_ai_comment_placeholder: "When a student starts block coding, AI will automatically analyze session logs and provide tailored feedback here. (Waiting...)",
+            default_student_name: "Student Minjun Kim",
 
             // Learning list
             lesson_1: "1. Launch the exploration boat",
@@ -448,6 +624,22 @@
     // ----------------------------------------------------
 
     // 5.1 다국어 변경 로직 (Change Language)
+    window.applyBrickSyncLanguage = function (lang) {
+        const targetLang = lang || localStorage.getItem('bricksync_lang') || 'ko';
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (i18n[targetLang] && i18n[targetLang][key]) {
+                el.innerHTML = i18n[targetLang][key];
+            }
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            if (i18n[targetLang] && i18n[targetLang][key]) {
+                el.placeholder = i18n[targetLang][key];
+            }
+        });
+    };
+
     window.changeSettingsLanguage = function (lang) {
         localStorage.setItem('bricksync_lang', lang);
 
@@ -460,12 +652,7 @@
         translateSettingsModal(lang);
 
         // 부모 페이지의 data-i18n 마크업이 부착된 노드 전체 번역
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            const key = el.getAttribute('data-i18n');
-            if (i18n[lang] && i18n[lang][key]) {
-                el.innerText = i18n[lang][key];
-            }
-        });
+        window.applyBrickSyncLanguage(lang);
 
         // 다국어 변경 커스텀 이벤트 디스패치 (학습단원 및 미션 동적 텍스트 실시간 연동용)
         const langEvent = new CustomEvent('bricksync-language-changed', { detail: { lang: lang } });
@@ -481,6 +668,10 @@
             lucide.createIcons();
         }
     };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        window.applyBrickSyncLanguage();
+    });
 
     function translateSettingsModal(lang) {
         document.querySelectorAll('[data-settings-i18n]').forEach(el => {

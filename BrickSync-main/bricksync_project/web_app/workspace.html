@@ -370,7 +370,7 @@
         <div class="main-content">
 
             <div class="workspace-header">
-                <div class="workspace-title">디바이스 동기화</div>
+                <div class="workspace-title" data-i18n="lbl_device_sync">디바이스 동기화</div>
             </div>
 
             <div class="device-grid">
@@ -380,35 +380,35 @@
                         <i data-lucide="usb" style="width: 48px; height: 48px;"></i>
                         <i data-lucide="bluetooth" style="width: 48px; height: 48px;"></i>
                     </div>
-                    <div class="card-title">허브 연결</div>
+                    <div class="card-title" data-i18n="lbl_connect_hub">허브 연결</div>
                     <div style="display:flex; gap: 10px; margin-top: 15px; z-index: 10;">
                         <button onclick="connectUSB()"
                             style="display: none !important; padding: 6px 16px; border-radius: 6px; border:none; background:#34d399; color:white; font-weight:bold; cursor:pointer;">USB</button>
                         <button onclick="connectBluetooth()"
                             style="padding: 6px 16px; border-radius: 6px; border:none; background:#3b82f6; color:white; font-weight:bold; cursor:pointer;">Bluetooth</button>
                     </div>
-                    <div id="hubStatusText" style="margin-top:15px; font-weight:bold; color:#64748b;">허브 연결 안 됨</div>
+                    <div id="hubStatusText" data-i18n="lbl_hub_not_connected" style="margin-top:15px; font-weight:bold; color:#64748b;">허브 연결 안 됨</div>
                     <div class="card-number">1</div>
                 </div>
 
                 <!-- 2. 파이썬 코드 주입 -->
                 <div class="device-card" onclick="sendPythonCode()">
                     <i data-lucide="cpu" class="card-icon"></i>
-                    <div class="card-title">코드 주입</div>
+                    <div class="card-title" data-i18n="lbl_code_injection">코드 주입</div>
                     <div class="card-number">2</div>
                 </div>
 
                 <!-- 3. 연결 상태 모니터 -->
                 <div class="device-card">
                     <i data-lucide="radio" class="card-icon"></i>
-                    <div class="card-title">시스템 확인</div>
-                    <div class="card-status" id="status">대기 중...</div>
+                    <div class="card-title" data-i18n="lbl_system_check">시스템 확인</div>
+                    <div class="card-status" id="status" data-i18n="lbl_status_waiting">대기 중...</div>
                     <div class="card-number">3</div>
                 </div>
 
                 <!-- 4. 원시 데이터 로그 -->
                 <div class="device-card log-card">
-                    <div class="log-box" id="logBox">================ 로그 시작 ================<br></div>
+                    <div class="log-box" id="logBox" data-i18n="lbl_log_start">================ 로그 시작 ================<br></div>
                     <div class="card-number">4</div>
                 </div>
             </div>
@@ -578,16 +578,18 @@ while True:
         function updateStudentGreeting(lang) {
             try {
                 const sessionDataStr = localStorage.getItem('bricksync_student_session');
-                if (sessionDataStr) {
-                    const sessionData = JSON.parse(sessionDataStr);
-                    const nameDisp = document.getElementById('display-student-name');
-                    if (nameDisp) {
-                        const studentName = sessionData.name || 'Guest';
-                        if (lang === 'en') {
-                            nameDisp.innerText = 'Student ' + studentName;
-                        } else {
-                            nameDisp.innerText = studentName + ' 학생';
-                        }
+                const nameDisp = document.getElementById('display-student-name');
+                if (nameDisp) {
+                    let rawName = 'Guest_익명';
+                    if (sessionDataStr) {
+                        const sessionData = JSON.parse(sessionDataStr);
+                        rawName = sessionData.name || 'Guest_익명';
+                    }
+                    if (lang === 'en') {
+                        const cleanName = rawName.replace('Guest_익명', 'Guest_Anonymous').replace('익명', 'Anonymous');
+                        nameDisp.innerText = 'Student ' + cleanName;
+                    } else {
+                        nameDisp.innerText = rawName + ' 학생';
                     }
                 }
             } catch(e) {}

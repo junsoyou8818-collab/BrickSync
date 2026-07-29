@@ -824,12 +824,12 @@
 
     <div class="top-bar">
         <a href="#" onclick="console.log('▶ [HOME_CLICK] Clicked!'); console.log('window.parent:', window.parent); console.log('navigateIframe:', window.parent ? window.parent.navigateIframe : 'no parent'); if (window.parent && window.parent.navigateIframe) { console.log('▶ [HOME_CLICK] Calling parent.navigateIframe'); window.parent.navigateIframe('index.html'); } else { console.log('▶ [HOME_CLICK] Fallback navigation'); window.location.href='index.html?v=' + new Date().getTime(); } return false;" class="home-btn">
-            <i class="fas fa-home"></i> 홈으로 가기
+            <i class="fas fa-home"></i> <span data-i18n="btn_back_home">홈으로 가기</span>
         </a>
         <div
             style="font-size: 1.55rem; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 12px; letter-spacing: -0.5px;">
             <i class="fas fa-cubes" style="color: #a855f7; font-size: 1.9rem; filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.3));"></i>
-            BrickSync Essential 아이콘 코딩
+            <span data-i18n="lbl_workspace_title">BrickSync Essential 아이콘 코딩</span>
         </div>
         <div class="top-actions" style="align-items: center;">
             <div id="hubStatusIndicator"
@@ -837,7 +837,7 @@
                 <div id="hubStatusDot"
                     style="width: 14px; height: 14px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.65);">
                 </div>
-                <span id="hubStatusText">허브 연결 안 됨</span>
+                <span id="hubStatusText" data-i18n="lbl_hub_not_connected">허브 연결 안 됨</span>
             </div>
             <button class="action-btn" onclick="openConnectModal()" id="connBtn">
                 <i class="fas fa-link" style="color:#64748b;"></i> <span data-i18n="lbl_connect_hub">허브 연결</span>
@@ -886,7 +886,7 @@
             </div>
 
             <button id="btn-go-mission" onclick="openMissionBriefing()" class="btn-go-mission">
-                <i class="fas fa-trophy"></i> <span>미션하러가기</span>
+                <i class="fas fa-trophy"></i> <span data-i18n="btn_try_mission">미션하러가기</span>
             </button>
             <button id="btn-check-tasks" onclick="toggleMissionTasks()" class="btn-check-tasks">
                 <i class="fas fa-list-check"></i> <span data-i18n="btn_check_tasks">과제 확인</span>
@@ -4254,14 +4254,16 @@ except:
             if (gridContainer) {
                 let html = '';
                 const currentUnitNum = parseInt(unit) || 1;
+                const isEn = localStorage.getItem('bricksync_lang') === 'en';
                 for (let i = 1; i <= 8; i++) {
                     const isActive = (i === currentUnitNum);
+                    const slotText = isEn ? `Lesson ${i}` : `${i}단원`;
                     html += `
                         <div class="reward-slot ${isActive ? 'active' : ''}">
                             <div class="slot-circle">
                                 ${isActive ? '★' : i}
                             </div>
-                            <div class="slot-label">${i}단원</div>
+                            <div class="slot-label">${slotText}</div>
                         </div>
                     `;
                 }
@@ -4328,14 +4330,8 @@ except:
             if (typeof unit === 'undefined' || !unit) return;
             isMissionActive = true;
             
-            const mData = {
-                '1': { badge: 'STAGE 1', title: '탐험보트를 출발시켜요', desc: '5초 대기 후 앞으로 3번 이동하고, 좌회전 1번 후 뒤로 2번 이동하세요.', tasks: [{text: '재생(시작) 블록 연결하기'}, {text: '5초 대기하기'}, {text: '앞으로 3번 이동하기'}, {text: '좌회전 1번 작동하기'}, {text: '뒤로 2번 이동하기'}] },
-                '2': { badge: 'STAGE 2', title: '바닷속 잠수함으로 바다를 탐험해요', desc: '5초 대기 후 우회전 3번, 좌회전 3번 작동하세요.', tasks: [{text: '재생(시작) 블록 연결하기'}, {text: '5초 대기하기'}, {text: '우회전 3번 실행하기'}, {text: '좌회전 3번 실행하기'}] },
-                '3': { badge: 'STAGE 3', title: '5초 대기 후 오른쪽 3번, 왼쪽 2번으로 대관람차를 안전하게 운행하세요.', desc: '모터 회전 블록을 활용해 우회전 3번, 좌회전 2번으로 대관람차를 안전하게 운행하세요.', tasks: [{text: '재생(시작) 블록 연결하기'}, {text: '우회전 3초 실행하기'}, {text: '좌회전 2초 실행하기'}] },
-                '4': { badge: 'STAGE 4', title: '탐험 자동차를 만들어요', desc: '5초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.', tasks: [{text: '재생(시작) 블록 연결하기'}, {text: '5초 대기하기'}, {text: '앞으로 4번 이동하기'}, {text: '우회전 1번 작동하기'}, {text: '앞으로 2번 이동하기'}] },
-                '5': { badge: 'STAGE 5', title: '알록달록 조명 게이트 만들기', desc: '2초후에 빨간 불이 켜지도록 만들어보세요.', tasks: [{text: '재생(시작) 블록 연결하기'}, {text: '대기 블록(2초) 연결하기'}, {text: '빨간색 조명 연결하기'}] }
-            };
-            const current = mData[unit];
+            const missions = (typeof getMissionData === 'function') ? getMissionData() : null;
+            const current = missions ? missions[unit] : null;
             if (!current) return;
             
             document.getElementById('briefingStage').textContent = current.badge;
@@ -4507,10 +4503,125 @@ except:
             '5': 'Use light matrix and wait blocks to design a colorful light gate.'
         };
 
+        const missionDataAll = {
+            ko: {
+                '1': {
+                    badge: 'STAGE 1', title: '탐험보트를 출발시켜요', desc: '5초 대기 후 앞으로 3번 이동하고, 좌회전 1번 후 뒤로 2번 이동하세요.',
+                    pinCode: '7241',
+                    tasks: [
+                        { id: 'start', text: '재생(시작) 블록 연결하기' },
+                        { id: 'flow_wait_5', text: '5초 대기하기' },
+                        { id: 'car_forward_3', text: '앞으로 3번 이동하기' },
+                        { id: 'car_left_1', text: '좌회전 1번 작동하기' },
+                        { id: 'car_backward_2', text: '뒤로 2번 이동하기' }
+                    ]
+                },
+                '2': {
+                    badge: 'STAGE 2', title: '바닷속 잠수함으로 바다를 탐험해요', desc: '5초 대기 후 우회전 3번, 좌회전 3번 작동하세요.',
+                    pinCode: '8932',
+                    tasks: [
+                        { id: 'start', text: '재생(시작) 블록 연결하기' },
+                        { id: 'flow_wait_5', text: '5초 대기하기' },
+                        { id: 'motor_cw_3', text: '우회전 3번 실행하기' },
+                        { id: 'motor_ccw_3', text: '좌회전 3번 실행하기' }
+                    ]
+                },
+                '3': {
+                    badge: 'STAGE 3', title: '5초 대기 후 오른쪽 3번, 왼쪽 2번으로 대관람차를 안전하게 운행하세요.', desc: '모터 회전 블록을 활용해 우회전 3번, 좌회전 2번으로 대관람차를 안전하게 운행하세요.',
+                    pinCode: '5019',
+                    tasks: [
+                        { id: 'start', text: '재생(시작) 블록 연결하기' },
+                        { id: 'motor_cw', text: '우회전 3초 실행하기' },
+                        { id: 'motor_ccw', text: '좌회전 2초 실행하기' }
+                    ]
+                },
+                '4': {
+                    badge: 'STAGE 4', title: '탐험 자동차를 만들어요', desc: '5초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.',
+                    pinCode: '3370',
+                    tasks: [
+                        { id: 'start', text: '재생(시작) 블록 연결하기' },
+                        { id: 'flow_wait', text: '5초 대기하기' },
+                        { id: 'car_forward_4', text: '앞으로 4번 이동하기' },
+                        { id: 'car_right_1', text: '우회전 1번 작동하기' },
+                        { id: 'car_forward_2', text: '앞으로 2번 이동하기' }
+                    ]
+                },
+                '5': {
+                    badge: 'STAGE 5', title: '알록달록 조명 게이트 만들기', desc: '2초후에 빨간 불이 켜지도록 만들어보세요.',
+                    pinCode: '5019',
+                    tasks: [
+                        { id: 'start', text: '재생(시작) 블록 연결하기' },
+                        { id: 'flow_wait', text: '대기 블록(2초) 연결하기' },
+                        { id: 'matrix_pixel_red', text: '빨간색 조명 연결하기' }
+                    ]
+                }
+            },
+            en: {
+                '1': {
+                    badge: 'STAGE 1', title: 'Launch the exploration boat', desc: 'Wait 5 seconds, move forward 3 times, turn left 1 time, and move backward 2 times to launch the boat.',
+                    pinCode: '7241',
+                    tasks: [
+                        { id: 'start', text: 'Connect Play (Start) block' },
+                        { id: 'flow_wait_5', text: 'Wait 5 seconds' },
+                        { id: 'car_forward_3', text: 'Move forward 3 times' },
+                        { id: 'car_left_1', text: 'Turn left 1 time' },
+                        { id: 'car_backward_2', text: 'Move backward 2 times' }
+                    ]
+                },
+                '2': {
+                    badge: 'STAGE 2', title: 'Explore the sea with an underwater submarine', desc: 'Wait 5 seconds, turn right 3 times, and turn left 3 times.',
+                    pinCode: '8932',
+                    tasks: [
+                        { id: 'start', text: 'Connect Play (Start) block' },
+                        { id: 'flow_wait_5', text: 'Wait 5 seconds' },
+                        { id: 'motor_cw_3', text: 'Run right rotation 3 times' },
+                        { id: 'motor_ccw_3', text: 'Run left rotation 3 times' }
+                    ]
+                },
+                '3': {
+                    badge: 'STAGE 3', title: 'Safely operate the Ferris Wheel with 3 right turns and 2 left turns after waiting 5 seconds.', desc: 'Use motor rotation blocks to safely operate the Ferris Wheel with 3 right turns and 2 left turns.',
+                    pinCode: '5019',
+                    tasks: [
+                        { id: 'start', text: 'Connect Play (Start) block' },
+                        { id: 'motor_cw', text: 'Run right rotation for 3 seconds' },
+                        { id: 'motor_ccw', text: 'Run left rotation for 2 seconds' }
+                    ]
+                },
+                '4': {
+                    badge: 'STAGE 4', title: 'Build an exploration car', desc: 'Wait 5 seconds, move forward 4 times, turn right 1 time, and move forward 2 times.',
+                    pinCode: '3370',
+                    tasks: [
+                        { id: 'start', text: 'Connect Play (Start) block' },
+                        { id: 'flow_wait', text: 'Wait 5 seconds' },
+                        { id: 'car_forward_4', text: 'Move forward 4 times' },
+                        { id: 'car_right_1', text: 'Turn right 1 time' },
+                        { id: 'car_forward_2', text: 'Move forward 2 times' }
+                    ]
+                },
+                '5': {
+                    badge: 'STAGE 5', title: 'Build a colorful light gate', desc: 'Make the red light turn on after 2 seconds.',
+                    pinCode: '5019',
+                    tasks: [
+                        { id: 'start', text: 'Connect Play (Start) block' },
+                        { id: 'flow_wait', text: 'Connect Wait block (2 seconds)' },
+                        { id: 'matrix_pixel_red', text: 'Connect Red Light block' }
+                    ]
+                }
+            }
+        };
+
+        function getMissionData() {
+            const lang = localStorage.getItem('bricksync_lang') || 'ko';
+            return (missionDataAll[lang] || missionDataAll['ko']);
+        }
+
         function updateStatusBarText() {
             if (!unit) return;
-            const currentMission = missionData[unit];
+            const currentMission = getMissionData()[unit];
             if (!currentMission) return;
+            
+            const lang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = lang === 'en';
             
             const badgeEl = document.getElementById('m-badge');
             const titleEl = document.getElementById('m-title');
@@ -4520,13 +4631,13 @@ except:
             
             if (unit === '3') {
                 if (isMissionActive) {
-                    if (titleEl) titleEl.textContent = '5초 대기 후 오른쪽 3번, 왼쪽 2번으로 대관람차를 안전하게 운행하세요.';
+                    if (titleEl) titleEl.textContent = isEn ? 'After waiting 5s, safely run the Ferris wheel 3 times right and 2 times left.' : '5초 대기 후 오른쪽 3번, 왼쪽 2번으로 대관람차를 안전하게 운행하세요.';
                     if (descEl) {
                         descEl.textContent = '';
                         descEl.style.display = 'none';
                     }
                 } else {
-                    if (titleEl) titleEl.textContent = '우회전과 좌회전 모터 구동 블록을 조립하여 대관람차 장치를 직접 움직여 봅시다.';
+                    if (titleEl) titleEl.textContent = isEn ? 'Assemble motor blocks to spin the Ferris wheel.' : '우회전과 좌회전 모터 구동 블록을 조립하여 대관람차 장치를 직접 움직여 봅시다.';
                     if (descEl) {
                         descEl.textContent = '';
                         descEl.style.display = 'none';
@@ -4534,15 +4645,13 @@ except:
                 }
             } else if (unit === '4') {
                 if (isMissionActive) {
-                    if (titleEl) titleEl.textContent = '5초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.';
+                    if (titleEl) titleEl.textContent = isEn ? 'After waiting 5s, move forward 4 times, turn right 1 time, and move forward 2 times.' : '5초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.';
                     if (descEl) {
                         descEl.textContent = '';
                         descEl.style.display = 'none';
                     }
                 } else {
                     if (titleEl) titleEl.textContent = currentMission.title;
-                    const lang = localStorage.getItem('bricksync_lang') || 'ko';
-                    const isEn = lang === 'en';
                     const themeDesc = isEn ? (themeDescriptionsEn[unit] || '') : (themeDescriptions[unit] || '');
                     if (descEl) {
                         descEl.textContent = themeDesc;
@@ -4555,9 +4664,6 @@ except:
                 }
             } else {
                 if (titleEl) titleEl.textContent = currentMission.title;
-                
-                const lang = localStorage.getItem('bricksync_lang') || 'ko';
-                const isEn = lang === 'en';
                 const themeDesc = isEn ? (themeDescriptionsEn[unit] || '') : (themeDescriptions[unit] || '');
                 const descText = isMissionActive ? currentMission.desc : themeDesc;
                 
@@ -4572,61 +4678,8 @@ except:
             }
         }
 
-        const missionData = {
-            '1': {
-                badge: 'STAGE 1', title: '탐험보트를 출발시켜요', desc: '5초 대기 후 앞으로 3번 이동하고, 좌회전 1번 후 뒤로 2번 이동하세요.',
-                pinCode: '7241',
-                tasks: [
-                    { id: 'start', text: '재생(시작) 블록 연결하기' },
-                    { id: 'flow_wait_5', text: '5초 대기하기' },
-                    { id: 'car_forward_3', text: '앞으로 3번 이동하기' },
-                    { id: 'car_left_1', text: '좌회전 1번 작동하기' },
-                    { id: 'car_backward_2', text: '뒤로 2번 이동하기' }
-                ]
-            },
-            '2': {
-                badge: 'STAGE 2', title: '바닷속 잠수함으로 바다를 탐험해요', desc: '5초 대기 후 우회전 3번, 좌회전 3번 작동하세요.',
-                pinCode: '8932',
-                tasks: [
-                    { id: 'start', text: '재생(시작) 블록 연결하기' },
-                    { id: 'flow_wait_5', text: '5초 대기하기' },
-                    { id: 'motor_cw_3', text: '우회전 3번 실행하기' },
-                    { id: 'motor_ccw_3', text: '좌회전 3번 실행하기' }
-                ]
-            },
-            '3': {
-                badge: 'STAGE 3', title: '5초 대기 후 오른쪽 3번, 왼쪽 2번으로 대관람차를 안전하게 운행하세요.', desc: '모터 회전 블록을 활용해 우회전 3번, 좌회전 2번으로 대관람차를 안전하게 운행하세요.',
-                pinCode: '5019',
-                tasks: [
-                    { id: 'start', text: '재생(시작) 블록 연결하기' },
-                    { id: 'motor_cw', text: '우회전 3초 실행하기' },
-                    { id: 'motor_ccw', text: '좌회전 2초 실행하기' }
-                ]
-            },
-            '4': {
-                badge: 'STAGE 4', title: '탐험 자동차를 만들어요', desc: '5초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.',
-                pinCode: '3370',
-                tasks: [
-                    { id: 'start', text: '재생(시작) 블록 연결하기' },
-                    { id: 'flow_wait', text: '5초 대기하기' },
-                    { id: 'car_forward_4', text: '앞으로 4번 이동하기' },
-                    { id: 'car_right_1', text: '우회전 1번 작동하기' },
-                    { id: 'car_forward_2', text: '앞으로 2번 이동하기' }
-                ]
-            },
-            '5': {
-                badge: 'STAGE 5', title: '알록달록 조명 게이트 만들기', desc: '2초후에 빨간 불이 켜지도록 만들어보세요.',
-                pinCode: '5019',
-                tasks: [
-                    { id: 'start', text: '재생(시작) 블록 연결하기' },
-                    { id: 'flow_wait', text: '대기 블록(2초) 연결하기' },
-                    { id: 'matrix_pixel_red', text: '빨간색 조명 연결하기' }
-                ]
-            }
-        };
-
         if (unit) {
-            const currentMission = missionData[unit];
+            const currentMission = getMissionData()[unit];
             if (currentMission) {
                 document.getElementById('missionStatusBar').style.display = 'flex';
                 updateStatusBarText();
@@ -4831,30 +4884,29 @@ except:
                 style="width: 60px; height: 60px; background: #f1f5f9; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px;">
                 <i class="fas fa-link" style="font-size: 28px; color: #64748b;"></i>
             </div>
-            <h2 style="margin-bottom: 8px; font-size: 1.5rem; color: #1e293b; font-weight: 800;">연결 방식 선택</h2>
-            <p style="color: #64748b; margin-bottom: 30px; font-size: 1rem;">스파이크 허브와 연결할 방식을 선택해주세요.</p>
+            <h2 style="margin-bottom: 8px; font-size: 1.5rem; color: #1e293b; font-weight: 800;" data-i18n="lbl_conn_method_title">연결 방식 선택</h2>
+            <p style="color: #64748b; margin-bottom: 30px; font-size: 1rem;" data-i18n="lbl_conn_method_desc">스파이크 허브와 연결할 방식을 선택해주세요.</p>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <button onclick="connectUSB(); closeConnectModal();"
                     style="padding: 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: #fff; font-size: 1.1rem; font-weight: 700; color: #1e293b; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                        <i class="fab fa-usb" style="color: #10b981; font-size: 1.4rem;"></i> USB 선으로 연결 (강력 추천)
+                        <i class="fab fa-usb" style="color: #10b981; font-size: 1.4rem;"></i> <span data-i18n="lbl_conn_usb">USB 선으로 연결 (강력 추천)</span>
                     </div>
-                    <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;">안정적이며 빠른 속도 지원</span>
+                    <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 500;" data-i18n="lbl_conn_usb_desc">안정적이며 빠른 속도 지원</span>
                 </button>
                 <button onclick="connectBluetooth(); closeConnectModal();"
                     style="padding: 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: #fff; font-size: 1.1rem; font-weight: 700; color: #1e293b; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 12px;">
-                    <i class="fab fa-bluetooth-b" style="color: #3b82f6; font-size: 1.4rem;"></i> 무선 블루투스 연결
+                    <i class="fab fa-bluetooth-b" style="color: #3b82f6; font-size: 1.4rem;"></i> <span data-i18n="lbl_conn_bt">무선 블루투스 연결</span>
                 </button>
             </div>
 
             <button onclick="closeConnectModal()"
-                style="margin-top: 25px; background: none; border: none; color: #94a3b8; cursor: pointer; font-weight: 700; font-size: 1rem; text-decoration: underline;">취소</button>
+                style="margin-top: 25px; background: none; border: none; color: #94a3b8; cursor: pointer; font-weight: 700; font-size: 1rem; text-decoration: underline;" data-i18n="lbl_cancel">취소</button>
         </div>
     </div>
 
     <!-- 핀코드 보상 모달 팝업 패널 -->
-        <!-- 핀코드 보상 모달 팝업 패널 -->
     <div id="pinCodeModal"
         style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.6); z-index: 3000; justify-content: center; align-items: center; backdrop-filter: blur(12px); flex-direction: column;">
         
@@ -4942,13 +4994,13 @@ except:
             <div style="position: relative; height: 150px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
                 <div style="width: 140px; height: 140px; border: 5px double #ef4444; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #ef4444; font-family: 'Noto Sans KR', sans-serif; font-weight: 900; transform: rotate(-12deg); box-shadow: 0 6px 15px rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); animation: stampImpact 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;">
                     <div style="font-size: 14px; letter-spacing: 2px; opacity: 0.9; margin-bottom: -4px;">COIN MISSION</div>
-                    <div style="font-size: 32px; font-weight: 950; letter-spacing: 1px; border-top: 2.5px solid #ef4444; border-bottom: 2.5px solid #ef4444; padding: 2px 12px; margin: 5px 0;">완 료</div>
+                    <div style="font-size: 32px; font-weight: 950; letter-spacing: 1px; border-top: 2.5px solid #ef4444; border-bottom: 2.5px solid #ef4444; padding: 2px 12px; margin: 5px 0;" data-i18n="lbl_stamp_complete">완 료</div>
                     <div style="font-size: 12px; opacity: 0.8; font-weight: bold; margin-top: -1px;">★ SUCCESS ★</div>
                 </div>
             </div>
 
-            <h2 style="font-size: 1.85rem; color: #1e293b; font-weight: 900; margin: 15px 0 5px 0; letter-spacing: -0.5px;">미션 완료!</h2>
-            <p style="color: #64748b; font-size: 1rem; margin-bottom: 10px; line-height: 1.5;">훌륭한 실력이에요! 아래 보상판에 새로운 코인이 장착됩니다.</p>
+            <h2 style="font-size: 1.85rem; color: #1e293b; font-weight: 900; margin: 15px 0 5px 0; letter-spacing: -0.5px;" data-i18n="lbl_mission_clear_title">미션 완료!</h2>
+            <p style="color: #64748b; font-size: 1rem; margin-bottom: 10px; line-height: 1.5;" data-i18n="lbl_mission_clear_desc">훌륭한 실력이에요! 아래 보상판에 새로운 코인이 장착됩니다.</p>
 
             <!-- 보상판 그리드 컨테이너 -->
             <div id="rewardBoardGrid" class="reward-grid"></div>
@@ -4957,7 +5009,7 @@ except:
 
             <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
                 <button onclick="closePinCodeModal()"
-                    style="width: 100%; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; border: none; font-size: 1.15rem; font-weight: 900; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4); border-top: 1px solid rgba(255,255,255,0.2);">
+                    style="width: 100%; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; border: none; font-size: 1.15rem; font-weight: 900; cursor: pointer; transition: all 0.2s; box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4); border-top: 1px solid rgba(255,255,255,0.2);" data-i18n="btn_close">
                     닫기
                 </button>
             </div>
@@ -5508,6 +5560,12 @@ except:
             }, 200);
             setupPaletteScroll();
         });
+
+        // 다국어 변경 수신 리스너 (설정 변경 시 실시간 반영)
+        window.addEventListener('bricksync-language-changed', () => {
+            updateStatusBarText();
+            if (typeof updateProgress === 'function') updateProgress();
+        });
     </script>
     <script src="settings.js">
 </script>
@@ -5524,7 +5582,7 @@ except:
             <p id="briefingDesc" style="color: #475569; font-size: 1rem; line-height: 1.6; margin-bottom: 25px; text-align: center;">미션 설명 텍스트</p>
             
             <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 16px; padding: 20px; margin-bottom: 25px;">
-                <span style="font-size: 0.95rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 12px; text-align: left;">📋 미션 달성 과제</span>
+                <span style="font-size: 0.95rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 12px; text-align: left;" data-i18n="lbl_required_tasks">📋 미션 달성 과제</span>
                 <ul id="briefingTasks" style="style-type: none; display: flex; flex-direction: column; gap: 8px; text-align: left; padding: 0; list-style: none;">
                     <!-- 과제 항목들 동적 생성 -->
                 </ul>
@@ -5532,7 +5590,7 @@ except:
             
             <div style="display: flex; gap: 10px;">
                 <button onclick="closeMissionBriefing()"
-                    style="flex: 1; padding: 14px; border-radius: 12px; background: #eab308; color: #1e293b; border: none; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s; text-align: center; box-shadow: 0 4px 10px rgba(234, 179, 8, 0.3);">
+                    style="flex: 1; padding: 14px; border-radius: 12px; background: #eab308; color: #1e293b; border: none; font-size: 1.1rem; font-weight: 800; cursor: pointer; transition: 0.2s; text-align: center; box-shadow: 0 4px 10px rgba(234, 179, 8, 0.3);" data-i18n="btn_try_mission">
                     미션 도전하기 🚀
                 </button>
             </div>

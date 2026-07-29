@@ -119,10 +119,10 @@
 
     <div class="login-card">
         <div class="brand">BrickSync</div>
-        <div class="subtitle">AI 코딩 및 포트나이트 통합 제어 플랫폼</div>
+        <div class="subtitle" data-i18n="login_slogan">AI 코딩 및 포트나이트 통합 제어 플랫폼</div>
 
         <div class="input-group">
-            <label for="studentName">학생 이름</label>
+            <label for="studentName" data-i18n="lbl_name">학생 이름</label>
             <div class="input-box">
                 <i class="fas fa-user-astronaut"></i>
                 <input type="text" id="studentName" placeholder="예: 김민준" autocomplete="off" onkeypress="if(event.key === 'Enter') login()">
@@ -130,17 +130,18 @@
         </div>
 
         <button class="btn-submit" onclick="login()">
-            <i class="fas fa-rocket"></i> 로그인하기
+            <i class="fas fa-rocket"></i> <span data-i18n="mode_login">로그인하기</span>
         </button>
 
         <!-- 게스트 접속 버튼: 이름을 모으고 싶지 않거나, 테스트 목적일 때 사용 -->
-        <a href="lesson.html" class="skip-link" onclick="guestLogin(event)">로그인 없이 게스트로 구동 환경 테스트하기</a>
+        <a href="lesson.html" class="skip-link" onclick="guestLogin(event)" data-i18n="btn_guest_entry">로그인 없이 게스트로 구동 환경 테스트하기</a>
     </div>
 
     <!-- Firebase SDK 및 공통 설정 연동 -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="firebase_config.js"></script>
+    <script src="settings.js"></script>
 
     <!-- 무결점 2시간 타이머 (로컬스토리지) 스크립트 -->
     <script>
@@ -155,13 +156,19 @@
                 return;
             }
 
+            const lang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = lang === 'en';
+
             // Firebase 실시간 중복 접속 체크 적용
             if (isFirebaseOnline && database) {
                 database.ref('bricksync_classroom/students/' + name).once('value').then(snapshot => {
                     const data = snapshot.val();
                     // 최근 1분(60000ms) 이내에 온라인 활동 기록이 있는 경우 중복 접속 방지 경고
                     if (data && data.online && (Date.now() - (data.lastActive || 0) < 60000)) {
-                        alert("이미 해당 이름으로 접속 중인 학생이 있습니다. 이름 뒤에 번호나 알파벳을 붙여서 입장해주세요! (예: " + name + "2)");
+                        const alertMsg = isEn
+                            ? `A student is already logged in with this name. Please add a number or letter (e.g., ${name}2)!`
+                            : `이미 해당 이름으로 접속 중인 학생이 있습니다. 이름 뒤에 번호나 알파벳을 붙여서 입장해주세요! (예: ${name}2)`;
+                        alert(alertMsg);
                         nameInput.focus();
                     } else {
                         proceedLogin(name);

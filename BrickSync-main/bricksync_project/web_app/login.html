@@ -51,6 +51,33 @@ input.error{border-color:#f43f5e}
 .guest-btn{width:100%;padding:12px;background:transparent;border:1px solid #334155;border-radius:10px;color:#64748b;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s}
 .guest-btn:hover{border-color:#475569;color:#94a3b8}
 
+.lang-selector-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-bottom: 15px;
+}
+.lang-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lang-btn.active, .lang-btn:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: #8b5cf6;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+}
+
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:14px 24px;border-radius:12px;font-size:.9rem;font-weight:700;z-index:9999;transition:transform .35s cubic-bezier(.16,1,.3,1);min-width:300px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5)}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{border-color:#10b981;color:#6ee7b7}
@@ -63,55 +90,60 @@ input.error{border-color:#f43f5e}
 <body>
 
 <div class="card">
+  <div class="lang-selector-bar">
+    <button class="lang-btn" id="lang-btn-ko" onclick="setLoginLanguage('ko')">🌐 한국어</button>
+    <button class="lang-btn" id="lang-btn-en" onclick="setLoginLanguage('en')">🌐 English</button>
+  </div>
+
   <div class="brand">
     <h1>🧱 BrickSync</h1>
-    <p>AI 코딩 및 포트나이트 통합 플랫폼</p>
+    <p data-i18n="login_slogan">AI 코딩 및 포트나이트 통합 플랫폼</p>
   </div>
 
   <!-- 역할 탭 -->
   <div class="role-tabs">
     <button class="role-tab active" id="tab-student" onclick="switchRole('student')">
-      <i class="fas fa-user-astronaut"></i>학생
+      <i class="fas fa-user-astronaut"></i><span data-i18n="tab_student">학생</span>
     </button>
     <button class="role-tab" id="tab-teacher" onclick="switchRole('teacher')">
-      <i class="fas fa-chalkboard-teacher"></i>교사
+      <i class="fas fa-chalkboard-teacher"></i><span data-i18n="tab_teacher">교사</span>
     </button>
     <button class="role-tab" id="tab-parent" onclick="switchRole('parent')">
-      <i class="fas fa-heart"></i>학부모
+      <i class="fas fa-heart"></i><span data-i18n="tab_parent">학부모</span>
     </button>
   </div>
 
   <!-- 로그인/회원가입 토글 -->
   <div class="mode-toggle">
-    <button class="mode-btn active" id="modeLoginBtn" onclick="switchMode('login')">로그인</button>
-    <button class="mode-btn" id="modeSignupBtn" onclick="switchMode('signup')">회원가입</button>
+    <button class="mode-btn active" id="modeLoginBtn" onclick="switchMode('login')" data-i18n="mode_login">로그인</button>
+    <button class="mode-btn" id="modeSignupBtn" onclick="switchMode('signup')" data-i18n="mode_signup">회원가입</button>
   </div>
 
   <!-- ── 로그인 폼 ── -->
   <div id="panelLogin" class="panel active">
     <div class="form-group">
-      <label>이메일</label>
+      <label data-i18n="lbl_email">이메일</label>
       <div class="input-wrap">
         <i class="fas fa-envelope"></i>
         <input type="email" id="loginEmail" placeholder="example@email.com" autocomplete="email">
       </div>
     </div>
     <div class="form-group">
-      <label>비밀번호</label>
+      <label data-i18n="lbl_password">비밀번호</label>
       <div class="input-wrap">
         <i class="fas fa-lock"></i>
         <input type="password" id="loginPassword" placeholder="비밀번호 입력" autocomplete="current-password">
       </div>
     </div>
     <button class="btn-submit" id="btnLogin" onclick="doLogin()">
-      <i class="fas fa-rocket"></i> 로그인
+      <i class="fas fa-rocket"></i> <span data-i18n="mode_login">로그인</span>
     </button>
 
     <!-- 학생 탭에서만 게스트 버튼 표시 -->
     <div id="guestSection">
-      <div class="divider">또는</div>
+      <div class="divider" data-i18n="lbl_or">또는</div>
       <button class="guest-btn" onclick="doGuestLogin()">
-        <i class="fas fa-user-secret"></i> 로그인 없이 게스트로 입장
+        <i class="fas fa-user-secret"></i> <span data-i18n="btn_guest_entry">로그인 없이 게스트로 입장</span>
       </button>
     </div>
   </div>
@@ -120,33 +152,33 @@ input.error{border-color:#f43f5e}
   <div id="panelSignup" class="panel">
     <!-- 학생 안내 -->
     <div id="infoStudent" class="info-box">
-      <i class="fas fa-info-circle"></i>담임 선생님께 <strong>클래스 코드</strong>를 받은 후 가입하세요.
+      <i class="fas fa-info-circle"></i><span data-i18n="info_student_signup">담임 선생님께 <strong>클래스 코드</strong>를 받은 후 가입하세요.</span>
     </div>
     <!-- 교사 안내 -->
     <div id="infoTeacher" class="info-box" style="display:none">
-      <i class="fas fa-shield-alt"></i>교사 계정으로 가입하면 클래스 코드를 발급할 수 있습니다.
+      <i class="fas fa-shield-alt"></i><span data-i18n="info_teacher_signup">교사 계정으로 가입하면 클래스 코드를 발급할 수 있습니다.</span>
     </div>
     <!-- 학부모 안내 -->
     <div id="infoParent" class="info-box" style="display:none">
-      <i class="fas fa-link"></i>담임 선생님께 <strong>학부모 연결 코드</strong>를 받은 후 가입하세요.
+      <i class="fas fa-link"></i><span data-i18n="info_parent_signup">담임 선생님께 <strong>학부모 연결 코드</strong>를 받은 후 가입하세요.</span>
     </div>
 
     <div class="form-group">
-      <label>이름</label>
+      <label data-i18n="lbl_name">이름</label>
       <div class="input-wrap">
         <i class="fas fa-user"></i>
         <input type="text" id="signupName" placeholder="홍길동">
       </div>
     </div>
     <div class="form-group">
-      <label>이메일</label>
+      <label data-i18n="lbl_email">이메일</label>
       <div class="input-wrap">
         <i class="fas fa-envelope"></i>
         <input type="email" id="signupEmail" placeholder="example@email.com" autocomplete="email">
       </div>
     </div>
     <div class="form-group">
-      <label>비밀번호 (6자 이상)</label>
+      <label data-i18n="lbl_password_req">비밀번호 (6자 이상)</label>
       <div class="input-wrap">
         <i class="fas fa-lock"></i>
         <input type="password" id="signupPassword" placeholder="비밀번호 설정" autocomplete="new-password">
@@ -155,7 +187,7 @@ input.error{border-color:#f43f5e}
 
     <!-- 학교명 (교사 전용) -->
     <div class="form-group" id="fieldSchool" style="display:none">
-      <label>학교/기관명</label>
+      <label data-i18n="lbl_school_name">학교/기관명</label>
       <div class="input-wrap">
         <i class="fas fa-school"></i>
         <input type="text" id="signupSchool" placeholder="○○초등학교">
@@ -164,7 +196,7 @@ input.error{border-color:#f43f5e}
 
     <!-- 클래스 코드 (학생 전용) -->
     <div class="form-group" id="fieldClassCode">
-      <label>클래스 코드 (선생님 제공)</label>
+      <label data-i18n="lbl_class_code">클래스 코드 (선생님 제공)</label>
       <div class="input-wrap">
         <i class="fas fa-key"></i>
         <input type="text" id="signupClassCode" placeholder="예: BS-A1B2C3" style="text-transform:uppercase">
@@ -173,7 +205,7 @@ input.error{border-color:#f43f5e}
 
     <!-- 연결 코드 (학부모 전용) -->
     <div class="form-group" id="fieldParentCode" style="display:none">
-      <label>학부모 연결 코드 (선생님 제공)</label>
+      <label data-i18n="lbl_parent_code">학부모 연결 코드 (선생님 제공)</label>
       <div class="input-wrap">
         <i class="fas fa-link"></i>
         <input type="text" id="signupParentCode" placeholder="예: PRT-X7Y8Z9" style="text-transform:uppercase">
@@ -181,7 +213,7 @@ input.error{border-color:#f43f5e}
     </div>
 
     <button class="btn-submit" id="btnSignup" onclick="doSignup()">
-      <i class="fas fa-user-plus"></i> 계정 만들기
+      <i class="fas fa-user-plus"></i> <span data-i18n="btn_signup">계정 만들기</span>
     </button>
   </div>
 </div>
@@ -348,6 +380,33 @@ document.addEventListener('keydown', e => {
     if (legacy) window.location.href = 'index.html';
   }
 })();
+
+// ── 다국어 언어 변경 버튼 지원 ─────────────────────────────
+function setLoginLanguage(lang) {
+  if (typeof changeSettingsLanguage === 'function') {
+    changeSettingsLanguage(lang);
+  } else {
+    localStorage.setItem('bricksync_lang', lang);
+  }
+  updateLoginLangButtons(lang);
+}
+
+function updateLoginLangButtons(lang) {
+  const current = lang || localStorage.getItem('bricksync_lang') || 'ko';
+  const btnKo = document.getElementById('lang-btn-ko');
+  const btnEn = document.getElementById('lang-btn-en');
+  if (btnKo) btnKo.classList.toggle('active', current === 'ko');
+  if (btnEn) btnEn.classList.toggle('active', current === 'en');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const current = localStorage.getItem('bricksync_lang') || 'ko';
+  updateLoginLangButtons(current);
+  if (typeof applyBrickSyncLanguage === 'function') {
+    applyBrickSyncLanguage(current);
+  }
+});
 </script>
+<script src="settings.js"></script>
 </body>
 </html>

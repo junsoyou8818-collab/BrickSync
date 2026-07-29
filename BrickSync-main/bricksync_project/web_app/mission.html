@@ -340,7 +340,6 @@
         // Run rendering on load
         renderBriefing();
 
-        // Listen for language changes (in case Settings module is used in parent wrapper)
         window.addEventListener('bricksync-language-changed', (e) => {
             renderBriefing();
         });

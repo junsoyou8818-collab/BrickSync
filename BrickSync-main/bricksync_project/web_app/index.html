@@ -765,12 +765,12 @@
                 <!-- 교사/학부모용 대시보드 - 홍 화면에서 직접 접근 -->
                 <li class="menu-item" onclick="window.open('dashboard_v2.html?v=' + new Date().getTime(), '_blank')" style="cursor:pointer;">
                     <i data-lucide="layout-dashboard" class="menu-icon"></i>
-                    <span>교사/학부모용 대시보드</span>
+                    <span data-i18n="nav_dashboard_all">교사/학부모용 대시보드</span>
                 </li>
                 <!-- 역할별 대시보드 링크 (JS로 동적 주입) -->
                 <li class="menu-item" id="nav-dashboard-item" style="display:none" onclick="goToDashboard()">
                     <i data-lucide="layout-dashboard" class="menu-icon"></i>
-                    <span id="nav-dashboard-label">대시보드</span>
+                    <span id="nav-dashboard-label" data-i18n="nav_dashboard_teacher">대시보드</span>
                 </li>
             </ul>
 
@@ -791,7 +791,7 @@
                 <div class="reward-shelf-panel">
                     <div class="shelf-title">
                         <span>🏆 <strong data-i18n="lbl_coin_shelf">코인 보상 진열대</strong></span>
-                        <span class="shelf-subtitle">코딩 미션을 성공할 때마다 황금 코인이 진열대에 하나씩 추가됩니다!</span>
+                        <span class="shelf-subtitle" data-i18n="lbl_coin_shelf_subtitle">코딩 미션을 성공할 때마다 황금 코인이 진열대에 하나씩 추가됩니다!</span>
                     </div>
                     <div class="shelf-slots" id="lobby-reward-shelf">
                         <!-- JS에서 동적 로드 -->
@@ -802,7 +802,7 @@
                     <div class="banner-image-container">
                         <img src="./assets/fortnite_characters.png" class="banner-img" alt="Lego Fortnite Characters">
                     </div>
-                    <div class="banner-text">
+                    <div class="banner-text" data-i18n="banner_intro_text">
                         레고 포트나이트 앱 소개<br>
                         및 학습 관련 가이드 내용
                     </div>
@@ -909,15 +909,21 @@
             }
 
             // 이름 표시
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const nameEl = document.getElementById('display-student-name');
-            if (nameEl) nameEl.textContent = displayName + ' ' + (role === 'teacher' ? '교사' : role === 'parent' ? '학부모' : '학생');
+            if (nameEl) {
+                const roleSuffix = currentLang === 'en'
+                    ? (role === 'teacher' ? ' Teacher' : role === 'parent' ? ' Parent' : ' Student')
+                    : (' ' + (role === 'teacher' ? '교사' : role === 'parent' ? '학부모' : '학생'));
+                nameEl.textContent = displayName + roleSuffix;
+            }
 
             // 역할별 대시보드 메뉴 표시
             const dashItem = document.getElementById('nav-dashboard-item');
             const dashLabel = document.getElementById('nav-dashboard-label');
             if (role === 'teacher') {
                 if (dashItem) dashItem.style.display = '';
-                if (dashLabel) dashLabel.textContent = '교사 대시보드';
+                if (dashLabel) dashLabel.textContent = currentLang === 'en' ? 'Teacher Dashboard' : '교사 대시보드';
             } else {
                 if (dashItem) dashItem.style.display = 'none';
             }
@@ -934,6 +940,7 @@
             const shelfContainer = document.getElementById('lobby-reward-shelf');
             if (!shelfContainer) return;
 
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const studentName = getStudentName();
             let missions = [false, false, false, false, false, false, false, false]; // 기본 세팅 (전부 비활성)
             
@@ -950,11 +957,11 @@
             } catch(e) {}
 
             const getMissionName = (idx) => {
-                return (idx + 1) + "단원";
+                return currentLang === 'en' ? `Lesson ${idx + 1}` : `${idx + 1}단원`;
             };
 
             const getMissionDesc = (idx) => {
-                const descs = [
+                const descsKo = [
                     "북극 탐험선",
                     "심해 잠수함",
                     "대관람차 회전",
@@ -964,7 +971,17 @@
                     "몬스터 RPS",
                     "행복한 매점"
                 ];
-                return descs[idx] || "";
+                const descsEn = [
+                    "Arctic Exploration Boat",
+                    "Deep Sea Submarine",
+                    "Ferris Wheel Rotation",
+                    "Eco Generator",
+                    "Recycling Classifier",
+                    "Magic Tree Elevator",
+                    "Monster RPS",
+                    "Happy Snack Bar"
+                ];
+                return currentLang === 'en' ? (descsEn[idx] || "") : (descsKo[idx] || "");
             };
 
             let html = "";
@@ -1090,6 +1107,17 @@
             const projects = Array.from(projectMap.values()).sort((a, b) => b.updatedAt - a.updatedAt);
 
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const unitTitlesEn = {
+                '1': 'Lesson 1: Start the Expedition Boat',
+                '2': 'Lesson 2: Explore Underwater Submarine',
+                '3': 'Lesson 3: Operate Ferris Wheel Safely',
+                '4': 'Lesson 4: Build an Expedition Car',
+                '5': 'Lesson 5: Build a Colorful Light Gate',
+                '6': 'AI Lesson 1: RPS North Pole Racing',
+                '7': 'AI Lesson 2: Monster Alarm Camera',
+                '8': 'AI Lesson 3: Voice-Controlled Magic Swing'
+            };
+
             let html = '';
             for (let i = 0; i < 3; i++) {
                 if (i < projects.length) {
@@ -1102,6 +1130,14 @@
                     const targetUrl = isAi ? `ai_fusion.html?unit=${p.unit}&v=${Date.now()}` : `lesson.html?unit=${p.unit}&v=${Date.now()}`;
                     const blocksText = currentLang === 'en' ? `Blocks: ${p.blocksCount}` : `블록 수: ${p.blocksCount}개`;
                     const modifiedText = currentLang === 'en' ? 'Modified' : '최근 수정';
+                    
+                    let displayName = p.name || '무제 프로젝트';
+                    if (currentLang === 'en') {
+                        if (displayName.includes('학습') || displayName === '무제 프로젝트') {
+                            displayName = unitTitlesEn[p.unit] || (displayName.replace('학습 ', 'Lesson ').replace('무제 프로젝트', 'Untitled Project'));
+                        }
+                    }
+
                     html += `
                         <div class="project-card active-project" style="cursor: pointer;" onclick="location.href='${targetUrl}&projectId=${p.id}'">
                             <div class="project-card-inner">
@@ -1111,7 +1147,7 @@
                                         <i data-lucide="trash-2"></i>
                                     </button>
                                 </div>
-                                <div class="project-card-name">${escapeHtml(p.name)}</div>
+                                <div class="project-card-name">${escapeHtml(displayName)}</div>
                                 <div class="project-card-bottom">
                                     <div class="project-info-text">${blocksText}<br>${modifiedText}</div>
                                     <button class="project-play-btn" onclick="event.stopPropagation(); location.href='${targetUrl}&projectId=${p.id}'">
@@ -1154,16 +1190,18 @@
         function updateStudentGreeting(lang) {
             try {
                 const sessionDataStr = localStorage.getItem('bricksync_student_session');
-                if (sessionDataStr) {
-                    const sessionData = JSON.parse(sessionDataStr);
-                    const nameDisp = document.getElementById('display-student-name');
-                    if (nameDisp) {
-                        const studentName = sessionData.name || 'Guest';
-                        if (lang === 'en') {
-                            nameDisp.innerText = 'Student ' + studentName;
-                        } else {
-                            nameDisp.innerText = studentName + ' 학생';
-                        }
+                const nameDisp = document.getElementById('display-student-name');
+                if (nameDisp) {
+                    let rawName = 'Guest_익명';
+                    if (sessionDataStr) {
+                        const sessionData = JSON.parse(sessionDataStr);
+                        rawName = sessionData.name || 'Guest_익명';
+                    }
+                    if (lang === 'en') {
+                        const cleanName = rawName.replace('Guest_익명', 'Guest_Anonymous').replace('익명', 'Anonymous');
+                        nameDisp.innerText = 'Student ' + cleanName;
+                    } else {
+                        nameDisp.innerText = rawName + ' 학생';
                     }
                 }
             } catch(e) {}
