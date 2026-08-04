@@ -573,22 +573,23 @@
         window.connectBluetooth = async function () {
             // ── navigator.bluetooth 가용성 확인 ──
             if (!navigator.bluetooth) {
-                // Chrome 권한 차단 vs 미지원 구분
-                const isChrome = /chrome/i.test(navigator.userAgent) && !/edge/i.test(navigator.userAgent);
-                if (isChrome) {
+                // Chrome / Edge 권한 차단 vs 미지원 구분
+                const isChromium = /chrome/i.test(navigator.userAgent) || /edg/i.test(navigator.userAgent);
+                if (isChromium) {
                     alert(
-                        '🔒 Chrome이 Bluetooth 접근을 차단하고 있습니다.\n\n' +
+                        '🔒 브라우저가 Bluetooth 접근을 차단하고 있습니다.\n\n' +
                         '해결 방법:\n' +
                         '① 주소창 왼쪽 자물쇠(🔒) 클릭\n' +
                         '② "Bluetooth" → "허용" 으로 변경\n' +
                         '③ 페이지 새로고침(F5)\n\n' +
-                        '또는 Chrome 주소창에 아래를 입력하세요:\n' +
-                        'chrome://settings/content/bluetoothDevices'
+                        '또는 브라우저 주소창에 아래를 입력하세요:\n' +
+                        'chrome://settings/content/bluetoothDevices\n' +
+                        '(Edge는 edge://settings/content/bluetoothDevices)'
                     );
                 } else {
                     alert(
                         '❌ 블루투스를 사용할 수 없습니다.\n\n' +
-                        '• Chrome 브라우저를 사용해 주세요 (Edge/Firefox 미지원)\n' +
+                        '• Chrome 또는 Edge 브라우저를 사용해 주세요 (Firefox · Safari 미지원)\n' +
                         '• Windows Bluetooth가 켜져 있는지 확인하세요\n' +
                         '• [설정 → Bluetooth 및 장치]에서 Bluetooth를 켜주세요.'
                     );
