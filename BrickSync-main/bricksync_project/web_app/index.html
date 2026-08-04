@@ -598,8 +598,8 @@
             transform: scale(1.1);
         }
 
-        /* 오른쪽에 튀어나오는 라마 데코레이션 로고 (공식 에셋 없을 경우를 대비한 가상 배치용) */
-        .llama-deco {
+        /* 우측에 튀어나오는 래빗 데코레이션 */
+        .rabbit-deco {
             position: absolute;
             right: -20px;
             bottom: -50px;
@@ -607,6 +607,17 @@
             pointer-events: none;
             z-index: 5;
             filter: drop-shadow(-10px 10px 20px rgba(0, 0, 0, 0.3));
+        }
+
+        /* 좌측 하단 햄버거 데코레이션 (사이드바 앞에 배치) */
+        .hamburger-deco {
+            position: absolute;
+            left: 10px;
+            bottom: -10px;
+            height: 32vh;
+            pointer-events: none;
+            z-index: 7;
+            filter: drop-shadow(5px 5px 15px rgba(0, 0, 0, 0.25));
         }
 
         /* 왼쪽 레고 로봇 데코레이션 (사이드바 뒤에 배치) */
@@ -844,12 +855,14 @@
     <div class="bg-circle circle-2"></div>
     <div class="bg-circle circle-3"></div>
 
-    <!-- 우측에 직접 전달해주신 레고 라마 이미지 사용 (assets 폴더 연동) -->
-    <img src="./assets/fortnite2.png" class="llama-deco"
-        onerror="this.src='https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzEyMDdfMTA1%2FMDAxNzAxOTQxMTc4MzMy.hVndw1oE2rMhXv1lP8NnsfF0yvA9tQ9-9A_JqKxXnKcg.fM1RItB_EihgO9F7-7v_8bI9WqHwItz2bZ2qYc4oU2og.PNG.sjh912%2F2.png&type=sc960_832'">
+    <!-- 우측 래빗 데코레이션 -->
+    <img src="./assets/Rabbit.png" class="rabbit-deco" alt="">
 
     <!-- 좌측 레고 로봇 데코레이션 (사이드바 뒤에 배치, z-index:3) -->
     <img src="./assets/lego_robot.png" class="lego-robot-deco" alt="">
+
+    <!-- 좌측 하단 햄버거 데코레이션 (사이드바 앞, z-index:7) -->
+    <img src="./assets/Hambuerger.png" class="hamburger-deco" alt="">
 
     <!-- 좌측 상단 전체화면 글로벌 로고 영역 -->
     <div class="top-logo">
