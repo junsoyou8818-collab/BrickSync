@@ -601,31 +601,25 @@
         /* 우측에 튀어나오는 래빗 데코레이션 */
         .rabbit-deco {
             position: absolute;
-            right: -20px;
-            bottom: -50px;
-            height: 80vh;
+            right: -50px;
+            bottom: -40px;
+            height: 82vh;
             pointer-events: none;
             z-index: 5;
             filter: drop-shadow(-10px 10px 20px rgba(0, 0, 0, 0.3));
         }
 
-        /* 좌측 하단 햄버거 데코레이션 (사이드바 앞에 배치) */
+        /* 좌측 하단 햄버거 데코레이션 — 현재 레이아웃에서 미사용 */
         .hamburger-deco {
-            position: absolute;
-            left: 10px;
-            bottom: -10px;
-            height: 32vh;
-            pointer-events: none;
-            z-index: 7;
-            filter: drop-shadow(5px 5px 15px rgba(0, 0, 0, 0.25));
+            display: none;
         }
 
         /* 왼쪽 레고 로봇 데코레이션 (사이드바 뒤에 배치) */
         .lego-robot-deco {
             position: absolute;
-            left: -30px;
-            bottom: -30px;
-            height: 70vh;
+            left: -80px;
+            bottom: -20px;
+            height: 80vh;
             pointer-events: none;
             z-index: 3;
             filter: drop-shadow(10px 10px 20px rgba(0, 0, 0, 0.25));
