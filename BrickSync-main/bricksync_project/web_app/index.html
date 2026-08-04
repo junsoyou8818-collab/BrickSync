@@ -609,6 +609,18 @@
             filter: drop-shadow(-10px 10px 20px rgba(0, 0, 0, 0.3));
         }
 
+        /* 왼쪽 레고 로봇 데코레이션 (사이드바 뒤에 배치) */
+        .lego-robot-deco {
+            position: absolute;
+            left: -30px;
+            bottom: -30px;
+            height: 70vh;
+            pointer-events: none;
+            z-index: 3;
+            filter: drop-shadow(10px 10px 20px rgba(0, 0, 0, 0.25));
+            opacity: 0.92;
+        }
+
         /* 전체화면 좌측 상단 레고 포트나이트 공식 로고 */
         .top-logo {
             position: absolute;
@@ -835,6 +847,9 @@
     <!-- 우측에 직접 전달해주신 레고 라마 이미지 사용 (assets 폴더 연동) -->
     <img src="./assets/fortnite2.png" class="llama-deco"
         onerror="this.src='https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzEyMDdfMTA1%2FMDAxNzAxOTQxMTc4MzMy.hVndw1oE2rMhXv1lP8NnsfF0yvA9tQ9-9A_JqKxXnKcg.fM1RItB_EihgO9F7-7v_8bI9WqHwItz2bZ2qYc4oU2og.PNG.sjh912%2F2.png&type=sc960_832'">
+
+    <!-- 좌측 레고 로봇 데코레이션 (사이드바 뒤에 배치, z-index:3) -->
+    <img src="./assets/lego_robot.png" class="lego-robot-deco" alt="">
 
     <!-- 좌측 상단 전체화면 글로벌 로고 영역 -->
     <div class="top-logo">
