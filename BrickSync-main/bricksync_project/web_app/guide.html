@@ -16,9 +16,9 @@
         }
 
         .guide-wrap {
-            max-width: 1200px;
+            max-width: 1440px;
             margin: 0 auto;
-            padding: 0 44px 60px;
+            padding: 0 28px 60px;
         }
 
         /* ── 헤더: 양끝 배치 ── */
@@ -65,12 +65,11 @@
             padding: 36px 0 28px;
         }
 
-        /* CSS로 직접 그린 BrickSync 로고 → 투명 PNG로 교체 */
+        /* 원본 투명 bslogo */
         .bslogo-img {
-            height: 80px;
+            height: 90px;
             display: block;
-            margin: 0 auto 16px;
-            filter: drop-shadow(0 2px 10px rgba(0,0,0,0.15));
+            margin: 0 auto 12px;
         }
         .brick-studs {
             display: flex;
@@ -190,11 +189,16 @@
             border: 1px solid rgba(139,92,246,0.3);
         }
 
-        /* ── 오른쪽: 메뉴 탭 ── */
+        /* ── 탭 네비게이션: 한 줄 고정 ── */
         .tab-nav {
-            display: flex; gap: 8px;
-            flex-wrap: wrap; margin-bottom: 16px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            margin-bottom: 16px;
+            scrollbar-width: none;
         }
+        .tab-nav::-webkit-scrollbar { display: none; }
         .tab-btn {
             display: flex; align-items: center; gap: 7px;
             background: rgba(255,255,255,0.07);
