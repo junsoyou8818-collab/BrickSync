@@ -9,21 +9,17 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
-            height: 100%;
-            overflow: hidden;
+            min-height: 100%;
             font-family: 'Outfit', -apple-system, sans-serif;
             background: linear-gradient(135deg, #2d1b69 0%, #1a0a3e 55%, #0f0526 100%);
             color: #fff;
         }
 
-        /* ── 전체 레이아웃 ── */
+        /* ── 레이아웃 래퍼 ── */
         .guide-wrap {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            max-width: 960px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 0 36px;
+            padding: 0 36px 60px;
         }
 
         /* ── 헤더 ── */
@@ -31,9 +27,12 @@
             display: flex;
             align-items: center;
             gap: 16px;
-            padding: 18px 0 14px;
-            flex-shrink: 0;
+            padding: 20px 0 16px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #2d1b69, #1a0a3e);
+            z-index: 100;
         }
         .back-btn {
             background: rgba(255,255,255,0.1);
@@ -60,42 +59,112 @@
             font-weight: 600;
         }
 
-        /* ── 히어로 (로고 + 타이틀) ── */
+        /* ── 히어로: 로고 + 타이틀 (흰 배경 없음) ── */
         .hero {
             text-align: center;
-            padding: 20px 0 16px;
-            flex-shrink: 0;
+            padding: 36px 0 24px;
         }
-        /* 흰 배경 pill → 로고 색상 선명하게 */
-        .logo-pill {
-            display: inline-block;
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 10px 32px;
-            margin-bottom: 12px;
-            box-shadow: 0 6px 24px rgba(0,0,0,0.25);
-        }
-        .logo-pill img {
-            height: 60px;
+        .hero-logo {
+            height: 130px;
+            mix-blend-mode: multiply;
             display: block;
+            margin: 0 auto 14px;
         }
         .hero h1 {
-            font-size: 2.4rem;
+            font-size: 2.2rem;
             font-weight: 900;
             letter-spacing: -0.5px;
+            color: #a78bfa;
         }
-        .hero h1 span { color: #a78bfa; }
+
+        /* ── 섹션 공통 ── */
+        .section-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #a78bfa;
+            text-transform: uppercase;
+            margin: 40px 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(167,139,250,0.2);
+        }
+
+        /* ── 환경설정 카드 ── */
+        .setup-card {
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 24px;
+            padding: 36px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .setup-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 5px;
+            background: #8b5cf6;
+            border-radius: 24px 0 0 24px;
+        }
+        .setup-card-tag {
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.38);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .setup-card-title {
+            font-size: 1.9rem;
+            font-weight: 900;
+            margin-bottom: 24px;
+            letter-spacing: -0.3px;
+        }
+        .setup-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .setup-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.6;
+        }
+        .setup-step-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .setup-step strong { color: #fff; font-weight: 700; }
+        .setup-badge {
+            display: inline-block;
+            margin-top: 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: rgba(139,92,246,0.15);
+            color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(139,92,246,0.3);
+        }
 
         /* ── 탭 네비게이션 ── */
         .tab-nav {
             display: flex;
             gap: 10px;
-            padding: 16px 0 12px;
-            flex-shrink: 0;
-            overflow-x: auto;
-            scrollbar-width: none;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
         }
-        .tab-nav::-webkit-scrollbar { display: none; }
         .tab-btn {
             display: flex;
             align-items: center;
@@ -111,7 +180,6 @@
             cursor: pointer;
             white-space: nowrap;
             transition: all 0.2s;
-            flex-shrink: 0;
         }
         .tab-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
         .tab-btn.active {
@@ -121,72 +189,61 @@
         }
         .tab-btn i { width: 20px; height: 20px; flex-shrink: 0; }
 
-        /* ── 콘텐츠 패널 (나머지 높이 채움) ── */
-        .content-area {
-            flex: 1;
-            overflow: hidden;
-            padding-bottom: 28px;
-        }
-        .tab-panel { display: none; height: 100%; }
-        .tab-panel.active { display: flex; }
+        /* ── 메뉴 패널 카드 ── */
+        .menu-panel { display: none; }
+        .menu-panel.active { display: block; }
 
-        /* ── 패널 메인 카드 ── */
-        .panel-main {
-            flex: 1;
+        .menu-card {
             background: rgba(255,255,255,0.07);
             border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 28px;
-            padding: 44px 52px;
-            display: flex;
-            flex-direction: column;
-            gap: 22px;
-            overflow: auto;
+            border-radius: 24px;
+            padding: 36px 40px;
             position: relative;
+            overflow: hidden;
         }
-        .panel-main::before {
+        .menu-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; bottom: 0;
-            width: 6px;
-            border-radius: 28px 0 0 28px;
+            width: 5px;
+            border-radius: 24px 0 0 24px;
         }
-        /* 메뉴별 포인트 컬러 */
-        .panel-home    .panel-main::before { background: #f59e0b; }
-        .panel-lessons .panel-main::before { background: #10b981; }
-        .panel-ai      .panel-main::before { background: #6366f1; }
-        .panel-system  .panel-main::before { background: #0ea5e9; }
-        .panel-projects.panel-main::before { background: #f43f5e; }
-        .panel-setup   .panel-main::before { background: #8b5cf6; }
+        .panel-home    .menu-card::before { background: #f59e0b; }
+        .panel-lessons .menu-card::before { background: #10b981; }
+        .panel-ai      .menu-card::before { background: #6366f1; }
+        .panel-system  .menu-card::before { background: #0ea5e9; }
+        .panel-projects.menu-card::before { background: #f43f5e; }
 
-        .panel-tag {
-            font-size: 1rem;
+        .menu-card-tag {
+            font-size: 0.9rem;
             font-weight: 700;
             letter-spacing: 2px;
             color: rgba(255,255,255,0.38);
             text-transform: uppercase;
+            margin-bottom: 12px;
         }
-        .panel-title {
-            font-size: 2.4rem;
+        .menu-card-title {
+            font-size: 1.9rem;
             font-weight: 900;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
+            margin-bottom: 20px;
+            letter-spacing: -0.3px;
         }
-        .panel-desc {
-            font-size: 1.75rem;
-            color: rgba(255,255,255,0.75);
+        .menu-card-desc {
+            font-size: 1.4rem;
+            color: rgba(255,255,255,0.8);
             line-height: 1.7;
         }
-        .panel-desc strong { color: #fff; font-weight: 700; }
-        .panel-badge {
+        .menu-card-desc strong { color: #fff; font-weight: 700; }
+        .menu-badge {
             display: inline-block;
-            font-size: 1.1rem;
+            margin-top: 20px;
+            font-size: 1rem;
             font-weight: 600;
             padding: 8px 20px;
             border-radius: 20px;
             background: rgba(255,255,255,0.08);
             color: rgba(255,255,255,0.6);
             border: 1px solid rgba(255,255,255,0.14);
-            width: fit-content;
         }
     </style>
 </head>
@@ -200,15 +257,43 @@
         <span class="header-badge">Guide</span>
     </div>
 
-    <!-- 히어로 -->
+    <!-- 히어로: 로고 (흰 배경 없음) -->
     <div class="hero">
-        <div class="logo-pill">
-            <img src="./assets/bslogo.png" alt="BrickSync">
-        </div>
-        <h1><span>이렇게 사용해요!</span></h1>
+        <img src="./assets/bslogo.png" class="hero-logo" alt="BrickSync">
+        <h1>이렇게 사용해요!</h1>
     </div>
 
-    <!-- 탭 네비게이션 -->
+    <!-- ─── 섹션 1: 환경설정 ─── -->
+    <div class="section-label">⚙️ BrickSync 기초 환경설정</div>
+
+    <div class="setup-card">
+        <div class="setup-card-tag">Setup Guide</div>
+        <div class="setup-card-title">BrickSync.exe 실행 및 기본 설정</div>
+        <div class="setup-steps">
+            <div class="setup-step">
+                <span class="setup-step-icon">🖱️</span>
+                <span><strong>실행</strong>: BrickSync.exe를 더블클릭하면 로컬 브릿지 서버가 자동으로 시작되고, Chrome 또는 Edge 브라우저에서 BrickSync 웹앱이 자동으로 열립니다.</span>
+            </div>
+            <div class="setup-step">
+                <span class="setup-step-icon">🌐</span>
+                <span><strong>브라우저 요구사항</strong>: Web Bluetooth API를 지원하는 <strong>Chrome 또는 Edge</strong> 브라우저가 필요합니다. (Firefox · Safari 미지원)</span>
+            </div>
+            <div class="setup-step">
+                <span class="setup-step-icon">🔵</span>
+                <span><strong>허브 연결</strong>: 웹앱이 열리면 <strong>시스템 연결</strong> 메뉴에서 레고 허브를 블루투스로 연결할 수 있습니다.</span>
+            </div>
+            <div class="setup-step">
+                <span class="setup-step-icon">👤</span>
+                <span><strong>계정 로그인</strong>: 학생 · 교사 · 학부모 계정으로 로그인하면 역할에 맞는 대시보드와 기능이 활성화됩니다.</span>
+            </div>
+        </div>
+        <span class="setup-badge">별도 설치 불필요 · 원클릭 실행</span>
+    </div>
+
+    <!-- ─── 섹션 2: 메뉴 설명 ─── -->
+    <div class="section-label">📋 메뉴 기능 안내</div>
+
+    <!-- 탭 버튼 -->
     <div class="tab-nav">
         <button class="tab-btn active" onclick="switchTab(this,'home')">
             <i data-lucide="home"></i> 홈
@@ -225,100 +310,74 @@
         <button class="tab-btn" onclick="switchTab(this,'projects')">
             <i data-lucide="blocks"></i> 프로젝트
         </button>
-        <button class="tab-btn" onclick="switchTab(this,'setup')">
-            <i data-lucide="settings"></i> 환경설정
-        </button>
     </div>
 
-    <!-- 콘텐츠 패널 -->
-    <div class="content-area">
-
-        <!-- 홈 -->
-        <div class="tab-panel panel-home active" id="panel-home">
-            <div class="panel-main">
-                <div class="panel-tag">Menu 01</div>
-                <div class="panel-title">홈 (Home)</div>
-                <div class="panel-desc">
-                    BrickSync의 <strong>메인 페이지</strong>입니다.<br>
-                    학습 시작, 포트나이트 맵 접속, 내 프로젝트 확인 등<br>
-                    BrickSync의 모든 기능을 한눈에 볼 수 있는 시작 화면입니다.
-                </div>
-                <span class="panel-badge">시작 화면</span>
+    <!-- 메뉴 패널들 -->
+    <div class="menu-panel panel-home active" id="mpanel-home">
+        <div class="menu-card">
+            <div class="menu-card-tag">Menu 01</div>
+            <div class="menu-card-title">홈 (Home)</div>
+            <div class="menu-card-desc">
+                BrickSync의 <strong>메인 페이지</strong>입니다.<br>
+                학습 시작, 포트나이트 맵 접속, 내 프로젝트 확인 등<br>
+                BrickSync의 모든 기능을 한눈에 볼 수 있는 시작 화면입니다.
             </div>
+            <span class="menu-badge">시작 화면</span>
         </div>
+    </div>
 
-        <!-- 학습단원 -->
-        <div class="tab-panel panel-lessons" id="panel-lessons">
-            <div class="panel-main">
-                <div class="panel-tag">Menu 02</div>
-                <div class="panel-title">학습단원 (Lessons)</div>
-                <div class="panel-desc">
-                    BrickSync 코딩 커리큘럼 <strong>1~5단원</strong>을 학습하는 공간입니다.<br>
-                    단원별 미션을 수행하며 레고 허브 블록 코딩을 단계적으로 배울 수 있습니다.<br>
-                    각 단원을 완료하면 <strong>코인 보상</strong>이 지급됩니다.
-                </div>
-                <span class="panel-badge">1단원 ~ 5단원</span>
+    <div class="menu-panel panel-lessons" id="mpanel-lessons">
+        <div class="menu-card">
+            <div class="menu-card-tag">Menu 02</div>
+            <div class="menu-card-title">학습단원 (Lessons)</div>
+            <div class="menu-card-desc">
+                BrickSync 코딩 커리큘럼 <strong>1~5단원</strong>을 학습하는 공간입니다.<br>
+                단원별 미션을 수행하며 레고 허브 블록 코딩을 단계적으로 배울 수 있습니다.<br>
+                각 단원을 완료하면 <strong>코인 보상</strong>이 지급됩니다.
             </div>
+            <span class="menu-badge">1단원 ~ 5단원</span>
         </div>
+    </div>
 
-        <!-- AI 학습단원 -->
-        <div class="tab-panel panel-ai" id="panel-ai">
-            <div class="panel-main">
-                <div class="panel-tag">Menu 03</div>
-                <div class="panel-title">AI 학습단원 (AI Lessons)</div>
-                <div class="panel-desc">
-                    인공지능을 활용한 <strong>심화 학습</strong> 공간입니다.<br>
-                    <strong>6~8단원</strong>에서는 손 제스처 인식, 음성 명령 등<br>
-                    AI 기술과 레고 허브를 융합한 특별한 코딩 미션을 경험할 수 있습니다.
-                </div>
-                <span class="panel-badge">6단원 ~ 8단원 · AI 융합</span>
+    <div class="menu-panel panel-ai" id="mpanel-ai">
+        <div class="menu-card">
+            <div class="menu-card-tag">Menu 03</div>
+            <div class="menu-card-title">AI 학습단원 (AI Lessons)</div>
+            <div class="menu-card-desc">
+                인공지능을 활용한 <strong>심화 학습</strong> 공간입니다.<br>
+                <strong>6~8단원</strong>에서는 손 제스처 인식, 음성 명령 등<br>
+                AI 기술과 레고 허브를 융합한 특별한 코딩 미션을 경험할 수 있습니다.
             </div>
+            <span class="menu-badge">6단원 ~ 8단원 · AI 융합</span>
         </div>
+    </div>
 
-        <!-- 시스템 연결 -->
-        <div class="tab-panel panel-system" id="panel-system">
-            <div class="panel-main">
-                <div class="panel-tag">Menu 04</div>
-                <div class="panel-title">시스템 연결 (System Connection)</div>
-                <div class="panel-desc">
-                    레고 허브를 <strong>블루투스</strong>로 연결하고 직접 코딩하는 공간입니다.<br>
-                    허브의 센서 값, 모터 상태 등 <strong>실시간 작동 상태를 확인</strong>하며<br>
-                    블록 코드를 직접 만들고 실행할 수 있습니다.
-                </div>
-                <span class="panel-badge">허브 연결 · 코딩 실습</span>
+    <div class="menu-panel panel-system" id="mpanel-system">
+        <div class="menu-card">
+            <div class="menu-card-tag">Menu 04</div>
+            <div class="menu-card-title">시스템 연결 (System Connection)</div>
+            <div class="menu-card-desc">
+                레고 허브를 <strong>블루투스</strong>로 연결하고 직접 코딩하는 공간입니다.<br>
+                허브의 센서 값, 모터 상태 등 <strong>실시간 작동 상태를 확인</strong>하며<br>
+                블록 코드를 직접 만들고 실행할 수 있습니다.
             </div>
+            <span class="menu-badge">허브 연결 · 코딩 실습</span>
         </div>
+    </div>
 
-        <!-- 프로젝트 -->
-        <div class="tab-panel panel-projects" id="panel-projects">
-            <div class="panel-main">
-                <div class="panel-tag">Menu 05</div>
-                <div class="panel-title">프로젝트 (Projects)</div>
-                <div class="panel-desc">
-                    내가 만든 <strong>코딩 프로젝트</strong>를 저장하고 관리하는 공간입니다.<br>
-                    이전에 작업한 코드를 불러오거나<br>
-                    새 프로젝트를 시작할 수 있습니다.
-                </div>
-                <span class="panel-badge">프로젝트 저장 · 관리</span>
+    <div class="menu-panel panel-projects" id="mpanel-projects">
+        <div class="menu-card">
+            <div class="menu-card-tag">Menu 05</div>
+            <div class="menu-card-title">프로젝트 (Projects)</div>
+            <div class="menu-card-desc">
+                내가 만든 <strong>코딩 프로젝트</strong>를 저장하고 관리하는 공간입니다.<br>
+                이전에 작업한 코드를 불러오거나<br>
+                새 프로젝트를 시작할 수 있습니다.
             </div>
+            <span class="menu-badge">프로젝트 저장 · 관리</span>
         </div>
+    </div>
 
-        <!-- 환경설정 -->
-        <div class="tab-panel panel-setup" id="panel-setup">
-            <div class="panel-main">
-                <div class="panel-tag">Setup Guide</div>
-                <div class="panel-title">BrickSync.exe 실행 및 기본 설정</div>
-                <div class="panel-desc">
-                    🖱️ <strong>실행</strong>: BrickSync.exe 더블클릭 → 로컬 서버 자동 시작 → 브라우저 자동 오픈<br>
-                    🌐 <strong>브라우저</strong>: Chrome 또는 Edge 필요 (Firefox · Safari 미지원)<br>
-                    🔵 <strong>허브 연결</strong>: 시스템 연결 메뉴에서 블루투스로 연결<br>
-                    👤 <strong>계정</strong>: 학생 · 교사 · 학부모 계정으로 로그인 후 역할별 기능 활성화
-                </div>
-                <span class="panel-badge">별도 설치 불필요 · 원클릭 실행</span>
-            </div>
-        </div>
-
-    </div><!-- /content-area -->
 </div><!-- /guide-wrap -->
 
 <script>
@@ -326,11 +385,10 @@
 
     function switchTab(btn, name) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
         btn.classList.add('active');
-        document.getElementById('panel-' + name).classList.add('active');
+        document.getElementById('mpanel-' + name).classList.add('active');
     }
 </script>
-
 </body>
 </html>
