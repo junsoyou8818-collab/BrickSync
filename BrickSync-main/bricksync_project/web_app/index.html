@@ -454,12 +454,13 @@
 
         /* 5) 학습 콘텐츠 2열 그리드 레이아웃 */
         .learning-grid {
-            display: grid;
             grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: 1fr;
             gap: 20px;
             width: 100%;
-            display: none;
-            /* 기본 숨김 */
+            flex: 1;
+            min-height: 0;
+            display: none; /* 기본 숨김 */
         }
 
         .learning-card {
@@ -476,7 +477,7 @@
             position: relative;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-decoration: none;
-            padding: 40px 20px;
+            min-height: 0;
         }
 
         .learning-card:hover {
