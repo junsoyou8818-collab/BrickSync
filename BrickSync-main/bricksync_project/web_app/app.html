@@ -726,12 +726,25 @@
                 throw new Error(`Notification 시작 실패: ${e.message}`);
             }
 
-            // [5단계] 모든 포트 센서 구독
+            // [5단계] 모든 포트 센서 구독 (외부 포트 A~F)
             for (let p = 0; p < 6; p++) {
                 const subscribeMsg = new Uint8Array([10, 0, 0x41, p, 0, 1, 0, 0, 0, 1]);
                 try { await window.txCharacteristic.writeValueWithoutResponse(subscribeMsg); } catch (e) { }
                 await new Promise(r => setTimeout(r, 30));
             }
+
+            // [6단계] 내장 IMU 센서 구독 (포트 99 - 자이로/가속도)
+            // LEGO SPIKE 내장 IMU는 LWP3 프로토콜로 명시적 구독이 필요
+            const imuPorts = [97, 98, 99]; // 허브 펌웨어 버전에 따라 포트 다름
+            for (const imuPort of imuPorts) {
+                // mode 0: acceleration, mode 3: tilt angle
+                for (const mode of [0, 3]) {
+                    const imuMsg = new Uint8Array([10, 0, 0x41, imuPort, mode, 1, 0, 0, 0, 1]);
+                    try { await window.txCharacteristic.writeValueWithoutResponse(imuMsg); } catch (e) { }
+                    await new Promise(r => setTimeout(r, 30));
+                }
+            }
+            console.log('[BLE] 내장 IMU 구독 완료 (port 97/98/99, mode 0/3)');
         }
 
         window.isReconnecting = false;
