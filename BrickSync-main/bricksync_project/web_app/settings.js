@@ -360,13 +360,15 @@
             background: rgba(43, 17, 79, 0.85);
             border: 2px solid rgba(250, 204, 21, 0.3);
             box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(167, 139, 250, 0.2);
-            border-radius: 24px;
-            width: 480px; max-width: 90%;
-            padding: 30px;
+            border-radius: 36px;
+            width: 720px; max-width: 92%;
+            padding: 45px;
             color: #f8fafc;
             transform: scale(0.9);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .bs-settings-overlay.show .bs-settings-card {
             transform: scale(1);
@@ -374,51 +376,51 @@
         .bs-settings-header {
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 15px; margin-bottom: 20px;
+            padding-bottom: 22px; margin-bottom: 30px;
         }
         .bs-settings-title {
-            font-size: 1.4rem; font-weight: 800; color: #facc15;
+            font-size: 2.1rem; font-weight: 800; color: #facc15;
             text-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
         }
         .bs-settings-close {
             background: none; border: none; color: #cbd5e1;
-            font-size: 1.5rem; cursor: pointer; transition: color 0.2s;
+            font-size: 2.25rem; cursor: pointer; transition: color 0.2s;
         }
         .bs-settings-close:hover { color: #f43f5e; }
         
         .bs-settings-section {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         .bs-settings-sec-title {
-            font-size: 0.95rem; font-weight: 700; color: #c4b5fd;
-            margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+            font-size: 1.425rem; font-weight: 700; color: #c4b5fd;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 12px;
         }
         
         /* Profile Row */
         .bs-profile-row {
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.05); padding: 12px 18px; border-radius: 12px;
+            background: rgba(255,255,255,0.05); padding: 18px 27px; border-radius: 18px;
             border: 1px solid rgba(255,255,255,0.08);
         }
-        .bs-profile-name { font-weight: 700; font-size: 1.05rem; }
+        .bs-profile-name { font-weight: 700; font-size: 1.575rem; }
         .bs-btn-danger {
             background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4);
-            color: #f43f5e; padding: 6px 14px; border-radius: 8px; font-weight: 700;
-            cursor: pointer; transition: 0.2s;
+            color: #f43f5e; padding: 9px 21px; border-radius: 12px; font-weight: 700;
+            font-size: 1.05rem; cursor: pointer; transition: 0.2s;
         }
         .bs-btn-danger:hover { background: #f43f5e; color: #fff; }
 
         /* Button Groups (Language / Zoom) */
         .bs-btn-group {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
         }
         .bs-btn-group.three-cols {
             grid-template-columns: repeat(3, 1fr);
         }
         .bs-btn-option {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            color: #cbd5e1; padding: 10px; border-radius: 10px; font-weight: 600;
-            cursor: pointer; text-align: center; transition: 0.2s;
+            color: #cbd5e1; padding: 15px; border-radius: 15px; font-weight: 600;
+            font-size: 1.2rem; cursor: pointer; text-align: center; transition: 0.2s;
         }
         .bs-btn-option:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .bs-btn-option.active {
@@ -429,41 +431,41 @@
         
         /* Volume Range */
         .bs-volume-container {
-            display: flex; align-items: center; gap: 15px;
+            display: flex; align-items: center; gap: 22px;
         }
         .bs-volume-slider {
-            flex: 1; height: 6px; -webkit-appearance: none; appearance: none;
-            background: rgba(255,255,255,0.15); border-radius: 3px; outline: none;
+            flex: 1; height: 9px; -webkit-appearance: none; appearance: none;
+            background: rgba(255,255,255,0.15); border-radius: 5px; outline: none;
         }
         .bs-volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
+            -webkit-appearance: none; appearance: none; width: 27px; height: 27px;
             border-radius: 50%; background: #facc15; cursor: pointer;
             box-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
         }
-        .bs-volume-val { font-family: 'Outfit', monospace; font-weight: 700; width: 35px; text-align: right; }
+        .bs-volume-val { font-family: 'Outfit', monospace; font-weight: 700; font-size: 1.2rem; width: 52px; text-align: right; }
 
         /* Backup Buttons */
         .bs-backup-group {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
         }
         .bs-btn-accent {
             background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.4);
-            color: #38bdf8; padding: 10px; border-radius: 10px; font-weight: 700;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+            color: #38bdf8; padding: 15px; border-radius: 15px; font-weight: 700;
+            font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;
             transition: 0.2s;
         }
         .bs-btn-accent:hover { background: #38bdf8; color: #000; }
         
         /* Diagnostics Panel */
         .bs-diag-box {
-            background: rgba(0,0,0,0.2); padding: 12px 18px; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; min-height: 45px;
+            background: rgba(0,0,0,0.2); padding: 18px 27px; border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.05); font-size: 1.35rem; min-height: 67px;
             display: flex; align-items: center; justify-content: space-between;
         }
         .bs-diag-status { font-weight: 600; color: #94a3b8; }
         .bs-diag-btn {
             background: rgba(167, 139, 250, 0.15); border: 1px solid rgba(167, 139, 250, 0.4);
-            color: #c4b5fd; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem;
+            color: #c4b5fd; padding: 6px 15px; border-radius: 9px; font-size: 1.2rem;
             font-weight: 700; cursor: pointer; transition: 0.2s;
         }
         .bs-diag-btn:hover { background: #8b5cf6; color: #fff; }
