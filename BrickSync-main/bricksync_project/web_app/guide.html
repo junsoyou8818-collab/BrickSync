@@ -65,13 +65,12 @@
             padding: 36px 0 28px;
         }
 
-        /* CSS로 직접 그린 BrickSync 로고 */
-        .bslogo-css {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 16px;
+        /* CSS로 직접 그린 BrickSync 로고 → 투명 PNG로 교체 */
+        .bslogo-img {
+            height: 80px;
+            display: block;
+            margin: 0 auto 16px;
+            filter: drop-shadow(0 2px 10px rgba(0,0,0,0.15));
         }
         .brick-studs {
             display: flex;
@@ -271,22 +270,7 @@
 
     <!-- 히어로: CSS 로고 -->
     <div class="hero">
-        <div class="bslogo-css">
-            <div class="brick-studs">
-                <span></span><span></span><span></span><span></span><span></span>
-            </div>
-            <div class="bs-letters">
-                <span class="c-B">B</span>
-                <span class="c-r">r</span>
-                <span class="c-i">i</span>
-                <span class="c-c">c</span>
-                <span class="c-k">k</span>
-                <span class="c-S">S</span>
-                <span class="c-y">y</span>
-                <span class="c-n">n</span>
-                <span class="c-c2">c</span>
-            </div>
-        </div>
+        <img src="./assets/bslogo_t.png" class="bslogo-img" alt="BrickSync">
         <h1>이렇게 사용해요!</h1>
     </div>
 
