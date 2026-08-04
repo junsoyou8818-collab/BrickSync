@@ -810,8 +810,8 @@
                     <i data-lucide="blocks" class="menu-icon"></i>
                     <span data-i18n="nav_projects">프로젝트</span>
                 </li>
-                <!-- 교사/학부모용 대시보드 - 홍 화면에서 직접 접근 -->
-                <li class="menu-item" onclick="window.open('dashboard_v2.html?v=' + new Date().getTime(), '_blank')" style="cursor:pointer;">
+                <!-- 교사/학부모용 대시보드 - 학생에게는 숨김 (JS로 역할 체크 후 표시) -->
+                <li class="menu-item" id="nav-dashboard-all-item" style="display:none" onclick="window.open('dashboard_v2.html?v=' + new Date().getTime(), '_blank')" style="cursor:pointer;">
                     <i data-lucide="layout-dashboard" class="menu-icon"></i>
                     <span data-i18n="nav_dashboard_all">교사/학부모용 대시보드</span>
                 </li>
@@ -973,10 +973,18 @@
             // 역할별 대시보드 메뉴 표시
             const dashItem = document.getElementById('nav-dashboard-item');
             const dashLabel = document.getElementById('nav-dashboard-label');
-            if (role === 'teacher') {
+            const dashAllItem = document.getElementById('nav-dashboard-all-item');
+
+            if (role === 'teacher' || role === 'parent') {
+                // 교사/학부모: 두 메뉴 모두 표시
+                if (dashAllItem) dashAllItem.style.display = '';
                 if (dashItem) dashItem.style.display = '';
-                if (dashLabel) dashLabel.textContent = currentLang === 'en' ? 'Teacher Dashboard' : '교사 대시보드';
+                if (dashLabel) dashLabel.textContent = currentLang === 'en'
+                    ? (role === 'teacher' ? 'Teacher Dashboard' : 'Parent Dashboard')
+                    : (role === 'teacher' ? '교사 대시보드' : '학부모 대시보드');
             } else {
+                // 학생: 대시보드 메뉴 완전 숨김
+                if (dashAllItem) dashAllItem.style.display = 'none';
                 if (dashItem) dashItem.style.display = 'none';
             }
 

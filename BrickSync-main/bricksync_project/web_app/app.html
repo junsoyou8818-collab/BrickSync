@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>BrickSync Platform (SPA)</title>
+    <title>BrickSync</title>
     <!-- 폰트 적용 -->
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap"
@@ -127,6 +127,225 @@
     <!-- 모든 페이지는 이 iframe 안에서 전환되며, 블루투스는 부모 창인 여기서 영구 유지됩니다. -->
     <iframe id="main-frame"
         allow="bluetooth; window-placement; microphone; camera; midi; usb; display-capture"></iframe>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         Electron 전용 Bluetooth 장치 선택 UI (Chrome picker 대체)
+         main.js에서 IPC로 bluetooth-devices 이벤트 수신 시 표시
+         ═══════════════════════════════════════════════════════════ -->
+    <div id="bt-picker-backdrop" style="
+        display: none;
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 99998;
+    "></div>
+
+    <div id="bt-picker" style="
+        display: none;
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.28);
+        width: 360px;
+        font-family: 'Noto Sans KR', 'Segoe UI', sans-serif;
+        z-index: 99999;
+        overflow: hidden;
+    ">
+        <!-- 헤더 -->
+        <div style="padding: 20px 24px 12px; border-bottom: 1px solid #e8eaed;">
+            <div style="font-size: 13px; color: #5f6368; margin-bottom: 6px;">bricksync.monsteratech.com이(가) 페어링을 하려고 합니다.</div>
+        </div>
+
+        <!-- 장치 목록 -->
+        <div id="bt-device-list" style="
+            min-height: 80px;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 8px 0;
+        ">
+            <!-- 스캔 중 상태 -->
+            <div id="bt-scanning" style="
+                display: flex; align-items: center; gap: 12px;
+                padding: 16px 24px;
+                color: #5f6368; font-size: 13px;
+            ">
+                <svg width="16" height="16" viewBox="0 0 24 24" style="animation: bt-spin 1s linear infinite; flex-shrink:0;">
+                    <circle cx="12" cy="12" r="10" fill="none" stroke="#4285f4" stroke-width="3" stroke-dasharray="40" stroke-dashoffset="10"/>
+                </svg>
+                스캔하는 중...
+            </div>
+        </div>
+
+        <!-- 하단 버튼 -->
+        <div style="
+            display: flex; justify-content: flex-end; gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid #e8eaed;
+        ">
+            <button id="bt-cancel-btn" style="
+                padding: 8px 20px; border: none; border-radius: 6px;
+                background: transparent; color: #1a73e8;
+                font-size: 14px; font-weight: 500; cursor: pointer;
+            " onmouseover="this.style.background='#f1f3f4'" onmouseout="this.style.background='transparent'">
+                취소
+            </button>
+            <button id="bt-connect-btn" style="
+                padding: 8px 20px; border: none; border-radius: 6px;
+                background: #1a73e8; color: #fff;
+                font-size: 14px; font-weight: 500; cursor: pointer;
+                opacity: 0.4; pointer-events: none;
+            ">
+                연결
+            </button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes bt-spin {
+            to { transform: rotate(360deg); }
+        }
+        .bt-device-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 24px; cursor: pointer;
+            font-size: 14px; color: #202124;
+            transition: background 0.15s;
+        }
+        .bt-device-item:hover { background: #f1f3f4; }
+        .bt-device-item.selected { background: #e8f0fe; color: #1a73e8; }
+        .bt-device-icon { font-size: 18px; flex-shrink: 0; }
+    </style>
+
+    <script>
+        // ── Bluetooth Picker UI 로직 ──
+        (function () {
+            const picker     = document.getElementById('bt-picker');
+            const backdrop   = document.getElementById('bt-picker-backdrop');
+            const deviceList = document.getElementById('bt-device-list');
+            const scanning   = document.getElementById('bt-scanning');
+            const connectBtn = document.getElementById('bt-connect-btn');
+            const cancelBtn  = document.getElementById('bt-cancel-btn');
+            let selectedDeviceId = null;
+
+            function showPicker() {
+                picker.style.display = 'block';
+                backdrop.style.display = 'block';
+                // 스캔 중 초기화
+                scanning.style.display = 'flex';
+                // 기존 장치 항목 제거 (스캔 div 제외)
+                Array.from(deviceList.querySelectorAll('.bt-device-item')).forEach(el => el.remove());
+                selectedDeviceId = null;
+                connectBtn.style.opacity = '0.4';
+                connectBtn.style.pointerEvents = 'none';
+            }
+
+            function hidePicker() {
+                picker.style.display = 'none';
+                backdrop.style.display = 'none';
+            }
+
+            function selectDevice(id) {
+                selectedDeviceId = id;
+                connectBtn.style.opacity = '1';
+                connectBtn.style.pointerEvents = 'auto';
+            }
+
+            // Electron IPC: main에서 장치 목록 수신
+            if (window.electronAPI) {
+                window.electronAPI.onBluetoothDevices(function (devices) {
+                    showPicker();
+
+                    if (!devices || devices.length === 0) {
+                        // 아직 스캔 중
+                        scanning.style.display = 'flex';
+                        return;
+                    }
+
+                    // 스캔 완료 → 장치 목록 표시
+                    scanning.style.display = 'none';
+
+                    // 기존 항목 제거
+                    Array.from(deviceList.querySelectorAll('.bt-device-item')).forEach(el => el.remove());
+
+                    devices.forEach(function (device) {
+                        const item = document.createElement('div');
+                        item.className = 'bt-device-item';
+                        item.dataset.deviceId = device.id;
+
+                        const icon = document.createElement('span');
+                        icon.className = 'bt-device-icon';
+                        icon.textContent = device.isLego ? '🎮' : '📶';
+
+                        const name = document.createElement('span');
+                        name.textContent = device.name;
+
+                        item.appendChild(icon);
+                        item.appendChild(name);
+
+                        item.addEventListener('click', function () {
+                            Array.from(deviceList.querySelectorAll('.bt-device-item'))
+                                .forEach(function (el) { el.classList.remove('selected'); });
+                            item.classList.add('selected');
+                            selectDevice(device.id);
+                        });
+
+                        deviceList.appendChild(item);
+
+                        // LEGO Hub가 하나뿐이면 자동 선택
+                        if (device.isLego && devices.filter(function(d){ return d.isLego; }).length === 1) {
+                            item.classList.add('selected');
+                            selectDevice(device.id);
+                        }
+                    });
+                });
+            }
+
+            // 연결 버튼
+            connectBtn.addEventListener('click', function () {
+                if (selectedDeviceId && window.electronAPI) {
+                    // 연결 중 UI 표시 (흰 화면 대신 로딩 표시)
+                    connectBtn.textContent = '연결 중...';
+                    connectBtn.style.opacity = '0.7';
+                    connectBtn.style.pointerEvents = 'none';
+                    cancelBtn.style.pointerEvents = 'none';
+
+                    window.electronAPI.selectBluetoothDevice(selectedDeviceId);
+
+                    // GATT 연결 완료 or 실패 시 picker 닫기 (connectionType 변화 감지)
+                    const checkInterval = setInterval(function () {
+                        if (window.connectionType === 'BLE') {
+                            clearInterval(checkInterval);
+                            hidePicker();
+                        }
+                    }, 300);
+
+                    // 15초 타임아웃 후 자동 닫기 (GATT 10초 타임아웃보다 길어야 에러 알림 표시됨)
+                    setTimeout(function () {
+                        clearInterval(checkInterval);
+                        hidePicker();
+                    }, 15000);
+                }
+            });
+
+
+            // 취소 버튼
+            cancelBtn.addEventListener('click', function () {
+                if (window.electronAPI) {
+                    window.electronAPI.selectBluetoothDevice('');
+                }
+                hidePicker();
+            });
+
+            // 배경 클릭 취소
+            backdrop.addEventListener('click', function () {
+                if (window.electronAPI) {
+                    window.electronAPI.selectBluetoothDevice('');
+                }
+                hidePicker();
+            });
+        })();
+    </script>
+
     <script>
         // SPA 내부 페이지 상태 유지 (새로고침 시 마지막 화면 복원)
         (function () {
@@ -352,19 +571,50 @@
         };
 
         window.connectBluetooth = async function () {
-            try {
-                const LEGO_HUB_SERVICE_ID = '00001623-1212-efde-1623-785feabcd123';
-                const device = await navigator.bluetooth.requestDevice({
+            // ── navigator.bluetooth 가용성 확인 ──
+            if (!navigator.bluetooth) {
+                alert('❌ 블루투스를 사용할 수 없습니다.\n\n가능한 원인:\n• 이 기기에 Bluetooth 어댑터가 없음\n• Windows Bluetooth가 꺼져있음\n• 브라우저가 Web Bluetooth를 지원하지 않음\n\n[설정 → Bluetooth 및 장치]에서 Bluetooth를 켜주세요.');
+                window.connectionType = null;
+                return false;
+            }
+
+            const LEGO_HUB_SERVICE_ID = '00001623-1212-efde-1623-785feabcd123';
+            const OPTIONAL_SERVICE_ID  = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+
+            // ── Electron 환경 감지 ──
+            const isElectron = /electron/i.test(navigator.userAgent);
+
+            const requestOptions = isElectron
+                ? {
+                    // Electron: 이름 접두사 필터 (서비스 UUID 필터 권한과 동일하게 GATT 접근 보장)
+                    filters: [
+                        { namePrefix: 'LEGO' },
+                        { namePrefix: 'Hub' },
+                        { namePrefix: 'SPIKE' },
+                        { namePrefix: 'Technic' }
+                    ],
+                    optionalServices: [LEGO_HUB_SERVICE_ID, OPTIONAL_SERVICE_ID]
+                  }
+                : {
+                    // 일반 브라우저: LEGO Hub 서비스 UUID로 필터링
                     filters: [{ services: [LEGO_HUB_SERVICE_ID] }],
-                    optionalServices: ['6e400001-b5a3-f393-e0a9-e50e24dcca9e']
-                });
+                    optionalServices: [OPTIONAL_SERVICE_ID]
+                  };
+
+            try {
+                const device = await navigator.bluetooth.requestDevice(requestOptions);
                 await connectBluetoothDevice(device);
                 return true;
             } catch (error) {
-                if (error.name === 'NetworkError') {
-                    alert("블루투스 접속 오류: 기기가 꺼져있거나 다른 장치와 연결되어 있습니다.");
-                } else if (error.name !== 'NotFoundError') {
-                    console.error("Bluetooth 오류:", error);
+                if (error.name === 'NotFoundError') {
+                    alert('🔍 LEGO Hub를 찾을 수 없습니다.\n\n• Hub 전원이 켜져 있는지 확인하세요\n• Hub의 버튼을 한 번 눌러 검색 모드로 설정하세요\n• Hub가 다른 기기와 연결되어 있으면 먼저 끊어주세요');
+                } else if (error.name === 'NetworkError') {
+                    alert('📡 블루투스 접속 오류\n기기가 꺼져있거나 다른 장치와 연결되어 있습니다.');
+                } else if (error.name === 'SecurityError') {
+                    alert('🔒 블루투스 권한이 없습니다.\n앱을 다시 시작하거나 관리자에게 문의하세요.');
+                } else if (error.name !== 'NotAllowedError') {
+                    alert(`⚠️ 블루투스 오류\n오류 유형: ${error.name}\n${error.message}`);
+                    console.error('Bluetooth 오류:', error);
                 }
                 window.connectionType = null;
                 throw error;
@@ -374,23 +624,55 @@
         async function connectBluetoothDevice(device) {
             const LEGO_HUB_SERVICE_ID = '00001623-1212-efde-1623-785feabcd123';
             const LEGO_HUB_CHARACTERISTIC_ID = '00001624-1212-efde-1623-785feabcd123';
+            const NORDIC_UART_SERVICE = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+            const NORDIC_UART_RX = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+            const NORDIC_UART_TX = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
 
             if (!device.hasDisconnectListener) {
                 device.addEventListener('gattserverdisconnected', () => {
                     window.connectionType = null;
                     updateUI('DISCONNECT');
-                    // 백그라운드 자동 복구 시도 루프 시작
                     setTimeout(() => startBackgroundReconnect(device), 3000);
                 });
                 device.hasDisconnectListener = true;
             }
 
-            const server = await device.gatt.connect();
-            await new Promise(r => setTimeout(r, 1000));
+            // [1단계] GATT 서버 연결 (10초 타임아웃)
+            let server;
+            try {
+                server = await Promise.race([
+                    device.gatt.connect(),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('GATT 연결 시간 초과 (10초)\n\n• Hub 전원이 켜져 있는지 확인하세요\n• Hub가 다른 기기와 연결되어 있으면 먼저 끊어주세요\n• Hub를 껐다가 다시 켜서 재시도하세요')), 10000)
+                    )
+                ]);
+            } catch (e) {
+                throw new Error(`GATT 서버 연결 실패: ${e.message}`);
 
-            const service = await server.getPrimaryService(LEGO_HUB_SERVICE_ID).catch(() => server.getPrimaryService('6e400001-b5a3-f393-e0a9-e50e24dcca9e'));
-            window.rxCharacteristic = await service.getCharacteristic(LEGO_HUB_CHARACTERISTIC_ID).catch(() => service.getCharacteristic('6e400002-b5a3-f393-e0a9-e50e24dcca9e'));
-            window.txCharacteristic = window.rxCharacteristic;
+            }
+
+            await new Promise(r => setTimeout(r, 800));
+
+            // [2단계] Primary Service 가져오기 (LEGO LWP 먼저, 없으면 Nordic UART 시도)
+            let service;
+            try {
+                service = await server.getPrimaryService(LEGO_HUB_SERVICE_ID);
+            } catch (e1) {
+                try {
+                    service = await server.getPrimaryService(NORDIC_UART_SERVICE);
+                } catch (e2) {
+                    throw new Error(`서비스 첣기 실패.\nLEGO 서비스: ${e1.message}\nNordic UART: ${e2.message}`);
+                }
+            }
+
+            // [3단계] Characteristic 가져오기
+            try {
+                window.rxCharacteristic = await service.getCharacteristic(LEGO_HUB_CHARACTERISTIC_ID)
+                    .catch(() => service.getCharacteristic(NORDIC_UART_RX));
+                window.txCharacteristic = window.rxCharacteristic;
+            } catch (e) {
+                throw new Error(`Characteristic 첣기 실패: ${e.message}`);
+            }
 
             window.connectionType = 'BLE';
             updateUI('BLE');
@@ -410,10 +692,15 @@
                 });
             } catch (e) { }
 
-            await window.txCharacteristic.startNotifications();
-            window.txCharacteristic.addEventListener('characteristicvaluechanged', handleBLEData);
+            // [4단계] Notification 시작
+            try {
+                await window.txCharacteristic.startNotifications();
+                window.txCharacteristic.addEventListener('characteristicvaluechanged', handleBLEData);
+            } catch (e) {
+                throw new Error(`Notification 시작 실패: ${e.message}`);
+            }
 
-            // 모든 포트를 무조건 센서 감지 모드(Mode 0)로 강제 구독
+            // [5단계] 모든 포트 센서 구독
             for (let p = 0; p < 6; p++) {
                 const subscribeMsg = new Uint8Array([10, 0, 0x41, p, 0, 1, 0, 0, 0, 1]);
                 try { await window.txCharacteristic.writeValueWithoutResponse(subscribeMsg); } catch (e) { }
