@@ -69,6 +69,13 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-8px); }
         }
+        /* 히어로 BrickSync 로고 이미지 */
+        .hero-logo-wrap { margin: 0 auto 12px; }
+        .hero-logo {
+            height: 80px;
+            mix-blend-mode: multiply;
+            filter: drop-shadow(0 4px 12px rgba(167,139,250,0.3));
+        }
         .hero h1 {
             font-size: 2rem;
             font-weight: 900;
@@ -136,6 +143,7 @@
         .card-ai::before        { background: #6366f1; }
         .card-workspace::before { background: #0ea5e9; }
         .card-projects::before  { background: #f43f5e; }
+        .card-setup::before     { background: #8b5cf6; }
 
         .card-icon {
             width: 52px; height: 52px;
@@ -149,6 +157,7 @@
         .card-ai .card-icon        { background: rgba(99,102,241,0.15); }
         .card-workspace .card-icon { background: rgba(14,165,233,0.15); }
         .card-projects .card-icon  { background: rgba(244,63,94,0.15); }
+        .card-setup .card-icon     { background: rgba(139,92,246,0.15); }
 
         .card-body { flex: 1; }
         .card-number {
@@ -270,7 +279,10 @@
     <!-- 히어로 -->
     <div class="hero">
         <div class="hero-icon">🧱</div>
-        <h1>BrickSync <span>이렇게 사용해요!</span></h1>
+        <div class="hero-logo-wrap">
+            <img src="./assets/bslogo.png" class="hero-logo" alt="BrickSync">
+        </div>
+        <h1><span>이렇게 사용해요!</span></h1>
         <p>레고 허브와 포트나이트를 연결하는 BrickSync의<br>각 메뉴 기능을 소개합니다.</p>
     </div>
 
@@ -295,7 +307,7 @@
 
         <!-- 2. 학습단원 -->
         <div class="menu-card card-lessons">
-            <div class="card-icon">📚</div>
+            <div class="card-icon">📖</div>
             <div class="card-body">
                 <div class="card-number">Menu 02</div>
                 <div class="card-title">학습단원 (Lessons)</div>
@@ -322,12 +334,12 @@
             </div>
         </div>
 
-        <!-- 4. 워크스페이스 -->
+        <!-- 4. 시스템 연결 -->
         <div class="menu-card card-workspace">
-            <div class="card-icon">🔧</div>
+            <div class="card-icon">🖥️</div>
             <div class="card-body">
                 <div class="card-number">Menu 04</div>
-                <div class="card-title">워크스페이스 (Workspace)</div>
+                <div class="card-title">시스템 연결 (System Connection)</div>
                 <div class="card-desc">
                     레고 허브를 블루투스로 연결하고 직접 코딩하는 공간입니다.
                     허브의 센서 값, 모터 상태 등 <strong>실시간 작동 상태를 확인</strong>하며,
@@ -351,6 +363,30 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- BrickSync 기초 환경설정 섹션 -->
+    <div class="section-label">BrickSync 기초 환경설정</div>
+    <div class="cards-container">
+        <div class="menu-card card-setup">
+            <div class="card-icon">⚙️</div>
+            <div class="card-body">
+                <div class="card-number">Setup Guide</div>
+                <div class="card-title">BrickSync.exe 실행 및 기본 설정</div>
+                <div class="card-desc">
+                    <strong>BrickSync.exe</strong> 파일 하나로 모든 환경이 자동 구성됩니다.<br><br>
+                    🖱️ <strong>실행 방법</strong>: BrickSync.exe를 더블클릭하면 로컬 브릿지 서버가 자동으로 시작되고,
+                    Chrome 또는 Edge 브라우저에서 BrickSync 웹앱이 자동으로 열립니다.<br><br>
+                    🌐 <strong>브라우저 요구사항</strong>: Web Bluetooth API를 지원하는
+                    <strong>Chrome 또는 Edge</strong> 브라우저가 필요합니다. (Firefox·Safari 미지원)<br><br>
+                    🔵 <strong>허브 연결</strong>: 웹앱이 열리면 <strong>시스템 연결</strong> 메뉴에서
+                    레고 허브를 블루투스로 연결할 수 있습니다.<br><br>
+                    👤 <strong>계정 로그인</strong>: 학생·교사·학부모 계정으로 로그인하면
+                    역할에 맞는 대시보드와 기능이 활성화됩니다.
+                </div>
+                <span class="card-tag">별도 설치 불필요 · 원클릭 실행</span>
+            </div>
+        </div>
     </div>
 
     <!-- 허브 연결 빠른 가이드 -->
