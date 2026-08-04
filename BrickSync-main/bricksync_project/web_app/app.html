@@ -586,7 +586,7 @@
 
             const requestOptions = isElectron
                 ? {
-                    // Electron: 이름 접두사 필터 (서비스 UUID 필터 권한과 동일하게 GATT 접근 보장)
+                    // Electron: 이름 접두사 필터
                     filters: [
                         { namePrefix: 'LEGO' },
                         { namePrefix: 'Hub' },
@@ -596,9 +596,15 @@
                     optionalServices: [LEGO_HUB_SERVICE_ID, OPTIONAL_SERVICE_ID]
                   }
                 : {
-                    // 일반 브라우저: LEGO Hub 서비스 UUID로 필터링
-                    filters: [{ services: [LEGO_HUB_SERVICE_ID] }],
-                    optionalServices: [OPTIONAL_SERVICE_ID]
+                    // 일반 브라우저: 서비스 UUID + 이름 접두사 동시 필터 (어느 쪽이든 매칭)
+                    filters: [
+                        { services: [LEGO_HUB_SERVICE_ID] },
+                        { namePrefix: 'LEGO' },
+                        { namePrefix: 'Hub' },
+                        { namePrefix: 'SPIKE' },
+                        { namePrefix: 'Technic' }
+                    ],
+                    optionalServices: [LEGO_HUB_SERVICE_ID, OPTIONAL_SERVICE_ID]
                   };
 
             try {
