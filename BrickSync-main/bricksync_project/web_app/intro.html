@@ -97,6 +97,31 @@
             padding: 0 20px;
         }
 
+        /* ── 반응형 LEGO Fortnite 로고 오버레이 ── */
+        .fortnite-logo-overlay {
+            position: absolute;
+            /* 세로 중앙에서 약간 위 */
+            top: 50%;
+            transform: translate(-50%, -60%);
+            left: 50%;
+
+            /* 양쪽 여백 1cm씩, 최대 900px */
+            width: min(calc(100vw - 2cm), 900px);
+
+            /* 로고 영역 비율: 1920x1080 이미지에서 x=220~1750, y=170~520 */
+            /* 가로:세로 = 1530:350 ≈ 4.37:1 */
+            aspect-ratio: 4.37 / 1;
+
+            /* 배경 이미지를 로고 영역만 크롭 */
+            background-image: url('https://cdn2.unrealengine.com/lego-fortnite-social-1920x1080-68be5a5756df.jpg');
+            background-size: 125% auto;
+            background-position: 56% 23%;
+            background-repeat: no-repeat;
+
+            z-index: 5;
+            pointer-events: none;
+        }
+
         /* 타이틀 박스 (블러된 글래스 모피즘 효과) */
         /* .title-container {
             width: 100%;
@@ -248,6 +273,9 @@
     <!-- 둥둥 떠다니는 배경 장식 -->
     <div class="bg-circle circle-1"></div>
     <div class="bg-circle circle-2"></div>
+
+    <!-- 반응형 LEGO Fortnite 로고 (항상 양쪽 여백 1cm) -->
+    <div class="fortnite-logo-overlay"></div>
 
     <div class="content-wrapper">
         <!-- 타이틀 영역 -->
