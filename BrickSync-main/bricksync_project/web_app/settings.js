@@ -103,7 +103,7 @@
             btn_signup: "계정 만들기",
 
             // Workspace & Dashboard UI Keys
-            lbl_device_sync: "디바이스 동기화",
+            lbl_device_sync: "시스템 연결",
             lbl_code_injection: "코드 주입",
             lbl_system_check: "시스템 확인",
             lbl_local_server_connected: "로컬 서버(포트나이트 연동) 연결 완료",
@@ -268,7 +268,7 @@
             btn_signup: "Create Account",
 
             // Workspace & Dashboard UI Keys
-            lbl_device_sync: "Device Synchronization",
+            lbl_device_sync: "System Connection",
             lbl_code_injection: "Code Injection",
             lbl_system_check: "System Verification",
             lbl_local_server_connected: "Local Server (Fortnite Sync) Connected",
