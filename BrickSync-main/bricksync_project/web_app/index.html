@@ -1062,14 +1062,14 @@
                 } catch(e) {}
             }
 
-            // 이름 표시
+            // 이름 표시 - [역할] [이름] 순서 (예: 학생 이재학 / Student Cliff)
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const nameEl = document.getElementById('display-student-name');
             if (nameEl) {
-                const roleSuffix = currentLang === 'en'
-                    ? (role === 'teacher' ? ' Teacher' : role === 'parent' ? ' Parent' : ' Student')
-                    : (' ' + (role === 'teacher' ? '교사' : role === 'parent' ? '학부모' : '학생'));
-                nameEl.textContent = displayName + roleSuffix;
+                const rolePrefix = currentLang === 'en'
+                    ? (role === 'teacher' ? 'Teacher ' : role === 'parent' ? 'Parent ' : 'Student ')
+                    : (role === 'teacher' ? '교사 ' : role === 'parent' ? '학부모 ' : '학생 ');
+                nameEl.textContent = rolePrefix + displayName;
             }
 
             // 역할별 대시보드 메뉴 표시
