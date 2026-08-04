@@ -635,6 +635,74 @@
         }
 
         /* 🏆 코인 보상 진열대 스타일 */
+        /* ===== BrickSync 가이드 배너 ===== */
+        .guide-banner {
+            width: 100%;
+            background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 50%, #7c3aed 100%);
+            border-radius: 20px;
+            padding: 18px 24px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(109, 40, 217, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .guide-banner::before {
+            content: '';
+            position: absolute;
+            top: -40px; right: -40px;
+            width: 150px; height: 150px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 50%;
+        }
+        .guide-banner::after {
+            content: '';
+            position: absolute;
+            bottom: -30px; left: 30%;
+            width: 100px; height: 100px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .guide-banner:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(109, 40, 217, 0.55);
+        }
+        .guide-banner-icon {
+            font-size: 2.4rem;
+            animation: guide-pulse 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes guide-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+        }
+        .guide-banner-text { flex: 1; }
+        .guide-banner-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.3px;
+            margin-bottom: 3px;
+        }
+        .guide-banner-subtitle {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.75);
+            font-weight: 400;
+        }
+        .guide-banner-arrow {
+            font-size: 1.6rem;
+            color: rgba(255,255,255,0.8);
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+        .guide-banner:hover .guide-banner-arrow {
+            transform: translateX(5px);
+        }
+
         .reward-shelf-panel {
             width: 100%;
             background: rgba(255, 255, 255, 0.08);
@@ -835,17 +903,18 @@
 
             <!-- 홈 화면 뷰 -->
             <div id="view-home" style="width: 100%; display: flex; flex-direction: column;">
-                <!-- 🏆 코인 보상 진열대 영역 -->
-                <div class="reward-shelf-panel">
-                    <div class="shelf-title">
-                        <span>🏆 <strong data-i18n="lbl_coin_shelf">코인 보상 진열대</strong></span>
-                        <span class="shelf-subtitle" data-i18n="lbl_coin_shelf_subtitle">코딩 미션을 성공할 때마다 황금 코인이 진열대에 하나씩 추가됩니다!</span>
+
+                <!-- 📖 BrickSync 가이드 배너 -->
+                <div class="guide-banner" onclick="location.href='intro.html'">
+                    <div class="guide-banner-icon">📖</div>
+                    <div class="guide-banner-text">
+                        <div class="guide-banner-title" data-i18n="lbl_guide_banner_title">BrickSync 시작 가이드</div>
+                        <div class="guide-banner-subtitle" data-i18n="lbl_guide_banner_subtitle">BrickSync가 처음이실 가요? 연결 방법과 활용 방법을 확인하세요</div>
                     </div>
-                    <div class="shelf-slots" id="lobby-reward-shelf">
-                        <!-- JS에서 동적 로드 -->
-                    </div>
+                    <div class="guide-banner-arrow">›</div>
                 </div>
 
+                <!-- The Brick Island 배너 -->
                 <div class="banner-section">
                     <div class="banner-image-container">
                         <img src="./assets/fortnite_characters.png" class="banner-img" alt="Lego Fortnite Characters">
@@ -858,6 +927,17 @@
                             <span class="map-btn-code">Island Code : 7603-2493-0825</span>
                         </div>
                     </a>
+                </div>
+
+                <!-- 🏆 코인 보상 진열대 (배너와 My Projects 사이) -->
+                <div class="reward-shelf-panel">
+                    <div class="shelf-title">
+                        <span>🏆 <strong data-i18n="lbl_coin_shelf">코인 보상 진열대</strong></span>
+                        <span class="shelf-subtitle" data-i18n="lbl_coin_shelf_subtitle">코딩 미션을 성공할 때마다 황금 코인이 진열대에 하나씩 추가됩니다!</span>
+                    </div>
+                    <div class="shelf-slots" id="lobby-reward-shelf">
+                        <!-- JS에서 동적 로드 -->
+                    </div>
                 </div>
 
                 <!-- 가로선(디바이더) -->
