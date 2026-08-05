@@ -83,6 +83,22 @@ input.error{border-color:#f43f5e}
 .toast.success{border-color:#10b981;color:#6ee7b7}
 .toast.error{border-color:#f43f5e;color:#fda4af}
 
+
+/* 모바일: 카드가 화면을 꽉 채우도록 */
+@media (max-width: 520px) {
+  body { padding: 10px; align-items: flex-start; padding-top: 16px; }
+  .card { border-radius: 18px; padding: 28px 20px; }
+}
+
+/* bslogo 이미지 */
+.brand-logo {
+  display: block;
+  margin: 0 auto 6px;
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+}
+
 /* 패널 전환 */
 .panel{display:none}.panel.active{display:block}
 </style>
@@ -96,7 +112,7 @@ input.error{border-color:#f43f5e}
   </div>
 
   <div class="brand">
-    <h1>🧱 BrickSync</h1>
+    <img src="./assets/bslogo.png" alt="BrickSync" class="brand-logo">
     <p data-i18n="login_slogan">AI 코딩 및 포트나이트 통합 플랫폼</p>
   </div>
 
