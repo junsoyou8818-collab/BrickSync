@@ -639,10 +639,10 @@
 
         .top-logo img.bricksync-logo {
             height: auto;
-            /* 대시보드 위 공간(9vh)에 맞게, 최대 130px */
-            max-height: clamp(40px, calc(9vh - 1cm), 130px);
-            /* 화면 너비의 80%, 최대 300px */
-            max-width: min(300px, 80vw);
+            /* 1.5배 크기 (130px→195px), 대시보드 위 공간의 65% 사용 → 위아래 17.5%씩 간격 자동 유지 */
+            max-height: clamp(60px, calc(9vh * 0.65), 195px);
+            /* 1.5배 너비 (300px→450px) */
+            max-width: min(450px, 80vw);
         }
 
         /* 🏆 코인 보상 진열대 스타일 */
