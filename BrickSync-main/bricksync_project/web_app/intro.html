@@ -90,9 +90,11 @@
         /* ── 반응형 IntroLogo ── */
         .intro-logo {
             position: absolute;
-            top: 50%;
+            /* svh = URL바 포함 모바일 실제 화면 기준, 정확한 중앙 */
+            top: 50vh;
+            top: 50svh; /* 모던 모바일 브라우저 우선 적용 */
             left: 50%;
-            transform: translate(-50%, -60%);
+            transform: translate(-50%, -50%);
 
             /* 양쪽 여백 1cm씩, 최대 800px */
             width: min(calc(100vw - 2cm), 800px);
@@ -100,7 +102,6 @@
 
             z-index: 5;
             pointer-events: none;
-            /* 로고 드롭섀도 */
             filter: drop-shadow(0 4px 24px rgba(0,0,0,0.45));
         }
 
