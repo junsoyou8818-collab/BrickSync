@@ -93,10 +93,13 @@ input.error{border-color:#f43f5e}
 /* bslogo 이미지 */
 .brand-logo {
   display: block;
-  margin: 0 auto 6px;
+  margin: 0 auto 8px;
   width: 100%;
-  max-width: 240px;
+  max-width: 280px;   /* PC: 카드(460px) 대비 적정 크기 */
   height: auto;
+}
+@media (max-width: 520px) {
+  .brand-logo { max-width: 200px; }  /* 모바일: 조금 더 작게 */
 }
 
 /* 패널 전환 */
