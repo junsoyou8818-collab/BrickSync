@@ -127,7 +127,8 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 32px;
-            align-items: start;
+            /* 양 컬럼 높이를 동일하게 → 밑변 정렬 */
+            align-items: stretch;
         }
 
         /* 섹션 라벨 */
@@ -192,18 +193,24 @@
             border: 1px solid rgba(139,92,246,0.3);
         }
 
+        /* ── 오른쪽 메뉴 컬럼 ── */
+        .menu-col {
+            display: flex;
+            flex-direction: column;
+        }
+
         /* ── 탭 네비게이션: 한 줄 고정 ── */
         .tab-nav {
             display: flex;
             gap: 6px;
             flex-wrap: nowrap;
-            overflow-x: auto;
             margin-bottom: 16px;
+            /* overflow 제거 - 탭이 가득 채움 */
             scrollbar-width: none;
         }
         .tab-nav::-webkit-scrollbar { display: none; }
         .tab-btn {
-            display: flex; align-items: center; gap: 7px;
+            display: flex; align-items: center; justify-content: center; gap: 7px;
             background: rgba(255,255,255,0.07);
             border: 1px solid rgba(255,255,255,0.12);
             color: rgba(255,255,255,0.65);
@@ -212,6 +219,8 @@
             font-family: 'Outfit', sans-serif;
             cursor: pointer; white-space: nowrap;
             transition: all 0.2s;
+            /* 4개 탭이 동일 너비로 menu-card 우측변까지 꽉 채움 */
+            flex: 1;
         }
         .tab-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
         .tab-btn.active {
@@ -222,13 +231,16 @@
         .tab-btn i { width: 17px; height: 17px; flex-shrink: 0; }
 
         .menu-panel { display: none; }
-        .menu-panel.active { display: block; }
+        /* active 패널이 남은 높이를 채워 왼쪽 카드 밑변과 정렬 */
+        .menu-panel.active { display: flex; flex-direction: column; flex: 1; }
 
         .menu-card {
             background: rgba(255,255,255,0.07);
             border: 1px solid rgba(255,255,255,0.12);
             border-radius: 22px; padding: 30px 34px;
             position: relative; overflow: hidden;
+            /* 패널이 flex:1이면 카드도 늘어나서 높이 맞춤 */
+            flex: 1;
         }
         .menu-card::before {
             content: '';
@@ -313,7 +325,7 @@
         </div>
 
         <!-- 오른쪽: 메뉴 설명 -->
-        <div>
+        <div class="menu-col">
             <div class="section-label">📋 메뉴 기능 안내</div>
             <div class="tab-nav">
                 <button class="tab-btn active" onclick="switchTab(this,'home')">
