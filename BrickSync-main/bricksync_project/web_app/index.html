@@ -189,6 +189,8 @@
             overflow: hidden;
             position: relative;
             z-index: 10;
+            /* 박스 1cm 아래로 */
+            margin-top: 1cm;
 
             /* 대시보드 부드러운 등장 애니메이션 */
             opacity: 0;
@@ -639,10 +641,10 @@
 
         .top-logo img.bricksync-logo {
             height: auto;
-            /* 1.5배 크기 (130px→195px), 대시보드 위 공간의 65% 사용 → 위아래 17.5%씩 간격 자동 유지 */
-            max-height: clamp(60px, calc(9vh * 0.65), 195px);
-            /* 1.5배 너비 (300px→450px) */
-            max-width: min(450px, 80vw);
+            /* 1.5배 크기 (195px→1.5배=292px), 대시보드 위 공간의 97.5% 기준 */
+            max-height: clamp(90px, calc(9vh * 0.975), 292px);
+            /* 1.5배 너비 (450px→675px) */
+            max-width: min(675px, 80vw);
         }
 
         /* 🏆 코인 보상 진열대 스타일 */
@@ -941,7 +943,7 @@
                         <img src="./assets/brick_siland.jpg" class="map-btn-img" alt="The Brick Island">
                         <div class="map-btn-overlay">
                             <span class="map-btn-label">THE BRICK ISLAND</span>
-                            <span class="map-btn-subtitle">지금 플레이하세요!</span>
+                            <span class="map-btn-subtitle">지금 플레이<wbr>하세요!</span>
                         </div>
                     </a>
                 </div>
