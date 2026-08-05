@@ -629,14 +629,12 @@
         /* 전체화면 좌측 상단 레고 포트나이트 공식 로고 */
         .top-logo {
             position: absolute;
-            /* 상단 여백 1cm 고정 */
-            top: 1cm;
-            /* 대시보드 왼쪽 엣지(16vw) 바로 앞측 = 14vw */
-            left: 14vw;
-            transform: translateX(-50%);
+            /* 대시보드 위 공간(9vh) 세로 중앙 = 4.5vh */
+            top: 4.5vh;
+            /* 화면 좌우 정중앙 */
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 100;
-            /* 로고 아래 1cm 간격 고정 */
-            margin-bottom: 1cm;
         }
 
         .top-logo img.bricksync-logo {
