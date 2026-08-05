@@ -357,12 +357,15 @@
             flex-direction: column;
             align-items: flex-start;
             justify-content: center;
-            padding: 0 36px;
+            /* 오른쪽 흔색 텍스트와 겨치지 않도록 왜쪽 45%만 사용 */
+            width: 45%;
+            padding: 0 clamp(12px, 3%, 36px);
             transition: opacity 0.3s;
         }
         .map-btn-label {
             color: #fff;
-            font-size: 2.2rem;
+            /* 화면 폭에 따라 1rem~2.2rem 사이 자동 조절 */
+            font-size: clamp(0.85rem, 2.5vw, 2.2rem);
             font-weight: 800;
             letter-spacing: -0.3px;
             text-shadow: 0 2px 12px rgba(0,0,0,0.7);
@@ -371,22 +374,15 @@
         }
         .map-btn-subtitle {
             color: #fff;
-            font-size: 2.2rem;
+            /* 화면 폭에 따라 1rem~2.2rem 사이 자동 조절 */
+            font-size: clamp(0.85rem, 2.5vw, 2.2rem);
             font-weight: 800;
             letter-spacing: -0.3px;
             text-shadow: 0 2px 12px rgba(0,0,0,0.7);
-            margin-bottom: 12px;
+            margin-bottom: 0;
             line-height: 1.1;
         }
-        .map-btn-code {
-            color: rgba(255,255,255,0.95);
-            font-size: 1.56rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            background: rgba(79,70,229,0.9);
-            padding: 8px 22px;
-            border-radius: 30px;
-        }
+        /* .map-btn-code 삭제됨 - 보라색 타원 제거 */
 
         /* 2) 섹션 구분 얇은 실선 */
         .divider {
@@ -945,7 +941,6 @@
                         <div class="map-btn-overlay">
                             <span class="map-btn-label">THE BRICK ISLAND</span>
                             <span class="map-btn-subtitle">지금 플레이하세요!</span>
-                            <span class="map-btn-code">Island Code : 7603-2493-0825</span>
                         </div>
                     </a>
                 </div>
