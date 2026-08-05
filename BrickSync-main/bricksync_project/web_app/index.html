@@ -631,8 +631,8 @@
         /* 전체화면 좌측 상단 레고 포트나이트 공식 로고 */
         .top-logo {
             position: absolute;
-            /* 대시보드 위 공간(9vh) 세로 중앙 = 4.5vh */
-            top: 4.5vh;
+            /* 대시보드 위 공간 = 9vh + 1cm(margin-top) → 중앙 = (9vh+1cm)/2 = 4.5vh+0.5cm */
+            top: calc(4.5vh + 0.5cm);
             /* 화면 좌우 정중앙 */
             left: 50%;
             transform: translate(-50%, -50%);
@@ -641,9 +641,9 @@
 
         .top-logo img.bricksync-logo {
             height: auto;
-            /* 1.5배 크기 (195px→1.5배=292px), 대시보드 위 공간의 97.5% 기준 */
-            max-height: clamp(90px, calc(9vh * 0.975), 292px);
-            /* 1.5배 너비 (450px→675px) */
+            /* 위 공간(9vh+1cm)에서 위아래 0.5cm씩 → 로고 높이 = 9vh */
+            max-height: clamp(50px, 9vh, 292px);
+            /* 화면 너비의 80%, 최대 675px */
             max-width: min(675px, 80vw);
         }
 
