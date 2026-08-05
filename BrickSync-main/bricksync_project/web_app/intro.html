@@ -25,7 +25,7 @@
             /* 로딩바를 화면 하단부에 배치 */
             align-items: center;
             /* 전달해주신 레고 포트나이트 이미지를 꽉 차게 배경으로 설정 */
-            background-image: url('https://cdn2.unrealengine.com/lego-fortnite-social-1920x1080-68be5a5756df.jpg');
+            background-image: url('./assets/intro.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -87,6 +87,23 @@
             }
         }
 
+        /* ── 반응형 IntroLogo ── */
+        .intro-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -60%);
+
+            /* 양쪽 여백 1cm씩, 최대 800px */
+            width: min(calc(100vw - 2cm), 800px);
+            height: auto;
+
+            z-index: 5;
+            pointer-events: none;
+            /* 로고 드롭섀도 */
+            filter: drop-shadow(0 4px 24px rgba(0,0,0,0.45));
+        }
+
         .content-wrapper {
             z-index: 10;
             display: flex;
@@ -95,31 +112,6 @@
             width: 100%;
             max-width: 600px;
             padding: 0 20px;
-        }
-
-        /* ── 반응형 LEGO Fortnite 로고 오버레이 ── */
-        .fortnite-logo-overlay {
-            position: absolute;
-            /* 세로 중앙에서 약간 위 */
-            top: 50%;
-            transform: translate(-50%, -60%);
-            left: 50%;
-
-            /* 양쪽 여백 1cm씩, 최대 900px */
-            width: min(calc(100vw - 2cm), 900px);
-
-            /* 로고 영역 비율: 1920x1080 이미지에서 x=220~1750, y=170~520 */
-            /* 가로:세로 = 1530:350 ≈ 4.37:1 */
-            aspect-ratio: 4.37 / 1;
-
-            /* 배경 이미지를 로고 영역만 크롭 */
-            background-image: url('https://cdn2.unrealengine.com/lego-fortnite-social-1920x1080-68be5a5756df.jpg');
-            background-size: 125% auto;
-            background-position: 56% 23%;
-            background-repeat: no-repeat;
-
-            z-index: 5;
-            pointer-events: none;
         }
 
         /* 타이틀 박스 (블러된 글래스 모피즘 효과) */
@@ -274,8 +266,8 @@
     <div class="bg-circle circle-1"></div>
     <div class="bg-circle circle-2"></div>
 
-    <!-- 반응형 LEGO Fortnite 로고 (항상 양쪽 여백 1cm) -->
-    <div class="fortnite-logo-overlay"></div>
+    <!-- 반응형 인트로 로고 (양쪽 1cm 여백, 화면 크기 맞춤형) -->
+    <img class="intro-logo" src="./assets/IntroLogo.webp" alt="LEGO Fortnite">
 
     <div class="content-wrapper">
         <!-- 타이틀 영역 -->
