@@ -633,16 +633,19 @@
         /* 전체화면 좌측 상단 레고 포트나이트 공식 로고 */
         .top-logo {
             position: absolute;
-            top: 18px;
-            left: 18px;
+            /* 위쪽 2cm 여백 고정 */
+            top: 2cm;
+            /* 왼쪽 퍼플 영역(16vw) 중앙 = 8vw */
+            left: 8vw;
+            transform: translateX(-50%);
             z-index: 100;
         }
 
         .top-logo img.bricksync-logo {
             height: auto;
-            max-height: 70px;
-            /* 대시보드 왼쪽 여백(16vw) - 로고 왼쪽간격(18px) - 로고-박스 사이 간격(18px) */
-            max-width: calc(16vw - 36px);
+            max-height: 100px;
+            /* 왼쪽 2cm(화면 엘지) + 2cm(박스 여백) = 4cm 제외한 나머지 너비 */
+            max-width: calc(16vw - 4cm);
         }
 
         /* 🏆 코인 보상 진열대 스타일 */
