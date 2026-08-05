@@ -325,7 +325,8 @@
                 <button class="tab-btn" onclick="switchTab(this,'ai')">
                     <i data-lucide="bot"></i> AI 학습단원
                 </button>
-                <button class="tab-btn" onclick="switchTab(this,'system')">
+                <!-- 시스템 연결 탭 - 숨김 처리 (index.html과 동일하게, 코드 유지) -->
+                <button class="tab-btn" onclick="switchTab(this,'system')" style="display:none;" id="guide-tab-system">
                     <i data-lucide="monitor"></i> 시스템 연결
                 </button>
                 <button class="tab-btn" onclick="switchTab(this,'projects')">
@@ -372,7 +373,8 @@
                 </div>
             </div>
 
-            <div class="menu-panel panel-system" id="mpanel-system">
+            <!-- 시스템 연결 패널 - 숨김 처리 (코드 유지) -->
+            <div class="menu-panel panel-system" id="mpanel-system" style="display:none !important;">
                 <div class="menu-card">
                     <div class="menu-tag">Menu 04</div>
                     <div class="menu-title">시스템 연결 (System Connection)</div>
