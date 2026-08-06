@@ -5788,8 +5788,7 @@ print("BrickSync Sandbox Run")
                                 : ['몬스터 (Monster)', '보 (Paper)', '가위 (Scissors)', '배경 (None)'];
                             icons = ['fa-dragon', 'fa-hand-paper', 'fa-hand-scissors', 'fa-ban'];
                         }
-                            icons = ['fa-dragon', 'fa-hand-paper', 'fa-hand-scissors', 'fa-ban'];
-                        }
+                        // ↑ [BUGFIX] 중복 icons 할당(5791)과 여분의 }(5792) 제거 → 구문 오류 수정
 
                         currentGestureLabel.innerHTML = `<i class="fas ${icons[detectedGesture]}"></i> ${labels[detectedGesture]} (${Math.round(result.confidences[result.label] * 100)}%)`;
 
