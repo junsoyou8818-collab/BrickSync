@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['server.py'],
+    ['C:\\Users\\Mons\\Documents\\GitHub\\BrickSync\\BrickSync-main\\bricksync_project\\bridge_server\\server.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -29,7 +29,7 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
