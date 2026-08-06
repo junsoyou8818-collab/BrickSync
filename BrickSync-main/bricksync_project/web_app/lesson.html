@@ -3905,20 +3905,21 @@ except:
                                 currentBleDelay += 500;
                                 break;
                             case 'motor_cw':
-                                // 1회전 = 1200ms (파워 40, 부하 상태 기준 ~50RPM)
-                                // 이전 1000ms는 실제 회전수보다 부족해 언더슛 발생
+                                // RunForDegrees: LEGO 인코더 피드백으로 정확한 각도 제어
+                                // 첫 번째 명령에 전체 회전 각도 전달, 이후 명령은 포트나이트 신호 전용
+                                // 1회전당 2000ms 대기 (부하 상황에서도 완료 보장)
                                 for (let i = 0; i < timeVal; i++) {
-                                    bleQueue.push({ action: 'motor_cw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 1200;
+                                    bleQueue.push({ action: 'motor_cw', speed: bleGlobalMotorSpeed, delay: currentBleDelay, totalDegrees: i === 0 ? timeVal * 360 : 0 });
+                                    currentBleDelay += 2000;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 800;
                                 break;
                             case 'motor_ccw':
-                                // 1회전 = 1200ms (파워 40, 부하 상태 기준 ~50RPM)
+                                // RunForDegrees CCW: 음수 속도로 반시계 방향 정확 제어
                                 for (let i = 0; i < timeVal; i++) {
-                                    bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 1200;
+                                    bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay, totalDegrees: i === 0 ? timeVal * 360 : 0 });
+                                    currentBleDelay += 2000;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 800;
@@ -4006,13 +4007,30 @@ except:
                                     } catch (e) { }
                                     let speedInt = Math.round(cmd.speed);
                                     let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
-                                    for (let p = 0; p < 2; p++) {
-                                        const dev = window.parent.hubDevices ? window.parent.hubDevices[p] : undefined;
-                                        if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
-                                        await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(e => { });
-                                        await new Promise(r => setTimeout(r, 60));
-                                        break; // 전문가 패치: 파란색(단일 모터) 블록은 가장 먼저 인식된 모터 1개만 돌리고 루프 탈출
+                                    if (cmd.totalDegrees > 0) {
+                                        // RunForDegrees (0x0D): LEGO 인코더로 정확한 각도 제어
+                                        // 부하나 속도와 무관하게 정확히 N회전 보장
+                                        const deg = cmd.totalDegrees;
+                                        const d0 = deg & 0xFF, d1 = (deg >> 8) & 0xFF, d2 = (deg >> 16) & 0xFF, d3 = (deg >> 24) & 0xFF;
+                                        for (let p = 0; p < 2; p++) {
+                                            const dev = window.parent.hubDevices ? window.parent.hubDevices[p] : undefined;
+                                            if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
+                                            // [14, 0, 0x81, port, 0x11, 0x0D, deg0-3, speed, maxPower, endState=Brake, profile]
+                                            await window.parent.writeToHub(new Uint8Array([14, 0, 0x81, p, 0x11, 0x0D, d0, d1, d2, d3, speedHex, 100, 3, 0])).catch(e => { });
+                                            await new Promise(r => setTimeout(r, 60));
+                                            break;
+                                        }
+                                    } else if (cmd.totalDegrees === undefined) {
+                                        // 기존 StartPower (정지 명령 등)
+                                        for (let p = 0; p < 2; p++) {
+                                            const dev = window.parent.hubDevices ? window.parent.hubDevices[p] : undefined;
+                                            if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
+                                            await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(e => { });
+                                            await new Promise(r => setTimeout(r, 60));
+                                            break; // 전문가 패치: 파란색(단일 모터) 블록은 가장 먼저 인식된 모터 1개만 돌리고 루프 탈출
+                                        }
                                     }
+                                    // totalDegrees === 0: 포트나이트 신호만 (이미 RunForDegrees 진행 중, BLE 스킵)
                                 } else if (cmd.action === 'motor_speed_set') {
                                     try { window.parent.sendWebSocketAction({ action: 'SPEED_' + cmd.speedLevel }); } catch (e) { }
                                 } else if (cmd.action.startsWith('car_') && cmd.action !== 'car_speed_set' && cmd.action !== 'car_stop') {
