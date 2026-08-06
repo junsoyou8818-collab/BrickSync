@@ -21,10 +21,11 @@ SERVER_PY = r"C:\Users\Mons\Documents\GitHub\BrickSync\BrickSync-main\bricksync_
 BRICKSYNC_URL = "https://bricksync.monsteratech.com"
 
 # Chrome 설치 경로 목록 (우선순위 순)
+# C:\Program Files 를 최우선으로 (이 PC에서 발견된 경로)
 CHROME_PATHS = [
-    os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+    os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
 ]
 
 # ── 유틸리티 ────────────────────────────────────────────────────────────
@@ -73,11 +74,13 @@ def open_browser_when_ready():
 
     chrome = find_chrome()
     if chrome:
-        # Chrome 발견 → Chrome으로 강제 실행
-        subprocess.Popen(
-            [chrome, BRICKSYNC_URL],
-            creationflags=subprocess.CREATE_NO_WINDOW,
-        )
+        try:
+            # ✅ Chrome은 GUI 앱이므로 CREATE_NO_WINDOW 플래그 없이 실행
+            # CREATE_NO_WINDOW는 콘솔 앱 전용 → Chrome에 쓰면 일부 PC에서 실행 차단됨
+            subprocess.Popen([chrome, BRICKSYNC_URL])
+        except Exception:
+            # Chrome 실행 실패 시 기본 브라우저로 폴백
+            webbrowser.open(BRICKSYNC_URL)
     else:
         # Chrome 없음 → 기본 브라우저 사용 (폴백)
         webbrowser.open(BRICKSYNC_URL)
