@@ -22,7 +22,18 @@ except ImportError:
     print("pydirectinput is not installed. Run: pip install pydirectinput")
     pass
 
-web_app_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "web_app")
+import sys
+
+# PyInstaller exe 여부에 따라 web_app 경로 결정
+# 설치 후: resources/bridge/server.exe → web_app: resources/web_app/
+if getattr(sys, 'frozen', False):
+    _BASE_DIR = os.path.dirname(sys.executable)
+else:
+    _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+web_app_dir = os.path.join(_BASE_DIR, "..", "web_app")
+
+
 
 def focus_fortnite():
     try:
