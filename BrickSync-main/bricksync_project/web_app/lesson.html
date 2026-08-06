@@ -3905,17 +3905,20 @@ except:
                                 currentBleDelay += 500;
                                 break;
                             case 'motor_cw':
+                                // 1회전 = 1200ms (파워 40, 부하 상태 기준 ~50RPM)
+                                // 이전 1000ms는 실제 회전수보다 부족해 언더슛 발생
                                 for (let i = 0; i < timeVal; i++) {
                                     bleQueue.push({ action: 'motor_cw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 1000;
+                                    currentBleDelay += 1200;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 800;
                                 break;
                             case 'motor_ccw':
+                                // 1회전 = 1200ms (파워 40, 부하 상태 기준 ~50RPM)
                                 for (let i = 0; i < timeVal; i++) {
                                     bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 1000;
+                                    currentBleDelay += 1200;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 800;
