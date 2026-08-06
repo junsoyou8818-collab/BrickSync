@@ -117,6 +117,27 @@ def release_all_steering_keys():
     safe_key_up('o')
 
 async def handle_websocket(request):
+    # ─────────────────────────────────────────────────────────────────────
+    # Chrome Private Network Access (PNA) Preflight 처리
+    # HTTPS 페이지에서 ws://127.0.0.1 접속 시, Chrome이 먼저 일반 GET 요청을
+    # Access-Control-Request-Private-Network: true 헤더와 함께 전송함.
+    # 이 요청에 Access-Control-Allow-Private-Network: true 로 응답해야
+    # 이후 실제 WebSocket 업그레이드 요청이 허용됨.
+    # ─────────────────────────────────────────────────────────────────────
+    if request.headers.get('Access-Control-Request-Private-Network') == 'true':
+        origin = request.headers.get('Origin', '*')
+        print(f"[PNA] Chrome Private Network Access preflight 수신 → 승인 응답 (Origin: {origin})")
+        return web.Response(
+            status=200,
+            headers={
+                'Access-Control-Allow-Origin': origin,
+                'Access-Control-Allow-Private-Network': 'true',
+                'Access-Control-Allow-Methods': 'GET',
+                'Access-Control-Allow-Headers': 'Upgrade, Connection',
+                'Vary': 'Origin',
+            }
+        )
+
     ws = web.WebSocketResponse()
     await ws.prepare(request)
     print("웹브라우저(브릭싱크)가 연결되었습니다!")
@@ -254,8 +275,29 @@ async def handle_websocket(request):
 
 @web.middleware
 async def no_cache_middleware(request, handler):
+    # CORS OPTIONS preflight 처리 (Mixed Content 우회 포함)
+    if request.method == 'OPTIONS':
+        origin = request.headers.get('Origin', '*')
+        return web.Response(
+            status=200,
+            headers={
+                'Access-Control-Allow-Origin': origin,
+                'Access-Control-Allow-Private-Network': 'true',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers': '*',
+            }
+        )
+
     try:
         response = await handler(request)
+        origin = request.headers.get('Origin', '*')
+        # Chrome Private Network Access + CORS 허용 헤더 (HTTPS → localhost WebSocket 연결 허용)
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Private-Network'] = 'true'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+        response.headers['Vary'] = 'Origin'
+        # 캐시 비활성화
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '0'
