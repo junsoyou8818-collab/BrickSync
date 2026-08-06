@@ -313,9 +313,18 @@ async def index_handler(request):
 
 def init_app():
     app = web.Application(middlewares=[no_cache_middleware])
+    # WebSocket 엔드포인트 (항상 등록 - 포트나이트 연동 핵심)
     app.router.add_get('/ws', handle_websocket)
-    app.router.add_get('/', index_handler)
-    app.router.add_static('/', web_app_dir)
+    # web_app 폴더가 있을 때만 정적 파일 서빙 등록
+    # BrickSync.exe로 다른 PC에서 실행 시 web_app 폴더가 없어도 정상 동작
+    # (웹앱은 https://bricksync.monsteratech.com 에서 Cloudflare로 서빙됨)
+    _web_app_resolved = os.path.realpath(web_app_dir)
+    if os.path.isdir(_web_app_resolved):
+        app.router.add_get('/', index_handler)
+        app.router.add_static('/', web_app_dir)
+        print(f"[SERVER] 로컬 웹앱 서빙 활성화: {_web_app_resolved}")
+    else:
+        print(f"[SERVER] 웹앱 폴더 없음 → 클라우드 모드 (WebSocket only): ws://127.0.0.1:8000/ws")
     return app
 
 if __name__ == "__main__":
