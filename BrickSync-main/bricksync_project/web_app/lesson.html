@@ -5291,7 +5291,9 @@ except:
         });
 
         // --- Workspace Auto-Save / Auto-Load System ---
+        let _isLoadingWorkspace = false;
         function saveWorkspace() {
+            if (_isLoadingWorkspace) return; // 로드 중 저장 차단 (경쟁조건 방지)
             if (!unit) return;
             const workspaceArea = document.getElementById('workspaceArea');
             if (!workspaceArea) return;
@@ -5387,6 +5389,7 @@ except:
 
         async function loadWorkspace() {
             if (!unit) return;
+            _isLoadingWorkspace = true;  // 로드 시작 신호
             const projectId = _bsStudentName + '_project_unit_' + unit;
             const cloudDocId = 'unit_' + unit;
 
@@ -5504,6 +5507,8 @@ except:
                 });
             } catch (e) {
                 console.error("Workspace restore error:", e);
+            } finally {
+                _isLoadingWorkspace = false;  // 로드 완료
             }
         }
 

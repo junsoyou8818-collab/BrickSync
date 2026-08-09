@@ -4895,7 +4895,9 @@ print("BrickSync Sandbox Run")
         }
 
         // --- Workspace Auto-Save / Auto-Load System for AI ---
+        let _isLoadingWorkspace = false;
         function saveWorkspace() {
+            if (_isLoadingWorkspace) return; // 로드 중 저장 차단 (경쟁조건 방지)
             if (!unit) return;
             const workspaceArea = document.getElementById('workspaceArea');
             if (!workspaceArea) return;
@@ -4999,6 +5001,7 @@ print("BrickSync Sandbox Run")
 
         async function loadWorkspace() {
             if (!unit) return;
+            _isLoadingWorkspace = true;  // 로드 시작
             const projectId = _bsStudentName + '_project_ai_' + unit;
             const cloudDocId = 'ai_' + unit;
 
@@ -5118,6 +5121,8 @@ print("BrickSync Sandbox Run")
                 });
             } catch (e) {
                 console.error("Workspace restore error:", e);
+            } finally {
+                _isLoadingWorkspace = false;  // 로드 완료
             }
         }
 
