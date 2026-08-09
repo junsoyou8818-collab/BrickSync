@@ -4677,9 +4677,9 @@ except:
                 document.getElementById('missionStatusBar').style.display = 'flex';
                 updateStatusBarText();
 
-                // Show/hide status elements based on isMissionActive
-                document.getElementById('m-progress-container').style.display = isMissionActive ? 'flex' : 'none';
-                document.getElementById('btn-check-tasks').style.display = isMissionActive ? 'inline-flex' : 'none';
+                // Show/hide status elements (always show progress, check tasks, and try mission buttons)
+                document.getElementById('m-progress-container').style.display = 'flex';
+                document.getElementById('btn-check-tasks').style.display = 'inline-flex';
                 document.getElementById('btn-go-mission').style.display = 'inline-flex';
 
                 // 퍼센티지 재계산 및 과제 리스트 렌더링용
