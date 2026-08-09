@@ -4515,9 +4515,9 @@ except:
         const themeDescriptionsEn = {
             '1': 'Wait 5 seconds, move forward 3 times, turn left once, and move backward 2 times.',
             '2': 'Wait 5 seconds, run right rotation 3 times, left rotation 3 times.',
-            '3': 'Rotate the Ferris Wheel | Wait 5 seconds, rotate the motor right 3 times and left 2 times to operate the Ferris Wheel.',
+            '3': 'Wait 5 seconds, rotate the motor right 3 times and left 2 times.',
             '4': 'Wait 5 seconds, move forward 4 times, turn right once, and move forward 2 times.',
-            '5': 'Turn on red light for 2 seconds, then change lights to yellow and green in order.'
+            '5': 'Make the red light turn on after waiting 2 seconds.'
         };
 
         const missionDataAll = {
@@ -4597,16 +4597,17 @@ except:
                     ]
                 },
                 '3': {
-                    badge: 'STAGE 3', title: 'Safely operate the Ferris Wheel with 3 right turns and 2 left turns after waiting 5 seconds.', desc: 'Use motor rotation blocks to safely operate the Ferris Wheel with 3 right turns and 2 left turns.',
+                    badge: 'STAGE 3', title: 'Rotate the Ferris Wheel', desc: 'Wait 5 seconds, rotate the motor right 3 times and left 2 times.',
                     pinCode: '5019',
                     tasks: [
                         { id: 'start', text: 'Connect Play (Start) block' },
+                        { id: 'flow_wait_5', text: 'Wait 5 seconds' },
                         { id: 'motor_cw', text: 'Run right rotation 3 times' },
                         { id: 'motor_ccw', text: 'Run left rotation 2 times' }
                     ]
                 },
                 '4': {
-                    badge: 'STAGE 4', title: 'Build an exploration car', desc: 'Wait 5 seconds, move forward 4 times, turn right 1 time, and move forward 2 times.',
+                    badge: 'STAGE 4', title: 'Ride a Cave Car and Travel', desc: 'Wait 5 seconds, move forward 4 times, turn right 1 time, and move forward 2 times.',
                     pinCode: '3370',
                     tasks: [
                         { id: 'start', text: 'Connect Play (Start) block' },
@@ -4617,12 +4618,12 @@ except:
                     ]
                 },
                 '5': {
-                    badge: 'STAGE 5', title: 'Build a colorful light gate', desc: 'Make the red light turn on after 2 seconds.',
-                    pinCode: '5019',
+                    badge: 'STAGE 5', title: 'Ride a Cave Car and Travel', desc: 'Make the red light turn on after waiting 2 seconds.',
+                    pinCode: '9428',
                     tasks: [
                         { id: 'start', text: 'Connect Play (Start) block' },
                         { id: 'flow_wait', text: 'Connect Wait block (2 seconds)' },
-                        { id: 'matrix_pixel_red', text: 'Connect Red Light block' }
+                        { id: 'matrix_pixel_red', text: 'Connect Red Light' }
                     ]
                 }
             }

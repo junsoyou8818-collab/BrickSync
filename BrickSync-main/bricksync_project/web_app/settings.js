@@ -329,7 +329,7 @@
             lesson_1: "1. Launch the exploration boat",
             lesson_2: "2. Explore the sea with an underwater submarine",
             lesson_3: "3. Rotate the Ferris Wheel",
-            lesson_4: "4. Build an exploration car",
+            lesson_4: "4. Ride a cave car and travel",
             lesson_5: "5. Ride a cave car and travel",
 
             ai_lesson_1: "6. RPS Gesture-Controlled Cabin Roof (Open/Close)",
