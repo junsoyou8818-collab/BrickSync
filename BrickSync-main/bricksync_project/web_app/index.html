@@ -959,7 +959,7 @@
                     <div class="banner-image-container">
                         <img src="./assets/fortnite_characters.png" class="banner-img" alt="Lego Fortnite Characters">
                     </div>
-                    <a class="map-btn" href="https://www.fortnite.com/play/island/7603-2493-0825" target="_blank" rel="noopener" title="The Brick Island - 포트나이트 맵 접속">
+                    <a class="map-btn" href="https://www.fortnite.com/play/island/7603-2493-0825" onclick="openFortniteMap(event)" target="_blank" rel="noopener" title="The Brick Island - 포트나이트 맵 접속">
                         <img src="./assets/brick_siland.jpg" class="map-btn-img" alt="The Brick Island">
                         <div class="map-btn-overlay">
                             <span class="map-btn-subtitle" data-i18n="lbl_map_play_now">지금 플레이하세요!</span>
@@ -1031,6 +1031,16 @@
 
     <!-- 뷰 전환 및 프로젝트 렌더링 스크립트 -->
     <script>
+        function openFortniteMap(e) {
+            if (e) e.preventDefault();
+            const lang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = lang === 'en';
+            const targetUrl = isEn 
+                ? 'https://www.fortnite.com/en-US/play/island/7603-2493-0825' 
+                : 'https://www.fortnite.com/ko/play/island/7603-2493-0825';
+            window.open(targetUrl, '_blank', 'noopener');
+        }
+
         async function goToRecentProject() {
             const lang = localStorage.getItem('bricksync_lang') || 'ko';
 
