@@ -169,7 +169,14 @@
 
             ai_lesson_1: "6. 가위, 바위, 보로 여닫는 오두막 지붕",
             ai_lesson_2: "7. 몬스터를 보여줘! 경보 알림켜기.",
-            ai_lesson_3: "8. 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네"
+            ai_lesson_3: "8. 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네",
+
+            // Modal & Workspace UI
+            lbl_required_tasks: "📋 미션 달성 과제",
+            btn_try_mission: "미션 도전하기 🚀",
+            btn_check_tasks: "미션 과제 체크",
+            hint_drag_blocks: "하단에서 아이콘 블록을 끌어와 조립해보세요!",
+            hint_drag_assemble: "하단에서 아이콘 블록을 끌어와 조립해보세요!"
         },
         en: {
             // Sidebar / UI Shell
@@ -334,7 +341,14 @@
 
             ai_lesson_1: "6. RPS Gesture-Controlled Cabin Roof (Open/Close)",
             ai_lesson_2: "7. Squats! Riding the Magic Tree Elevator",
-            ai_lesson_3: "8. Shout into the Mic! Control the Magic Swing with Your Voice"
+            ai_lesson_3: "8. Shout into the Mic! Control the Magic Swing with Your Voice",
+
+            // Modal & Workspace UI
+            lbl_required_tasks: "📋 Required Tasks",
+            btn_try_mission: "Try Mission 🚀",
+            btn_check_tasks: "Check Tasks",
+            hint_drag_blocks: "Drag icon blocks from below to assemble your code!",
+            hint_drag_assemble: "Drag icon blocks from below to assemble your code!"
         }
     };
 

@@ -4336,10 +4336,19 @@ except:
             const current = missions ? missions[unit] : null;
             if (!current) return;
             
+            const lang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = lang === 'en';
+
             document.getElementById('briefingStage').textContent = current.badge;
             document.getElementById('briefingTitle').textContent = current.title;
             document.getElementById('briefingDesc').textContent = current.desc;
             
+            const reqTaskEl = document.querySelector('#missionBriefingModal [data-i18n="lbl_required_tasks"]');
+            if (reqTaskEl) reqTaskEl.textContent = isEn ? '📋 Required Tasks' : '📋 미션 달성 과제';
+
+            const tryBtnEl = document.querySelector('#missionBriefingModal [data-i18n="btn_try_mission"]');
+            if (tryBtnEl) tryBtnEl.textContent = isEn ? 'Try Mission 🚀' : '미션 도전하기 🚀';
+
             const briefingTasksEl = document.getElementById('briefingTasks');
             briefingTasksEl.innerHTML = '';
             current.tasks.forEach(t => {
