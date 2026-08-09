@@ -4240,21 +4240,6 @@ print("BrickSync Sandbox Run")
                                 if (window.bleEngineRunCounter !== currentRunId) return;
 
                                 if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
-                                    if (cmd.action === 'motor_cw') {
-                                        if (unit !== '8') try { window.parent.sendWebSocketAction({ action: 'motor_cw' }); } catch (e) { }
-                                    }
-                                    else if (cmd.action === 'motor_ccw') {
-                                        if (unit !== '8') try { window.parent.sendWebSocketAction({ action: 'motor_ccw' }); } catch (e) { }
-                                    }
-                                    else if (cmd.action === 'motor_stop_cw') {
-                                        if (unit !== '8') try { window.parent.sendWebSocketAction({ action: 'motor_stop' }); } catch (e) { }
-                                    }
-                                    else if (cmd.action === 'motor_stop_ccw') {
-                                        if (unit !== '8') try { window.parent.sendWebSocketAction({ action: 'motor_stop' }); } catch (e) { }
-                                    }
-                                    else if (cmd.action.startsWith('motor_stop')) {
-                                        if (unit !== '8') try { window.parent.sendWebSocketAction({ action: 'motor_stop' }); } catch (e) { }
-                                    }
                                     let speedInt = Math.round(cmd.speed);
                                     let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
                                     for (let p = 0; p < 6; p++) {
@@ -4265,9 +4250,6 @@ print("BrickSync Sandbox Run")
                                         break; // 전문가 패치: 파란색(단일 모터) 블록은 가장 먼저 인식된 모터 1개만 돌리고 루프 탈출
                                     }
                                 } else if (cmd.action.startsWith('car_') && cmd.action !== 'car_speed_set' && cmd.action !== 'car_stop') {
-                                    let fws = cmd.action === 'car_forward' ? 'UP' : cmd.action === 'car_backward' ? 'DOWN' : cmd.action === 'car_left' ? 'LEFT' : 'RIGHT';
-                                    try { window.parent.sendWebSocketAction({ action: 'STEER_' + fws }); } catch (e) { }
-
                                     let mCnt = 0;
                                     for (let p = 0; p < 6; p++) {
                                         const dev = window.parent.hubDevices ? window.parent.hubDevices[p] : undefined;
@@ -4286,9 +4268,6 @@ print("BrickSync Sandbox Run")
                                         if (mCnt >= 2) break;
                                     }
                                 } else if (cmd.action === 'car_stop') {
-                                    let fws = cmd.dir === 'car_forward' ? 'UP' : cmd.dir === 'car_backward' ? 'DOWN' : cmd.dir === 'car_left' ? 'LEFT' : 'RIGHT';
-                                    try { window.parent.sendWebSocketAction({ action: 'STOP_' + fws }); } catch (e) { }
-
                                     let mCnt = 0;
                                     for (let p = 0; p < 6; p++) {
                                         const dev = window.parent.hubDevices ? window.parent.hubDevices[p] : undefined;
