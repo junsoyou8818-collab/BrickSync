@@ -3649,18 +3649,18 @@ print("BrickSync Sandbox Run")
                             cumulativeDelayMs += 300; // 스위칭 오버랩 방지 딜레이
                             break;
                         case 'motor_cw':
-                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 750)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1300)) \n${indent}sm() \n`;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_RIGHT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 750;
+                                cumulativeDelayMs += 1300;
                             }
                             cumulativeDelayMs += 400; // UEFN 엔진 비동기 충돌 회피용 안전 딜레이
                             break;
                         case 'motor_ccw':
-                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 750)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1300)) \n${indent}sm() \n`;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_LEFT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 750;
+                                cumulativeDelayMs += 1300;
                             }
                             cumulativeDelayMs += 400; // UEFN 엔진 비동기 충돌 회피용 안전 딜레이
                             break;
@@ -3905,19 +3905,19 @@ except:
                                 currentBleDelay += 500;
                                 break;
                             case 'motor_cw':
-                                // 1회전당 750ms 기준 (360도 회전)
+                                // 1회전당 1300ms 기준 (360도 1바퀴 실측 기준)
                                 for (let i = 0; i < timeVal; i++) {
                                     bleQueue.push({ action: 'motor_cw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 750;
+                                    currentBleDelay += 1300;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 400;
                                 break;
                             case 'motor_ccw':
-                                // 1회전당 750ms 기준 (360도 회전)
+                                // 1회전당 1300ms 기준 (360도 1바퀴 실측 기준)
                                 for (let i = 0; i < timeVal; i++) {
                                     bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 750;
+                                    currentBleDelay += 1300;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 400;
