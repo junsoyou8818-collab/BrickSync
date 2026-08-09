@@ -4652,6 +4652,7 @@ print("BrickSync Sandbox Run")
                 updateMissionUI();
 
                 const lang = localStorage.getItem('bricksync_lang') || 'ko';
+                const isEn = lang === 'en';
                 const current = (missionData[lang] || missionData['ko'])[unit];
                 if (!current) return;
 
@@ -4662,9 +4663,6 @@ print("BrickSync Sandbox Run")
                 document.getElementById('briefingStage').textContent = current.badge;
                 document.getElementById('briefingTitle').textContent = current.title;
                 document.getElementById('briefingDesc').textContent = current.desc;
-
-                const lang = localStorage.getItem('bricksync_lang') || 'ko';
-                const isEn = lang === 'en';
 
                 const reqTaskEl = document.querySelector('#missionBriefingModal [data-i18n="lbl_required_tasks"]');
                 if (reqTaskEl) reqTaskEl.textContent = isEn ? '📋 Required Tasks' : '📋 미션 달성 과제';
@@ -4685,6 +4683,7 @@ print("BrickSync Sandbox Run")
 
                 document.getElementById('missionBriefingModal').style.display = 'flex';
             };
+            window.openMissionBriefing = openMissionBriefing;
 
             setupMissionToolbox = function (targetUnit) {
                 const palette = document.getElementById('palette');
