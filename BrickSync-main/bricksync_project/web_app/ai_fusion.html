@@ -827,7 +827,7 @@
 
     <!-- 상단 미션 및 진행도 현황창 -->
     <div id="missionStatusBar"
-        style="display: none; justify-content: space-between; align-items: center; background: #fff; padding: 12px 30px; border-bottom: 2px solid #e2e8f0; z-index: 9;">
+        style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px 30px; border-bottom: 2px solid #e2e8f0; z-index: 9;">
         <div style="display: flex; align-items: center; gap: 15px;">
             <div id="m-badge"
                 style="background: #eab308; color: #1e293b; font-weight: 900; font-size: 0.9rem; padding: 4px 12px; border-radius: 20px;">
@@ -4568,7 +4568,7 @@ print("BrickSync Sandbox Run")
         const urlParams = new URLSearchParams(window.location.search);
         let unit = urlParams.get('unit');
         if (!unit) {
-            unit = localStorage.getItem('brickSyncLastUnit') || '8';
+            unit = localStorage.getItem('brickSyncLastUnit') || '6';
         } else {
             localStorage.setItem('brickSyncLastUnit', unit);
         }
