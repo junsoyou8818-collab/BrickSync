@@ -12,7 +12,7 @@
             nav_lessons: "학습단원",
             nav_ai_lessons: "AI 학습단원",
             nav_workspace: "시스템 연결",
-            nav_projects: "프로젝트",
+            nav_projects: "최근 프로젝트",
             nav_dashboard: "교사/학부모용 대시보드",
             nav_settings: "설정",
 
@@ -177,7 +177,7 @@
             nav_lessons: "Lessons",
             nav_ai_lessons: "AI Lessons",
             nav_workspace: "System Connection",
-            nav_projects: "Projects",
+            nav_projects: "Recent Project",
             nav_dashboard: "Dashboard",
             nav_settings: "Settings",
 

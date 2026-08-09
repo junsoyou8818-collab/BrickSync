@@ -908,9 +908,9 @@
                     <span data-i18n="nav_ai_lessons">AI 학습단원</span>
                 </li>
                 <!-- Projects - System Connection 자리로 이동 -->
-                <li class="menu-item">
-                    <i data-lucide="blocks" class="menu-icon"></i>
-                    <span data-i18n="nav_projects">프로젝트</span>
+                <li class="menu-item" onclick="goToRecentProject()">
+                    <i data-lucide="clock" class="menu-icon"></i>
+                    <span data-i18n="nav_projects">최근 프로젝트</span>
                 </li>
                 <!-- System Connection - 숨김 처리 (기능 코드 유지, 추후 재활성화 가능) -->
                 <a href="#" onclick="location.href='workspace.html?v=' + new Date().getTime(); return false;" class="menu-item" style="display:none;" id="menu-system-connection">
@@ -1032,6 +1032,64 @@
 
     <!-- 뷰 전환 및 프로젝트 렌더링 스크립트 -->
     <script>
+        async function goToRecentProject() {
+            const studentName = getStudentName();
+            const studentPrefix = studentName + '_project_';
+            const lang = localStorage.getItem('bricksync_lang') || 'ko';
+
+            // 1순위: Firestore
+            if (typeof BrickSyncCloud !== 'undefined' && BrickSyncCloud.isAvailable()) {
+                try {
+                    const cloudProjects = await BrickSyncCloud.listProjects();
+                    const valid = cloudProjects
+                        .filter(p => p.blocks && p.blocks.length > 0)
+                        .sort((a, b) => {
+                            const ta = a.updatedAt?.toMillis ? a.updatedAt.toMillis() : (a.updatedAt || 0);
+                            const tb = b.updatedAt?.toMillis ? b.updatedAt.toMillis() : (b.updatedAt || 0);
+                            return tb - ta;
+                        });
+                    if (valid.length > 0) {
+                        const p = valid[0];
+                        const isAi = p.id.startsWith('ai_');
+                        const unit = p.unit || p.id.replace(/^(ai_|unit_)/, '');
+                        location.href = isAi
+                            ? `ai_fusion.html?unit=${unit}&v=${Date.now()}`
+                            : `lesson.html?unit=${unit}&v=${Date.now()}`;
+                        return;
+                    }
+                } catch(e) { console.warn('Cloud fetch failed:', e); }
+            }
+
+            // 2순위: localStorage
+            let latest = null;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (!key) continue;
+                const isUnit = key.startsWith(studentPrefix + 'unit_');
+                const isAi   = key.startsWith(studentPrefix + 'ai_');
+                if (!isUnit && !isAi) continue;
+                try {
+                    const data = JSON.parse(localStorage.getItem(key) || '{}');
+                    if (!data.blocks || data.blocks.length === 0) continue;
+                    if (!latest || (data.updatedAt || 0) > (latest.data.updatedAt || 0)) {
+                        latest = { key, data, isAi };
+                    }
+                } catch(e) {}
+            }
+
+            if (latest) {
+                const unit = latest.data.unit ||
+                    (latest.isAi
+                        ? latest.key.replace(studentPrefix + 'ai_', '')
+                        : latest.key.replace(studentPrefix + 'unit_', ''));
+                location.href = latest.isAi
+                    ? `ai_fusion.html?unit=${unit}&v=${Date.now()}`
+                    : `lesson.html?unit=${unit}&v=${Date.now()}`;
+            } else {
+                alert(lang === 'en' ? 'No recent projects found.' : '최근 작업한 프로젝트가 없습니다.');
+            }
+        }
+
         function showView(viewId) {
             // 버튼 액티브 상태 변경
             document.querySelectorAll('.menu-list .menu-item').forEach(btn => btn.classList.remove('active'));
