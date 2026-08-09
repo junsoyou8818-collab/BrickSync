@@ -3654,15 +3654,15 @@ print("BrickSync Sandbox Run")
                                 localActionsQueue.push({ action: 'MWHEEL_RIGHT', delay: cumulativeDelayMs });
                                 cumulativeDelayMs += 1400;
                             }
-                            cumulativeDelayMs += 400; // UEFN 엔진 비동기 충돌 회피용 안전 딜레이
+                            cumulativeDelayMs += 600; // UEFN 엔진 비동기 충돌 회피용 안전 딜레이
                             break;
                         case 'motor_ccw':
-                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1250)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 975)) \n${indent}sm() \n`;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_LEFT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 1250;
+                                cumulativeDelayMs += 975;
                             }
-                            cumulativeDelayMs += 400; // UEFN 엔진 비동기 충돌 회피용 안전 딜레이
+                            cumulativeDelayMs += 600; // UEFN 엔진 비동기 충돌 회피용 안전 딜레이
                             break;
                         case 'motor_stop':
                             pyCode += `${indent}sm() \n`;
@@ -3911,16 +3911,16 @@ except:
                                     currentBleDelay += 1400;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
-                                currentBleDelay += 400;
+                                currentBleDelay += 600;
                                 break;
                             case 'motor_ccw':
-                                // 1회전당 1250ms 기준 (실측 관성보정 2바퀴 720도 정적중)
+                                // 1회전당 975ms 기준 (실측 관성보정 2바퀴 720도 정적중)
                                 for (let i = 0; i < timeVal; i++) {
                                     bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 1250;
+                                    currentBleDelay += 975;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
-                                currentBleDelay += 400;
+                                currentBleDelay += 600;
                                 break;
                             case 'motor_stop':
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });

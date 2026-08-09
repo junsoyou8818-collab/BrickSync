@@ -3863,17 +3863,17 @@ print("BrickSync Sandbox Run")
                             } else {
                                 cumulativeDelayMs += (timeVal * 1400);
                             }
-                            cumulativeDelayMs += 400;
+                            cumulativeDelayMs += 600;
                             break;
                         case 'motor_ccw':
-                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1250)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 975)) \n${indent}sm() \n`;
                             if (unit !== '8') {
                                 localActionsQueue.push({ action: 'motor_ccw', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += (timeVal * 1250);
+                                cumulativeDelayMs += (timeVal * 975);
                             } else {
-                                cumulativeDelayMs += (timeVal * 1250);
+                                cumulativeDelayMs += (timeVal * 975);
                             }
-                            cumulativeDelayMs += 400;
+                            cumulativeDelayMs += 600;
                             break;
                         case 'motor_stop':
                             pyCode += `${indent}sm() \n`;
@@ -4121,15 +4121,15 @@ print("BrickSync Sandbox Run")
                                     currentBleDelay += 1400;
                                 }
                                 bleQueue.push({ action: 'motor_stop_cw', speed: 0, delay: currentBleDelay });
-                                currentBleDelay += 400;
+                                currentBleDelay += 600;
                                 break;
                             case 'motor_ccw':
                                 for (let i = 0; i < timeVal; i++) {
                                     bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 1250;
+                                    currentBleDelay += 975;
                                 }
                                 bleQueue.push({ action: 'motor_stop_ccw', speed: 0, delay: currentBleDelay });
-                                currentBleDelay += 400;
+                                currentBleDelay += 600;
                                 break;
                             case 'motor_stop':
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
