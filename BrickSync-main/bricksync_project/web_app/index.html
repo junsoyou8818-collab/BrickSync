@@ -471,7 +471,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 20px;
             cursor: pointer;
-            transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -485,7 +485,9 @@
         }
 
         .learning-card:hover {
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(255, 255, 255, 0.4);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+            border-color: rgba(255, 255, 255, 0.9);
+            border-width: 2px;
         }
 
         .learning-card-text {
@@ -1002,7 +1004,7 @@
 
             <!-- AI 학습단원 화면 뷰 (2열 그리드, 총 3개 단원) -->
             <div id="view-ai-learning" class="learning-grid">
-                <div class="learning-card" style="background-image: url('assets/6.png');" onclick="location.href='ai_fusion.html?unit=6&v=' + new Date().getTime()">
+                <div class="learning-card" style="background-image: url('assets/6.png'); background-position: center top;" onclick="location.href='ai_fusion.html?unit=6&v=' + new Date().getTime()">
                     <span class="learning-card-text" data-i18n="ai_lesson_1">6. 가위! 바위! 보! 손가락으로 하는 북극 레이싱</span>
                 </div>
                 <div class="learning-card" style="background-image: url('assets/7.png');" onclick="location.href='ai_fusion.html?unit=7&v=' + new Date().getTime()">
