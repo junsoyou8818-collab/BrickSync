@@ -5392,8 +5392,21 @@ except:
 
             let projectData = null;
 
+            // 0순위: 최근 프로젝트 버튼 경유 시 캐시된 데이터 (1회용)
+            try {
+                const resumeRaw = localStorage.getItem('bricksync_resume_data');
+                if (resumeRaw) {
+                    localStorage.removeItem('bricksync_resume_data');
+                    const resumeData = JSON.parse(resumeRaw);
+                    if (resumeData && resumeData.blocks && resumeData.blocks.length > 0
+                        && String(resumeData.unit) === String(unit)) {
+                        projectData = resumeData;
+                    }
+                }
+            } catch(e) {}
+
             // 1순위: Firestore에서 불러오기
-            if (typeof BrickSyncCloud !== 'undefined' && BrickSyncCloud.isAvailable()) {
+            if (!projectData && typeof BrickSyncCloud !== 'undefined' && BrickSyncCloud.isAvailable()) {
                 try {
                     const cloudData = await BrickSyncCloud.loadProject(cloudDocId);
                     if (cloudData && cloudData.blocks && cloudData.blocks.length > 0) {

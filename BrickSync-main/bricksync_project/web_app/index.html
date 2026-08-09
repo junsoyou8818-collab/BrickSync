@@ -1052,6 +1052,18 @@
                         const p = valid[0];
                         const isAi = p.id.startsWith('ai_');
                         const unit = p.unit || p.id.replace(/^(ai_|unit_)/, '');
+                        // 블록 데이터를 resume 캐시에 저장 (목적지 페이지에서 0순위로 읽음)
+                        try {
+                            const fullData = await BrickSyncCloud.loadProject(p.id);
+                            if (fullData && fullData.blocks) {
+                                localStorage.setItem('bricksync_resume_data', JSON.stringify(fullData));
+                            } else {
+                                // listProjects 반환 데이터 그대로 캐시
+                                localStorage.setItem('bricksync_resume_data', JSON.stringify(p));
+                            }
+                        } catch(e) {
+                            localStorage.setItem('bricksync_resume_data', JSON.stringify(p));
+                        }
                         location.href = isAi
                             ? `ai_fusion.html?unit=${unit}&v=${Date.now()}`
                             : `lesson.html?unit=${unit}&v=${Date.now()}`;
@@ -1082,6 +1094,8 @@
                     (latest.isAi
                         ? latest.key.replace(studentPrefix + 'ai_', '')
                         : latest.key.replace(studentPrefix + 'unit_', ''));
+                // 블록 데이터를 resume 캐시에 저장
+                localStorage.setItem('bricksync_resume_data', JSON.stringify(latest.data));
                 location.href = latest.isAi
                     ? `ai_fusion.html?unit=${unit}&v=${Date.now()}`
                     : `lesson.html?unit=${unit}&v=${Date.now()}`;
