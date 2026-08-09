@@ -1033,8 +1033,6 @@
     <!-- 뷰 전환 및 프로젝트 렌더링 스크립트 -->
     <script>
         async function goToRecentProject() {
-            const studentName = getStudentName();
-            const studentPrefix = studentName + '_project_';
             const lang = localStorage.getItem('bricksync_lang') || 'ko';
 
             // 1순위: Firestore
@@ -1052,13 +1050,11 @@
                         const p = valid[0];
                         const isAi = p.id.startsWith('ai_');
                         const unit = p.unit || p.id.replace(/^(ai_|unit_)/, '');
-                        // 블록 데이터를 resume 캐시에 저장 (목적지 페이지에서 0순위로 읽음)
                         try {
                             const fullData = await BrickSyncCloud.loadProject(p.id);
                             if (fullData && fullData.blocks) {
                                 localStorage.setItem('bricksync_resume_data', JSON.stringify(fullData));
                             } else {
-                                // listProjects 반환 데이터 그대로 캐시
                                 localStorage.setItem('bricksync_resume_data', JSON.stringify(p));
                             }
                         } catch(e) {
@@ -1072,14 +1068,14 @@
                 } catch(e) { console.warn('Cloud fetch failed:', e); }
             }
 
-            // 2순위: localStorage
+            // 2순위: localStorage - 학생 이름 무관하게 모든 _project_ 키 스캔
             let latest = null;
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (!key) continue;
-                const isUnit = key.startsWith(studentPrefix + 'unit_');
-                const isAi   = key.startsWith(studentPrefix + 'ai_');
-                if (!isUnit && !isAi) continue;
+                const isAi  = key.includes('_project_ai_');
+                const isUnit = key.includes('_project_unit_');
+                if (!isAi && !isUnit) continue;
                 try {
                     const data = JSON.parse(localStorage.getItem(key) || '{}');
                     if (!data.blocks || data.blocks.length === 0) continue;
@@ -1090,11 +1086,8 @@
             }
 
             if (latest) {
-                const unit = latest.data.unit ||
-                    (latest.isAi
-                        ? latest.key.replace(studentPrefix + 'ai_', '')
-                        : latest.key.replace(studentPrefix + 'unit_', ''));
-                // 블록 데이터를 resume 캐시에 저장
+                const m = latest.key.match(/_project_(?:ai|unit)_(.+)$/);
+                const unit = latest.data.unit || (m ? m[1] : '1');
                 localStorage.setItem('bricksync_resume_data', JSON.stringify(latest.data));
                 location.href = latest.isAi
                     ? `ai_fusion.html?unit=${unit}&v=${Date.now()}`
@@ -1324,10 +1317,10 @@
                 }
             }
 
-            // 2순위: localStorage 스캔 (백업/폴백)
+            // 2순위: localStorage 스캔 - 학생 이름 무관하게 모든 _project_ 키 스캔
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (!key || !(key.startsWith(studentPrefix + 'unit_') || key.startsWith(studentPrefix + 'ai_'))) continue;
+                if (!key || !(key.includes('_project_unit_') || key.includes('_project_ai_'))) continue;
                 try {
                     const rawData = localStorage.getItem(key);
                     if (!rawData) continue;
@@ -1335,17 +1328,19 @@
                     if (!projectData || !projectData.blocks || projectData.blocks.length === 0) {
                         localStorage.removeItem(key); i--; continue;
                     }
-                    // Firestore에 이미 있으면 덮어쓰지 않음
+                    // cloudId 추출
                     const isAi = key.includes('_project_ai_');
+                    const m = key.match(/_project_(?:ai|unit)_(.+)$/);
+                    const extractedUnit = m ? m[1] : '1';
                     const cloudId = isAi
-                        ? 'ai_' + (projectData.unit || key.replace(studentPrefix + 'ai_', ''))
-                        : 'unit_' + (projectData.unit || key.replace(studentPrefix + 'unit_', ''));
+                        ? 'ai_' + (projectData.unit || extractedUnit)
+                        : 'unit_' + (projectData.unit || extractedUnit);
                     if (!projectMap.has(cloudId)) {
                         projectMap.set(cloudId, {
                             id: key,
                             cloudId,
                             name: projectData.name || '무제 프로젝트',
-                            unit: projectData.unit || '1',
+                            unit: projectData.unit || extractedUnit,
                             type: isAi ? 'ai' : 'lesson',
                             blocksCount: projectData.blocks.length,
                             updatedAt: projectData.updatedAt || Date.now()
@@ -1416,17 +1411,24 @@
         }
 
         async function openProject(unit, cloudId, isAi) {
-            // localStorage 우선 탐색 (올바른 키 직접 구성)
-            const studentName = getStudentName();
-            const localKey = studentName + '_project_' + (isAi ? 'ai_' : 'unit_') + unit;
+            // 학생 이름에 무관하게 localStorage에서 해당 unit/type 구조 직접 탐색
             let projectData = null;
-            try {
-                const raw = localStorage.getItem(localKey);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    if (parsed && parsed.blocks && parsed.blocks.length > 0) projectData = parsed;
-                }
-            } catch(e) {}
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (!k) continue;
+                const kIsAi   = k.includes('_project_ai_');
+                const kIsUnit = k.includes('_project_unit_');
+                if (!kIsAi && !kIsUnit) continue;
+                if (Boolean(isAi) !== kIsAi) continue; // type 일치 확인
+                try {
+                    const parsed = JSON.parse(localStorage.getItem(k) || '{}');
+                    if (parsed && parsed.blocks && parsed.blocks.length > 0
+                        && String(parsed.unit) === String(unit)) {
+                        projectData = parsed;
+                        break;
+                    }
+                } catch(e) {}
+            }
 
             // localStorage 없으면 Firestore
             if (!projectData && typeof BrickSyncCloud !== 'undefined' && BrickSyncCloud.isAvailable()) {
