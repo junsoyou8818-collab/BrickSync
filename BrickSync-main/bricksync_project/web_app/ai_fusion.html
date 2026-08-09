@@ -4575,7 +4575,7 @@ print("BrickSync Sandbox Run")
             const missionData = {
                 ko: {
                     '6': {
-                        badge: 'STAGE 6', title: '가위바위보 쓰레기통 조종 (뚜껑 열고 닫기)', desc: '가위바위보 제스처를 이용해 쓰레기통의 뚜껑(위턱)을 열고 닫아 보세요!',
+                        badge: 'STAGE 6', title: '가위,바위,보 제스쳐로 여닫는 오두막 지붕', desc: '카메라를 통해 제스쳐를 AI에게 학습시켜 오두막 지붕을 열고 닫아 보세요!',
                         pinCode: '7241',
                         tasks: [
                             { id: 'event_ai_gesture', text: 'AI 제스처 인식 블록 연결하기' },
@@ -4603,7 +4603,7 @@ print("BrickSync Sandbox Run")
                 },
                 en: {
                     '6': {
-                        badge: 'STAGE 6', title: 'RPS Trash Can (Open/Close Lid)', desc: 'Control the trash can lid by opening and closing it with gesture blocks!',
+                        badge: 'STAGE 6', title: 'RPS Gesture-Controlled Cabin Roof (Open/Close)', desc: 'Train the AI with your gestures through the camera to open and close the cabin roof!',
                         pinCode: '7241',
                         tasks: [
                             { id: 'event_ai_gesture', text: 'Connect the AI Gesture block' },
@@ -4769,7 +4769,7 @@ print("BrickSync Sandbox Run")
                     document.getElementById('m-title').textContent = currentMission.title;
 
                     let sandboxDesc = '블록을 자유롭게 배치하고 코딩해 보세요!';
-                    if (unit === '6') sandboxDesc = '가위바위보 블록을 자유롭게 코딩해 보세요!';
+                    if (unit === '6') sandboxDesc = '제스쳐를 AI에게 학습시켜 모터를 작동시켜보세요!';
                     else if ((unit === '7' || unit === '2')) sandboxDesc = '조명 게이트 블록을 자유롭게 코딩해 보세요!';
                     else if ((unit === '8' || unit === '3')) sandboxDesc = '대관람차 블록을 자유롭게 코딩해 보세요!';
 
@@ -4966,7 +4966,7 @@ print("BrickSync Sandbox Run")
 
             const projectNames = {
                 ko: {
-                    '1': 'AI 단원 1: 가위! 바위! 보! 손가락으로 하는 북극 레이싱',
+                    '1': 'AI 단원 1: 가위, 바위, 보로 여닫는 오두막 지붕',
                     '2': 'AI 단원 2: 몬스터를 보여줘! 경보 알림켜기.',
                     '3': 'AI 단원 3: 카메라에 맛있는 과일을 보여주고 간식 선물받기'
                 },
