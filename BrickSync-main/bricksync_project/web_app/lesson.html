@@ -4680,7 +4680,7 @@ except:
                 // Show/hide status elements based on isMissionActive
                 document.getElementById('m-progress-container').style.display = isMissionActive ? 'flex' : 'none';
                 document.getElementById('btn-check-tasks').style.display = isMissionActive ? 'inline-flex' : 'none';
-                document.getElementById('btn-go-mission').style.display = isMissionActive ? 'none' : 'inline-flex';
+                document.getElementById('btn-go-mission').style.display = 'inline-flex';
 
                 // 퍼센티지 재계산 및 과제 리스트 렌더링용
                 const tasksEl = document.getElementById('m-tasks-list');
