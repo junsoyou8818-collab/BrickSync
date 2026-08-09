@@ -3648,29 +3648,36 @@ print("BrickSync Sandbox Run")
                         case 'car_backward': {
                             let p0_sign = action === 'car_forward' ? '-' : '';
                             let p1_sign = action === 'car_forward' ? '' : '-';
-                            // 포트나이트 맵 전용 딜레이: 1회당 1200ms (4번 설정 시 정확히 4번 전진)
+                            // 포트나이트 맵 전용 전진 딜레이: 1회당 1200ms
                             let fnRunDurationMs = Math.round(timeVal * 1200);
                             let pythonDuration = Math.round(pythonTimeVal * 1600);
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_forward' ? 'UP' : 'DOWN';
+                            // 좌우 회전 잔여 키 해제 및 직진 명령 발송
+                            localActionsQueue.push({ action: 'STOP_LEFT', delay: cumulativeDelayMs });
+                            localActionsQueue.push({ action: 'STOP_RIGHT', delay: cumulativeDelayMs });
                             localActionsQueue.push({ action: 'STEER_' + fws, delay: cumulativeDelayMs });
                             localActionsQueue.push({ action: 'STOP_' + fws, delay: cumulativeDelayMs + fnRunDurationMs });
-                            cumulativeDelayMs += fnRunDurationMs + 300;
+                            cumulativeDelayMs += fnRunDurationMs + 600; // 액션 간 엉킴 예방 안전 휴식 딜레이 600ms
                             break;
                         }
                         case 'car_left':
                         case 'car_right': {
                             let p0_sign = action === 'car_right' ? '-' : '';
                             let p1_sign = action === 'car_left' ? '' : '-';
-                            let fnRunDurationMs = Math.round(timeVal * 700);
+                            // 포트나이트 맵 전용 90도 회전 딜레이: 1회당 500ms
+                            let fnRunDurationMs = Math.round(timeVal * 500);
                             let pythonDuration = Math.round(pythonTimeVal * 835);
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_left' ? 'LEFT' : 'RIGHT';
+                            // 전/후진 잔여 키 해제 및 회전 명령 발송
+                            localActionsQueue.push({ action: 'STOP_UP', delay: cumulativeDelayMs });
+                            localActionsQueue.push({ action: 'STOP_DOWN', delay: cumulativeDelayMs });
                             localActionsQueue.push({ action: 'STEER_' + fws, delay: cumulativeDelayMs });
                             localActionsQueue.push({ action: 'STOP_' + fws, delay: cumulativeDelayMs + fnRunDurationMs });
-                            cumulativeDelayMs += fnRunDurationMs + 300;
+                            cumulativeDelayMs += fnRunDurationMs + 600; // 회전 완료 후 안전 휴식 딜레이 600ms
                             break;
                         }
                         case 'motor_cw':
