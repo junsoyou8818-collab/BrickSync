@@ -942,8 +942,8 @@
             <div class="main-layout">
                 <div class="coding-area" id="workspaceArea">
                     <div class="hint-text">
-                        <i class="fas fa-hand-pointer" style="font-size: 48px;"></i>
-                        하단에서 아이콘 블럭을 끌어와 조립해보세요!
+                        <i class="fas fa-hand-pointer" style="font-size: 48px;"></i><br>
+                        <span data-i18n="hint_drag_assemble">하단에서 아이콘 블록을 끌어와 조립해보세요!</span>
                     </div>
                 </div>
                 <div class="trash-area" id="trashArea">
@@ -4917,6 +4917,9 @@ print("BrickSync Sandbox Run")
 
             window.addEventListener('bricksync-language-changed', (e) => {
                 renderActiveMission();
+                if (typeof window.applyBrickSyncLanguage === 'function') {
+                    window.applyBrickSyncLanguage(e.detail ? e.detail.lang : null);
+                }
             });
         }
 

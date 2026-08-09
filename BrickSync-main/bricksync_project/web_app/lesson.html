@@ -4867,6 +4867,13 @@ except:
                 setTimeout(updateProgress, 300);
             }
         }
+
+        window.addEventListener('bricksync-language-changed', (e) => {
+            if (typeof updateStatusBarText === 'function') updateStatusBarText();
+            if (typeof window.applyBrickSyncLanguage === 'function') {
+                window.applyBrickSyncLanguage(e.detail ? e.detail.lang : null);
+            }
+        });
     </script>
 
     <!-- Connection Modal Popup -->
