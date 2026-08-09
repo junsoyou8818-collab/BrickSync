@@ -479,6 +479,9 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             text-decoration: none;
             min-height: 0;
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
         }
 
         .learning-card:hover {
@@ -495,7 +498,19 @@
             padding: 0 30px;
             word-break: keep-all;
             line-height: 1.4;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 배경 이미지가 있는 카드의 어두운 오버레이 */
+        .learning-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            background: linear-gradient(160deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.42) 100%);
+            z-index: 0;
         }
 
         /* 프로젝트 카드 내부 스타일 */
@@ -978,32 +993,32 @@
 
             <!-- 학습단원 화면 뷰 (2열 그리드, 총 5개 단원) -->
             <div id="view-learning" class="learning-grid">
-                <div class="learning-card" onclick="location.href='mission.html?unit=1'">
+                <div class="learning-card" style="background-image: url('assets/1.png');" onclick="location.href='mission.html?unit=1'">
                     <span class="learning-card-text" data-i18n="lesson_1">1. 요리조리 기울여서 탐험보트를 출발시켜요</span>
                 </div>
-                <div class="learning-card" onclick="location.href='mission.html?unit=2'">
+                <div class="learning-card" style="background-image: url('assets/2.png');" onclick="location.href='mission.html?unit=2'">
                     <span class="learning-card-text" data-i18n="lesson_2">2. 바닷속 잠수함으로 바다를 탐험해요</span>
                 </div>
-                <div class="learning-card" onclick="location.href='mission.html?unit=3'">
+                <div class="learning-card" style="background-image: url('assets/3.png');" onclick="location.href='mission.html?unit=3'">
                     <span class="learning-card-text" data-i18n="lesson_3">3. 모터를 돌려 빙글빙글 대관람차를 태워줘요</span>
                 </div>
-                <div class="learning-card" onclick="location.href='mission.html?unit=4'">
+                <div class="learning-card" style="background-image: url('assets/4.png');" onclick="location.href='mission.html?unit=4'">
                     <span class="learning-card-text" data-i18n="lesson_4">4. 탐험 자동차를 만들어요</span>
                 </div>
-                <div class="learning-card" style="grid-column: span 2;" onclick="location.href='mission.html?unit=5'">
+                <div class="learning-card" style="grid-column: span 2; background-image: url('assets/5.png');" onclick="location.href='mission.html?unit=5'">
                     <span class="learning-card-text" data-i18n="lesson_5">5. 동굴 자동차를 타고 여행해요</span>
                 </div>
             </div>
 
             <!-- AI 학습단원 화면 뷰 (2열 그리드, 총 3개 단원) -->
             <div id="view-ai-learning" class="learning-grid">
-                <div class="learning-card" onclick="location.href='ai_fusion.html?unit=6&v=' + new Date().getTime()">
+                <div class="learning-card" style="background-image: url('assets/6.png');" onclick="location.href='ai_fusion.html?unit=6&v=' + new Date().getTime()">
                     <span class="learning-card-text" data-i18n="ai_lesson_1">6. 가위! 바위! 보! 손가락으로 하는 북극 레이싱</span>
                 </div>
-                <div class="learning-card" onclick="location.href='ai_fusion.html?unit=7&v=' + new Date().getTime()">
+                <div class="learning-card" style="background-image: url('assets/7.png');" onclick="location.href='ai_fusion.html?unit=7&v=' + new Date().getTime()">
                     <span class="learning-card-text" data-i18n="ai_lesson_2">7. 몬스터를 보여줘! 경보 알림켜기.</span>
                 </div>
-                <div class="learning-card" style="grid-column: span 2;" onclick="location.href='ai_fusion.html?unit=8&v=' + new Date().getTime()">
+                <div class="learning-card" style="grid-column: span 2; background-image: url('assets/8.png');" onclick="location.href='ai_fusion.html?unit=8&v=' + new Date().getTime()">
                     <span class="learning-card-text" data-i18n="ai_lesson_3">8. 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네</span>
                 </div>
             </div>
