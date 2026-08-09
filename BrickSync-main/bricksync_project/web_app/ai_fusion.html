@@ -3859,8 +3859,8 @@ print("BrickSync Sandbox Run")
                         case 'car_backward': {
                             let p0_sign = action === 'car_forward' ? '-' : '';
                             let p1_sign = action === 'car_forward' ? '' : '-';
-                            let runDurationMs = Math.round(timeVal * 1330);
-                            let pythonDuration = Math.round(pythonTimeVal * 1330);
+                            let runDurationMs = Math.round(timeVal * 1600);
+                            let pythonDuration = Math.round(pythonTimeVal * 1600);
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_forward' ? 'UP' : 'DOWN';
@@ -3874,8 +3874,8 @@ print("BrickSync Sandbox Run")
                         case 'car_right': {
                             let p0_sign = action === 'car_right' ? '-' : '';
                             let p1_sign = action === 'car_left' ? '' : '-';
-                            let runDurationMs = Math.round(timeVal * 650);
-                            let pythonDuration = Math.round(pythonTimeVal * 650);
+                            let runDurationMs = Math.round(timeVal * 835);
+                            let pythonDuration = Math.round(pythonTimeVal * 835);
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_left' ? 'LEFT' : 'RIGHT';
@@ -4139,7 +4139,7 @@ print("BrickSync Sandbox Run")
                             case 'car_forward':
                             case 'car_backward': {
                                 bleQueue.push({ action: action, speed: bleGlobalMotorSpeed, delay: currentBleDelay });
-                                currentBleDelay += Math.round(timeVal * 1330);
+                                currentBleDelay += Math.round(timeVal * 1600);
                                 bleQueue.push({ action: 'car_stop', speed: 0, dir: action, delay: currentBleDelay });
                                 currentBleDelay += 500;
                                 break;
@@ -4147,7 +4147,7 @@ print("BrickSync Sandbox Run")
                             case 'car_left':
                             case 'car_right': {
                                 bleQueue.push({ action: action, speed: bleGlobalMotorSpeed, delay: currentBleDelay });
-                                currentBleDelay += Math.round(timeVal * 650);
+                                currentBleDelay += Math.round(timeVal * 835);
                                 bleQueue.push({ action: 'car_stop', speed: 0, dir: action, delay: currentBleDelay });
                                 currentBleDelay += 500;
                                 break;
