@@ -4646,52 +4646,17 @@ except:
             const descEl = document.getElementById('m-desc');
             
             if (badgeEl) badgeEl.textContent = currentMission.badge;
+            if (titleEl) titleEl.textContent = currentMission.title;
+
+            const themeDesc = isEn ? (themeDescriptionsEn[unit] || '') : (themeDescriptions[unit] || '');
+            const descText = isMissionActive ? currentMission.desc : themeDesc;
             
-            if (unit === '3') {
-                if (isMissionActive) {
-                    if (titleEl) titleEl.textContent = isEn ? 'After waiting 5s, safely run the Ferris wheel 3 times right and 2 times left.' : '5초 대기 후 오른쪽 3번, 왼쪽 2번으로 대관람차를 안전하게 운행하세요.';
-                    if (descEl) {
-                        descEl.textContent = '';
-                        descEl.style.display = 'none';
-                    }
+            if (descEl) {
+                descEl.textContent = descText;
+                if (descText && descText.trim() !== '') {
+                    descEl.style.display = '';
                 } else {
-                    if (titleEl) titleEl.textContent = isEn ? 'Assemble motor blocks to spin the Ferris wheel.' : '우회전과 좌회전 모터 구동 블록을 조립하여 대관람차 장치를 직접 움직여 봅시다.';
-                    if (descEl) {
-                        descEl.textContent = '';
-                        descEl.style.display = 'none';
-                    }
-                }
-            } else if (unit === '4') {
-                if (isMissionActive) {
-                    if (titleEl) titleEl.textContent = isEn ? 'After waiting 5s, move forward 4 times, turn right 1 time, and move forward 2 times.' : '5초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.';
-                    if (descEl) {
-                        descEl.textContent = '';
-                        descEl.style.display = 'none';
-                    }
-                } else {
-                    if (titleEl) titleEl.textContent = currentMission.title;
-                    const themeDesc = isEn ? (themeDescriptionsEn[unit] || '') : (themeDescriptions[unit] || '');
-                    if (descEl) {
-                        descEl.textContent = themeDesc;
-                        if (themeDesc && themeDesc.trim() !== '') {
-                            descEl.style.display = '';
-                        } else {
-                            descEl.style.display = 'none';
-                        }
-                    }
-                }
-            } else {
-                if (titleEl) titleEl.textContent = currentMission.title;
-                const themeDesc = isEn ? (themeDescriptionsEn[unit] || '') : (themeDescriptions[unit] || '');
-                const descText = isMissionActive ? currentMission.desc : themeDesc;
-                
-                if (descEl) {
-                    descEl.textContent = descText;
-                    if (descText && descText.trim() !== '') {
-                        descEl.style.display = '';
-                    } else {
-                        descEl.style.display = 'none';
-                    }
+                    descEl.style.display = 'none';
                 }
             }
         }
