@@ -3856,19 +3856,35 @@ print("BrickSync Sandbox Run")
                             pyCode += `${indent}print("Motor Speed Block Triggered") \n`;
                             break;
                         case 'car_forward':
-                        case 'car_backward':
-                        case 'car_left':
-                        case 'car_right':
-                            let p0_sign = (action === 'car_forward' || action === 'car_right') ? '-' : '';
-                            let p1_sign = (action === 'car_forward' || action === 'car_left') ? '' : '-';
-                            pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1000)) \n${indent}sm() \n`;
+                        case 'car_backward': {
+                            let p0_sign = action === 'car_forward' ? '-' : '';
+                            let p1_sign = action === 'car_forward' ? '' : '-';
+                            let runDurationMs = Math.round(timeVal * 923);
+                            let pythonDuration = Math.round(pythonTimeVal * 923);
+                            pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
-                            let fws = action === 'car_forward' ? 'UP' : action === 'car_backward' ? 'DOWN' : action === 'car_left' ? 'LEFT' : 'RIGHT';
+                            let fws = action === 'car_forward' ? 'UP' : 'DOWN';
                             localActionsQueue.push({ action: 'STEER_' + fws, delay: cumulativeDelayMs });
-                            cumulativeDelayMs += (timeVal * 1000);
+                            cumulativeDelayMs += runDurationMs;
                             localActionsQueue.push({ action: 'STOP_' + fws, delay: cumulativeDelayMs });
-                            cumulativeDelayMs += 300; // 스위칭 오버랩 방지 딜레이
+                            cumulativeDelayMs += 300;
                             break;
+                        }
+                        case 'car_left':
+                        case 'car_right': {
+                            let p0_sign = action === 'car_right' ? '-' : '';
+                            let p1_sign = action === 'car_left' ? '' : '-';
+                            let runDurationMs = Math.round(timeVal * 750);
+                            let pythonDuration = Math.round(pythonTimeVal * 750);
+                            pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
+
+                            let fws = action === 'car_left' ? 'LEFT' : 'RIGHT';
+                            localActionsQueue.push({ action: 'STEER_' + fws, delay: cumulativeDelayMs });
+                            cumulativeDelayMs += runDurationMs;
+                            localActionsQueue.push({ action: 'STOP_' + fws, delay: cumulativeDelayMs });
+                            cumulativeDelayMs += 300;
+                            break;
+                        }
                         case 'motor_cw':
                             pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1400)) \n${indent}sm() \n`;
                             if (unit !== '8') {
@@ -4121,14 +4137,21 @@ print("BrickSync Sandbox Run")
                                 bleGlobalMotorSpeed = paramVal === -1 ? 40 : paramVal;
                                 break;
                             case 'car_forward':
-                            case 'car_backward':
-                            case 'car_left':
-                            case 'car_right':
+                            case 'car_backward': {
                                 bleQueue.push({ action: action, speed: bleGlobalMotorSpeed, delay: currentBleDelay });
-                                currentBleDelay += (timeVal * 1000);
+                                currentBleDelay += Math.round(timeVal * 923);
                                 bleQueue.push({ action: 'car_stop', speed: 0, dir: action, delay: currentBleDelay });
                                 currentBleDelay += 500;
                                 break;
+                            }
+                            case 'car_left':
+                            case 'car_right': {
+                                bleQueue.push({ action: action, speed: bleGlobalMotorSpeed, delay: currentBleDelay });
+                                currentBleDelay += Math.round(timeVal * 750);
+                                bleQueue.push({ action: 'car_stop', speed: 0, dir: action, delay: currentBleDelay });
+                                currentBleDelay += 500;
+                                break;
+                            }
                             case 'motor_cw':
                                 for (let i = 0; i < timeVal; i++) {
                                     bleQueue.push({ action: 'motor_cw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
