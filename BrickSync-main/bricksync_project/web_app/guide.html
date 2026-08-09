@@ -283,14 +283,14 @@
 
     <!-- 헤더: 양끝 배치 -->
     <div class="guide-header">
-        <a class="back-btn" href="index.html">← 홈으로</a>
+        <a class="back-btn" href="index.html" data-i18n="btn_back_home">← 홈으로 가기</a>
         <span class="header-badge">Guide</span>
     </div>
 
     <!-- 히어로: CSS 로고 -->
     <div class="hero">
         <img src="./assets/bslogo.png" class="bslogo-img" alt="BrickSync">
-        <h1>이렇게 사용해요!</h1>
+        <h1 data-i18n="lbl_guide_hero_title">이렇게 사용해요!</h1>
     </div>
 
     <!-- 2컬럼 본문 -->
@@ -298,90 +298,90 @@
 
         <!-- 왼쪽: 환경설정 -->
         <div>
-            <div class="section-label">⚙️ BrickSync 기초 환경설정</div>
+            <div class="section-label" data-i18n="lbl_guide_setup_header">⚙️ BrickSync 기초 환경설정</div>
             <div class="setup-card">
                 <div class="setup-tag">Setup Guide</div>
-                <div class="setup-title">BrickSync.exe 실행 및 기본 설정</div>
+                <div class="setup-title" data-i18n="lbl_guide_setup_title">BrickSync.exe 실행 및 기본 설정</div>
                 <div class="setup-steps">
                     <div class="setup-step">
                         <span class="setup-step-icon">🖱️</span>
-                        <span><strong>실행</strong>: BrickSync.exe 더블클릭 → 로컬 서버 자동 시작 → 브라우저 자동 오픈</span>
+                        <span data-i18n="lbl_guide_step1"><strong>실행</strong>: BrickSync.exe 더블클릭 → 로컬 서버 자동 시작 → 브라우저 자동 오픈</span>
                     </div>
                     <div class="setup-step">
                         <span class="setup-step-icon">🌐</span>
-                        <span><strong>브라우저</strong>: Web Bluetooth 지원 <strong>Chrome 또는 Edge</strong> 필요 (Firefox · Safari 미지원)</span>
+                        <span data-i18n="lbl_guide_step2"><strong>브라우저</strong>: Web Bluetooth 지원 <strong>Chrome 또는 Edge</strong> 필요 (Firefox · Safari 미지원)</span>
                     </div>
                     <div class="setup-step">
                         <span class="setup-step-icon">🔵</span>
-                        <span><strong>허브 연결</strong>: <strong>시스템 연결</strong> 메뉴에서 레고 허브를 블루투스로 연결</span>
+                        <span data-i18n="lbl_guide_step3"><strong>허브 연결</strong>: <strong>시스템 연결</strong> 메뉴에서 레고 허브를 블루투스로 연결</span>
                     </div>
                     <div class="setup-step">
                         <span class="setup-step-icon">👤</span>
-                        <span><strong>계정 로그인</strong>: 학생 · 교사 · 학부모 계정으로 로그인 후 역할별 기능 활성화</span>
+                        <span data-i18n="lbl_guide_step4"><strong>계정 로그인</strong>: 학생 · 교사 · 학부모 계정으로 로그인 후 역할별 기능 활성화</span>
                     </div>
                 </div>
-                <span class="setup-badge">별도 설치 불필요 · 원클릭 실행</span>
+                <span class="setup-badge" data-i18n="lbl_guide_setup_badge">별도 설치 불필요 · 원클릭 실행</span>
             </div>
         </div>
 
         <!-- 오른쪽: 메뉴 설명 -->
         <div class="menu-col">
-            <div class="section-label">📋 메뉴 기능 안내</div>
+            <div class="section-label" data-i18n="lbl_guide_menu_header">📋 메뉴 기능 안내</div>
             <div class="tab-nav">
                 <button class="tab-btn active" onclick="switchTab(this,'home')">
-                    <i data-lucide="home"></i> 홈
+                    <i data-lucide="home"></i> <span data-i18n="nav_home">홈</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab(this,'lessons')">
-                    <i data-lucide="book-open"></i> 학습단원
+                    <i data-lucide="book-open"></i> <span data-i18n="nav_lessons">학습단원</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab(this,'ai')">
-                    <i data-lucide="bot"></i> AI 학습단원
+                    <i data-lucide="bot"></i> <span data-i18n="nav_ai_lessons">AI 학습단원</span>
                 </button>
                 <!-- 시스템 연결 탭 - 숨김 처리 (index.html과 동일하게, 코드 유지) -->
                 <button class="tab-btn" onclick="switchTab(this,'system')" style="display:none;" id="guide-tab-system">
-                    <i data-lucide="monitor"></i> 시스템 연결
+                    <i data-lucide="monitor"></i> <span data-i18n="nav_workspace">시스템 연결</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab(this,'projects')">
-                    <i data-lucide="blocks"></i> 프로젝트
+                    <i data-lucide="blocks"></i> <span data-i18n="nav_projects">프로젝트</span>
                 </button>
             </div>
 
             <div class="menu-panel panel-home active" id="mpanel-home">
                 <div class="menu-card">
                     <div class="menu-tag">Menu 01</div>
-                    <div class="menu-title">홈 (Home)</div>
-                    <div class="menu-desc">
+                    <div class="menu-title" data-i18n="lbl_menu01_title">홈 (Home)</div>
+                    <div class="menu-desc" data-i18n="lbl_menu01_desc">
                         BrickSync의 <strong>메인 페이지</strong>입니다.<br>
                         학습 시작, 포트나이트 맵 접속, 내 프로젝트 확인 등<br>
                         모든 기능을 한눈에 볼 수 있는 시작 화면입니다.
                     </div>
-                    <span class="menu-badge">시작 화면</span>
+                    <span class="menu-badge" data-i18n="lbl_menu01_badge">시작 화면</span>
                 </div>
             </div>
 
             <div class="menu-panel panel-lessons" id="mpanel-lessons">
                 <div class="menu-card">
                     <div class="menu-tag">Menu 02</div>
-                    <div class="menu-title">학습단원 (Lessons)</div>
-                    <div class="menu-desc">
+                    <div class="menu-title" data-i18n="lbl_menu02_title">학습단원 (Lessons)</div>
+                    <div class="menu-desc" data-i18n="lbl_menu02_desc">
                         BrickSync 코딩 커리큘럼 <strong>1~5단원</strong>을 학습하는 공간입니다.<br>
                         단원별 미션을 수행하며 레고 허브 블록 코딩을 단계적으로 배울 수 있습니다.<br>
                         각 단원을 완료하면 <strong>코인 보상</strong>이 지급됩니다.
                     </div>
-                    <span class="menu-badge">1단원 ~ 5단원</span>
+                    <span class="menu-badge" data-i18n="lbl_menu02_badge">1단원 ~ 5단원</span>
                 </div>
             </div>
 
             <div class="menu-panel panel-ai" id="mpanel-ai">
                 <div class="menu-card">
                     <div class="menu-tag">Menu 03</div>
-                    <div class="menu-title">AI 학습단원 (AI Lessons)</div>
-                    <div class="menu-desc">
+                    <div class="menu-title" data-i18n="lbl_menu03_title">AI 학습단원 (AI Lessons)</div>
+                    <div class="menu-desc" data-i18n="lbl_menu03_desc">
                         인공지능을 활용한 <strong>심화 학습</strong> 공간입니다.<br>
                         <strong>6~8단원</strong>에서는 손 제스처 인식, 음성 명령 등<br>
                         AI 기술과 레고 허브를 융합한 특별한 코딩 미션을 경험합니다.
                     </div>
-                    <span class="menu-badge">6단원 ~ 8단원 · AI 융합</span>
+                    <span class="menu-badge" data-i18n="lbl_menu03_badge">6단원 ~ 8단원 · AI 융합</span>
                 </div>
             </div>
 
@@ -402,13 +402,13 @@
             <div class="menu-panel panel-projects" id="mpanel-projects">
                 <div class="menu-card">
                     <div class="menu-tag">Menu 05</div>
-                    <div class="menu-title">프로젝트 (Projects)</div>
-                    <div class="menu-desc">
+                    <div class="menu-title" data-i18n="lbl_menu05_title">프로젝트 (Projects)</div>
+                    <div class="menu-desc" data-i18n="lbl_menu05_desc">
                         내가 만든 <strong>코딩 프로젝트</strong>를 저장하고 관리하는 공간입니다.<br>
                         이전에 작업한 코드를 불러오거나<br>
                         새 프로젝트를 시작할 수 있습니다.
                     </div>
-                    <span class="menu-badge">프로젝트 저장 · 관리</span>
+                    <span class="menu-badge" data-i18n="lbl_menu05_badge">프로젝트 저장 · 관리</span>
                 </div>
             </div>
         </div>
@@ -416,6 +416,7 @@
     </div><!-- /two-col -->
 </div><!-- /guide-wrap -->
 
+<script src="settings.js"></script>
 <script>
     lucide.createIcons();
     function switchTab(btn, name) {
