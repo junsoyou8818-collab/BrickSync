@@ -5675,10 +5675,13 @@ print("BrickSync Sandbox Run")
                 const btnPaper = document.querySelector('button[onclick="addExample(1)"]');
                 const btnScissors = document.querySelector('button[onclick="addExample(2)"]');
 
+                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                const isEn = currentLang === 'en';
+
                 if (btnRock) {
                     btnRock.style.background = '#f97316';
                     btnRock.style.boxShadow = '0 3px 0 #ea580c';
-                    btnRock.innerHTML = '<i class="fas fa-dragon"></i> <span>몬스터 (Monster)</span>';
+                    btnRock.innerHTML = `<i class="fas fa-dragon"></i> <span>${isEn ? 'Monster' : '몬스터'}</span>`;
                 }
                 if (btnPaper) btnPaper.style.display = 'none';
                 if (btnScissors) btnScissors.style.display = 'none';
@@ -5743,7 +5746,7 @@ print("BrickSync Sandbox Run")
                             <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
                                 <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '⌨️ Text Command Input (Mic Backup)' : '⌨️ 텍스트 명령 입력 (마이크 백업용)'}</div>
                                 <div style="display: flex; gap: 8px; width: 100%;">
-                                    <input type="text" id="voice-text-input" placeholder="${isEn ? 'e.g. Turn 5 times forward' : '예: 앞으로 5바퀴 돌아 / Turn 5 times forward'}" style="flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; outline: none; font-weight: 600; font-family: inherit;" />
+                                    <input type="text" id="voice-text-input" placeholder="${isEn ? 'e.g. Turn 5 times forward' : '예: 앞으로 5바퀴 돌아'}" style="flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; outline: none; font-weight: 600; font-family: inherit;" />
                                     <button id="btn-send-voice-text" style="background: #3b82f6; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.1s;">${isEn ? 'Submit' : '입력'}</button>
                                 </div>
                             </div>
