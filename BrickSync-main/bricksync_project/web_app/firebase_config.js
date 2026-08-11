@@ -1,16 +1,17 @@
 // BrickSync - Firebase 통합 설정 파일 (Auth + Firestore)
 // ============================================================
 // [v2.0] Firebase Authentication + Firestore 기반 역할별 인증 시스템
-// 프로젝트: bricksync-1e814
+// 프로젝트: bricksync-65781 (개인 소유)
 // ============================================================
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCSojrWgkQdtXGcbeUwdlJKmKJcLBupN7o",
-    authDomain: "bricksync-1e814.firebaseapp.com",
-    projectId: "bricksync-1e814",
-    storageBucket: "bricksync-1e814.firebasestorage.app",
-    messagingSenderId: "585550769605",
-    appId: "1:585550769605:web:7b14af2edaadfa7f062fac"
+    apiKey: "AIzaSyBzXYHE6JiVa31mhEQs5jXjriw-uoJ2xJo",
+    authDomain: "bricksync-65781.firebaseapp.com",
+    projectId: "bricksync-65781",
+    storageBucket: "bricksync-65781.firebasestorage.app",
+    messagingSenderId: "535108260222",
+    appId: "1:535108260222:web:89664a949b18588f26632f",
+    measurementId: "G-YWKZ2HF985"
 };
 
 // ── 전역 서비스 인스턴스 ──────────────────────────────────────
