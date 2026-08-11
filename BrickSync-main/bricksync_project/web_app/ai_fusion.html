@@ -5938,19 +5938,48 @@ print("BrickSync Sandbox Run")
                 predictWebcam();
             } catch (e) {
                 console.error('[AI Engine Error]', e);
-                let errMsg = '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> ';
-                if (e.message && e.message.startsWith('TIMEOUT:mobilenet')) {
-                    errMsg += isEn ? 'AI model load timeout. Camera is active. Please retry training.' : 'AI 모델 로딩 지연. 카메라 연결됨. 다시 시도해주세요.';
-                } else if (e.message && e.message.includes('WEBCAM')) {
-                    errMsg += isEn ? 'Camera connection timeout. Please check camera device.' : '카메라 연결 시간 초과. 카메라 장치를 확인하고 새로고침 해주세요.';
-                } else if (e.name === 'NotAllowedError' || (e.message && e.message.includes('Permission'))) {
-                    errMsg += isEn ? 'Camera permission denied. Please allow camera access.' : '카메라 권한이 거부되었습니다. 주소창 🔒 아이콘에서 카메라 권한을 허용해주세요.';
+                let errMsg = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> `;
+                const errDetail = e ? `${e.name || ''}: ${e.message || e}` : 'Unknown';
+                
+                if (e.name === 'NotAllowedError' || (e.message && e.message.includes('Permission'))) {
+                    errMsg += isEn ? 'Camera permission denied. Please allow camera access on browser address bar 🔒.' : '카메라 권한이 거부되었습니다. 브라우저 주소창 🔒 아이콘을 눌러 카메라 권한을 [허용]해주세요.';
                 } else if (e.name === 'NotFoundError') {
-                    errMsg += isEn ? 'Camera device not found. Please check connection.' : '카메라 장치를 찾을 수 없습니다. 웹캠이 연결되어 있는지 확인해주세요.';
+                    errMsg += isEn ? 'Camera device not found. Please connect your webcam.' : '카메라 장치를 찾을 수 없습니다. 웹캠이 연결되어 있는지 확인해주세요.';
+                } else if (e.name === 'NotReadableError' || (e.message && e.message.includes('in use'))) {
+                    errMsg += isEn ? 'Camera is currently in use by another app (Zoom, Teams, etc.).' : '카메라가 다른 앱(Zoom, 팀즈, 카카오톡 등)에서 이미 사용 중입니다. 다른 앱을 종료하고 시도해주세요.';
                 } else {
-                    errMsg += isEn ? 'Camera or AI engine error. Please refresh.' : '카메라 또는 AI 엔진 오류가 발생했습니다. 새로고침 후 시도해주세요.';
+                    errMsg += isEn ? `Camera connection status: (${errDetail}). Click [Force Connect Camera] button.` : `카메라 연결 상태: (${errDetail}). [웹캠 강제 연결] 버튼을 눌러보세요.`;
                 }
+
+                errMsg += `<br><button onclick="forceConnectWebcam()" style="margin-top:8px; padding: 6px 14px; background:#0284c7; color:#fff; border:none; border-radius:20px; font-weight:800; cursor:pointer;"><i class="fas fa-camera"></i> ${isEn ? 'Force Connect Camera 📷' : '웹캠 강제 연결하기 📷'}</button>`;
+
                 aiStatusLabel.innerHTML = errMsg;
+                aiStatusLabel.style.color = '#991b1b';
+                aiStatusLabel.style.backgroundColor = '#fee2e2';
+                aiStatusLabel.style.borderColor = '#fecaca';
+            }
+        }
+
+        // 🚀 웹캠 강제 직접 접속 함수
+        async function forceConnectWebcam() {
+            if (!aiStatusLabel) return;
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
+            aiStatusLabel.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Connecting Camera Directly...' : '웹캠 직접 연결 시도 중...'}`;
+            aiStatusLabel.style.color = '#0369a1';
+            aiStatusLabel.style.backgroundColor = '#e0f2fe';
+            aiStatusLabel.style.borderColor = '#bae6fd';
+            try {
+                await setupWebcam();
+                aiStatusLabel.innerHTML = `<i class="fas fa-check-circle"></i> ${isEn ? 'Webcam Stream Connected Successfully!' : '웹캠 라이브 화면 연결 성공!'}`;
+                aiStatusLabel.style.color = '#10b981';
+                aiStatusLabel.style.backgroundColor = '#d1fae5';
+                aiStatusLabel.style.borderColor = '#a7f3d0';
+                aiLoopRunning = true;
+                predictWebcam();
+            } catch (err) {
+                const errDetail = err ? `${err.name || ''}: ${err.message || err}` : 'Unknown';
+                aiStatusLabel.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${isEn ? 'Camera Connection Failed:' : '카메라 연결 실패 원인:'} <strong>${errDetail}</strong><br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:4px 12px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:700; cursor:pointer;">${isEn ? 'Retry Camera 📷' : '카메라 재시도 📷'}</button>`;
                 aiStatusLabel.style.color = '#991b1b';
                 aiStatusLabel.style.backgroundColor = '#fee2e2';
                 aiStatusLabel.style.borderColor = '#fecaca';
