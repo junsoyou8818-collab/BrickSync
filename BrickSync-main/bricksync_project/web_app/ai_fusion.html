@@ -5400,57 +5400,99 @@ print("BrickSync Sandbox Run")
         const aiStatusLabel = document.getElementById('ai-status');
         let examplesCount = [0, 0, 0, 0];
 
-        // [BUG-03 FIX] 웹캠 초기화에 타임아웃(10초) 보호 추가
-        // 이전 코드는 loadeddata 이벤트가 발생하지 않을 경우 Promise가 영원히 resolve되지 않았음.
-        // 카메라 장치 없음/권한 지연/드라이버 오류 등으로 인한 무한 로딩 방지.
-        async function setupWebcam() {
-            const WEBCAM_TIMEOUT_MS = 10000; // 10초 타임아웃
-
-            function withTimeout(promise, ms, errMsg) {
-                return Promise.race([
-                    promise,
-                    new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error(errMsg)), ms)
-                    )
-                ]);
-            }
-
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                    webcamElement.srcObject = stream;
-                    return await withTimeout(
-                        new Promise((resolve) => {
-                            webcamElement.addEventListener('loadeddata', () => resolve(), { once: true });
-                        }),
-                        WEBCAM_TIMEOUT_MS,
-                        'WEBCAM_LOADEDDATA_TIMEOUT'
-                    );
-                } catch (error) {
-                    throw error;
-                }
-            } else {
-                return new Promise((resolve, reject) => {
-                    const navigatorAny = navigator;
-                    navigator.getUserMedia = navigator.getUserMedia ||
-                        navigatorAny.webkitGetUserMedia || navigatorAny.mozGetUserMedia || navigatorAny.msGetUserMedia;
-                    if (navigator.getUserMedia) {
-                        const timeoutId = setTimeout(() => reject(new Error('WEBCAM_LEGACY_TIMEOUT')), WEBCAM_TIMEOUT_MS);
-                        navigator.getUserMedia({ video: true }, stream => {
-                            webcamElement.srcObject = stream;
-                            webcamElement.addEventListener('loadeddata', () => {
-                                clearTimeout(timeoutId);
-                                resolve();
-                            }, { once: true });
-                        }, error => {
-                            clearTimeout(timeoutId);
-                            reject(error);
+        // 🎥 이전 활성화된 웹캠 트랙 안전 해제 (카메라 장치 락 및 재접속 실패 완전 방지)
+        function stopExistingWebcam() {
+            try {
+                if (webcamElement && webcamElement.srcObject) {
+                    const stream = webcamElement.srcObject;
+                    if (stream && stream.getTracks) {
+                        stream.getTracks().forEach(track => {
+                            try { track.stop(); } catch (e) { }
                         });
-                    } else {
-                        reject(new Error("getUserMedia is not supported on this browser"));
                     }
-                });
+                    webcamElement.srcObject = null;
+                }
+            } catch (e) {
+                console.warn('[Webcam] Existing stream cleanup warning:', e);
             }
+        }
+
+        // 🚀 스마트 웹캠 3단계 강인성 스트림 취득 함수
+        async function getRobustWebcamStream() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error("getUserMedia is not supported on this browser");
+            }
+
+            // 1차 시도: 권장 640x480 해상도 + 전면 카메라
+            try {
+                return await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }
+                });
+            } catch (e1) {
+                console.warn('[Webcam] 1st constraint failed, retrying with basic video:true', e1);
+            }
+
+            // 2차 시도: 기본 비디오 요청
+            try {
+                return await navigator.mediaDevices.getUserMedia({ video: true });
+            } catch (e2) {
+                console.warn('[Webcam] 2nd basic getUserMedia failed, checking enumerateDevices()', e2);
+            }
+
+            // 3차 시도: 연결된 웹캠 비디오 장치 직접 수동 탐색 지정
+            if (navigator.mediaDevices.enumerateDevices) {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                if (videoDevices.length > 0) {
+                    for (const dev of videoDevices) {
+                        try {
+                            return await navigator.mediaDevices.getUserMedia({
+                                video: { deviceId: { exact: dev.deviceId } }
+                            });
+                        } catch (e3) { }
+                    }
+                }
+            }
+
+            throw new Error("WEBCAM_DEVICE_NOT_ACCESSIBLE");
+        }
+
+        // [BUG-03 FIX & WEBCAM ENHANCEMENT] 웹캠 완벽 연결 및 재생 보장
+        async function setupWebcam() {
+            // 1. 기존 카메라 트랙 완전 해제
+            stopExistingWebcam();
+
+            // 2. 비디오 엘리먼트 자동재생 속성 보장
+            if (webcamElement) {
+                webcamElement.muted = true;
+                webcamElement.setAttribute('playsinline', 'true');
+                webcamElement.setAttribute('autoplay', 'true');
+            }
+
+            // 3. 웹캠 스트림 획득
+            const stream = await getRobustWebcamStream();
+            webcamElement.srcObject = stream;
+
+            // 4. 비디오 재생 명령 및 렌더링 완료 대기
+            try {
+                await webcamElement.play();
+            } catch (pErr) {
+                console.warn('[Webcam] play() error handled:', pErr);
+            }
+
+            return new Promise((resolve) => {
+                const checkReady = () => {
+                    if (webcamElement.readyState >= 2 && webcamElement.videoWidth > 0) {
+                        resolve();
+                    } else {
+                        setTimeout(checkReady, 100);
+                    }
+                };
+
+                webcamElement.addEventListener('loadeddata', () => resolve(), { once: true });
+                webcamElement.addEventListener('loadedmetadata', () => checkReady(), { once: true });
+                checkReady();
+            });
         }
 
         let speechRecognition;
