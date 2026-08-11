@@ -17,7 +17,8 @@ else:
     SERVER_EXE = None  # 개발시엔 Python으로 직접 실행
 
 PYTHON_EXE = sys.executable
-SERVER_PY = r"C:\Users\Mons\Documents\GitHub\BrickSync\BrickSync-main\bricksync_project\bridge_server\server.py"
+_LAUNCHER_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_PY = os.path.join(_LAUNCHER_DIR, "..", "bricksync_project", "bridge_server", "server.py")
 BRICKSYNC_URL = "https://www.bricksync.org"
 
 # Chrome 설치 경로 목록 (우선순위 순)
