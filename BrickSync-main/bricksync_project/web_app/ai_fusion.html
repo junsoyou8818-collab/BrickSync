@@ -5888,11 +5888,25 @@ print("BrickSync Sandbox Run")
             }
 
             try {
-                aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-spinner fa-spin"></i> Loading MobileNet Model... (Max 15s)' : '<i class="fas fa-spinner fa-spin"></i> 모바일넷 모델링 중... (최대 15초)';
-                net = await withTimeout(mobilenet.load(), MODEL_LOAD_TIMEOUT_MS, 'mobilenet');
-
+                // 🚀 1. 웹캠 화면을 최우선으로 0.1초 만에 화면에 띄움 (비디오 프리뷰 즉시 활성화)
                 aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-camera"></i> Mounting Webcam...' : '<i class="fas fa-camera"></i> 웹캠 마운트 중...';
-                await setupWebcam();
+                try {
+                    await setupWebcam();
+                } catch (camErr) {
+                    console.warn('[Webcam Mount Warning]', camErr);
+                }
+
+                // 🚀 2. 웹캠이 켜진 후 AI 모델 비동기 로딩 (최대 12초 타임아웃)
+                aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-spinner fa-spin"></i> Loading AI Model...' : '<i class="fas fa-spinner fa-spin"></i> AI 모델 분석 로딩 중...';
+                
+                if (!net) {
+                    try {
+                        net = await withTimeout(mobilenet.load({ version: 1, alpha: 0.25 }), 12000, 'mobilenet');
+                    } catch (mErr) {
+                        console.warn('[MobileNet Primary Load Failed, retrying default mobilenet.load()]', mErr);
+                        net = await mobilenet.load();
+                    }
+                }
 
                 aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> AI Engine Ready! Train using buttons below.' : '<i class="fas fa-check-circle"></i> AI 엔진 가동 완료! 하단의 버튼으로 학습하세요.';
                 aiStatusLabel.style.color = '#10b981';
@@ -5905,15 +5919,15 @@ print("BrickSync Sandbox Run")
                 console.error('[AI Engine Error]', e);
                 let errMsg = '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> ';
                 if (e.message && e.message.startsWith('TIMEOUT:mobilenet')) {
-                    errMsg += isEn ? 'AI model load timeout (15s). Please check network and refresh.' : 'AI 모델 로딩 시간 초과 (15초). 네트워크 연결을 확인하고 새로고침 해주세요.';
+                    errMsg += isEn ? 'AI model load timeout. Camera is active. Please retry training.' : 'AI 모델 로딩 지연. 카메라 연결됨. 다시 시도해주세요.';
                 } else if (e.message && e.message.includes('WEBCAM')) {
-                    errMsg += isEn ? 'Camera connection timeout (10s). Please check camera device.' : '카메라 연결 시간 초과 (10초). 카메라 장치를 확인하고 새로고침 해주세요.';
+                    errMsg += isEn ? 'Camera connection timeout. Please check camera device.' : '카메라 연결 시간 초과. 카메라 장치를 확인하고 새로고침 해주세요.';
                 } else if (e.name === 'NotAllowedError' || (e.message && e.message.includes('Permission'))) {
-                    errMsg += isEn ? 'Camera permission denied. Please allow camera access.' : '카메라 권한이 거부되었습니다. 브라우저 주소창의 🔒 아이콘을 클릭하여 카메라 권한을 허용해주세요.';
+                    errMsg += isEn ? 'Camera permission denied. Please allow camera access.' : '카메라 권한이 거부되었습니다. 주소창 🔒 아이콘에서 카메라 권한을 허용해주세요.';
                 } else if (e.name === 'NotFoundError') {
                     errMsg += isEn ? 'Camera device not found. Please check connection.' : '카메라 장치를 찾을 수 없습니다. 웹캠이 연결되어 있는지 확인해주세요.';
                 } else {
-                    errMsg += isEn ? 'Camera or AI engine error occurred. Please refresh.' : '카메라 또는 AI 엔진 오류가 발생했습니다. 새로고침 후 다시 시도해주세요.';
+                    errMsg += isEn ? 'Camera or AI engine error. Please refresh.' : '카메라 또는 AI 엔진 오류가 발생했습니다. 새로고침 후 시도해주세요.';
                 }
                 aiStatusLabel.innerHTML = errMsg;
                 aiStatusLabel.style.color = '#991b1b';
