@@ -5386,7 +5386,7 @@ print("BrickSync Sandbox Run")
 
     <!-- 🚀 AI CAMERA ENGINE (Seesaw Protection System) 🚀 -->
     <script>
-        const classifier = knnClassifier.create();
+        let classifier = null; // 안전 전역 선언 (ReferenceError 원천 차단)
         const webcamElement = document.getElementById('webcam');
         let net;
         let aiLoopRunning = false;
@@ -5888,6 +5888,25 @@ print("BrickSync Sandbox Run")
             }
 
             try {
+                // 🚀 0. 안전 분류기(Classifier) 인스턴스 보장 (ReferenceError 차단)
+                if (!classifier) {
+                    if (typeof knnClassifier !== 'undefined' && knnClassifier.create) {
+                        classifier = knnClassifier.create();
+                    } else {
+                        console.warn('[AI] Dynamic script loading fallback for knnClassifier...');
+                        await new Promise((res) => {
+                            const script = document.createElement('script');
+                            script.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier';
+                            script.onload = () => {
+                                if (typeof knnClassifier !== 'undefined') classifier = knnClassifier.create();
+                                res();
+                            };
+                            script.onerror = () => res();
+                            document.head.appendChild(script);
+                        });
+                    }
+                }
+
                 // 🚀 1. 웹캠 화면을 최우선으로 0.1초 만에 화면에 띄움 (비디오 프리뷰 즉시 활성화)
                 aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-camera"></i> Mounting Webcam...' : '<i class="fas fa-camera"></i> 웹캠 마운트 중...';
                 try {
@@ -5904,7 +5923,9 @@ print("BrickSync Sandbox Run")
                         net = await withTimeout(mobilenet.load({ version: 1, alpha: 0.25 }), 12000, 'mobilenet');
                     } catch (mErr) {
                         console.warn('[MobileNet Primary Load Failed, retrying default mobilenet.load()]', mErr);
-                        net = await mobilenet.load();
+                        if (typeof mobilenet !== 'undefined') {
+                            net = await mobilenet.load();
+                        }
                     }
                 }
 
@@ -5938,7 +5959,7 @@ print("BrickSync Sandbox Run")
 
         async function predictWebcam() {
             while (aiLoopRunning) {
-                if (classifier.getNumClasses() > 0) {
+                if (classifier && classifier.getNumClasses() > 0) {
                     const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
                     const isEn = currentLang === 'en';
                     const img = await webcamElement;
@@ -5995,8 +6016,19 @@ print("BrickSync Sandbox Run")
         }
 
         function addExample(classId) {
-            const activation = net.infer(webcamElement, 'conv_preds');
-            classifier.addExample(activation, classId);
+            if (!classifier && typeof knnClassifier !== 'undefined') {
+                classifier = knnClassifier.create();
+            }
+            if (!classifier || !net) {
+                console.warn('[AI] Classifier or Net not ready yet.');
+                return;
+            }
+            try {
+                const activation = net.infer(webcamElement, 'conv_preds');
+                classifier.addExample(activation, classId);
+            } catch (e) {
+                console.error('[AI] addExample error:', e);
+            }
             examplesCount[classId]++;
 
             document.getElementById('count-rock').innerText = `${examplesCount[0]}개`;
