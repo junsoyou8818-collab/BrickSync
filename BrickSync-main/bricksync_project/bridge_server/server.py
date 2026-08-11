@@ -317,7 +317,7 @@ def init_app():
     app.router.add_get('/ws', handle_websocket)
     # web_app 폴더가 있을 때만 정적 파일 서빙 등록
     # BrickSync.exe로 다른 PC에서 실행 시 web_app 폴더가 없어도 정상 동작
-    # (웹앱은 https://bricksync.monsteratech.com 에서 Cloudflare로 서빙됨)
+    # (웹앱은 https://www.bricksync.org 에서 Cloudflare로 서빙됨)
     _web_app_resolved = os.path.realpath(web_app_dir)
     if os.path.isdir(_web_app_resolved):
         app.router.add_get('/', index_handler)

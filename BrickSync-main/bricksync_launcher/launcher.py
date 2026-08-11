@@ -18,7 +18,7 @@ else:
 
 PYTHON_EXE = sys.executable
 SERVER_PY = r"C:\Users\Mons\Documents\GitHub\BrickSync\BrickSync-main\bricksync_project\bridge_server\server.py"
-BRICKSYNC_URL = "https://bricksync.monsteratech.com"
+BRICKSYNC_URL = "https://www.bricksync.org"
 
 # Chrome 설치 경로 목록 (우선순위 순)
 # C:\Program Files 를 최우선으로 (이 PC에서 발견된 경로)
