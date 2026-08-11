@@ -77,8 +77,12 @@ def open_browser_when_ready():
     if chrome:
         try:
             # ✅ Chrome은 GUI 앱이므로 CREATE_NO_WINDOW 플래그 없이 실행
-            # CREATE_NO_WINDOW는 콘솔 앱 전용 → Chrome에 쓰면 일부 PC에서 실행 차단됨
-            subprocess.Popen([chrome, BRICKSYNC_URL])
+            subprocess.Popen(
+                [chrome, BRICKSYNC_URL],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
         except Exception:
             # Chrome 실행 실패 시 기본 브라우저로 폴백
             webbrowser.open(BRICKSYNC_URL)
