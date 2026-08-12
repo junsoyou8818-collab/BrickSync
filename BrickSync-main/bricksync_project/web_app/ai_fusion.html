@@ -949,11 +949,6 @@
                 style="padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; align-items: center; overflow-y: auto;">
                 <div
                     style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155;">
-                    <!-- 카메라 6개 선택용 스마트 드롭다운 UI (직관적 보라색 배지) -->
-                    <div style="position: absolute; top: 10px; right: 10px; z-index: 25; display: flex; align-items: center; gap: 6px;">
-                        <select id="camera-device-select" onchange="onCameraSelectChange(this.value)"
-                            style="background: linear-gradient(135deg, #0284c7, #4f46e5); color: #ffffff; border: 2px solid #6366f1; border-radius: 20px; padding: 6px 14px; font-size: 0.85rem; font-weight: 800; cursor: pointer; outline: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); max-width: 260px; text-overflow: ellipsis; display: block;"></select>
-                    </div>
                     <video id="webcam" autoplay playsinline
                         style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
                     <div id="ai-result-overlay"
@@ -5434,47 +5429,50 @@ print("BrickSync Sandbox Run")
             }
         }
 
-        // 🚀 스마트 웹캠 6개 다중 장치 자동 스캐닝 및 최적 디바이스 선택 함수
-        async function getRobustWebcamStream(targetDeviceId = null) {
+        // 🚀 100% 가상 카메라 블랙리스트 차단 및 실제 하드웨어 웹캠 전용 자동 바인딩 함수
+        async function getRobustWebcamStream() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error("getUserMedia is not supported on this browser");
             }
 
-            // 연결된 카메라 장치들 탐색 및 드롭다운 메뉴 갱신
+            // 🚫 가상 카메라 키워드 블랙리스트 (100% 무조건 배제)
+            const virtualKeywords = ['virtual', 'obs', 'camo', 'droid', 'epoc', 'manycam', 'splitcam', 'unity', 'nvidia', 'broadcast', 'software', 'screen', 'capture', 'streamlabs', 'e2esoft', 'xsplit', 'ivcam'];
+
             try {
                 if (navigator.mediaDevices.enumerateDevices) {
                     const devices = await navigator.mediaDevices.enumerateDevices();
                     const videoDevices = devices.filter(d => d.kind === 'videoinput');
                     
-                    // 드롭다운 UI 갱신 (항상 노출)
-                    populateCameraSelect(videoDevices);
-
-                    // 특정 장치 선택 시
-                    if (targetDeviceId) {
-                        return await navigator.mediaDevices.getUserMedia({
-                            video: { deviceId: { exact: targetDeviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
-                        });
-                    }
-
-                    // 1순위: C920, Logitech, HD Pro 등 실제 물리 웹캠 탐색
-                    const realCam = videoDevices.find(d => {
-                        const lbl = (d.label || '').toLowerCase();
-                        return lbl.includes('c920') || lbl.includes('logitech') || lbl.includes('hd pro') || (lbl.includes('webcam') && !lbl.includes('virtual') && !lbl.includes('obs'));
+                    // 1. 가상 카메라 100% 완전 제거된 진짜 물리 웹캠만 필터링
+                    const realPhysicalCams = videoDevices.filter(d => {
+                        const label = (d.label || '').toLowerCase();
+                        return !virtualKeywords.some(kw => label.includes(kw));
                     });
 
-                    if (realCam && realCam.deviceId) {
+                    console.log('[Webcam Filter] All Video Devices:', videoDevices.map(d => d.label));
+                    console.log('[Webcam Filter] Real Physical Cameras:', realPhysicalCams.map(d => d.label));
+
+                    // 1순위: C920, Logitech, HD Pro 우선 매칭
+                    const priorityCam = realPhysicalCams.find(d => {
+                        const lbl = (d.label || '').toLowerCase();
+                        return lbl.includes('c920') || lbl.includes('logitech') || lbl.includes('hd pro') || lbl.includes('integrated');
+                    });
+
+                    const targetCam = priorityCam || (realPhysicalCams.length > 0 ? realPhysicalCams[0] : null);
+
+                    if (targetCam && targetCam.deviceId) {
                         try {
-                            console.log('[Webcam] Priority physical webcam matched:', realCam.label);
+                            console.log('[Webcam] Connecting target physical camera:', targetCam.label);
                             return await navigator.mediaDevices.getUserMedia({
-                                video: { deviceId: { exact: realCam.deviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
+                                video: { deviceId: { exact: targetCam.deviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
                             });
                         } catch (pErr) {
-                            console.warn('[Webcam] Priority camera failed, trying next:', pErr);
+                            console.warn('[Webcam] Physical camera direct match failed, fallbacking...', pErr);
                         }
                     }
 
-                    // 2순위: 6개 카메라 전체 순차 자동 탐색
-                    for (const dev of videoDevices) {
+                    // 2순위: 물리 웹캠 배열 순차 시도
+                    for (const dev of realPhysicalCams) {
                         try {
                             const st = await navigator.mediaDevices.getUserMedia({
                                 video: { deviceId: { exact: dev.deviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
