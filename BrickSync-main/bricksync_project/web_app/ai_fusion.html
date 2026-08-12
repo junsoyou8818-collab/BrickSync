@@ -3932,24 +3932,26 @@ print("BrickSync Sandbox Run")
                             break;
                         }
                         case 'motor_cw':
-                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1400)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1150)) \n${indent}sm() \n`;
                             if (unit !== '8') {
                                 localActionsQueue.push({ action: 'motor_cw', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += (timeVal * 1400);
+                                cumulativeDelayMs += (timeVal * 1150);
                             } else {
-                                cumulativeDelayMs += (timeVal * 1400);
+                                cumulativeDelayMs += (timeVal * 1150);
                             }
-                            cumulativeDelayMs += 600;
+                            localActionsQueue.push({ action: 'motor_stop', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += 800; // 관성 및 반대 방향 회전 충돌 방지 브레이크 휴식 800ms
                             break;
                         case 'motor_ccw':
-                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 975)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1150)) \n${indent}sm() \n`;
                             if (unit !== '8') {
                                 localActionsQueue.push({ action: 'motor_ccw', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += (timeVal * 975);
+                                cumulativeDelayMs += (timeVal * 1150);
                             } else {
-                                cumulativeDelayMs += (timeVal * 975);
+                                cumulativeDelayMs += (timeVal * 1150);
                             }
-                            cumulativeDelayMs += 600;
+                            localActionsQueue.push({ action: 'motor_stop', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += 800; // 관성 및 반대 방향 회전 충돌 방지 브레이크 휴식 800ms
                             break;
                         case 'motor_stop':
                             pyCode += `${indent}sm() \n`;
