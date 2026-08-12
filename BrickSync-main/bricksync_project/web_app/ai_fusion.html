@@ -951,11 +951,6 @@
                     style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155;">
                     <video id="webcam" autoplay playsinline
                         style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
-                    <!-- 중앙 카메라 원클릭 직통 가동 버튼 (Autoplay 방지용) -->
-                    <div id="cam-direct-start-btn" onclick="forceConnectWebcam(); this.style.display='none';"
-                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 12px 24px; border-radius: 30px; font-weight: 900; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4), 0 3px 0 #075985; border: 2px solid rgba(255,255,255,0.4); display: flex; align-items: center; gap: 8px; z-index: 10; transition: all 0.2s ease;">
-                        <i class="fas fa-video" style="font-size: 1.2rem;"></i> <span data-i18n="btn_start_camera_now">📷 카메라 바로 켜기</span>
-                    </div>
                     <div id="ai-result-overlay"
                         style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 8px 20px; border-radius: 20px; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(4px);">
                         <i class="fas fa-eye"></i> <span id="current-gesture" data-i18n="lbl_gesture_waiting">대기
@@ -5498,11 +5493,13 @@ print("BrickSync Sandbox Run")
             }
 
             return new Promise((resolve) => {
+                let attempts = 0;
                 const checkReady = () => {
-                    if (webcamElement.readyState >= 2 && webcamElement.videoWidth > 0) {
+                    attempts++;
+                    if ((webcamElement.readyState >= 2 && webcamElement.videoWidth > 0) || attempts > 3) {
                         resolve();
                     } else {
-                        setTimeout(checkReady, 100);
+                        setTimeout(checkReady, 50);
                     }
                 };
 
