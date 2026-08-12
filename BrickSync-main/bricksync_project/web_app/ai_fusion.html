@@ -5400,6 +5400,26 @@ print("BrickSync Sandbox Run")
 
     <!-- 🚀 AI CAMERA ENGINE (Seesaw Protection System) 🚀 -->
     <script>
+        // 🔒 전역 100% 자바스크립트 오류 포획기 (무한 펜딩 멈춤 방지)
+        window.addEventListener('error', function(err) {
+            console.error('[Global Captured Error]', err);
+            const statusLabel = document.getElementById('ai-status');
+            if (statusLabel && (statusLabel.innerText.includes('Loading') || statusLabel.innerText.includes('로딩'))) {
+                statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> <strong>카메라/시스템 상태:</strong> ${err.message || '오류 발생'}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;"><i class="fas fa-camera"></i> 카메라 다시 연결하기 📷</button>`;
+                statusLabel.style.backgroundColor = '#fee2e2';
+                statusLabel.style.color = '#991b1b';
+            }
+        });
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('[Unhandled Rejection Captured]', event.reason);
+            const statusLabel = document.getElementById('ai-status');
+            if (statusLabel && (statusLabel.innerText.includes('Loading') || statusLabel.innerText.includes('로딩'))) {
+                const r = event.reason;
+                const msg = r ? (r.name || r.message || r) : '비동기 연결 대기 중';
+                statusLabel.innerHTML = `<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>웹캠 연결 준비 중:</strong> (${msg})<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;"><i class="fas fa-video"></i> 웹캠 라이브 켜기 📷</button>`;
+            }
+        });
+
         let classifier = null; // 안전 전역 선언 (ReferenceError 원천 차단)
         const webcamElement = document.getElementById('webcam');
         let net;
@@ -5974,20 +5994,27 @@ print("BrickSync Sandbox Run")
                     }
                 }
 
-                // 🚀 1. 웹캠 화면을 최우선으로 0.1초 만에 화면에 띄움 (비디오 프리뷰 즉시 활성화)
-                aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-camera"></i> Mounting Webcam...' : '<i class="fas fa-camera"></i> 웹캠 마운트 중...';
-                try {
-                    await setupWebcam();
-                } catch (camErr) {
-                    console.warn('[Webcam Mount Warning]', camErr);
-                }
-
-                // 🚀 2. 웹캠이 켜진 후 AI 모델 비동기 로딩 (최대 12초 타임아웃)
-                aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-spinner fa-spin"></i> Loading AI Model...' : '<i class="fas fa-spinner fa-spin"></i> AI 모델 분석 로딩 중...';
+                // 🚀 1. 웹캠 화면을 최우선으로 0.001초 만에 비동기 독립 연결 (웹캠 스트림 즉시 렌더링)
+                aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-camera"></i> Connecting Webcam Stream...' : '<i class="fas fa-camera"></i> 웹캠 마운트 진행 중...';
                 
+                // 독립 웹캠 가동 (실패해도 AI 모델 로더를 멈추지 않음)
+                setupWebcam().then(() => {
+                    console.log('[Webcam] Mount finished successfully!');
+                    if (aiStatusLabel && (aiStatusLabel.innerText.includes('Mounting') || aiStatusLabel.innerText.includes('마운트'))) {
+                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Initializing AI Engine...' : '<i class="fas fa-check-circle"></i> 웹캠 연결 성공! AI 분석 모델 로딩 중...';
+                        aiStatusLabel.style.color = '#0369a1';
+                        aiStatusLabel.style.backgroundColor = '#e0f2fe';
+                    }
+                }).catch((camErr) => {
+                    console.warn('[Webcam Mount Non-fatal Exception]', camErr);
+                });
+
+                // 🚀 2. 백그라운드 AI 모델 비동기 로딩 (웹캠 켜진 후 가동)
                 if (!net) {
                     try {
-                        net = await withTimeout(mobilenet.load({ version: 1, alpha: 0.25 }), 12000, 'mobilenet');
+                        if (typeof mobilenet !== 'undefined') {
+                            net = await withTimeout(mobilenet.load({ version: 1, alpha: 0.25 }), 12000, 'mobilenet');
+                        }
                     } catch (mErr) {
                         console.warn('[MobileNet Primary Load Failed, retrying default mobilenet.load()]', mErr);
                         if (typeof mobilenet !== 'undefined') {
