@@ -4800,12 +4800,22 @@ except:
                         } else if (unit === '2') {
                             if (task_id === 'start') {
                                 isCompleted = presentActions.includes('start');
-                            } else if (task_id === 'flow_wait_5') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && cmd.val === 5);
-                            } else if (task_id === 'motor_cw_3') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && cmd.val === 3);
-                            } else if (task_id === 'motor_ccw_3') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && cmd.val === 3);
+                            } else if (task_id === 'flow_wait_5' || task_id === 'flow_wait') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && (cmd.val === 5 || cmd.val === '5'));
+                            } else if (task_id === 'motor_cw_3' || task_id === 'motor_cw') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && (cmd.val === 3 || cmd.val === '3'));
+                            } else if (task_id === 'motor_ccw_3' || task_id === 'motor_ccw') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && (cmd.val === 3 || cmd.val === '3'));
+                            }
+                        } else if (unit === '3') {
+                            if (task_id === 'start') {
+                                isCompleted = presentActions.includes('start');
+                            } else if (task_id === 'flow_wait_5' || task_id === 'flow_wait') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && (cmd.val === 5 || cmd.val === '5'));
+                            } else if (task_id === 'motor_cw_3' || task_id === 'motor_cw') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && (cmd.val === 3 || cmd.val === '3'));
+                            } else if (task_id === 'motor_ccw_2' || task_id === 'motor_ccw') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && (cmd.val === 2 || cmd.val === '2'));
                             }
                         } else if (unit === '4') {
                             if (task_id === 'start') {
