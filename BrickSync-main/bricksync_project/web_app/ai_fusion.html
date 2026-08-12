@@ -5977,7 +5977,7 @@ print("BrickSync Sandbox Run")
             }
         }
 
-        // 🚀 웹캠 강제 직접 접속 함수
+        // 🚀 웹캠 강제 직접 접속 함수 (유저 이벤트 직접 트리거 보장)
         async function forceConnectWebcam() {
             if (!aiStatusLabel) return;
             const directBtn = document.getElementById('cam-direct-start-btn');
@@ -5987,8 +5987,20 @@ print("BrickSync Sandbox Run")
             aiStatusLabel.style.color = '#0369a1';
             aiStatusLabel.style.backgroundColor = '#e0f2fe';
             aiStatusLabel.style.borderColor = '#bae6fd';
+
             try {
-                await setupWebcam();
+                // 직접 유저 클릭 이벤트 발생 시점에서 getUserMedia 즉시 실행
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } }
+                });
+                
+                stopExistingWebcam();
+                if (webcamElement) {
+                    webcamElement.muted = true;
+                    webcamElement.srcObject = stream;
+                    await webcamElement.play().catch(e => {});
+                }
+                
                 if (directBtn) directBtn.style.display = 'none';
                 aiStatusLabel.innerHTML = `<i class="fas fa-check-circle"></i> ${isEn ? 'Webcam Stream Connected Successfully!' : '웹캠 라이브 화면 연결 성공!'}`;
                 aiStatusLabel.style.color = '#10b981';
@@ -5997,8 +6009,14 @@ print("BrickSync Sandbox Run")
                 aiLoopRunning = true;
                 predictWebcam();
             } catch (err) {
+                console.error('[forceConnectWebcam Error]', err);
                 const errDetail = err ? `${err.name || ''}: ${err.message || err}` : 'Unknown';
-                aiStatusLabel.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${isEn ? 'Camera Connection Failed:' : '카메라 연결 실패 원인:'} <strong>${errDetail}</strong><br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:4px 12px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:700; cursor:pointer;">${isEn ? 'Retry Camera 📷' : '카메라 재시도 📷'}</button>`;
+                
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    alert(isEn ? 'Camera permission was denied. Click the 🔒 icon next to the URL bar and select Allow for Camera.' : '카메라 권한이 거부되었습니다. 주소창 왼쪽 🔒 아이콘을 눌러 카메라 권한을 [허용]으로 바꾸어 주세요.');
+                }
+                
+                aiStatusLabel.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${isEn ? 'Camera Connection Failed:' : '카메라 연결 실패 원인:'} <strong>${errDetail}</strong><br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 16px; background:#0284c7; color:#fff; border:none; border-radius:18px; font-weight:800; cursor:pointer;">${isEn ? 'Retry Camera 📷' : '카메라 다시 켜기 📷'}</button>`;
                 aiStatusLabel.style.color = '#991b1b';
                 aiStatusLabel.style.backgroundColor = '#fee2e2';
                 aiStatusLabel.style.borderColor = '#fecaca';
