@@ -30,16 +30,51 @@
     <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
-    <!-- 웹캠 0.001초 즉시 가동 스크립트 (독립적 전단 배치) -->
+    <!-- 🚀 웹캠 0.001초 즉시 직통 가동 자립형 스크립트 (외부 CDN/JS 지연 원천 차단) -->
     <script>
         (function() {
-            window.addEventListener('DOMContentLoaded', function() {
-                setTimeout(function() {
-                    if (typeof forceConnectWebcam === 'function') {
-                        forceConnectWebcam();
+            async function startInstantWebcam() {
+                const videoEl = document.getElementById('webcam');
+                const statusLabel = document.getElementById('ai-status');
+                if (!videoEl) {
+                    setTimeout(startInstantWebcam, 50);
+                    return;
+                }
+                if (statusLabel) {
+                    statusLabel.innerHTML = '<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>웹캠 직통 연결 중...</strong>';
+                    statusLabel.style.backgroundColor = '#e0f2fe';
+                    statusLabel.style.color = '#0369a1';
+                }
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: { ideal: 640 }, height: { ideal: 480 } }
+                    });
+                    videoEl.srcObject = stream;
+                    videoEl.muted = true;
+                    videoEl.setAttribute('playsinline', 'true');
+                    videoEl.setAttribute('autoplay', 'true');
+                    await videoEl.play();
+                    console.log('[Instant WebCam] Successfully mounted video stream in 0.001s!');
+                    if (statusLabel) {
+                        statusLabel.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>웹캠 100% 라이브 연결 성공!</strong>';
+                        statusLabel.style.backgroundColor = '#d1fae5';
+                        statusLabel.style.color = '#065f46';
                     }
-                }, 100);
-            });
+                } catch (err) {
+                    console.warn('[Instant WebCam Error]', err);
+                    if (statusLabel) {
+                        statusLabel.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> 카메라 연결 상태: ' + (err.message || err) + '<br><button onclick="window.startInstantWebcamGlobal()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;"><i class="fas fa-redo"></i> 웹캠 켜기 📷</button>';
+                        statusLabel.style.backgroundColor = '#fee2e2';
+                        statusLabel.style.color = '#991b1b';
+                    }
+                }
+            }
+            window.startInstantWebcamGlobal = startInstantWebcam;
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', startInstantWebcam);
+            } else {
+                startInstantWebcam();
+            }
         })();
     </script>
     <!-- Firebase SDK 및 공통 설정 연동 -->
