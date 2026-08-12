@@ -5888,7 +5888,7 @@ print("BrickSync Sandbox Run")
                 if (countScissors) countScissors.style.display = 'none';
             }
 
-            if ((unit === '3' || (unit === '8' || unit === '3'))) {
+            if (unit === '3' || unit === 'voice') {
                 const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
                 const isEn = currentLang === 'en';
 
@@ -6189,8 +6189,12 @@ print("BrickSync Sandbox Run")
             document.getElementById('count-none').innerText = `${examplesCount[3]}개`;
         }
 
-        // 스파이크 앱 로딩에 지장이 없도록 1.5초 딜레이 후 AI 로딩
-        setTimeout(app, 1500);
+        // DOM 즉시 로딩과 함께 AI 카메라 앱 시작 (0.001초 직통 연결)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', app);
+        } else {
+            app();
+        }
 
         // 툴박스(팔레트) 마우스 드래그 및 휠 가로 스크롤 구현
         function setupPaletteScroll() {
