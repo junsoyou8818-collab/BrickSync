@@ -5431,10 +5431,23 @@ print("BrickSync Sandbox Run")
             }
         }
 
-        // 🚀 100% 가상 카메라 블랙리스트 차단 및 실제 하드웨어 웹캠 전용 자동 바인딩 함수
+        // 🚀 크롬 주소창 선택 카메라 100% 최우선 순수 바인딩 함수
         async function getRobustWebcamStream() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error("getUserMedia is not supported on this browser");
+            }
+
+            // 0순위: 크롬 주소창 🔒 팝업에서 유저가 선택한 카메라(ABKO, C920 등)를 즉시 100% 획득
+            try {
+                const defaultStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } }
+                });
+                if (defaultStream && defaultStream.getVideoTracks().length > 0) {
+                    console.log('[Webcam] Successfully acquired Chrome default selected camera stream!');
+                    return defaultStream;
+                }
+            } catch (defErr) {
+                console.warn('[Webcam] 0-priority default stream failed, scanning physical devices...', defErr);
             }
 
             // 🚫 가상 카메라 키워드 블랙리스트 (100% 무조건 배제)
@@ -5451,28 +5464,6 @@ print("BrickSync Sandbox Run")
                         return !virtualKeywords.some(kw => label.includes(kw));
                     });
 
-                    console.log('[Webcam Filter] All Video Devices:', videoDevices.map(d => d.label));
-                    console.log('[Webcam Filter] Real Physical Cameras:', realPhysicalCams.map(d => d.label));
-
-                    // 1순위: C920, Logitech, HD Pro 우선 매칭
-                    const priorityCam = realPhysicalCams.find(d => {
-                        const lbl = (d.label || '').toLowerCase();
-                        return lbl.includes('c920') || lbl.includes('logitech') || lbl.includes('hd pro') || lbl.includes('integrated');
-                    });
-
-                    const targetCam = priorityCam || (realPhysicalCams.length > 0 ? realPhysicalCams[0] : null);
-
-                    if (targetCam && targetCam.deviceId) {
-                        try {
-                            console.log('[Webcam] Connecting target physical camera:', targetCam.label);
-                            return await navigator.mediaDevices.getUserMedia({
-                                video: { deviceId: { exact: targetCam.deviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
-                            });
-                        } catch (pErr) {
-                            console.warn('[Webcam] Physical camera direct match failed, fallbacking...', pErr);
-                        }
-                    }
-
                     // 2순위: 물리 웹캠 배열 순차 시도
                     for (const dev of realPhysicalCams) {
                         try {
@@ -5487,14 +5478,7 @@ print("BrickSync Sandbox Run")
                 console.warn('[Webcam] Device enumeration error:', enumErr);
             }
 
-            // 백업 1차 시도: 기본 권장 해상도
-            try {
-                return await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }
-                });
-            } catch (e1) { }
-
-            // 백업 2차 시도: 기본 비디오
+            // 백업 3차 시도: 기본 비디오 요청
             return await navigator.mediaDevices.getUserMedia({ video: true });
         }
 
