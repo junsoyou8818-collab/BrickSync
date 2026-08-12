@@ -5955,17 +5955,26 @@ print("BrickSync Sandbox Run")
                 let errMsg = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> `;
                 const errDetail = e ? `${e.name || ''}: ${e.message || e}` : 'Unknown';
                 
-                if (e.name === 'NotAllowedError' || (e.message && e.message.includes('Permission'))) {
-                    errMsg += isEn ? 'Camera permission denied. Please allow camera access on browser address bar 🔒.' : '카메라 권한이 거부되었습니다. 브라우저 주소창 🔒 아이콘을 눌러 카메라 권한을 [허용]해주세요.';
-                } else if (e.name === 'NotFoundError') {
-                    errMsg += isEn ? 'Camera device not found. Please connect your webcam.' : '카메라 장치를 찾을 수 없습니다. 웹캠이 연결되어 있는지 확인해주세요.';
-                } else if (e.name === 'NotReadableError' || (e.message && e.message.includes('in use'))) {
-                    errMsg += isEn ? 'Camera is currently in use by another app (Zoom, Teams, etc.).' : '카메라가 다른 앱(Zoom, 팀즈, 카카오톡 등)에서 이미 사용 중입니다. 다른 앱을 종료하고 시도해주세요.';
-                } else {
-                    errMsg += isEn ? `Camera connection status: (${errDetail}). Click [Force Connect Camera] button.` : `카메라 연결 상태: (${errDetail}). [웹캠 강제 연결] 버튼을 눌러보세요.`;
-                }
+                // 새 도메인(www.bricksync.org) 카메라 권한 허용 안내
+                const domainGuide = `<div style="margin-top:10px; padding:10px; background:#fff3cd; border:1px solid #ffe69c; border-radius:8px; color:#664d03; text-align:left; font-size:0.88rem; line-height:1.4;">
+                    <strong>🔒 카메라 권한 허용 방법 (도메인 변경 안내):</strong><br>
+                    새 홈페이지 주소(www.bricksync.org)로 이전되어 브라우저에서 카메라 권한을 새로 허용해야 합니다.<br>
+                    1. 크롬 주소창 맨 왼쪽의 <strong>🔒 아이콘</strong>을 클릭하세요.<br>
+                    2. <strong>'카메라'</strong> 항목의 스위치를 <strong>[허용]</strong>으로 켜주세요.<br>
+                    3. 페이지를 <strong>새로고침(F5)</strong> 해주시면 웹캠이 바로 연결됩니다!
+                </div>`;
 
-                errMsg += `<br><button onclick="forceConnectWebcam()" style="margin-top:8px; padding: 6px 14px; background:#0284c7; color:#fff; border:none; border-radius:20px; font-weight:800; cursor:pointer;"><i class="fas fa-camera"></i> ${isEn ? 'Force Connect Camera 📷' : '웹캠 강제 연결하기 📷'}</button>`;
+                if (e.name === 'NotAllowedError' || (e.message && e.message.includes('Permission'))) {
+                    errMsg += isEn ? 'Camera permission denied on www.bricksync.org. Please allow camera access on browser address bar 🔒.' : '새 도메인(www.bricksync.org)의 카메라 권한이 거부되었습니다.';
+                    errMsg += domainGuide;
+                } else if (e.name === 'NotFoundError') {
+                    errMsg += isEn ? 'Camera device not found. Please connect your webcam.' : '카메라 장치를 찾을 수 없습니다. 웹캠이 PC에 제대로 연결되어 있는지 확인해주세요.';
+                } else if (e.name === 'NotReadableError' || (e.message && e.message.includes('in use'))) {
+                    errMsg += isEn ? 'Camera is currently in use by another app (Zoom, Teams, etc.).' : '카메라가 다른 앱(Zoom, 팀즈, 카카오톡 등)에서 이미 사용 중입니다. 다른 앱을 종료하고 새로고침 해주세요.';
+                } else {
+                    errMsg += isEn ? `Camera connection error: (${errDetail}).` : `카메라 연결 상태: (${errDetail}).`;
+                    errMsg += domainGuide;
+                }
 
                 aiStatusLabel.innerHTML = errMsg;
                 aiStatusLabel.style.color = '#991b1b';
