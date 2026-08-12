@@ -4731,7 +4731,7 @@ except:
                         const action = block.getAttribute('data-action') || '';
                         
                         let paramVal = 1;
-                        let paramEl = block.querySelector(':scope > .block-param:not(.param-time)') || block.querySelector('.block-param');
+                        let paramEl = block.querySelector('.block-param') || block.querySelector('.param-time') || block.querySelector('.param-badge') || block.querySelector('[data-val]');
                         if (paramEl) {
                             if (paramEl.hasAttribute('data-val')) paramVal = parseFloat(paramEl.getAttribute('data-val'));
                             else {
@@ -5350,7 +5350,7 @@ except:
 
                     const blockData = { action: action };
 
-                    const paramEl = block.querySelector(':scope > .block-param:not(.param-time)') || block.querySelector('.color-brick-icon');
+                    const paramEl = block.querySelector(':scope > .block-param') || block.querySelector('.param-time') || block.querySelector('.color-brick-icon');
                     if (paramEl) {
                         blockData.paramVal = paramEl.hasAttribute('data-val') ? paramEl.getAttribute('data-val') : paramEl.innerText.trim();
                         if (paramEl.hasAttribute('data-matrix')) {
@@ -5522,7 +5522,7 @@ except:
                         block.classList.add('workspace-item');
 
                         if (blockData.paramVal !== undefined) {
-                            const paramEl = block.querySelector(':scope > .block-param:not(.param-time)') || block.querySelector('.color-brick-icon');
+                            const paramEl = block.querySelector(':scope > .block-param') || block.querySelector('.param-time') || block.querySelector('.color-brick-icon');
                             if (paramEl) {
                                 paramEl.setAttribute('data-val', blockData.paramVal);
                                 if (paramEl.classList.contains('color-brick-icon')) {
