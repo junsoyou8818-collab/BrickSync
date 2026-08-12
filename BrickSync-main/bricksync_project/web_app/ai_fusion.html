@@ -5417,8 +5417,39 @@ print("BrickSync Sandbox Run")
                 const r = event.reason;
                 const msg = r ? (r.name || r.message || r) : '비동기 연결 대기 중';
                 statusLabel.innerHTML = `<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>웹캠 연결 준비 중:</strong> (${msg})<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;"><i class="fas fa-video"></i> 웹캠 라이브 켜기 📷</button>`;
+        // 📷 수동 / 강제 웹캠 스트림 직통 연결 함수
+        async function forceConnectWebcam() {
+            const statusLabel = document.getElementById('ai-status');
+            const v = document.getElementById('webcam');
+            if (statusLabel) {
+                statusLabel.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 웹캠 렌더링 직통 연결 중...';
+                statusLabel.style.backgroundColor = '#e0f2fe';
+                statusLabel.style.color = '#0369a1';
             }
-        });
+            try {
+                stopExistingWebcam();
+                const st = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 } } });
+                if (v) {
+                    v.srcObject = st;
+                    v.muted = true;
+                    v.setAttribute('playsinline', 'true');
+                    v.setAttribute('autoplay', 'true');
+                    await v.play();
+                }
+                if (statusLabel) {
+                    statusLabel.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>웹캠 100% 라이브 연결 성공!</strong>';
+                    statusLabel.style.backgroundColor = '#d1fae5';
+                    statusLabel.style.color = '#065f46';
+                }
+            } catch (err) {
+                console.error('[forceConnectWebcam Error]', err);
+                if (statusLabel) {
+                    statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> 카메라 연결 오류: ${err.message || err}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;"><i class="fas fa-redo"></i> 웹캠 켜기 재시도 📷</button>`;
+                    statusLabel.style.backgroundColor = '#fee2e2';
+                    statusLabel.style.color = '#991b1b';
+                }
+            }
+        }
 
         let classifier = null; // 안전 전역 선언 (ReferenceError 원천 차단)
         const webcamElement = document.getElementById('webcam');
