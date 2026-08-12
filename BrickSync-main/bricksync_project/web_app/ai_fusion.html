@@ -949,6 +949,9 @@
                 style="padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; align-items: center; overflow-y: auto;">
                 <div
                     style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155;">
+                    <!-- 카메라 6개 선택용 스마트 드롭다운 UI -->
+                    <select id="camera-device-select" onchange="onCameraSelectChange(this.value)"
+                        style="position: absolute; top: 10px; right: 10px; z-index: 20; background: rgba(15, 23, 42, 0.85); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 12px; font-size: 0.8rem; font-weight: 700; cursor: pointer; outline: none; backdrop-filter: blur(4px); max-width: 60%; text-overflow: ellipsis; display: none;"></select>
                     <video id="webcam" autoplay playsinline
                         style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
                     <div id="ai-result-overlay"
@@ -5429,44 +5432,104 @@ print("BrickSync Sandbox Run")
             }
         }
 
-        // 🚀 스마트 웹캠 3단계 강인성 스트림 취득 함수
-        async function getRobustWebcamStream() {
+        // 🚀 스마트 웹캠 6개 다중 장치 자동 스캐닝 및 최적 디바이스 선택 함수
+        async function getRobustWebcamStream(targetDeviceId = null) {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error("getUserMedia is not supported on this browser");
             }
 
-            // 1차 시도: 권장 640x480 해상도 + 전면 카메라
+            // 연결된 카메라 장치들 탐색 및 드롭다운 메뉴 갱신
+            try {
+                if (navigator.mediaDevices.enumerateDevices) {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                    
+                    // 드롭다운 UI 갱신
+                    populateCameraSelect(videoDevices);
+
+                    // 특정 장치 선택 시
+                    if (targetDeviceId) {
+                        return await navigator.mediaDevices.getUserMedia({
+                            video: { deviceId: { exact: targetDeviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
+                        });
+                    }
+
+                    // 1순위: C920, Logitech, HD Pro 등 실제 물리 웹캠 탐색
+                    const realCam = videoDevices.find(d => {
+                        const lbl = (d.label || '').toLowerCase();
+                        return lbl.includes('c920') || lbl.includes('logitech') || lbl.includes('hd pro') || (lbl.includes('webcam') && !lbl.includes('virtual') && !lbl.includes('obs'));
+                    });
+
+                    if (realCam && realCam.deviceId) {
+                        try {
+                            console.log('[Webcam] Priority physical webcam matched:', realCam.label);
+                            return await navigator.mediaDevices.getUserMedia({
+                                video: { deviceId: { exact: realCam.deviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
+                            });
+                        } catch (pErr) {
+                            console.warn('[Webcam] Priority camera failed, trying next:', pErr);
+                        }
+                    }
+
+                    // 2순위: 순차 탐색
+                    for (const dev of videoDevices) {
+                        try {
+                            return await navigator.mediaDevices.getUserMedia({
+                                video: { deviceId: { exact: dev.deviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
+                            });
+                        } catch (eDev) { }
+                    }
+                }
+            } catch (enumErr) {
+                console.warn('[Webcam] Device enumeration error:', enumErr);
+            }
+
+            // 백업 1차 시도: 기본 권장 해상도
             try {
                 return await navigator.mediaDevices.getUserMedia({
                     video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }
                 });
-            } catch (e1) {
-                console.warn('[Webcam] 1st constraint failed, retrying with basic video:true', e1);
+            } catch (e1) { }
+
+            // 백업 2차 시도: 기본 비디오
+            return await navigator.mediaDevices.getUserMedia({ video: true });
+        }
+
+        // 카메라 선택 드롭다운 팝업 생성
+        function populateCameraSelect(videoDevices) {
+            const selectEl = document.getElementById('camera-device-select');
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            
+            if (videoDevices.length === 0) {
+                selectEl.innerHTML = '<option value="">카메라를 찾을 수 없음</option>';
+                return;
             }
 
-            // 2차 시도: 기본 비디오 요청
-            try {
-                return await navigator.mediaDevices.getUserMedia({ video: true });
-            } catch (e2) {
-                console.warn('[Webcam] 2nd basic getUserMedia failed, checking enumerateDevices()', e2);
-            }
-
-            // 3차 시도: 연결된 웹캠 비디오 장치 직접 수동 탐색 지정
-            if (navigator.mediaDevices.enumerateDevices) {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(d => d.kind === 'videoinput');
-                if (videoDevices.length > 0) {
-                    for (const dev of videoDevices) {
-                        try {
-                            return await navigator.mediaDevices.getUserMedia({
-                                video: { deviceId: { exact: dev.deviceId } }
-                            });
-                        } catch (e3) { }
-                    }
+            videoDevices.forEach((dev, idx) => {
+                const opt = document.createElement('option');
+                opt.value = dev.deviceId;
+                opt.innerText = dev.label || `카메라 장치 ${idx + 1}`;
+                if ((dev.label || '').toLowerCase().includes('c920') || (dev.label || '').toLowerCase().includes('logitech')) {
+                    opt.selected = true;
                 }
-            }
+                selectEl.appendChild(opt);
+            });
+            selectEl.style.display = videoDevices.length > 1 ? 'block' : 'none';
+        }
 
-            throw new Error("WEBCAM_DEVICE_NOT_ACCESSIBLE");
+        // 수동 카메라 변경 이벤트
+        async function onCameraSelectChange(deviceId) {
+            if (!deviceId) return;
+            try {
+                stopExistingWebcam();
+                const stream = await getRobustWebcamStream(deviceId);
+                webcamElement.srcObject = stream;
+                await webcamElement.play();
+                console.log('[Webcam] Manually switched to camera:', deviceId);
+            } catch (err) {
+                console.error('[Webcam] Manual camera switch failed:', err);
+            }
         }
 
         // [BUG-03 FIX & WEBCAM ENHANCEMENT] 웹캠 완벽 연결 및 재생 보장
