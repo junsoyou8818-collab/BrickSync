@@ -40,8 +40,10 @@
                     setTimeout(startInstantWebcam, 50);
                     return;
                 }
+                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                const isEn = currentLang === 'en';
                 if (statusLabel) {
-                    statusLabel.innerHTML = '<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>웹캠 직통 연결 중...</strong>';
+                    statusLabel.innerHTML = isEn ? '<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>Connecting Camera Stream...</strong>' : '<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>웹캠 직통 연결 중...</strong>';
                     statusLabel.style.backgroundColor = '#e0f2fe';
                     statusLabel.style.color = '#0369a1';
                 }
@@ -56,14 +58,16 @@
                     await videoEl.play();
                     console.log('[Instant WebCam] Successfully mounted video stream in 0.001s!');
                     if (statusLabel) {
-                        statusLabel.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>웹캠 100% 라이브 연결 성공!</strong>';
+                        statusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Camera Stream Connected Successfully!</strong>' : '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>웹캠 100% 라이브 연결 성공!</strong>';
                         statusLabel.style.backgroundColor = '#d1fae5';
                         statusLabel.style.color = '#065f46';
                     }
                 } catch (err) {
                     console.warn('[Instant WebCam Error]', err);
                     if (statusLabel) {
-                        statusLabel.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> 카메라 연결 상태: ' + (err.message || err) + '<br><button onclick="window.startInstantWebcamGlobal()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;"><i class="fas fa-redo"></i> 웹캠 켜기 📷</button>';
+                        const statusTitle = isEn ? 'Camera Connection Status: ' : '카메라 연결 상태: ';
+                        const btnText = isEn ? '<i class="fas fa-redo"></i> Turn On Camera 📷' : '<i class="fas fa-redo"></i> 웹캠 켜기 📷';
+                        statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> ${statusTitle} ${err.message || err}<br><button onclick="window.startInstantWebcamGlobal()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;">${btnText}</button>`;
                         statusLabel.style.backgroundColor = '#fee2e2';
                         statusLabel.style.color = '#991b1b';
                     }
@@ -5439,8 +5443,12 @@ print("BrickSync Sandbox Run")
         window.addEventListener('error', function(err) {
             console.error('[Global Captured Error]', err);
             const statusLabel = document.getElementById('ai-status');
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
             if (statusLabel && (statusLabel.innerText.includes('Loading') || statusLabel.innerText.includes('로딩'))) {
-                statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> <strong>카메라/시스템 상태:</strong> ${err.message || '오류 발생'}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;"><i class="fas fa-camera"></i> 카메라 다시 연결하기 📷</button>`;
+                const title = isEn ? 'Camera/System Error:' : '카메라/시스템 상태:';
+                const btnText = isEn ? '<i class="fas fa-camera"></i> Reconnect Camera 📷' : '<i class="fas fa-camera"></i> 카메라 다시 연결하기 📷';
+                statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> <strong>${title}</strong> ${err.message || 'Error occurred'}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;">${btnText}</button>`;
                 statusLabel.style.backgroundColor = '#fee2e2';
                 statusLabel.style.color = '#991b1b';
             }
@@ -5448,16 +5456,24 @@ print("BrickSync Sandbox Run")
         window.addEventListener('unhandledrejection', function(event) {
             console.error('[Unhandled Rejection Captured]', event.reason);
             const statusLabel = document.getElementById('ai-status');
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
             if (statusLabel && (statusLabel.innerText.includes('Loading') || statusLabel.innerText.includes('로딩'))) {
                 const r = event.reason;
-                const msg = r ? (r.name || r.message || r) : '비동기 연결 대기 중';
-                statusLabel.innerHTML = `<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>웹캠 연결 준비 중:</strong> (${msg})<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;"><i class="fas fa-video"></i> 웹캠 라이브 켜기 📷</button>`;
+                const msg = r ? (r.name || r.message || r) : (isEn ? 'Waiting for async connection' : '비동기 연결 대기 중');
+                const title = isEn ? 'Preparing Camera Stream:' : '웹캠 연결 준비 중:';
+                const btnText = isEn ? '<i class="fas fa-video"></i> Turn On WebCam 📷' : '<i class="fas fa-video"></i> 웹캠 라이브 켜기 📷';
+                statusLabel.innerHTML = `<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>${title}</strong> (${msg})<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;">${btnText}</button>`;
+            }
+        });
         // 📷 수동 / 강제 웹캠 스트림 직통 연결 함수
         async function forceConnectWebcam() {
             const statusLabel = document.getElementById('ai-status');
             const v = document.getElementById('webcam');
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
             if (statusLabel) {
-                statusLabel.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 웹캠 렌더링 직통 연결 중...';
+                statusLabel.innerHTML = isEn ? '<i class="fas fa-spinner fa-spin"></i> Connecting Camera Stream Directly...' : '<i class="fas fa-spinner fa-spin"></i> 웹캠 렌더링 직통 연결 중...';
                 statusLabel.style.backgroundColor = '#e0f2fe';
                 statusLabel.style.color = '#0369a1';
             }
@@ -5472,14 +5488,16 @@ print("BrickSync Sandbox Run")
                     await v.play();
                 }
                 if (statusLabel) {
-                    statusLabel.innerHTML = '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>웹캠 100% 라이브 연결 성공!</strong>';
+                    statusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Camera Stream Connected Successfully!</strong>' : '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>웹캠 100% 라이브 연결 성공!</strong>';
                     statusLabel.style.backgroundColor = '#d1fae5';
                     statusLabel.style.color = '#065f46';
                 }
             } catch (err) {
                 console.error('[forceConnectWebcam Error]', err);
                 if (statusLabel) {
-                    statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> 카메라 연결 오류: ${err.message || err}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;"><i class="fas fa-redo"></i> 웹캠 켜기 재시도 📷</button>`;
+                    const title = isEn ? 'Camera Connection Error:' : '카메라 연결 오류:';
+                    const btnText = isEn ? '<i class="fas fa-redo"></i> Retry Camera 📷' : '<i class="fas fa-redo"></i> 웹캠 켜기 재시도 📷';
+                    statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> ${title} ${err.message || err}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;">${btnText}</button>`;
                     statusLabel.style.backgroundColor = '#fee2e2';
                     statusLabel.style.color = '#991b1b';
                 }
@@ -6101,8 +6119,14 @@ print("BrickSync Sandbox Run")
                 let errMsg = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> `;
                 const errDetail = e ? `${e.name || ''}: ${e.message || e}` : 'Unknown';
                 
-                // 새 도메인(www.bricksync.org) 카메라 권한 허용 안내
-                const domainGuide = `<div style="margin-top:10px; padding:10px; background:#fff3cd; border:1px solid #ffe69c; border-radius:8px; color:#664d03; text-align:left; font-size:0.88rem; line-height:1.4;">
+                // 새 도메인(www.bricksync.org) 카메라 권한 허용 안내 (다국어 지원)
+                const domainGuide = isEn ? `<div style="margin-top:10px; padding:10px; background:#fff3cd; border:1px solid #ffe69c; border-radius:8px; color:#664d03; text-align:left; font-size:0.88rem; line-height:1.4;">
+                    <strong>🔒 Camera Access Guide (Domain Update):</strong><br>
+                    Please grant camera permissions for www.bricksync.org in your browser.<br>
+                    1. Click the <strong>🔒 icon</strong> on the left side of the address bar.<br>
+                    2. Toggle the <strong>'Camera'</strong> option to <strong>[Allow]</strong>.<br>
+                    3. Refresh the page (F5) to connect your webcam immediately!
+                </div>` : `<div style="margin-top:10px; padding:10px; background:#fff3cd; border:1px solid #ffe69c; border-radius:8px; color:#664d03; text-align:left; font-size:0.88rem; line-height:1.4;">
                     <strong>🔒 카메라 권한 허용 방법 (도메인 변경 안내):</strong><br>
                     새 홈페이지 주소(www.bricksync.org)로 이전되어 브라우저에서 카메라 권한을 새로 허용해야 합니다.<br>
                     1. 크롬 주소창 맨 왼쪽의 <strong>🔒 아이콘</strong>을 클릭하세요.<br>
