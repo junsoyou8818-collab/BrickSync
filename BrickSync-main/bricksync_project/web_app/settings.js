@@ -201,7 +201,8 @@
             btn_check_tasks: "미션 과제 체크",
             hint_drag_blocks: "하단에서 아이콘 블록을 끌어와 조립해보세요!",
             hint_drag_assemble: "하단에서 아이콘 블록을 끌어와 조립해보세요!",
-            btn_retry_camera: "웹캠 수동 연결 📷"
+            btn_retry_camera: "웹캠 수동 연결 📷",
+            btn_start_camera_now: "📷 카메라 바로 켜기"
         },
         en: {
             // Sidebar / UI Shell

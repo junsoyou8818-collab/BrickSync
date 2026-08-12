@@ -26,10 +26,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 폭죽(파티클) 효과 라이브러리 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- TensorFlow.js 및 머신러닝 라이브러리 추가 -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+    <!-- TensorFlow.js 및 머신러닝 라이브러리 (non-blocking defer 로딩) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+    <!-- 웹캠 0.001초 즉시 가동 스크립트 (독립적 전단 배치) -->
+    <script>
+        (function() {
+            window.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    if (typeof forceConnectWebcam === 'function') {
+                        forceConnectWebcam();
+                    }
+                }, 100);
+            });
+        })();
+    </script>
     <!-- Firebase SDK 및 공통 설정 연동 -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -939,6 +951,11 @@
                     style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155;">
                     <video id="webcam" autoplay playsinline
                         style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                    <!-- 중앙 카메라 원클릭 직통 가동 버튼 (Autoplay 방지용) -->
+                    <div id="cam-direct-start-btn" onclick="forceConnectWebcam(); this.style.display='none';"
+                        style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #0284c7, #0369a1); color: white; padding: 12px 24px; border-radius: 30px; font-weight: 900; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4), 0 3px 0 #075985; border: 2px solid rgba(255,255,255,0.4); display: flex; align-items: center; gap: 8px; z-index: 10; transition: all 0.2s ease;">
+                        <i class="fas fa-video" style="font-size: 1.2rem;"></i> <span data-i18n="btn_start_camera_now">📷 카메라 바로 켜기</span>
+                    </div>
                     <div id="ai-result-overlay"
                         style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 8px 20px; border-radius: 20px; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(4px);">
                         <i class="fas fa-eye"></i> <span id="current-gesture" data-i18n="lbl_gesture_waiting">대기
@@ -5963,6 +5980,7 @@ print("BrickSync Sandbox Run")
         // 🚀 웹캠 강제 직접 접속 함수
         async function forceConnectWebcam() {
             if (!aiStatusLabel) return;
+            const directBtn = document.getElementById('cam-direct-start-btn');
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const isEn = currentLang === 'en';
             aiStatusLabel.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Connecting Camera Directly...' : '웹캠 직접 연결 시도 중...'}`;
@@ -5971,6 +5989,7 @@ print("BrickSync Sandbox Run")
             aiStatusLabel.style.borderColor = '#bae6fd';
             try {
                 await setupWebcam();
+                if (directBtn) directBtn.style.display = 'none';
                 aiStatusLabel.innerHTML = `<i class="fas fa-check-circle"></i> ${isEn ? 'Webcam Stream Connected Successfully!' : '웹캠 라이브 화면 연결 성공!'}`;
                 aiStatusLabel.style.color = '#10b981';
                 aiStatusLabel.style.backgroundColor = '#d1fae5';
