@@ -17,7 +17,8 @@ else:
     SERVER_EXE = None  # 개발시엔 Python으로 직접 실행
 
 PYTHON_EXE = sys.executable
-SERVER_PY = r"C:\Users\Mons\Documents\GitHub\BrickSync\BrickSync-main\bricksync_project\bridge_server\server.py"
+_LAUNCHER_DIR = os.path.dirname(os.path.abspath(__file__))
+SERVER_PY = os.path.join(_LAUNCHER_DIR, "..", "bricksync_project", "bridge_server", "server.py")
 BRICKSYNC_URL = "https://www.bricksync.org"
 
 # Chrome 설치 경로 목록 (우선순위 순)
@@ -76,8 +77,12 @@ def open_browser_when_ready():
     if chrome:
         try:
             # ✅ Chrome은 GUI 앱이므로 CREATE_NO_WINDOW 플래그 없이 실행
-            # CREATE_NO_WINDOW는 콘솔 앱 전용 → Chrome에 쓰면 일부 PC에서 실행 차단됨
-            subprocess.Popen([chrome, BRICKSYNC_URL])
+            subprocess.Popen(
+                [chrome, BRICKSYNC_URL],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
         except Exception:
             # Chrome 실행 실패 시 기본 브라우저로 폴백
             webbrowser.open(BRICKSYNC_URL)

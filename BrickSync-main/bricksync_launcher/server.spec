@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['C:\\Users\\Mons\\Documents\\GitHub\\BrickSync\\BrickSync-main\\bricksync_project\\bridge_server\\server.py'],
+    ['..\\bricksync_project\\bridge_server\\server.py'],
     pathex=[],
     binaries=[],
     datas=[],
