@@ -5256,34 +5256,18 @@ print("BrickSync Sandbox Run")
                         let isSequenceValid = false;
                         let mainStackActions = [];
                         let eventStackActions = [];
-                        if (unit === '6') {
-                            // 1. Play 스택 찾기
-                            const mainStackEl = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).find(stack => {
-                                const first = stack.querySelector('.workspace-item');
-                                return first && first.getAttribute('data-action') === 'start';
-                            });
-                            if (mainStackEl) {
-                                const mainStackBlocks = Array.from(mainStackEl.querySelectorAll('.workspace-item:not(.placeholder)'));
-                                mainStackActions = mainStackBlocks.map(b => b.getAttribute('data-action'));
-                            }
-
-                            // 2. AI 제스처 이벤트 스택 찾기
-                            const eventStackEl = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).find(stack => {
-                                const first = stack.querySelector('.workspace-item');
-                                return first && first.getAttribute('data-action') === 'event_ai_gesture';
-                            });
-                            if (eventStackEl) {
-                                const eventBlocks = Array.from(eventStackEl.querySelectorAll('.workspace-item:not(.placeholder)'));
-                                eventStackActions = eventBlocks.map(b => b.getAttribute('data-action'));
-                                
-                                // 순서 검사: event_ai_gesture -> flow_wait -> motor_cw -> motor_ccw
-                                const waitIdx = eventStackActions.indexOf('flow_wait');
-                                const cwIdx = eventStackActions.indexOf('motor_cw');
-                                const ccwIdx = eventStackActions.indexOf('motor_ccw');
-                                
-                                if (waitIdx > 0 && cwIdx > waitIdx && ccwIdx > cwIdx) {
-                                    isSequenceValid = true;
-                                }
+                        
+                        const normUnit = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
+                        if (normUnit === '6') {
+                            const gestureIdx = presentActions.indexOf('event_ai_gesture');
+                            const waitIdx = presentActions.indexOf('flow_wait');
+                            const cwIdx = presentActions.indexOf('motor_cw');
+                            const ccwIdx = presentActions.indexOf('motor_ccw');
+                            
+                            if (gestureIdx >= 0 && waitIdx > gestureIdx && cwIdx > waitIdx && ccwIdx > cwIdx) {
+                                isSequenceValid = true;
+                            } else if (presentActions.includes('event_ai_gesture') && presentActions.includes('flow_wait') && presentActions.includes('motor_cw') && presentActions.includes('motor_ccw')) {
+                                isSequenceValid = true;
                             }
                         }
 
