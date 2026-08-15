@@ -6483,8 +6483,9 @@ print("BrickSync Sandbox Run")
                             consecutiveAiFrames++;
                             if (consecutiveAiFrames >= 10 && lastTriggeredAiGesture !== detectedGesture) {
                                 if (window.isBlockExecutionRunning) {
-                                    // 현재 블록 스택 시퀀스(대기, 회전, 정지)가 실행 중일 때는 중복/방해 트리거 차단
-                                    return;
+                                    // 현재 블록 스택 시퀀스가 실행 중일 때는 블록 실행 중복만 스킵하고 AI 비전 감지 루프는 100% 계속 유지
+                                    await tf.nextFrame();
+                                    continue;
                                 }
                                 lastTriggeredAiGesture = detectedGesture;
                                 console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
@@ -6539,6 +6540,10 @@ print("BrickSync Sandbox Run")
                 classifier.addExample(activation, classId);
             } catch (e) {
                 console.error('[AI] addExample error:', e);
+            }
+            if (!aiLoopRunning) {
+                aiLoopRunning = true;
+                predictWebcam();
             }
             examplesCount[classId] = (examplesCount[classId] || 0) + 1;
 
