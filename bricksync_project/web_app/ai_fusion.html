@@ -985,7 +985,7 @@
             <div
                 style="padding: 15px 20px; background: #f8fafc; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                 <div style="font-weight: 800; color: #1e293b; font-size: 1.1rem;">
-                    <i class="fas fa-robot" style="color: #8b5cf6;"></i> <span id="ai-panel-title-text" data-i18n="lbl_ai_vision_title">AI 비전 제스처 인식</span>
+                    <span id="ai-panel-title-text" data-i18n="lbl_ai_vision_title"><i class="fas fa-robot" style="color: #8b5cf6;"></i> AI 비전 제스처 인식</span>
                 </div>
             </div>
 
@@ -1041,7 +1041,7 @@
                             const p = document.getElementById('ai-left-panel-content');
                             const t = document.getElementById('ai-panel-title-text');
                             const isEn = (localStorage.getItem('bricksync_lang') || 'ko') === 'en';
-                            if (t) t.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Command Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 명령 인식';
+                            if (t) t.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 명령 인식';
                             if (p) {
                                 p.innerHTML = `
                                     <div style="width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center;">
@@ -4748,12 +4748,12 @@ print("BrickSync Sandbox Run")
                         ]
                     },
                     '7': {
-                        badge: 'STAGE 7', title: '마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네', desc: '재생(시작) 블록 연결하기 / AI 음성 인식 블록 연결하기 / 그네 회전 모터 블록 연결하기',
+                        badge: 'STAGE 7', title: '마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네', desc: 'AI 음성 인식 블록 연결하기 / 5초 대기하기 / 모터를 반시계 방향으로 3회 회전하기',
                         pinCode: '5019',
                         tasks: [
-                            { id: 'start', text: '재생(시작) 블록 연결하기' },
                             { id: 'event_ai_gesture', text: 'AI 음성 인식 블록 연결하기' },
-                            { id: ['motor_cw', 'motor_ccw'], text: '그네 회전 모터 블록 연결하기' }
+                            { id: 'flow_wait', text: '5초 대기하기' },
+                            { id: ['motor_cw', 'motor_ccw'], text: '모터를 반시계 방향으로 3회 회전하기' }
                         ]
                     },
                     '8': {
@@ -4779,12 +4779,12 @@ print("BrickSync Sandbox Run")
                         ]
                     },
                     '7': {
-                        badge: 'STAGE 7', title: 'Shout into the Mic! Control the Magic Swing with Your Voice', desc: 'Connect Play (Start) block / Connect AI Voice Recognition block / Connect Swing Motor block',
+                        badge: 'STAGE 7', title: 'Shout into the Mic! Control the Magic Swing with Your Voice', desc: 'Connect the AI Voice Recognition block / Wait 5 seconds / Rotate the motor counterclockwise 3 times',
                         pinCode: '5019',
                         tasks: [
-                            { id: 'start', text: 'Connect Play (Start) block' },
                             { id: 'event_ai_gesture', text: 'Connect the AI Voice Recognition block' },
-                            { id: ['motor_cw', 'motor_ccw'], text: 'Connect swing motor block' }
+                            { id: 'flow_wait', text: 'Wait 5 seconds' },
+                            { id: ['motor_cw', 'motor_ccw'], text: 'Rotate the motor counterclockwise 3 times' }
                         ]
                     },
                     '8': {
@@ -6085,7 +6085,7 @@ print("BrickSync Sandbox Run")
                 const panelContent = document.getElementById('ai-left-panel-content') || (document.getElementById('webcam') ? document.getElementById('webcam').parentElement.parentElement : null);
                 const titleEl = document.getElementById('ai-panel-title-text') || document.querySelector('[data-i18n="lbl_ai_vision_title"]');
                 if (titleEl) {
-                    titleEl.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Command Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 명령 인식';
+                    titleEl.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 명령 인식';
                 }
 
                 if (panelContent) {
