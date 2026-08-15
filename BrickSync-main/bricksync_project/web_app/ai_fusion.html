@@ -3800,8 +3800,8 @@
                                 if (!isNaN(txt) && txt !== '') blockVal = parseInt(txt);
                             }
                         }
-                        // 제스처 매칭 또는 기본 실행 허용
-                        if (triggerVal === -1 || triggerVal === blockVal || action === 'event_ai_gesture') {
+                        // 블록의 파라미터 값과 감지된 제스처(triggerVal)가 일치할 때만 실행
+                        if (triggerVal === -1 || triggerVal === blockVal) {
                             return true;
                         }
                     }
@@ -4171,9 +4171,9 @@ print("BrickSync Sandbox Run")
                 });
             }
 
-            if (!window.parent.connectionType) {
-                alert("⚠ 허브(USB 또는 블루투스)가 연결되지 않았습니다. 현재는 폭죽과 게임 보상 액션만 수행됩니다.");
-                return; // 하드웨어 코드로 넘어가지 않음
+            const connType = (window.parent && window.parent.connectionType) || window.connectionType || (window.parent && window.parent.hubConnected ? 'BLE' : null);
+            if (!connType) {
+                console.warn("⚠ 허브(USB 또는 블루투스)가 연결되어 있지 않습니다. 시뮬레이션 및 그래픽 연동만 실행됩니다.");
             }
 
             if (window.parent.connectionType === 'BLE') {
@@ -6498,9 +6498,19 @@ print("BrickSync Sandbox Run")
                             consecutiveAiFrames++;
                             if (consecutiveAiFrames >= 3 && lastTriggeredAiGesture !== detectedGesture) {
                                 if (!window.isBlockExecutionRunning) {
-                                    lastTriggeredAiGesture = detectedGesture;
-                                    console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
-                                    runBlocks('event_ai_gesture', detectedGesture);
+                                    // Background/None(3) 무동작 상태는 블록 코딩을 트리거하지 않음 (가만히 있을 때 무한 성공 팝업 방지)
+                                    const isBackground = (String(unit) === '3' || String(unit) === '8')
+                                        ? (detectedGesture === 1 || detectedGesture === 3)
+                                        : (detectedGesture === 3);
+
+                                    if (!isBackground) {
+                                        lastTriggeredAiGesture = detectedGesture;
+                                        console.log("🚀 [AI Trigger] Active Gesture Confirmed:", detectedGesture);
+                                        runBlocks('event_ai_gesture', detectedGesture);
+                                    }
+                                }
+                            }
+                        }
 
                                     // 3단원 몬스터 감지(0) 시 UEFN 경보 웹소켓 전송
                                     if (((unit === '3' || unit === '8')) && detectedGesture === 0) {
