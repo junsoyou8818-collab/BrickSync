@@ -1109,35 +1109,39 @@
         }
 
         // ── 역할별 사이드바 초기화 ────────────────────────────────
-        async function initRoleUI() {
-            let displayName = '학생';
-            let role = 'student';
+                async function initRoleUI() {
+            let displayName = 'Guest';
+            let role = 'guest';
 
             // 1. BrickSyncAuth 세션 검수
             try {
                 const currentUserRes = await BrickSyncAuth.getCurrentUser();
                 if (currentUserRes && currentUserRes.profile) {
-                    displayName = currentUserRes.profile.displayName || currentUserRes.profile.name || currentUserRes.profile.email || '학생';
+                    displayName = currentUserRes.profile.displayName || currentUserRes.profile.name || currentUserRes.profile.email || 'Guest';
                     role = currentUserRes.profile.role || 'student';
                 } else {
                     const rawSession = localStorage.getItem('bricksync_user_session') || localStorage.getItem('bricksync_student_session');
                     if (rawSession) {
                         const s = JSON.parse(rawSession);
-                        displayName = s.displayName || s.name || s.email || '학생';
-                        role = s.role || 'student';
+                        displayName = s.displayName || s.name || s.email || 'Guest';
+                        role = s.role || (displayName === 'Guest' ? 'guest' : 'student');
                     }
                 }
             } catch(e) {}
 
-            // 이름 표시 - [역할 | 이름] (예: Student | student01)
+            // 이름 표시 - 게스트 로그인인 경우 오직 'Guest'로만 표시
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const nameEl = document.getElementById('display-student-name');
             if (nameEl) {
-                const rolePrefix = currentLang === 'en'
-                    ? (role === 'teacher' ? 'Teacher | ' : role === 'parent' ? 'Parent | ' : 'Student | ')
-                    : (role === 'teacher' ? '교사 | ' : role === 'parent' ? '학부모 | ' : 'Student | ');
-                const cleanName = displayName.replace('Guest_익명', 'Guest_Anonymous').replace('익명', 'Anonymous');
-                nameEl.textContent = rolePrefix + cleanName;
+                const cleanName = displayName.replace('Guest_익명', 'Guest').replace('Guest_Anonymous', 'Guest').replace('익명', 'Guest');
+                if (role === 'guest' || cleanName.toLowerCase() === 'guest') {
+                    nameEl.textContent = 'Guest';
+                } else {
+                    const rolePrefix = currentLang === 'en'
+                        ? (role === 'teacher' ? 'Teacher | ' : role === 'parent' ? 'Parent | ' : 'Student | ')
+                        : (role === 'teacher' ? '교사 | ' : role === 'parent' ? '학부모 | ' : 'Student | ');
+                    nameEl.textContent = rolePrefix + cleanName;
+                }
             }
 
             // 역할별 대시보드 메뉴 표시
@@ -1146,22 +1150,17 @@
             const dashAllItem = document.getElementById('nav-dashboard-all-item');
 
             if (role === 'teacher' || role === 'parent') {
-                // 교사/학부모: 두 메뉴 모두 표시
                 if (dashAllItem) dashAllItem.style.display = '';
                 if (dashItem) dashItem.style.display = '';
                 if (dashLabel) dashLabel.textContent = currentLang === 'en'
                     ? (role === 'teacher' ? 'Teacher Dashboard' : 'Parent Dashboard')
                     : (role === 'teacher' ? '교사 대시보드' : '학부모 대시보드');
             } else {
-                // 학생: 대시보드 메뉴 완전 숨김
                 if (dashAllItem) dashAllItem.style.display = 'none';
                 if (dashItem) dashItem.style.display = 'none';
             }
 
-            // Lucide 아이콘 갱신
             if (typeof lucide !== 'undefined') lucide.createIcons();
-
-            // 보상 진열대 동기화
             renderRewardShelf();
         }
 
@@ -1256,18 +1255,17 @@
         function logoutStudent() { doLogout(); }
 
         function getStudentName() {
-            // Firebase Auth 우선 (동기 접근)
             if (typeof firebaseAuth !== 'undefined' && firebaseAuth?.currentUser) {
-                return firebaseAuth.currentUser.displayName || firebaseAuth.currentUser.email || 'Guest_익명';
+                return firebaseAuth.currentUser.displayName || firebaseAuth.currentUser.email || 'Guest';
             }
             try {
-                const sessionDataStr = localStorage.getItem('bricksync_student_session');
+                const sessionDataStr = localStorage.getItem('bricksync_user_session') || localStorage.getItem('bricksync_student_session');
                 if (sessionDataStr) {
                     const sessionData = JSON.parse(sessionDataStr);
-                    return sessionData.name || 'Guest_익명';
+                    return sessionData.displayName || sessionData.name || 'Guest';
                 }
             } catch(e) {}
-            return 'Guest_익명';
+            return 'Guest';
         }
 
 

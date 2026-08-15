@@ -216,18 +216,24 @@
         }
 
         function guestLogin(e) {
-            e.preventDefault();
-            const sessionData = {
-                name: 'Guest_익명',
-                expires: Date.now() + (2 * 60 * 60 * 1000),
-                loginTime: Date.now()
-            };
-            try {
-                localStorage.setItem('bricksync_student_session', JSON.stringify(sessionData));
-            } catch(e) {}
-            sessionStorage.setItem('brickSyncLastPage', 'index.html');
-            window.location.href = 'app.html';
-        }
+    if (e) e.preventDefault();
+    localStorage.removeItem('bricksync_user_session');
+    localStorage.removeItem('bricksync_student_session');
+
+    const guestSession = {
+        name: 'Guest',
+        displayName: 'Guest',
+        role: 'guest',
+        expires: Date.now() + 24 * 60 * 60 * 1000,
+        loginTime: Date.now()
+    };
+    try {
+        localStorage.setItem('bricksync_student_session', JSON.stringify(guestSession));
+        localStorage.setItem('bricksync_user_session', JSON.stringify(guestSession));
+    } catch(e) {}
+    sessionStorage.setItem('brickSyncLastPage', 'index.html');
+    window.location.href = 'app.html';
+}
     </script>
 </body>
 </html>
