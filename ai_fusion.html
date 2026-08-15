@@ -6415,14 +6415,28 @@ print("BrickSync Sandbox Run")
                     console.warn('[Webcam Mount Exception]', camErr);
                 });
 
-                if (!net) {
+                // 모바일넷 스크립트 로드 보장
+                if (typeof mobilenet === 'undefined') {
+                    console.log('[AI Engine] Loading MobileNet script dynamically...');
+                    await new Promise((res) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet';
+                        script.onload = () => res();
+                        script.onerror = () => res();
+                        document.head.appendChild(script);
+                    });
+                }
+
+                if (!net && typeof mobilenet !== 'undefined') {
                     try {
-                        if (typeof mobilenet !== 'undefined') {
-                            net = await withTimeout(mobilenet.load({ version: 1, alpha: 0.25 }), 12000, 'mobilenet');
-                        }
+                        console.log('[AI Engine] Loading MobileNet model weights...');
+                        net = await mobilenet.load({ version: 1, alpha: 0.25 });
                     } catch (mErr) {
-                        if (typeof mobilenet !== 'undefined') {
+                        console.warn('[AI Engine] MobileNet load fallback:', mErr);
+                        try {
                             net = await mobilenet.load();
+                        } catch(e2) {
+                            console.error('[AI Engine] MobileNet final load failed:', e2);
                         }
                     }
                 }
