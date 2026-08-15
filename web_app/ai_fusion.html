@@ -5827,17 +5827,22 @@ print("BrickSync Sandbox Run")
                 throw new Error("getUserMedia is not supported on this browser");
             }
 
-            // 0순위: 크롬 주소창 🔒 팝업에서 유저가 선택한 카메라(ABKO, C920 등)를 즉시 100% 획득
+            // 0순위: 크롬 주소창 🔒 주소줄 아이콘(📹 🎙️)에 카메라와 마이크 동시 100% 즉시 활성화
             try {
                 const defaultStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 640 }, height: { ideal: 480 } }
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: true
                 });
                 if (defaultStream && defaultStream.getVideoTracks().length > 0) {
-                    console.log('[Webcam] Successfully acquired Chrome default selected camera stream!');
+                    console.log('[Webcam+Mic] Successfully acquired Chrome camera & mic stream!');
                     return defaultStream;
                 }
             } catch (defErr) {
-                console.warn('[Webcam] 0-priority default stream failed, fallbacking...', defErr);
+                console.warn('[Webcam+Mic] Combined stream failed, fallbacking to video only...', defErr);
+                try {
+                    const vidOnly = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 } } });
+                    if (vidOnly) return vidOnly;
+                } catch(vErr) {}
             }
 
             // 🚫 명확한 소프트웨어 가상 카메라 툴 전용 블랙리스트 (실제 하드웨어 오차단 원천 방지)
@@ -6219,9 +6224,10 @@ print("BrickSync Sandbox Run")
                 micBtn.onclick = () => { toggleSpeechRecognition(); };
             }
 
-            // Request microphone permission
+            // Request microphone & camera permission so address bar icons activate 100%
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
+                navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then((fullStream) => {
+                    startRealtimeAudioVisualizer(fullStream);
                     if (voiceStatusBox && !isSpeechListening && !speechCooldown) {
                         voiceStatusBox.innerHTML = isEn
                             ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> Microphone connected! Click mic to speak.'
@@ -6230,6 +6236,9 @@ print("BrickSync Sandbox Run")
                         voiceStatusBox.style.color = '#065f46';
                     }
                 }).catch((err) => {
+                    navigator.mediaDevices.getUserMedia({ audio: true }).then((audioOnly) => {
+                        startRealtimeAudioVisualizer(audioOnly);
+                    }).catch(e => {});
                     console.warn("Microphone access warning:", err);
                     if (voiceStatusBox) {
                         voiceStatusBox.innerHTML = isEn
