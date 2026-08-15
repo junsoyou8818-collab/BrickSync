@@ -991,6 +991,59 @@
 
             <div
                 id="ai-left-panel-content" style="padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; align-items: center; overflow-y: auto;">
+                <script>
+                    (function() {
+                        try {
+                            const u = new URLSearchParams(window.location.search).get('unit') || localStorage.getItem('brickSyncLastUnit');
+                            if (String(u) === '2' || String(u) === '7') {
+                                const p = document.getElementById('ai-left-panel-content');
+                                const t = document.getElementById('ai-panel-title-text');
+                                const isEn = (localStorage.getItem('bricksync_lang') || 'ko') === 'en';
+                                if (t) t.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Command Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 명령 인식';
+                                if (p) {
+                                    p.innerHTML = `
+                                        <div style="width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center;">
+                                            <div id="voice-mic-container" style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
+                                                <div id="mic-icon-glow" style="width: 80px; height: 80px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 36px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); transition: all 0.2s;">
+                                                    <i class="fas fa-microphone"></i>
+                                                </div>
+                                                <div id="voice-waveform-canvas-container" style="width: 80%; height: 40px; display: flex; justify-content: center; align-items: center; gap: 4px;">
+                                                    <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                                    <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                                    <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                                    <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                                    <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                                </div>
+                                                <div style="position: absolute; bottom: 15px; background: rgba(0,0,0,0.7); color: #fff; padding: 6px 15px; border-radius: 20px; font-weight: 800; font-size: 0.95rem; backdrop-filter: blur(4px);">
+                                                    <span id="voice-recognized-text">${isEn ? 'Waiting...' : '대기 중...'}</span>
+                                                </div>
+                                            </div>
+
+                                            <div id="voice-status-box" style="width: 100%; padding: 12px; background: #dbeafe; border: 1px solid #bfdbfe; border-radius: 8px; color: #1e3a8a; font-weight: 700; text-align: center; font-size: 0.95rem;">
+                                                <i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Waiting for microphone activation...' : '마이크 활성화 대기 중...'}
+                                            </div>
+
+                                            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '⌨️ Text Command Input (Mic Backup)' : '⌨️ 텍스트 명령 입력 (마이크 백업용)'}</div>
+                                                <div style="display: flex; gap: 8px; width: 100%;">
+                                                    <input type="text" id="voice-text-input" placeholder="${isEn ? 'e.g. Turn 5 times forward' : '예: 앞으로 5바퀴 돌아'}" style="flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; outline: none; font-weight: 600; font-family: inherit;" />
+                                                    <button id="btn-send-voice-text" style="background: #3b82f6; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.1s;">${isEn ? 'Submit' : '입력'}</button>
+                                                </div>
+                                            </div>
+
+                                            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                                <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '📋 Recent Voice Log' : '📋 최근 인식된 음성 기록'}</div>
+                                                <div id="voice-command-log" style="font-size: 0.85rem; font-weight: 600; color: #475569; display: flex; flex-direction: column; gap: 6px; max-height: 80px; overflow-y: auto;">
+                                                    <span style="color: #94a3b8;">${isEn ? 'No history yet' : '인식 기록 없음'}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            }
+                        } catch(e) {}
+                    })();
+                </script>
                 <div
                     style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155;">
                     <video id="webcam" autoplay playsinline
@@ -4822,6 +4875,30 @@ print("BrickSync Sandbox Run")
                         const action = child.getAttribute('data-action');
                         if (allowed.includes(action)) {
                             child.style.display = ''; // Show
+
+                            if (action === 'event_ai_gesture') {
+                                const iconDiv = child.querySelector('.block-icon div:nth-child(2)');
+                                const paramEl = child.querySelector('.block-param');
+                                if (String(targetUnit) === '2' || String(targetUnit) === '7') {
+                                    if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-microphone"></i>';
+                                    if (paramEl) {
+                                        paramEl.setAttribute('data-val', '0');
+                                        paramEl.innerHTML = '<i class="fas fa-arrow-up" style="color:#64748b;"></i>';
+                                    }
+                                } else if (String(targetUnit) === '3' || String(targetUnit) === '8') {
+                                    if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-dragon"></i>';
+                                    if (paramEl) {
+                                        paramEl.setAttribute('data-val', '0');
+                                        paramEl.innerHTML = '<i class="fas fa-dragon" style="color:#64748b;"></i>';
+                                    }
+                                } else {
+                                    if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-hand-sparkles"></i>';
+                                    if (paramEl) {
+                                        paramEl.setAttribute('data-val', '1');
+                                        paramEl.innerHTML = '<i class="fas fa-hand-paper" style="color:#64748b;"></i>';
+                                    }
+                                }
+                            }
 
                             // Customize matrix_pixel to be a static red light with no options
                             if (action === 'matrix_pixel') {
