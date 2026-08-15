@@ -4343,7 +4343,18 @@ print("BrickSync Sandbox Run")
                     if (typeof lastTriggeredAiGesture !== 'undefined') {
                         lastTriggeredAiGesture = -1;
                     }
-                    console.log('✅ [Block Engine] Sequence completed. Ready for next gesture trigger.');
+                    console.log('✅ [Block Engine] Sequence completed. Checking for 100% mission modal trigger...');
+                    const progressEl = document.getElementById('m-progress');
+                    const percentEl = document.getElementById('m-percent');
+                    const currentPercent = percentEl ? parseInt(percentEl.textContent) : 0;
+                    if (currentPercent >= 100 || (progressEl && progressEl.dataset.completed === 'true')) {
+                        console.log('🎉 [Mission Complete] Motor rotation finished! Popping up PIN modal & fireworks.');
+                        try {
+                            if (typeof triggerSuccessConfetti === 'function') {
+                                triggerSuccessConfetti();
+                            }
+                        } catch(e) { console.warn('Confetti launch error:', e); }
+                    }
                 }, totalSequenceDurationMs);
 
                 const executeBleQueue = async () => {
@@ -5312,13 +5323,8 @@ print("BrickSync Sandbox Run")
                         if (progressEl) progressEl.style.width = percent + '%';
                         if (percentEl) percentEl.textContent = percent + '%';
 
-                        if (percent >= 100 && progressEl && !progressEl.dataset.completed) {
+                        if (percent >= 100 && progressEl) {
                             progressEl.dataset.completed = 'true';
-                            try {
-                                if (typeof triggerSuccessConfetti === 'function') {
-                                    triggerSuccessConfetti();
-                                }
-                            } catch (e) { console.warn('Confetti launch error:', e); }
                         } else if (percent < 100 && progressEl) {
                             progressEl.dataset.completed = ''; // 블럭 떨어져나가면 달성도 리셋
                         }
