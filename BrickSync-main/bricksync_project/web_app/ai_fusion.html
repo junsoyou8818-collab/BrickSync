@@ -974,18 +974,17 @@
     <!-- 🟢 AI & Coding Fusion Layout 🟢 -->
     <div style="display: flex; flex: 1; overflow: hidden; min-height: 0; height: 0;">
         <!-- 좌측: AI 카메라 및 제어 영역 -->
-        <div
+        <div id="ai-left-sidebar"
             style="width: 480px; border-right: 4px solid #e2e8f0; background: #fff; display: flex; flex-direction: column; z-index: 10;">
             <div
                 style="padding: 15px 20px; background: #f8fafc; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                 <div style="font-weight: 800; color: #1e293b; font-size: 1.1rem;">
-                    <i class="fas fa-robot" style="color: #8b5cf6;"></i> <span data-i18n="lbl_ai_vision_title">AI 비전 제스처
-                        인식</span>
+                    <i class="fas fa-robot" style="color: #8b5cf6;"></i> <span id="ai-panel-title-text" data-i18n="lbl_ai_vision_title">AI 비전 제스처 인식</span>
                 </div>
             </div>
 
             <div
-                style="padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; align-items: center; overflow-y: auto;">
+                id="ai-left-panel-content" style="padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 15px; align-items: center; overflow-y: auto;">
                 <div
                     style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155;">
                     <video id="webcam" autoplay playsinline
@@ -1582,12 +1581,12 @@
         function showAIGestureModal(paramEl) {
             modalBox.innerHTML = '';
             modalBox.style.cssText = 'background: #8b5cf6; display: flex; gap: 10px; padding: 10px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #7c3aed; width: auto; max-width: 250px;';
-            if ((unit === '2' || (unit === '7' || unit === '2'))) {
+            if ((unit === '2' || unit === '7')) {
                 options = [
                     { type: 'forward', val: 0, icon: '<i class="fas fa-arrow-up"></i>' },
                     { type: 'backward', val: 1, icon: '<i class="fas fa-arrow-down"></i>' }
                 ];
-            } else if ((unit === '3' || (unit === '8' || unit === '3'))) {
+            } else if ((unit === '3' || unit === '8')) {
                 options = [
                     { type: 'monster', val: 0, icon: '<i class="fas fa-dragon"></i>' },
                     { type: 'none', val: 3, icon: '<i class="fas fa-ban"></i>' }
@@ -3894,7 +3893,7 @@ print("BrickSync Sandbox Run")
                                 if (!isNaN(textVal) && textVal !== "") timeVal = parseFloat(textVal);
                             }
                         }
-                        if (((unit === '2' || (unit === '7' || unit === '2')) || (unit === '7' || unit === '2')) && window.lastParsedSpeechTurns) {
+                        if ((unit === '2' || unit === '7') && window.lastParsedSpeechTurns) {
                             timeVal = window.lastParsedSpeechTurns;
                         }
                     } else {
@@ -4008,7 +4007,7 @@ print("BrickSync Sandbox Run")
                             let lightDuration = matEl ? (parseFloat(matEl.getAttribute('data-val')) || 2) : 2;
 
                             // 2단원/7단원 조명 매트릭스 실행 시점에 포트나이트 경보 발동 신호를 지연 큐에 주입 (2초 대기 연동 실현)
-                            if (unit === '8' || unit === '3') {
+                            if (unit === '3' || unit === '8') {
                                 localActionsQueue.push({ action: 'MONSTER_ALERT', delay: cumulativeDelayMs });
                                 if (isMissionActive) {
                                     pyCode += `${indent}print("Mission Complete!")\n`;
@@ -4098,7 +4097,7 @@ print("BrickSync Sandbox Run")
 
             if (isMissionActive && blockCount > 1) {
                 // [보상 시스템] 블록 조립 코드를 성공적으로 완성하고 런(Run) 버튼을 누르면
-                if ((unit === '3' || (unit === '8' || unit === '3'))) {
+                if ((unit === '3' || unit === '8')) {
                     // 3단원: 몬스터 경보 및 보상 신호 송출 (MONSTER_ALERT는 매트릭스 블록 실행 시 지연 송출되므로 여기서는 제거)
                     try {
                         window.parent.sendWebSocketAction({ action: "ITEM_GRANT_REWARD" });
@@ -4188,7 +4187,7 @@ print("BrickSync Sandbox Run")
                                     if (!isNaN(textVal) && textVal !== "") timeVal = parseFloat(textVal);
                                 }
                             }
-                            if (((unit === '8' || unit === '3') || unit === '3') && window.lastParsedSpeechTurns) {
+                            if ((unit === '3' || unit === '8') && window.lastParsedSpeechTurns) {
                                 timeVal = window.lastParsedSpeechTurns;
                             }
                         } else {
@@ -4362,7 +4361,7 @@ print("BrickSync Sandbox Run")
                                     }
                                 } else if (cmd.action === 'matrix') {
                                     try { window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
-                                    if (isMissionActive && (unit === '8' || unit === '3') && window.bleEngineRunCounter === currentRunId) {
+                                    if (isMissionActive && (unit === '3' || unit === '8') && window.bleEngineRunCounter === currentRunId) {
                                         if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
                                     }
                                     let encodedColors = cmd.colors.map(c => { const val = Number(c); return val > 0 ? val + 160 : 0; });
@@ -5912,7 +5911,7 @@ print("BrickSync Sandbox Run")
                 if (micIcon) {
                     micIcon.className = 'mic-idle';
                 }
-                if ((unit === '2' || (unit === '7' || unit === '2'))) {
+                if ((unit === '2' || unit === '7')) {
                     if (voiceStatusBox) {
                         voiceStatusBox.innerHTML = '<i class="fas fa-microphone"></i> 마이크를 눌러 명령을 시작하세요';
                         voiceStatusBox.style.background = '#f1f5f9';
@@ -5923,7 +5922,7 @@ print("BrickSync Sandbox Run")
         }
 
         async function app() {
-            if ((unit === '3' || (unit === '8' || unit === '3'))) {
+            if ((unit === '3' || unit === '8')) {
                 // Dynamically modify block icon & defaults in the palette for Unit 3
                 const aiBlock = document.querySelector('#palette [data-action="event_ai_gesture"]');
                 if (aiBlock) {
@@ -5972,11 +5971,11 @@ print("BrickSync Sandbox Run")
                 if (countScissors) countScissors.style.display = 'none';
             }
 
-            if ((unit === '2' || (unit === '7' || unit === '2'))) {
+            if (unit === '2' || unit === '7') {
                 const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
                 const isEn = currentLang === 'en';
 
-                // Dynamically modify block icon & defaults in the palette for Unit 2
+                // Dynamically modify block icon & defaults in the palette for Unit 2 / 7
                 const aiBlock = document.querySelector('#palette [data-action="event_ai_gesture"]');
                 if (aiBlock) {
                     const iconContainer = aiBlock.querySelector('.block-icon div:nth-child(2)');
@@ -5991,16 +5990,14 @@ print("BrickSync Sandbox Run")
                 }
 
                 // Render Voice UI inside Left Panel
-                const webcamEl = document.getElementById('webcam');
-                if (webcamEl) {
-                    const scrollContainer = webcamEl.parentElement.parentElement;
-                    const leftPanelContainer = scrollContainer.parentElement;
-                    // Update Title
-                    const aiTitleText = leftPanelContainer.querySelector('[data-i18n="lbl_ai_vision_title"]');
-                    if (aiTitleText) {
-                        aiTitleText.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Command Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 명령 인식';
-                    }
-                    scrollContainer.innerHTML = `
+                const panelContent = document.getElementById('ai-left-panel-content') || (document.getElementById('webcam') ? document.getElementById('webcam').parentElement.parentElement : null);
+                const titleEl = document.getElementById('ai-panel-title-text') || document.querySelector('[data-i18n="lbl_ai_vision_title"]');
+                if (titleEl) {
+                    titleEl.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Command Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 명령 인식';
+                }
+
+                if (panelContent) {
+                    panelContent.innerHTML = `
                         <div style="width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center;">
                             <div id="voice-mic-container" style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
                                 <div id="mic-icon-glow" style="width: 80px; height: 80px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 36px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); transition: all 0.2s;">
@@ -6214,7 +6211,7 @@ print("BrickSync Sandbox Run")
                             ? ['Rock', 'Paper', 'Scissors', 'Background (None)']
                             : ['주먹 (Rock)', '보 (Paper)', '가위 (Scissors)', '배경 (None)'];
                         let icons = ['fa-hand-rock', 'fa-hand-paper', 'fa-hand-scissors', 'fa-ban'];
-                        if ((unit === '3' || (unit === '8' || unit === '3')) || (unit === '8' || unit === '3')) {
+                        if ((unit === '3' || unit === '8')) {
                             labels = isEn
                                 ? ['Monster', 'Paper', 'Scissors', 'Background (None)']
                                 : ['몬스터 (Monster)', '보 (Paper)', '가위 (Scissors)', '배경 (None)'];
@@ -6234,7 +6231,7 @@ print("BrickSync Sandbox Run")
                                 runBlocks('event_ai_gesture', detectedGesture);
 
                                 // 3단원 몬스터 감지(0) 시 UEFN 경보 웹소켓 전송
-                                if (((unit === '3' || (unit === '8' || unit === '3')) || (unit === '8' || unit === '3')) && detectedGesture === 0) {
+                                if (((unit === '3' || unit === '8')) && detectedGesture === 0) {
                                     try {
                                         window.parent.sendWebSocketAction({ action: "MONSTER_ALERT" });
                                         console.log("포트나이트 연동 신호(MONSTER_ALERT) 전송 완료 [AI 2단원]");
