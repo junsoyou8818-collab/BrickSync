@@ -3785,17 +3785,23 @@
                 const action = (firstBlock && firstBlock.getAttribute('data-action')) || '';
 
                 if (triggerAction === 'gui') {
-                    // GUI "실행" 버튼 클릭 시에도 AI 제스처 블록이 시작인 스택 실행 허용 (테스트 편의성 제공)
                     return action === 'start' || action === 'event_ai_gesture' || action.startsWith('event_');
                 } else {
-                    // 시스템(AI 락다운 머신)에서 특정 제스처/음성으로 트리거했을 때
                     if (action === triggerAction) {
                         const nu = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
-                        if (nu === '7' || action === 'event_ai_gesture') {
-                            return true; // 7단원 음성 명령 수신 시(마이크 또는 텍스트 입력) 즉시 블록 코딩 전체 자동 실행!
-                        }
+                        if (nu === '7') return true;
+                        
                         const paramEl = firstBlock.querySelector('.block-param');
-                        if (paramEl && parseInt(paramEl.getAttribute('data-val')) === triggerVal) {
+                        let blockVal = 0;
+                        if (paramEl) {
+                            if (paramEl.hasAttribute('data-val')) blockVal = parseInt(paramEl.getAttribute('data-val'));
+                            else {
+                                const txt = paramEl.innerText.trim();
+                                if (!isNaN(txt) && txt !== '') blockVal = parseInt(txt);
+                            }
+                        }
+                        // 제스처 매칭 또는 기본 실행 허용
+                        if (triggerVal === -1 || triggerVal === blockVal || action === 'event_ai_gesture') {
                             return true;
                         }
                     }
@@ -3805,6 +3811,7 @@
 
             if (validStacks.length === 0) {
                 console.log(`[BrickSync] 매칭되는 블록 스택이 없으므로 실행을 생략합니다. (Trigger: ${triggerAction}, Val: ${triggerVal})`);
+                window.isBlockExecutionRunning = false;
                 return;
             }
 
@@ -6483,7 +6490,7 @@ print("BrickSync Sandbox Run")
                         // 사유: 학습 데이터가 적을 때 1~2프레임 단위로 예측이 요동치는(Flicker) 현상 방지. 최소 10프레임 이상 연속 일치해야만 통과.
                         if (candidateAiGesture === detectedGesture) {
                             consecutiveAiFrames++;
-                            if (consecutiveAiFrames >= 10 && lastTriggeredAiGesture !== detectedGesture) {
+                            if (consecutiveAiFrames >= 3 && lastTriggeredAiGesture !== detectedGesture) {
                                 if (!window.isBlockExecutionRunning) {
                                     lastTriggeredAiGesture = detectedGesture;
                                     console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
