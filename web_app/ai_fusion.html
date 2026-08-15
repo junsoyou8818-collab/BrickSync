@@ -4896,34 +4896,7 @@ print("BrickSync Sandbox Run")
                             <button onclick="clearClassifier()" style="width:100%; margin-top:6px; background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; padding:6px; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:all 0.2s;"><i class="fas fa-trash-alt"></i> ${isEn ? 'Reset Training Data 🔄' : '학습 데이터 리셋 🔄'}</button>
                         </div>
                     `;
-                    setTimeout(() => {
-                        try {
-                            webcamElement = document.getElementById('webcam');
-                            aiStatusLabel = document.getElementById('ai-status');
-                            currentGestureLabel = document.getElementById('current-gesture');
-                            
-                            // 1. 웹캠 즉시 연결
-                            if (typeof setupWebcam === 'function') {
-                                setupWebcam().then(() => {
-                                    if (aiStatusLabel) {
-                                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Ready for model training.' : '<i class="fas fa-check-circle"></i> 웹캠 연결 완료! 하단 버튼으로 학습을 시작하세요.';
-                                        aiStatusLabel.style.color = '#10b981';
-                                        aiStatusLabel.style.backgroundColor = '#d1fae5';
-                                        aiStatusLabel.style.borderColor = '#a7f3d0';
-                                    }
-                                }).catch(e => {
-                                    console.warn('[Unit 6 WebCam Instant Init]', e);
-                                    if (aiStatusLabel) {
-                                        aiStatusLabel.innerHTML = `<i class="fas fa-video"></i> ${isEn ? 'Camera Ready. Click below to start stream:' : '카메라 연결 대기 중. 아래 버튼으로 켜세요:'}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 16px; background:#0284c7; color:#fff; border:none; border-radius:18px; font-weight:800; cursor:pointer;">${isEn ? 'Turn On Camera 📷' : '카메라 켜기 📷'}</button>`;
-                                    }
-                                });
-                            }
-                            // 2. AI 엔진 백그라운드 가동
-                            if (typeof initAiEngine === 'function') {
-                                initAiEngine();
-                            }
-                        } catch(e) {}
-                    }, 30);
+                    // UI DOM 마운트 완료 (스트림 시작은 단일 진입점 app() 함수에서 총괄 수행)
                 }
             }
                         // 🟣 UNIT 7 (Voice Magic Swing)
@@ -4973,12 +4946,7 @@ print("BrickSync Sandbox Run")
                             </div>
                         </div>
                     `;
-                    setTimeout(() => {
-                        try {
-                            if (typeof initSpeechEngine === 'function') initSpeechEngine();
-                            if (typeof setupTextInputOnly === 'function') setupTextInputOnly();
-                        } catch(e) {}
-                    }, 50);
+                    // UI DOM 마운트 완료
                 }
             }
             // 🟧 UNIT 8 (Monster Camera)
@@ -5015,32 +4983,7 @@ print("BrickSync Sandbox Run")
                             <button onclick="clearClassifier()" style="width:100%; margin-top:6px; background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; padding:6px; border-radius:8px; font-weight:700; font-size:0.88rem; cursor:pointer; transition:all 0.2s;"><i class="fas fa-trash-alt"></i> ${isEn ? 'Reset Training Data 🔄' : '학습 데이터 리셋 🔄'}</button>
                         </div>
                     `;
-                    setTimeout(() => {
-                        try {
-                            webcamElement = document.getElementById('webcam');
-                            aiStatusLabel = document.getElementById('ai-status');
-                            currentGestureLabel = document.getElementById('current-gesture');
-                            
-                            if (typeof setupWebcam === 'function') {
-                                setupWebcam().then(() => {
-                                    if (aiStatusLabel) {
-                                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Ready for model training.' : '<i class="fas fa-check-circle"></i> 웹캠 연결 완료! 하단 버튼으로 학습을 시작하세요.';
-                                        aiStatusLabel.style.color = '#10b981';
-                                        aiStatusLabel.style.backgroundColor = '#d1fae5';
-                                        aiStatusLabel.style.borderColor = '#a7f3d0';
-                                    }
-                                }).catch(e => {
-                                    console.warn('[Unit 8 WebCam Instant Init]', e);
-                                    if (aiStatusLabel) {
-                                        aiStatusLabel.innerHTML = `<i class="fas fa-video"></i> ${isEn ? 'Camera Ready. Click below to start stream:' : '카메라 연결 대기 중. 아래 버튼으로 켜세요:'}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 16px; background:#0284c7; color:#fff; border:none; border-radius:18px; font-weight:800; cursor:pointer;">${isEn ? 'Turn On Camera 📷' : '카메라 켜기 📷'}</button>`;
-                                    }
-                                });
-                            }
-                            if (typeof initAiEngine === 'function') {
-                                initAiEngine();
-                            }
-                        } catch(e) {}
-                    }, 30);
+                    // UI DOM 마운트 완료
                 }
             }
         }
@@ -5967,44 +5910,60 @@ print("BrickSync Sandbox Run")
         }
 
         // [BUG-03 FIX & WEBCAM ENHANCEMENT] 웹캠 완벽 연결 및 재생 보장
+        let activeWebcamInitPromise = null;
+
         async function setupWebcam() {
-            webcamElement = document.getElementById('webcam') || webcamElement;
-            aiStatusLabel = document.getElementById('ai-status') || aiStatusLabel;
-            currentGestureLabel = document.getElementById('current-gesture') || currentGestureLabel;
-            stopExistingWebcam();
-
-            if (webcamElement) {
-                webcamElement.muted = true;
-                webcamElement.setAttribute('playsinline', 'true');
-                webcamElement.setAttribute('autoplay', 'true');
-                webcamElement.width = 640;
-                webcamElement.height = 480;
+            if (activeWebcamInitPromise) {
+                return activeWebcamInitPromise;
             }
 
-            const stream = await getRobustWebcamStream();
-            webcamElement.srcObject = stream;
+            activeWebcamInitPromise = (async () => {
+                try {
+                    webcamElement = document.getElementById('webcam') || webcamElement;
+                    aiStatusLabel = document.getElementById('ai-status') || aiStatusLabel;
+                    currentGestureLabel = document.getElementById('current-gesture') || currentGestureLabel;
 
-            try {
-                await webcamElement.play();
-            } catch (pErr) {
-                console.warn('[Webcam] play() error handled:', pErr);
-            }
+                    stopExistingWebcam();
 
-            return new Promise((resolve) => {
-                let attempts = 0;
-                const checkReady = () => {
-                    attempts++;
-                    if ((webcamElement.readyState >= 2 && webcamElement.videoWidth > 0) || attempts > 3) {
-                        resolve();
-                    } else {
-                        setTimeout(checkReady, 50);
+                    if (webcamElement) {
+                        webcamElement.muted = true;
+                        webcamElement.setAttribute('playsinline', 'true');
+                        webcamElement.setAttribute('autoplay', 'true');
+                        webcamElement.width = 640;
+                        webcamElement.height = 480;
                     }
-                };
 
-                webcamElement.addEventListener('loadeddata', () => resolve(), { once: true });
-                webcamElement.addEventListener('loadedmetadata', () => checkReady(), { once: true });
-                checkReady();
-            });
+                    const stream = await getRobustWebcamStream();
+                    if (webcamElement && stream) {
+                        webcamElement.srcObject = stream;
+                        await webcamElement.play().catch(pErr => console.warn('[Webcam] play error:', pErr));
+                    }
+
+                    if (aiStatusLabel) {
+                        const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                        const isEn = currentLang === 'en';
+                        aiStatusLabel.innerHTML = isEn
+                            ? '<i class="fas fa-check-circle"></i> Camera Connected! Ready for model training.'
+                            : '<i class="fas fa-check-circle"></i> 웹캠 연결 완료! 하단 버튼으로 학습을 시작하세요.';
+                        aiStatusLabel.style.color = '#10b981';
+                        aiStatusLabel.style.backgroundColor = '#d1fae5';
+                        aiStatusLabel.style.borderColor = '#a7f3d0';
+                    }
+
+                    return stream;
+                } catch(camErr) {
+                    console.warn('[setupWebcam Error]', camErr);
+                    if (aiStatusLabel) {
+                        const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                        const isEn = currentLang === 'en';
+                        aiStatusLabel.innerHTML = `<i class="fas fa-video"></i> ${isEn ? 'Camera Permission Required:' : '카메라 권한 및 연결 확인 필요:'}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 16px; background:#0284c7; color:#fff; border:none; border-radius:18px; font-weight:800; cursor:pointer;">${isEn ? 'Turn On Camera 📷' : '카메라 켜기 📷'}</button>`;
+                    }
+                } finally {
+                    activeWebcamInitPromise = null;
+                }
+            })();
+
+            return activeWebcamInitPromise;
         }
 
                 let speechRecognition = null;
