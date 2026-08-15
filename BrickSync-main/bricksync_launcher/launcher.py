@@ -19,7 +19,7 @@ else:
 PYTHON_EXE = sys.executable
 _LAUNCHER_DIR = os.path.dirname(os.path.abspath(__file__))
 SERVER_PY = os.path.join(_LAUNCHER_DIR, "..", "bricksync_project", "bridge_server", "server.py")
-BRICKSYNC_URL = "https://www.bricksync.org"
+BRICKSYNC_URL = "https://www.bricksync.org/intro.html"
 
 # Chrome 설치 경로 목록 (우선순위 순)
 # C:\Program Files 를 최우선으로 (이 PC에서 발견된 경로)

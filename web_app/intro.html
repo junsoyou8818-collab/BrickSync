@@ -341,11 +341,10 @@
                     document.body.style.transition = "opacity 0.4s ease-out";
                     document.body.style.opacity = 0;
 
-                    // 0.4초 뒤에 메인 메뉴 앱(menu.html)으로 이동
+                    // 0.4초 뒤에 로그인 페이지(login.html)로 이동
                     setTimeout(() => {
-                        // iframe 안에 있어도 항상 최상위 창 이동
                         sessionStorage.removeItem('brickSyncLastPage');
-                        window.top.location.href = "app.html";
+                        window.top.location.href = "login.html";
                     }, 400);
                 }
 
