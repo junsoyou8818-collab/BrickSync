@@ -5947,11 +5947,11 @@ print("BrickSync Sandbox Run")
             });
         }
 
-        let speechRecognition;
+                let speechRecognition = null;
         let isSpeechListening = false;
         let speechCooldown = false;
 
-                function toggleSpeechRecognition() {
+        function toggleSpeechRecognition() {
             if (speechCooldown) return;
             if (!speechRecognition) {
                 initSpeechEngine();
@@ -5960,14 +5960,26 @@ print("BrickSync Sandbox Run")
                 console.warn("[Speech] SpeechRecognition API not ready.");
                 return;
             }
+
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
+
             if (isSpeechListening) {
-                try {
-                    speechRecognition.stop();
-                } catch (e) { }
+                isSpeechListening = false;
+                try { speechRecognition.stop(); } catch (e) { }
+                const micIcon = document.getElementById('mic-icon-glow');
+                if (micIcon) micIcon.className = 'mic-idle';
+                const voiceStatusBox = document.getElementById('voice-status-box');
+                if (voiceStatusBox) {
+                    voiceStatusBox.innerHTML = isEn
+                        ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> Microphone connected! Click mic to speak.'
+                        : '<i class="fas fa-check-circle" style="color:#10b981;"></i> 마이크가 연결되었습니다. 마이크를 누르고 말씀하세요!';
+                    voiceStatusBox.style.background = '#d1fae5';
+                    voiceStatusBox.style.color = '#065f46';
+                }
             } else {
                 try {
-                    const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
-                    speechRecognition.lang = (currentLang === 'en') ? 'en-US' : 'ko-KR';
+                    speechRecognition.lang = isEn ? 'en-US' : 'ko-KR';
                     speechRecognition.start();
                 } catch (e) {
                     console.error("Speech start error:", e);
@@ -5975,25 +5987,18 @@ print("BrickSync Sandbox Run")
                         speechRecognition.stop();
                         setTimeout(() => {
                             try {
-                                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
-                                speechRecognition.lang = (currentLang === 'en') ? 'en-US' : 'ko-KR';
+                                const curLang = localStorage.getItem('bricksync_lang') || 'ko';
+                                speechRecognition.lang = (curLang === 'en') ? 'en-US' : 'ko-KR';
                                 speechRecognition.start();
-                            } catch(err) {}
-                        }, 200);
+                            } catch(err) { console.error("Speech retry failed:", err); }
+                        }, 150);
                     } catch(err) {}
                 }
             }
         }
-        window.toggleSpeechRecognition = toggleSpeechRecognition; else {
-                try {
-                    speechRecognition.start();
-                } catch (e) {
-                    console.error("Speech start error:", e);
-                }
-            }
-        }
+        window.toggleSpeechRecognition = toggleSpeechRecognition;
 
-                function initSpeechEngine() {
+        function initSpeechEngine() {
             const voiceStatusBox = document.getElementById('voice-status-box');
             const recognizedTextEl = document.getElementById('voice-recognized-text');
             const waveBars = document.querySelectorAll('.wave-bar');
@@ -6004,12 +6009,10 @@ print("BrickSync Sandbox Run")
             if (micBtn) {
                 micBtn.className = 'mic-idle';
                 micBtn.style.cursor = 'pointer';
-                micBtn.onclick = () => {
-                    toggleSpeechRecognition();
-                };
+                micBtn.onclick = () => { toggleSpeechRecognition(); };
             }
 
-            // 1. Request microphone access immediately on stage load to connect attached microphone
+            // 1. Request microphone permission
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
                     if (voiceStatusBox && !isSpeechListening && !speechCooldown) {
@@ -6045,8 +6048,12 @@ print("BrickSync Sandbox Run")
                 return;
             }
 
+            if (speechRecognition) {
+                try { speechRecognition.abort(); } catch(e) {}
+            }
+
             speechRecognition = new SpeechRecognition();
-            speechRecognition.continuous = false; // process one phrase at a time
+            speechRecognition.continuous = false;
             speechRecognition.interimResults = false;
             speechRecognition.lang = isEn ? 'en-US' : 'ko-KR';
 
@@ -6076,8 +6083,8 @@ print("BrickSync Sandbox Run")
                     voiceStatusBox.innerHTML = isEn
                         ? '<i class="fas fa-volume-up"></i> Listening... Please speak now!'
                         : '<i class="fas fa-volume-up"></i> 귀기울여 듣고 있어요... 말씀하세요!';
-                    voiceStatusBox.style.background = '#d1fae5';
-                    voiceStatusBox.style.color = '#065f46';
+                    voiceStatusBox.style.background = '#fee2e2';
+                    voiceStatusBox.style.color = '#991b1b';
                 }
                 startWaveformAnimation();
             };
@@ -6096,8 +6103,8 @@ print("BrickSync Sandbox Run")
                             : '<i class="fas fa-microphone-slash" style="color:#ef4444;"></i> 마이크 권한이 거부되었습니다. 허용해주세요.';
                     } else {
                         voiceStatusBox.innerHTML = isEn
-                            ? '<i class="fas fa-microphone"></i> Microphone ready (Click mic to try again)'
-                            : '<i class="fas fa-microphone"></i> 마이크 준비 완료 (다시 클릭해 주세요)';
+                            ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> Microphone connected! Click mic to speak.'
+                            : '<i class="fas fa-check-circle" style="color:#10b981;"></i> 마이크가 연결되었습니다. 마이크를 누르고 말씀하세요!';
                     }
                 }
             };

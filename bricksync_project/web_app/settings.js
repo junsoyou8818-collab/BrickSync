@@ -424,7 +424,7 @@
     // 2. CSS 스타일 주입 (Glassmorphic Custom UI matching Lego Fortnite)
     // ----------------------------------------------------
     const styles = `
-        .home-btn, a.home-btn, [data-i18n="btn_back_home"] {
+        .home-btn, a.home-btn {
             display: inline-flex !important;
             align-items: center !important;
             gap: 10px !important;
