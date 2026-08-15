@@ -4846,6 +4846,70 @@ print("BrickSync Sandbox Run")
             };
             window.openMissionBriefing = openMissionBriefing;
 
+                    function customizePaletteBlocks(targetUnit) {
+            const palette = document.getElementById('palette');
+            if (!palette) return;
+
+            const children = Array.from(palette.children);
+            children.forEach(child => {
+                if (child.classList.contains('spike-block')) {
+                    const action = child.getAttribute('data-action');
+                    if (action === 'event_ai_gesture') {
+                        const iconDiv = child.querySelector('.block-icon div:nth-child(2)');
+                        const paramEl = child.querySelector('.block-param');
+                        if (String(targetUnit) === '2' || String(targetUnit) === '7') {
+                            if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-microphone"></i>';
+                            if (paramEl) {
+                                paramEl.setAttribute('data-val', '0');
+                                paramEl.innerHTML = '<i class="fas fa-arrow-up" style="color:#64748b;"></i>';
+                            }
+                        } else if (String(targetUnit) === '3' || String(targetUnit) === '8') {
+                            if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-dragon"></i>';
+                            if (paramEl) {
+                                paramEl.setAttribute('data-val', '0');
+                                paramEl.innerHTML = '<i class="fas fa-dragon" style="color:#64748b;"></i>';
+                            }
+                        } else {
+                            if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-hand-sparkles"></i>';
+                            if (paramEl) {
+                                paramEl.setAttribute('data-val', '1');
+                                paramEl.innerHTML = '<i class="fas fa-hand-paper" style="color:#64748b;"></i>';
+                            }
+                        }
+                    }
+
+                    if (action === 'matrix_pixel') {
+                        const innerPixels = child.querySelectorAll('div > div');
+                        innerPixels.forEach(pixel => {
+                            pixel.style.backgroundColor = '#ef4444';
+                            pixel.style.borderColor = '#ef4444';
+                        });
+                        const paramEl = child.querySelector('.block-param');
+                        if (paramEl) {
+                            paramEl.innerHTML = '';
+                            paramEl.style.backgroundColor = '#ef4444';
+                            paramEl.style.pointerEvents = 'none';
+                            paramEl.setAttribute('data-val', '9');
+                            paramEl.setAttribute('data-matrix', JSON.stringify([9, 9, 9, 9, 9, 9, 9, 9, 9]));
+                        }
+                    }
+                }
+            });
+        }
+        window.customizePaletteBlocks = customizePaletteBlocks;
+
+        function showAllPaletteBlocks(targetUnit) {
+            const palette = document.getElementById('palette');
+            if (!palette) return;
+            customizePaletteBlocks(targetUnit);
+
+            const children = Array.from(palette.children);
+            children.forEach(child => {
+                child.style.display = '';
+            });
+        }
+        window.showAllPaletteBlocks = showAllPaletteBlocks;
+
             setupMissionToolbox = function (targetUnit) {
                 const palette = document.getElementById('palette');
                 if (!palette) return;
@@ -4955,10 +5019,10 @@ print("BrickSync Sandbox Run")
                 console.log(`[BrickSync] Fortnite-compatible toolbox loaded for Unit ${targetUnit}`);
             };
 
-            // Run toolbox filter immediately on page load for the active unit
+            // Show full palette with Stage-customized blocks (e.g. Mic block for Unit 7) on page load
             if (typeof unit !== 'undefined' && unit) {
                 try {
-                    setupMissionToolbox(unit);
+                    showAllPaletteBlocks(unit);
                 } catch(e) {}
             }
 
