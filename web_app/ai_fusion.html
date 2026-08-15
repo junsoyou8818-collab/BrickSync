@@ -4862,6 +4862,22 @@ print("BrickSync Sandbox Run")
                             </div>
                         </div>
                     `;
+                    setTimeout(() => {
+                        try {
+                            webcamElement = document.getElementById('webcam');
+                            aiStatusLabel = document.getElementById('ai-status');
+                            currentGestureLabel = document.getElementById('current-gesture');
+                            if (typeof setupWebcam === 'function') {
+                                setupWebcam().then(() => {
+                                    if (aiStatusLabel && (aiStatusLabel.innerText.includes('Loading') || aiStatusLabel.innerText.includes('로딩') || aiStatusLabel.innerText.includes('Connecting') || aiStatusLabel.innerText.includes('마운트'))) {
+                                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Ready for model training.' : '<i class="fas fa-check-circle"></i> 웹캠 연결 완료! 모델 학습을 시작할 수 있습니다.';
+                                        aiStatusLabel.style.color = '#0369a1';
+                                        aiStatusLabel.style.backgroundColor = '#e0f2fe';
+                                    }
+                                }).catch(e => console.warn('[Unit 6 WebCam Instant Init]', e));
+                            }
+                        } catch(e) {}
+                    }, 30);
                 }
             }
                         // 🟣 UNIT 7 (Voice Magic Swing)
@@ -4952,6 +4968,22 @@ print("BrickSync Sandbox Run")
                             </div>
                         </div>
                     `;
+                    setTimeout(() => {
+                        try {
+                            webcamElement = document.getElementById('webcam');
+                            aiStatusLabel = document.getElementById('ai-status');
+                            currentGestureLabel = document.getElementById('current-gesture');
+                            if (typeof setupWebcam === 'function') {
+                                setupWebcam().then(() => {
+                                    if (aiStatusLabel && (aiStatusLabel.innerText.includes('Loading') || aiStatusLabel.innerText.includes('로딩') || aiStatusLabel.innerText.includes('Connecting') || aiStatusLabel.innerText.includes('마운트'))) {
+                                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Ready for model training.' : '<i class="fas fa-check-circle"></i> 웹캠 연결 완료! 모델 학습을 시작할 수 있습니다.';
+                                        aiStatusLabel.style.color = '#0369a1';
+                                        aiStatusLabel.style.backgroundColor = '#e0f2fe';
+                                    }
+                                }).catch(e => console.warn('[Unit 8 WebCam Instant Init]', e));
+                            }
+                        } catch(e) {}
+                    }, 30);
                 }
             }
         }
@@ -5779,7 +5811,7 @@ print("BrickSync Sandbox Run")
         }
 
         let classifier = null; // 안전 전역 선언 (ReferenceError 원천 차단)
-        const webcamElement = document.getElementById('webcam');
+        let webcamElement = null;
         let net;
         let aiLoopRunning = false;
         let aiConfidenceThreshold = 0.85; // 신뢰도 85% 이상만 캡처
@@ -5788,8 +5820,8 @@ print("BrickSync Sandbox Run")
         let candidateAiGesture = -1; // 현재 프레임의 연속 후보
         let consecutiveAiFrames = 0; // 연속 감지 프레임 카운터
 
-        const currentGestureLabel = document.getElementById('current-gesture');
-        const aiStatusLabel = document.getElementById('ai-status');
+        let currentGestureLabel = null;
+        let aiStatusLabel = null;
         let examplesCount = [0, 0, 0, 0];
 
         // 🎥 이전 활성화된 웹캠 트랙 안전 해제 (카메라 장치 락 및 재접속 실패 완전 방지)
@@ -6484,11 +6516,23 @@ print("BrickSync Sandbox Run")
         }
 
                 function addExample(classId) {
+            webcamElement = webcamElement || document.getElementById('webcam');
+            aiStatusLabel = aiStatusLabel || document.getElementById('ai-status');
+            currentGestureLabel = currentGestureLabel || document.getElementById('current-gesture');
+
             if (!classifier && typeof knnClassifier !== 'undefined') {
                 classifier = knnClassifier.create();
             }
             if (!classifier || !net || !webcamElement) {
                 console.warn('[AI] Classifier, Net, or Webcam not ready yet.');
+                if (aiStatusLabel) {
+                    const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                    aiStatusLabel.innerHTML = currentLang === 'en'
+                        ? '<i class="fas fa-spinner fa-spin"></i> Pre-loading AI Model... Please try clicking again in 2 seconds.'
+                        : '<i class="fas fa-spinner fa-spin"></i> AI 분석 모델 로딩 중입니다... 2초 후 버튼을 다시 눌러주세요!';
+                    aiStatusLabel.style.backgroundColor = '#fef3c7';
+                    aiStatusLabel.style.color = '#92400e';
+                }
                 return;
             }
             try {
