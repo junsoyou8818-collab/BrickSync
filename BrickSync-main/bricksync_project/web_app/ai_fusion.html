@@ -5275,7 +5275,11 @@ print("BrickSync Sandbox Run")
 
                         if (percent >= 100 && progressEl && !progressEl.dataset.completed) {
                             progressEl.dataset.completed = 'true';
-                            // [수정] 즉시 성공 보상창이 팝업되는 레거시 로직 제거 (런동작이 완료된 이후 runBlocks 내부에서 팝업을 안전하게 띄웁니다.)
+                            try {
+                                if (typeof triggerSuccessConfetti === 'function') {
+                                    triggerSuccessConfetti();
+                                }
+                            } catch (e) { console.warn('Confetti launch error:', e); }
                         } else if (percent < 100 && progressEl) {
                             progressEl.dataset.completed = ''; // 블럭 떨어져나가면 달성도 리셋
                         }
