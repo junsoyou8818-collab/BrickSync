@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrickSync — 로그인</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans KR','Outfit',sans-serif}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f172a;background-image:radial-gradient(ellipse at 60% 0%,#312e81 0%,transparent 60%),radial-gradient(ellipse at 10% 80%,#1e3a5f 0%,transparent 50%);padding:20px}
+
+.card{width:100%;max-width:460px;background:rgba(30,41,59,0.85);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px;box-shadow:0 30px 60px rgba(0,0,0,0.5);backdrop-filter:blur(20px);animation:fadeUp .5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.brand{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:30px}
+.brand h1{font-size:2rem;font-weight:900;color:#facc15;letter-spacing:-1px}
+.brand p{color:#64748b;font-size:.9rem;margin-top:4px;text-align:center}
+
+/* 역할 탭 */
+.role-tabs{display:flex;gap:8px;margin-bottom:28px;background:#0f172a;border-radius:14px;padding:5px}
+.role-tab{flex:1;padding:10px 5px;border:none;background:transparent;color:#64748b;font-size:.85rem;font-weight:700;border-radius:10px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.role-tab i{font-size:1.1rem}
+.role-tab.active{background:linear-gradient(135deg,#4f46e5,#9333ea);color:#fff;box-shadow:0 4px 15px rgba(79,70,229,.4)}
+
+/* 모드 토글 (로그인/회원가입) */
+.mode-toggle{display:flex;gap:0;margin-bottom:24px;border:1px solid #334155;border-radius:10px;overflow:hidden}
+.mode-btn{flex:1;padding:10px;border:none;background:transparent;color:#64748b;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s}
+.mode-btn.active{background:#1e293b;color:#fff}
+
+/* 폼 */
+.form-group{margin-bottom:16px}
+label{display:block;color:#94a3b8;font-size:.85rem;font-weight:700;margin-bottom:7px}
+.input-wrap{position:relative}
+.input-wrap i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#475569;font-size:.95rem}
+input[type=text],input[type=email],input[type=password]{width:100%;padding:13px 13px 13px 42px;background:#020617;border:2px solid #334155;border-radius:10px;color:#fff;font-size:1rem;outline:none;transition:all .2s}
+input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+input.error{border-color:#f43f5e}
+
+.info-box{background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);border-radius:10px;padding:12px 14px;font-size:.83rem;color:#a5b4fc;line-height:1.6;margin-bottom:16px}
+.info-box i{margin-right:6px}
+
+.btn-submit{width:100%;padding:15px;background:linear-gradient(135deg,#4f46e5,#9333ea);border:none;border-radius:12px;color:#fff;font-size:1.05rem;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 8px 20px rgba(147,51,234,.3);display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(147,51,234,.5)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+.divider{text-align:center;color:#334155;font-size:.8rem;margin:18px 0;position:relative}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:#334155}
+.divider::before{left:0}.divider::after{right:0}
+
+.guest-btn{width:100%;padding:12px;background:transparent;border:1px solid #334155;border-radius:10px;color:#64748b;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s}
+.guest-btn:hover{border-color:#475569;color:#94a3b8}
+
+.lang-selector-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-bottom: 15px;
+}
+.lang-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lang-btn.active, .lang-btn:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: #8b5cf6;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:14px 24px;border-radius:12px;font-size:.9rem;font-weight:700;z-index:9999;transition:transform .35s cubic-bezier(.16,1,.3,1);min-width:300px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.success{border-color:#10b981;color:#6ee7b7}
+.toast.error{border-color:#f43f5e;color:#fda4af}
+
+
+/* 모바일: 카드가 화면을 꽉 채우도록 */
+@media (max-width: 520px) {
+  body { padding: 10px; align-items: flex-start; padding-top: 16px; }
+  .card { border-radius: 18px; padding: 28px 20px; }
+}
+
+/* bslogo 이미지 */
+.brand-logo {
+  display: block;
+  margin: 0 auto 8px;
+  width: 100%;
+  max-width: 280px;   /* PC: 카드(460px) 대비 적정 크기 */
+  height: auto;
+}
+@media (max-width: 520px) {
+  .brand-logo { max-width: 200px; }  /* 모바일: 조금 더 작게 */
+}
+
+/* 패널 전환 */
+.panel{display:none}.panel.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="lang-selector-bar">
+    <button class="lang-btn" id="lang-btn-ko" onclick="setLoginLanguage('ko')">🌐 한국어</button>
+    <button class="lang-btn" id="lang-btn-en" onclick="setLoginLanguage('en')">🌐 English</button>
+  </div>
+
+  <div class="brand">
+    <img src="./assets/bslogo.png" alt="BrickSync" class="brand-logo">
+    <p data-i18n="login_slogan">AI 코딩 및 포트나이트 통합 플랫폼</p>
+  </div>
+
+  <!-- 역할 탭 -->
+  <div class="role-tabs">
+    <button class="role-tab active" id="tab-student" onclick="switchRole('student')">
+      <i class="fas fa-user-astronaut"></i><span data-i18n="tab_student">학생</span>
+    </button>
+    <button class="role-tab" id="tab-teacher" onclick="switchRole('teacher')">
+      <i class="fas fa-chalkboard-teacher"></i><span data-i18n="tab_teacher">교사</span>
+    </button>
+    <button class="role-tab" id="tab-parent" onclick="switchRole('parent')">
+      <i class="fas fa-heart"></i><span data-i18n="tab_parent">학부모</span>
+    </button>
+  </div>
+
+  <!-- 로그인/회원가입 토글 -->
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="modeLoginBtn" onclick="switchMode('login')" data-i18n="mode_login">로그인</button>
+    <button class="mode-btn" id="modeSignupBtn" onclick="switchMode('signup')" data-i18n="mode_signup">회원가입</button>
+  </div>
+
+  <!-- ── 로그인 폼 ── -->
+  <div id="panelLogin" class="panel active">
+    <div class="form-group">
+      <label data-i18n="lbl_email">이메일</label>
+      <div class="input-wrap">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="loginEmail" placeholder="example@email.com" autocomplete="email">
+      </div>
+    </div>
+    <div class="form-group">
+      <label data-i18n="lbl_password">비밀번호</label>
+      <div class="input-wrap">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="loginPassword" placeholder="비밀번호 입력" data-i18n-placeholder="lbl_password_placeholder" autocomplete="current-password">
+      </div>
+    </div>
+    <button class="btn-submit" id="btnLogin" onclick="doLogin()">
+      <i class="fas fa-rocket"></i> <span data-i18n="mode_login">로그인</span>
+    </button>
+
+    <!-- 학생 탭에서만 게스트 버튼 표시 -->
+    <div id="guestSection">
+      <div class="divider" data-i18n="lbl_or">또는</div>
+      <button class="guest-btn" onclick="doGuestLogin()">
+        <i class="fas fa-user-secret"></i> <span data-i18n="btn_guest_entry">로그인 없이 게스트로 입장</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── 회원가입 폼 ── -->
+  <div id="panelSignup" class="panel">
+    <!-- 학생 안내 -->
+    <div id="infoStudent" class="info-box">
+      <i class="fas fa-info-circle"></i><span data-i18n="info_student_signup">담임 선생님께 <strong>클래스 코드</strong>를 받은 후 가입하세요.</span>
+    </div>
+    <!-- 교사 안내 -->
+    <div id="infoTeacher" class="info-box" style="display:none">
+      <i class="fas fa-shield-alt"></i><span data-i18n="info_teacher_signup">교사 계정으로 가입하면 클래스 코드를 발급할 수 있습니다.</span>
+    </div>
+    <!-- 학부모 안내 -->
+    <div id="infoParent" class="info-box" style="display:none">
+      <i class="fas fa-link"></i><span data-i18n="info_parent_signup">담임 선생님께 <strong>학부모 연결 코드</strong>를 받은 후 가입하세요.</span>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="lbl_name">이름</label>
+      <div class="input-wrap">
+        <i class="fas fa-user"></i>
+        <input type="text" id="signupName" placeholder="홍길동" data-i18n-placeholder="lbl_name_placeholder">
+      </div>
+    </div>
+    <div class="form-group">
+      <label data-i18n="lbl_email">이메일</label>
+      <div class="input-wrap">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="signupEmail" placeholder="example@email.com" autocomplete="email">
+      </div>
+    </div>
+    <div class="form-group">
+      <label data-i18n="lbl_password_req">비밀번호 (6자 이상)</label>
+      <div class="input-wrap">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="signupPassword" placeholder="비밀번호 설정" data-i18n-placeholder="lbl_signup_password_placeholder" autocomplete="new-password">
+      </div>
+    </div>
+
+    <!-- 학교명 (교사 전용) -->
+    <div class="form-group" id="fieldSchool" style="display:none">
+      <label data-i18n="lbl_school_name">학교/기관명</label>
+      <div class="input-wrap">
+        <i class="fas fa-school"></i>
+        <input type="text" id="signupSchool" placeholder="○○초등학교" data-i18n-placeholder="lbl_school_placeholder">
+      </div>
+    </div>
+
+    <!-- 클래스 코드 (학생 전용) -->
+    <div class="form-group" id="fieldClassCode">
+      <label data-i18n="lbl_class_code">클래스 코드 (선생님 제공)</label>
+      <div class="input-wrap">
+        <i class="fas fa-key"></i>
+        <input type="text" id="signupClassCode" placeholder="예: BS-A1B2C3" data-i18n-placeholder="lbl_class_code_placeholder" style="text-transform:uppercase">
+      </div>
+    </div>
+
+    <!-- 연결 코드 (학부모 전용) -->
+    <div class="form-group" id="fieldParentCode" style="display:none">
+      <label data-i18n="lbl_parent_code">학부모 연결 코드 (선생님 제공)</label>
+      <div class="input-wrap">
+        <i class="fas fa-link"></i>
+        <input type="text" id="signupParentCode" placeholder="예: PRT-X7Y8Z9" data-i18n-placeholder="lbl_parent_code_placeholder" style="text-transform:uppercase">
+      </div>
+    </div>
+
+    <button class="btn-submit" id="btnSignup" onclick="doSignup()">
+      <i class="fas fa-user-plus"></i> <span data-i18n="btn_signup">계정 만들기</span>
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script src="firebase_config.js?v=5.0"></script>
+<script src="auth.js?v=5.0"></script>
+<script src="settings.js?v=5.0"></script>
+
+<script>
+let currentRole = 'student';
+let currentMode = 'login';
+
+// ── 글로벌 예외 가로채기 (파이어베이스 키 시스템 오류 UI 노출 방지) ─────────────
+window.addEventListener('error', function(e) {
+  if (e && e.message && (e.message.includes('api-key') || e.message.includes('firebase'))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return true;
+  }
+}, true);
+
+window.addEventListener('unhandledrejection', function(e) {
+  if (e && e.reason && (String(e.reason.message).includes('api-key') || String(e.reason.code).includes('api-key'))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return true;
+  }
+}, true);
+
+// ── 탭/모드 전환 ──────────────────────────────────────────────
+function switchRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + role).classList.add('active');
+
+  document.getElementById('guestSection').style.display = role === 'student' ? '' : 'none';
+  document.getElementById('fieldClassCode').style.display = role === 'student' ? '' : 'none';
+  document.getElementById('fieldParentCode').style.display = role === 'parent' ? '' : 'none';
+  document.getElementById('fieldSchool').style.display = role === 'teacher' ? '' : 'none';
+  document.getElementById('infoStudent').style.display = role === 'student' ? '' : 'none';
+  document.getElementById('infoTeacher').style.display = role === 'teacher' ? '' : 'none';
+  document.getElementById('infoParent').style.display = role === 'parent' ? '' : 'none';
+}
+
+function switchMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeLoginBtn').classList.toggle('active', mode === 'login');
+  document.getElementById('modeSignupBtn').classList.toggle('active', mode === 'signup');
+  document.getElementById('panelLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('panelSignup').classList.toggle('active', mode === 'signup');
+}
+
+// ── 토스트 알림 ───────────────────────────────────────────────
+function showToast(msg, type = 'info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── 로그인 ────────────────────────────────────────────────────
+async function doLogin() {
+  const lang = localStorage.getItem('bricksync_lang') || 'ko';
+  const isEn = lang === 'en';
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPassword').value;
+
+  if (!email) {
+    showToast(isEn ? 'Please enter your email.' : '이메일을 입력해주세요.', 'error');
+    document.getElementById('loginEmail').focus();
+    return;
+  }
+  if (!pw) {
+    showToast(isEn ? 'Please enter your password.' : '비밀번호를 입력해주세요.', 'error');
+    document.getElementById('loginPassword').focus();
+    return;
+  }
+
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Logging in...' : '로그인 중...'}`;
+
+  try {
+    const { profile } = await BrickSyncAuth.signIn(email, pw);
+    const roleLabel = isEn ? (profile.role === 'student' ? 'Student' : profile.role === 'teacher' ? 'Teacher' : 'Parent') : (BrickSyncAuth.ROLE_LABELS[profile.role] || profile.role);
+    showToast(isEn ? `Welcome, ${profile.displayName}! (${roleLabel})` : `환영합니다, ${profile.displayName}님! (${roleLabel})`, 'success');
+    setTimeout(() => BrickSyncAuth.redirectToHome(profile.role), 800);
+  } catch (e) {
+    let msg = isEn ? 'Login failed.' : '로그인에 실패했습니다.';
+    if (e && e.code === 'auth/user-not-found') {
+      msg = isEn ? 'Unregistered email account. Please sign up first.' : '등록되지 않은 이메일 계정입니다. 회원가입 후 이용해 주세요.';
+    } else if (e && e.code === 'auth/wrong-password') {
+      msg = isEn ? 'Incorrect password. Please check your password.' : '비밀번호가 올바르지 않습니다. 다시 확인해 주세요.';
+    } else if (e && e.code === 'auth/invalid-email') {
+      msg = isEn ? 'Invalid email format (e.g. user@domain.com).' : '이메일 형식이 올바르지 않습니다. (예: user@domain.com)';
+    }
+    showToast(msg, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fas fa-rocket"></i> <span data-i18n="mode_login">${isEn ? 'Log In' : '로그인'}</span>`;
+  }
+}
+
+// ── 회원가입 ──────────────────────────────────────────────────
+async function doSignup() {
+  const lang = localStorage.getItem('bricksync_lang') || 'ko';
+  const isEn = lang === 'en';
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pw = document.getElementById('signupPassword').value;
+
+  // 1. 상세 입력 검증 및 구체적인 UI 메시지 제공
+  if (!name) {
+    showToast(isEn ? 'Please enter your name.' : '이름을 입력해주세요.', 'error');
+    document.getElementById('signupName').focus();
+    return;
+  }
+  if (!email) {
+    showToast(isEn ? 'Please enter your email.' : '이메일을 입력해주세요.', 'error');
+    document.getElementById('signupEmail').focus();
+    return;
+  }
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    showToast(isEn ? 'Please enter a valid email address format.' : '올바른 이메일 형식을 입력해주세요. (예: user@domain.com)', 'error');
+    document.getElementById('signupEmail').focus();
+    return;
+  }
+  if (!pw) {
+    showToast(isEn ? 'Please enter a password.' : '비밀번호를 입력해주세요.', 'error');
+    document.getElementById('signupPassword').focus();
+    return;
+  }
+  if (pw.length < 6) {
+    showToast(isEn ? 'Password must be at least 6 characters long.' : '비밀번호는 최소 6자 이상이어야 합니다.', 'error');
+    document.getElementById('signupPassword').focus();
+    return;
+  }
+
+  // 2. 역할별 필수 항목 검증
+  if (currentRole === 'student') {
+    const classCode = document.getElementById('signupClassCode').value.trim().toUpperCase();
+    if (!classCode) {
+      showToast(isEn ? 'Please enter a class code.' : '클래스 코드를 입력해주세요.', 'error');
+      document.getElementById('signupClassCode').focus();
+      return;
+    }
+  } else if (currentRole === 'parent') {
+    const parentCode = document.getElementById('signupParentCode').value.trim().toUpperCase();
+    if (!parentCode) {
+      showToast(isEn ? 'Please enter a parent link code.' : '학부모 연결 코드를 입력해주세요.', 'error');
+      document.getElementById('signupParentCode').focus();
+      return;
+    }
+  }
+
+  const btn = document.getElementById('btnSignup');
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Processing...' : '처리 중...'}`;
+
+  try {
+    let result;
+    if (currentRole === 'student') {
+      const classCode = document.getElementById('signupClassCode').value.trim().toUpperCase();
+      result = await BrickSyncAuth.signUpStudent({ email, password: pw, displayName: name, classCode });
+    } else if (currentRole === 'teacher') {
+      const school = document.getElementById('signupSchool').value.trim();
+      result = await BrickSyncAuth.signUpTeacher({ email, password: pw, displayName: name, schoolName: school });
+    } else if (currentRole === 'parent') {
+      const parentCode = document.getElementById('signupParentCode').value.trim().toUpperCase();
+      result = await BrickSyncAuth.signUpParent({ email, password: pw, displayName: name, parentCode });
+    }
+
+    if (result && result.profile) {
+      showToast(isEn ? `Sign up complete! Welcome, ${name}! 🎉` : `가입 완료! 환영합니다, ${name}님 🎉`, 'success');
+      setTimeout(() => BrickSyncAuth.redirectToHome(result.profile.role), 900);
+    }
+  } catch (e) {
+    console.warn("[Signup Error]", e);
+    let msg = isEn ? 'Sign up failed.' : '가입에 실패했습니다.';
+    if (e && e.code === 'auth/email-already-in-use') {
+      msg = isEn ? 'This email is already registered. Please log in instead.' : '이미 가입된 이메일 계정입니다. 기존 계정으로 로그인해 주세요.';
+    } else if (e && e.code === 'auth/invalid-email') {
+      msg = isEn ? 'Invalid email format.' : '이메일 형식이 올바르지 않습니다.';
+    } else if (e && e.code === 'auth/weak-password') {
+      msg = isEn ? 'Password is too weak. Minimum 6 characters required.' : '비밀번호가 취약합니다. 최소 6자 이상 설정해 주세요.';
+    }
+    showToast(msg, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<i class="fas fa-user-plus"></i> <span data-i18n="btn_signup">${isEn ? 'Create Account' : '계정 만들기'}</span>`;
+  }
+}
+
+// ── 게스트 로그인 ─────────────────────────────────────────────
+function doGuestLogin() {
+  // 1. 게스트 입장 시 기존의 'Guest_익명' 관련 실습/대시보드 데이터를 완전 초기화하여 깨끗한 상태(새창)로 진입 보장
+  localStorage.removeItem('dashboard_stats_Guest_익명');
+  
+  // 2. 내 프로젝트 목록에서 게스트가 생성한 임시 프로젝트 및 미션 이력 완전 삭제
+  const keys = Object.keys(localStorage);
+  keys.forEach(key => {
+    if (
+      key.startsWith('Guest_익명_project_') || 
+      key.startsWith('bricksync_project_Guest_익명') || 
+      key.startsWith('bricksync_mission_active_unit_')
+    ) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  // 3. 신규 임시 세션 발급
+  localStorage.setItem('bricksync_student_session', JSON.stringify({
+    name: 'Guest_익명',
+    expires: Date.now() + 2 * 60 * 60 * 1000,
+    loginTime: Date.now(),
+    role: 'student'
+  }));
+  sessionStorage.setItem('brickSyncLastPage', 'index.html');
+  window.location.href = 'app.html';
+}
+
+// ── 엔터키 지원 ───────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (currentMode === 'login') doLogin();
+  else doSignup();
+});
+
+// ── 이미 로그인 상태면 자동 이동 ─────────────────────────────
+(async () => {
+  if (typeof firebaseAuth !== 'undefined' && firebaseAuth) {
+    firebaseAuth.onAuthStateChanged(async (user) => {
+      if (!user) return;
+      const profile = await BrickSyncAuth.getUserProfile(user.uid);
+      if (profile) BrickSyncAuth.redirectToHome(profile.role);
+    });
+  } else {
+    const legacy = BrickSyncAuth.getLegacySession();
+    if (legacy) { sessionStorage.setItem('brickSyncLastPage', 'index.html'); window.location.href = 'app.html'; }
+  }
+})();
+
+// ── 다국어 언어 변경 버튼 지원 ─────────────────────────────
+function setLoginLanguage(lang) {
+  if (typeof changeSettingsLanguage === 'function') {
+    changeSettingsLanguage(lang);
+  } else {
+    localStorage.setItem('bricksync_lang', lang);
+  }
+  updateLoginLangButtons(lang);
+  if (typeof applyBrickSyncLanguage === 'function') {
+    applyBrickSyncLanguage(lang);
+  }
+}
+
+function updateLoginLangButtons(lang) {
+  const current = lang || localStorage.getItem('bricksync_lang') || 'ko';
+  const btnKo = document.getElementById('lang-btn-ko');
+  const btnEn = document.getElementById('lang-btn-en');
+  if (btnKo) btnKo.classList.toggle('active', current === 'ko');
+  if (btnEn) btnEn.classList.toggle('active', current === 'en');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const current = localStorage.getItem('bricksync_lang') || 'ko';
+  updateLoginLangButtons(current);
+  if (typeof applyBrickSyncLanguage === 'function') {
+    applyBrickSyncLanguage(current);
+  }
+});
+</script>
+</body>
+</html>

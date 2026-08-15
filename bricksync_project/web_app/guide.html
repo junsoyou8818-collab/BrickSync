@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrickSync 시작 가이드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            min-height: 100%;
+            font-family: 'Outfit', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #2d1b69 0%, #1a0a3e 55%, #0f0526 100%);
+            color: #fff;
+        }
+
+        .guide-wrap {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 28px 60px;
+        }
+
+        /* ── 헤더: 양끝 배치 ── */
+        .guide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 0 18px;
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #2d1b69dd, #1a0a3edd);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 12px;
+            padding: 10px 22px;
+            font-size: 1.05rem;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.18); }
+        .header-badge {
+            background: linear-gradient(135deg, #6d28d9, #4f46e5);
+            border-radius: 20px;
+            padding: 7px 22px;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* ── 히어로: CSS 로고 (배경 묻힘 없음) ── */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 36px 0 28px;
+        }
+
+        /* 원본 투명 bslogo */
+        .bslogo-img {
+            height: 90px;
+            display: block;
+            margin: 0 auto 12px;
+        }
+        .brick-studs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 0;
+            padding-left: 4px;
+            align-self: flex-start;
+        }
+        .brick-studs span {
+            width: 18px; height: 18px;
+            border: 2.5px solid rgba(255,255,255,0.85);
+            border-radius: 5px;
+            display: block;
+        }
+        .bs-letters {
+            font-size: 3.4rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            line-height: 1;
+            display: flex;
+            align-items: baseline;
+        }
+        .bs-letters span { display: inline-block; }
+        .c-B  { color: #FF1493; text-shadow: 0 2px 12px rgba(255,20,147,0.4); }
+        .c-r  { color: #4A9EE8; text-shadow: 0 2px 12px rgba(74,158,232,0.4); }
+        .c-i  { color: #AA6EEE; text-shadow: 0 2px 12px rgba(170,110,238,0.4); position: relative; }
+        .c-i::before {
+            content: '●';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.6rem;
+            color: #FFD700;
+        }
+        .c-c  { color: #E84040; text-shadow: 0 2px 12px rgba(232,64,64,0.4); }
+        .c-k  { color: #F5A623; text-shadow: 0 2px 12px rgba(245,166,35,0.4); }
+        .c-S  { color: #9B4FE8; text-shadow: 0 2px 12px rgba(155,79,232,0.4); }
+        .c-y  { color: #2ECC71; text-shadow: 0 2px 12px rgba(46,204,113,0.4); }
+        .c-n  { color: #F4A8C0; text-shadow: 0 2px 12px rgba(244,168,192,0.4); }
+        .c-c2 { color: #87CEEB; text-shadow: 0 2px 12px rgba(135,206,235,0.4); }
+
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #a78bfa;
+            letter-spacing: -0.5px;
+        }
+
+        /* ── 2컬럼 레이아웃 ── */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            /* 양 컬럼 높이를 동일하게 → 밑변 정렬 */
+            align-items: stretch;
+        }
+
+        /* 섹션 라벨 */
+        .section-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #a78bfa;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(167,139,250,0.25);
+        }
+
+        /* ── 왼쪽: 환경설정 카드 ── */
+        .setup-card {
+            background: rgba(139,92,246,0.1);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 24px;
+            padding: 32px 36px;
+            position: relative;
+            overflow: hidden;
+        }
+        .setup-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 5px;
+            background: #8b5cf6;
+            border-radius: 24px 0 0 24px;
+        }
+        .setup-tag {
+            font-size: 0.8rem; font-weight: 700;
+            letter-spacing: 2px; color: rgba(255,255,255,0.35);
+            text-transform: uppercase; margin-bottom: 10px;
+        }
+        .setup-title {
+            font-size: 1.55rem; font-weight: 900;
+            margin-bottom: 22px; letter-spacing: -0.3px;
+        }
+        .setup-steps { display: flex; flex-direction: column; gap: 14px; }
+        .setup-step {
+            display: flex; align-items: flex-start;
+            gap: 12px; font-size: 1.05rem;
+            color: rgba(255,255,255,0.82); line-height: 1.6;
+        }
+        .setup-step-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
+        .setup-step strong { color: #fff; font-weight: 700; }
+        .setup-badge {
+            display: inline-block; margin-top: 20px;
+            font-size: 0.9rem; font-weight: 600;
+            padding: 7px 18px; border-radius: 20px;
+            background: rgba(139,92,246,0.15);
+            color: rgba(255,255,255,0.6);
+            border: 1px solid rgba(139,92,246,0.3);
+        }
+
+        /* ── 오른쪽 메뉴 컬럼 ── */
+        .menu-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── 탭 네비게이션: 한 줄 고정 ── */
+        .tab-nav {
+            display: flex;
+            gap: 6px;
+            flex-wrap: nowrap;
+            margin-bottom: 16px;
+            /* overflow 제거 - 탭이 가득 채움 */
+            scrollbar-width: none;
+        }
+        .tab-nav::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.65);
+            border-radius: 12px; padding: 9px 16px;
+            font-size: 0.95rem; font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer; white-space: nowrap;
+            transition: all 0.2s;
+            /* 4개 탭이 동일 너비로 menu-card 우측변까지 꽉 채움 */
+            flex: 1;
+        }
+        .tab-btn:hover { background: rgba(255,255,255,0.13); color: #fff; }
+        .tab-btn.active {
+            background: rgba(167,139,250,0.22);
+            border-color: rgba(167,139,250,0.55);
+            color: #fff;
+        }
+        .tab-btn i { width: 17px; height: 17px; flex-shrink: 0; }
+
+        .menu-panel { display: none; }
+        /* active 패널이 남은 높이를 채워 왼쪽 카드 밑변과 정렬 */
+        .menu-panel.active { display: flex; flex-direction: column; flex: 1; }
+
+        .menu-card {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 22px; padding: 30px 34px;
+            position: relative; overflow: hidden;
+            /* 패널이 flex:1이면 카드도 늘어나서 높이 맞춤 */
+            flex: 1;
+        }
+        .menu-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; bottom: 0;
+            width: 5px; border-radius: 22px 0 0 22px;
+        }
+        .panel-home     .menu-card::before { background: #f59e0b; }
+        .panel-lessons  .menu-card::before { background: #10b981; }
+        .panel-ai       .menu-card::before { background: #6366f1; }
+        .panel-system   .menu-card::before { background: #0ea5e9; }
+        .panel-projects .menu-card::before { background: #f43f5e; }
+
+        .menu-tag {
+            font-size: 0.8rem; font-weight: 700;
+            letter-spacing: 2px; color: rgba(255,255,255,0.35);
+            text-transform: uppercase; margin-bottom: 10px;
+        }
+        .menu-title {
+            font-size: 1.55rem; font-weight: 900;
+            margin-bottom: 16px; letter-spacing: -0.3px;
+        }
+        .menu-desc {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.7;
+        }
+        .menu-desc strong { color: #fff; font-weight: 700; }
+        .menu-badge {
+            display: inline-block; margin-top: 16px;
+            font-size: 0.88rem; font-weight: 600;
+            padding: 6px 16px; border-radius: 20px;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.55);
+            border: 1px solid rgba(255,255,255,0.14);
+        }
+    </style>
+</head>
+<body>
+<div class="guide-wrap">
+
+    <!-- 헤더: 양끝 배치 -->
+    <div class="guide-header">
+        <a class="back-btn" href="index.html" data-i18n="btn_back_home">← 홈으로 가기</a>
+        <span class="header-badge">Guide</span>
+    </div>
+
+    <!-- 히어로: CSS 로고 -->
+    <div class="hero">
+        <img src="./assets/bslogo.png" class="bslogo-img" alt="BrickSync">
+        <h1 data-i18n="lbl_guide_hero_title">이렇게 사용해요!</h1>
+    </div>
+
+    <!-- 2컬럼 본문 -->
+    <div class="two-col">
+
+        <!-- 왼쪽: 환경설정 -->
+        <div>
+            <div class="section-label" data-i18n="lbl_guide_setup_header">⚙️ BrickSync 기초 환경설정</div>
+            <div class="setup-card">
+                <div class="setup-tag">Setup Guide</div>
+                <div class="setup-title" data-i18n="lbl_guide_setup_title">BrickSync.exe 실행 및 기본 설정</div>
+                <div class="setup-steps">
+                    <div class="setup-step">
+                        <span class="setup-step-icon">🖱️</span>
+                        <span data-i18n="lbl_guide_step1"><strong>실행</strong>: BrickSync.exe 더블클릭 → 로컬 서버 자동 시작 → 브라우저 자동 오픈</span>
+                    </div>
+                    <div class="setup-step">
+                        <span class="setup-step-icon">🌐</span>
+                        <span data-i18n="lbl_guide_step2"><strong>브라우저</strong>: Web Bluetooth 지원 <strong>Chrome 또는 Edge</strong> 필요 (Firefox · Safari 미지원)</span>
+                    </div>
+                    <div class="setup-step">
+                        <span class="setup-step-icon">🔵</span>
+                        <span data-i18n="lbl_guide_step3"><strong>허브 연결</strong>: <strong>시스템 연결</strong> 메뉴에서 레고 허브를 블루투스로 연결</span>
+                    </div>
+                    <div class="setup-step">
+                        <span class="setup-step-icon">👤</span>
+                        <span data-i18n="lbl_guide_step4"><strong>계정 로그인</strong>: 학생 · 교사 · 학부모 계정으로 로그인 후 역할별 기능 활성화</span>
+                    </div>
+                </div>
+                <span class="setup-badge" data-i18n="lbl_guide_setup_badge">별도 설치 불필요 · 원클릭 실행</span>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 메뉴 설명 -->
+        <div class="menu-col">
+            <div class="section-label" data-i18n="lbl_guide_menu_header">📋 메뉴 기능 안내</div>
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab(this,'home')">
+                    <i data-lucide="home"></i> <span data-i18n="nav_home">홈</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab(this,'lessons')">
+                    <i data-lucide="book-open"></i> <span data-i18n="nav_lessons">학습단원</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab(this,'ai')">
+                    <i data-lucide="bot"></i> <span data-i18n="nav_ai_lessons">AI 학습단원</span>
+                </button>
+                <!-- 시스템 연결 탭 - 숨김 처리 (index.html과 동일하게, 코드 유지) -->
+                <button class="tab-btn" onclick="switchTab(this,'system')" style="display:none;" id="guide-tab-system">
+                    <i data-lucide="monitor"></i> <span data-i18n="nav_workspace">시스템 연결</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab(this,'projects')">
+                    <i data-lucide="blocks"></i> <span data-i18n="nav_projects">프로젝트</span>
+                </button>
+            </div>
+
+            <div class="menu-panel panel-home active" id="mpanel-home">
+                <div class="menu-card">
+                    <div class="menu-tag">Menu 01</div>
+                    <div class="menu-title" data-i18n="lbl_menu01_title">홈 (Home)</div>
+                    <div class="menu-desc" data-i18n="lbl_menu01_desc">
+                        BrickSync의 <strong>메인 페이지</strong>입니다.<br>
+                        학습 시작, 포트나이트 맵 접속, 내 프로젝트 확인 등<br>
+                        모든 기능을 한눈에 볼 수 있는 시작 화면입니다.
+                    </div>
+                    <span class="menu-badge" data-i18n="lbl_menu01_badge">시작 화면</span>
+                </div>
+            </div>
+
+            <div class="menu-panel panel-lessons" id="mpanel-lessons">
+                <div class="menu-card">
+                    <div class="menu-tag">Menu 02</div>
+                    <div class="menu-title" data-i18n="lbl_menu02_title">학습단원 (Lessons)</div>
+                    <div class="menu-desc" data-i18n="lbl_menu02_desc">
+                        BrickSync 코딩 커리큘럼 <strong>1~5단원</strong>을 학습하는 공간입니다.<br>
+                        단원별 미션을 수행하며 레고 허브 블록 코딩을 단계적으로 배울 수 있습니다.<br>
+                        각 단원을 완료하면 <strong>코인 보상</strong>이 지급됩니다.
+                    </div>
+                    <span class="menu-badge" data-i18n="lbl_menu02_badge">1단원 ~ 5단원</span>
+                </div>
+            </div>
+
+            <div class="menu-panel panel-ai" id="mpanel-ai">
+                <div class="menu-card">
+                    <div class="menu-tag">Menu 03</div>
+                    <div class="menu-title" data-i18n="lbl_menu03_title">AI 학습단원 (AI Lessons)</div>
+                    <div class="menu-desc" data-i18n="lbl_menu03_desc">
+                        인공지능을 활용한 <strong>심화 학습</strong> 공간입니다.<br>
+                        <strong>6~8단원</strong>에서는 손 제스처 인식, 음성 명령 등<br>
+                        AI 기술과 레고 허브를 융합한 특별한 코딩 미션을 경험합니다.
+                    </div>
+                    <span class="menu-badge" data-i18n="lbl_menu03_badge">6단원 ~ 8단원 · AI 융합</span>
+                </div>
+            </div>
+
+            <!-- 시스템 연결 패널 - 숨김 처리 (코드 유지) -->
+            <div class="menu-panel panel-system" id="mpanel-system" style="display:none !important;">
+                <div class="menu-card">
+                    <div class="menu-tag">Menu 04</div>
+                    <div class="menu-title">시스템 연결 (System Connection)</div>
+                    <div class="menu-desc">
+                        레고 허브를 <strong>블루투스</strong>로 연결하고 직접 코딩하는 공간입니다.<br>
+                        허브의 센서 값, 모터 상태 등 <strong>실시간 작동 상태를 확인</strong>하며<br>
+                        블록 코드를 직접 만들고 실행할 수 있습니다.
+                    </div>
+                    <span class="menu-badge">허브 연결 · 코딩 실습</span>
+                </div>
+            </div>
+
+            <div class="menu-panel panel-projects" id="mpanel-projects">
+                <div class="menu-card">
+                    <div class="menu-tag">Menu 05</div>
+                    <div class="menu-title" data-i18n="lbl_menu05_title">프로젝트 (Projects)</div>
+                    <div class="menu-desc" data-i18n="lbl_menu05_desc">
+                        내가 만든 <strong>코딩 프로젝트</strong>를 저장하고 관리하는 공간입니다.<br>
+                        이전에 작업한 코드를 불러오거나<br>
+                        새 프로젝트를 시작할 수 있습니다.
+                    </div>
+                    <span class="menu-badge" data-i18n="lbl_menu05_badge">프로젝트 저장 · 관리</span>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /two-col -->
+</div><!-- /guide-wrap -->
+
+<script src="settings.js"></script>
+<script>
+    lucide.createIcons();
+    function switchTab(btn, name) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('mpanel-' + name).classList.add('active');
+    }
+</script>
+</body>
+</html>

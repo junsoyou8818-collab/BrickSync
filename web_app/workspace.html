@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <!-- 최상위 윈도우 자동 래핑 리다이렉트 스크립트 -->
+    <script>
+        if (window === window.parent) {
+            let currentPage = window.location.pathname.split('/').pop() + window.location.search;
+            if (!currentPage || currentPage.startsWith('?')) {
+                currentPage = 'index.html' + window.location.search;
+            }
+            sessionStorage.setItem('brickSyncLastPage', currentPage);
+            window.location.href = 'app.html';
+        }
+    </script>
+    <!-- Firebase SDK (Auth + Firestore + Realtime DB) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="firebase_config.js"></script>
+    <script src="auth.js"></script>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrickSync - 워크스페이스</title>
+    <!-- 폰트: 한글은 Noto Sans, 영문은 Outfit -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- 깃허브 오픈소스 기반 심플 라인 아이콘 (Lucide) 로드 -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', 'Outfit', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 요청하신 이미지처럼 약간 비스듬한 스플릿(105도) 배경에 등고선(Topography) 패턴 오버레이 적용 */
+            background:
+                /* 부드러운 하얀색 등고선 패턴 오버레이 */
+                url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 0h2v20H9V0zm25.134.84l1.414 1.414-14.14 14.14-1.414-1.414 14.14-14.14zm44.732 0l1.414 1.414-14.14 14.14-1.414-1.414 14.14-14.14zM111 0h2v20h-2V0zM35.636 11.364l1.414-1.414-14.14-14.14-1.414 1.414 14.14 14.14zM100.864 11.364l1.414-1.414-14.14-14.14-1.414 1.414 14.14 14.14zM0 9v2h20V9H0zm100 0v2h20V9h-20zm-10.743 27.257l1.414-1.414 14.14 14.14-1.414 1.414-14.14-14.14zM11.364 35.636l1.414-1.414 14.14 14.14-1.414 1.414-14.14-14.14zM0 100v2h20v-2H0zm100 0v2h20v-2h-20zm-10.743 27.257l1.414-1.414 14.14 14.14-1.414 1.414-14.14-14.14zM11.364 100.864l1.414-1.414 14.14 14.14-1.414 1.414-14.14-14.14z' fill='rgba(255,255,255,0.06)' fill-rule='evenodd'/%3E%3C/svg%3E"),
+                /* 퍼플 & 옐로우 비스듬한 배경 */
+                linear-gradient(108deg, #6c1f86 0%, #6c1f86 52%, #eab308 52%, #eab308 100%);
+            background-size: 151px 151px, cover;
+            background-repeat: repeat, no-repeat;
+            overflow: hidden;
+            color: #1e293b;
+        }
+
+        /* 프리미엄 글래스모피즘(반투명 유리) 대시보드 */
+        .dashboard-container {
+            width: 85%;
+            max-width: 1400px;
+            height: 85vh;
+            /* 디자인처럼 은은한 반투명 흰색 막을 깔아줍니다 */
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            display: flex;
+            overflow: hidden;
+
+            /* 대시보드 부드러운 등장 애니메이션 */
+            opacity: 0;
+            transform: scale(0.98) translateY(20px);
+            animation: dashboardEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes dashboardEnter {
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* ================= 왼쪽 메뉴 사이드바 ================= */
+        .sidebar {
+            width: 260px;
+            padding: 50px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .menu-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0 25px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+            font-size: 1.1rem;
+            text-decoration: none;
+            width: max-content;
+            min-width: 160px;
+        }
+
+        /* 심플 라인 아이콘 */
+        .menu-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 16px;
+            color: rgba(255, 255, 255, 0.75);
+            transition: all 0.3s ease;
+        }
+
+        .menu-item:hover,
+        .menu-item:hover .menu-icon {
+            color: #ffffff;
+        }
+
+        /* 활성화된 위치의 스타일 - 목업처럼 둥근 흰색 박스 */
+        .menu-item.active {
+            background: #ffffff;
+            font-weight: 700;
+            color: #1e293b;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .menu-item.active .menu-icon {
+            color: #ff8c00;
+        }
+
+        .bottom-menu {
+            padding: 0 25px;
+        }
+
+        /* ================= 오른쪽 메인 화면 영역 ================= */
+        .main-content {
+            flex: 1;
+            padding: 60px 80px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .workspace-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .workspace-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* 컨트롤 영역 그리드 */
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            flex: 1;
+        }
+
+        .device-card {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .device-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 로깅 모니터 전용 박스 스타일 */
+        .device-card.log-card {
+            cursor: default;
+            align-items: flex-start;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        .device-card.log-card:hover {
+            transform: none;
+        }
+
+        .card-number {
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            color: #ffcc00;
+            /* 레고 옐로우 */
+            opacity: 0.8;
+            line-height: 1;
+        }
+
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            color: #69227F;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .card-status {
+            font-size: 1rem;
+            color: #64748b;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .log-box {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            overflow-y: auto;
+            font-family: 'Outfit', monospace;
+            font-size: 0.9rem;
+            color: #475569;
+            line-height: 1.5;
+            padding: 40px;
+            box-sizing: border-box;
+        }
+
+        .action-text {
+            color: #69227F;
+            font-weight: bold;
+        }
+
+        /* 우측에 직접 전달해주신 레고 라마 이미지 사용 (assets 폴더 연동) */
+        .llama-deco {
+            position: absolute;
+            right: -20px;
+            bottom: -50px;
+            height: 80vh;
+            pointer-events: none;
+            z-index: 100;
+            filter: drop-shadow(-10px 10px 20px rgba(0, 0, 0, 0.3));
+        }
+
+        /* 전체화면 좌측 상단 레고 포트나이트 공식 로고 */
+        .top-logo {
+            position: absolute;
+            top: 35px;
+            left: 50px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .top-logo img {
+            height: 36px;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.4));
+        }
+
+        .top-logo span {
+            font-family: 'Outfit', -apple-system, sans-serif;
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+
+<body>
+
+    <img src="./assets/fortnite2.png" class="llama-deco"
+        onerror="this.src='https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzEyMDdfMTA1%2FMDAxNzAxOTQxMTc4MzMy.hVndw1oE2rMhXv1lP8NnsfF0yvA9tQ9-9A_JqKxXnKcg.fM1RItB_EihgO9F7-7v_8bI9WqHwItz2bZ2qYc4oU2og.PNG.sjh912%2F2.png&type=sc960_832'">
+
+    <!-- 좌측 상단 전체화면 글로벌 로고 영역 -->
+    <div class="top-logo">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/LEGO_logo.svg" alt="Lego Logo">
+        <span>FORTNITE</span>
+    </div>
+
+    <div class="dashboard-container">
+
+        <!-- 왼쪽 메뉴 영역 -->
+        <div class="sidebar">
+            <!-- 학생 프로필 카드 -->
+            <div class="student-profile-card" style="padding: 15px; background: rgba(255,255,255,0.06); border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i data-lucide="user" style="color: #facc15; width: 18px; height: 18px;"></i>
+                    <span id="display-student-name" style="color: #fff; font-weight: 700; font-size: 0.95rem;">학생</span>
+                </div>
+                <button onclick="doLogout()" style="background: none; border: none; color: #f43f5e; cursor: pointer; display: flex; align-items: center; padding: 4px; transition: color 0.2s;" title="로그아웃" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#f43f5e'">
+                    <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+
+            <ul class="menu-list">
+                <a href="#" onclick="if (window.parent && window.parent.navigateIframe) { window.parent.navigateIframe('index.html'); } else { window.location.href='index.html?v='+new Date().getTime(); } return false;" class="menu-item">
+                    <i data-lucide="home" class="menu-icon"></i>
+                    <span data-i18n="nav_home">홈</span>
+                </a>
+                <a href="#" onclick="if (window.parent && window.parent.navigateIframe) { window.parent.navigateIframe('lesson.html'); } else { window.location.href='lesson.html?v='+new Date().getTime(); } return false;" class="menu-item">
+                    <i data-lucide="book-open" class="menu-icon"></i>
+                    <span data-i18n="nav_lessons">학습단원</span>
+                </a>
+                <a href="#" onclick="if (window.parent && window.parent.navigateIframe) { window.parent.navigateIframe('ai_fusion.html'); } else { window.location.href='ai_fusion.html?v='+new Date().getTime(); } return false;" class="menu-item" id="btn-ai">
+                    <i data-lucide="bot" class="menu-icon"></i>
+                    <span data-i18n="nav_ai_lessons">AI 학습단원</span>
+                </a>
+                <!-- 활성 메뉴: 워크스페이스 -->
+                <li class="menu-item active">
+                    <i data-lucide="monitor" class="menu-icon"></i>
+                    <span data-i18n="nav_workspace">워크스페이스</span>
+                </li>
+                <li class="menu-item">
+                    <i data-lucide="blocks" class="menu-icon"></i>
+                    <span data-i18n="nav_projects">프로젝트</span>
+                </li>
+                <!-- 역할별 대시보드 링크 (JS로 동적 주입) -->
+                <li class="menu-item" id="nav-dashboard-item" style="display:none" onclick="goToDashboard()">
+                    <i data-lucide="layout-dashboard" class="menu-icon"></i>
+                    <span id="nav-dashboard-label" data-i18n="nav_dashboard">대시보드</span>
+                </li>
+            </ul>
+
+            <div class="bottom-menu">
+                <li class="menu-item" id="settings-menu-btn" style="list-style:none;">
+                    <i data-lucide="settings" class="menu-icon"></i>
+                    <span data-i18n="nav_settings">설정</span>
+                </li>
+            </div>
+        </div>
+
+        <!-- 오른쪽 메인 컨텐츠 영역 -->
+        <div class="main-content">
+
+            <div class="workspace-header">
+                <div class="workspace-title" data-i18n="lbl_device_sync">디바이스 동기화</div>
+            </div>
+
+            <div class="device-grid">
+                <!-- 1. 통신 포트 연결 (USB / BLE) -->
+                <div class="device-card" id="connectCard">
+                    <div style="display:flex; gap: 10px; margin-bottom: 20px; color:#69227F;">
+                        <i data-lucide="usb" style="width: 48px; height: 48px;"></i>
+                        <i data-lucide="bluetooth" style="width: 48px; height: 48px;"></i>
+                    </div>
+                    <div class="card-title" data-i18n="lbl_connect_hub">허브 연결</div>
+                    <div style="display:flex; gap: 10px; margin-top: 15px; z-index: 10;">
+                        <button onclick="connectUSB()"
+                            style="display: none !important; padding: 6px 16px; border-radius: 6px; border:none; background:#34d399; color:white; font-weight:bold; cursor:pointer;">USB</button>
+                        <button onclick="connectBluetooth()"
+                            style="padding: 6px 16px; border-radius: 6px; border:none; background:#3b82f6; color:white; font-weight:bold; cursor:pointer;">Bluetooth</button>
+                    </div>
+                    <div id="hubStatusText" data-i18n="lbl_hub_not_connected" style="margin-top:15px; font-weight:bold; color:#64748b;">허브 연결 안 됨</div>
+                    <div class="card-number">1</div>
+                </div>
+
+                <!-- 2. 파이썬 코드 주입 -->
+                <div class="device-card" onclick="sendPythonCode()">
+                    <i data-lucide="cpu" class="card-icon"></i>
+                    <div class="card-title" data-i18n="lbl_code_injection">코드 주입</div>
+                    <div class="card-number">2</div>
+                </div>
+
+                <!-- 3. 연결 상태 모니터 -->
+                <div class="device-card">
+                    <i data-lucide="radio" class="card-icon"></i>
+                    <div class="card-title" data-i18n="lbl_system_check">시스템 확인</div>
+                    <div class="card-status" id="status" data-i18n="lbl_status_waiting">대기 중...</div>
+                    <div class="card-number">3</div>
+                </div>
+
+                <!-- 4. 원시 데이터 로그 -->
+                <div class="device-card log-card">
+                    <div class="log-box" id="logBox" data-i18n="lbl_log_start">================ 로그 시작 ================<br></div>
+                    <div class="card-number">4</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Lucide 아이콘 렌더링 스크립트 -->
+    <script>
+        lucide.createIcons();
+
+        function addLog(message) {
+            const logBox = document.getElementById('logBox');
+            // 원시 데이터(Raw)와 가공된 데이터(명령)를 시각적으로 구분
+            if (message.includes("RAW:")) {
+                logBox.innerHTML += "<span style='color:#94a3b8;'>" + message + "</span><br>";
+            } else {
+                logBox.innerHTML += message + "<br>";
+            }
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // ====================================================================
+        // SPA 아키텍처 연동: 모든 통신 주도권은 부모 프레임인 app.html이 가짐
+        // ====================================================================
+        function sendCommand(actionName) {
+            try { window.parent.sendCommand(actionName); } catch (e) { }
+        }
+
+        async function writeToHub(text) {
+            return await window.parent.writeToHub(text);
+        }
+
+        async function connectUSB() {
+            return await window.parent.connectUSB();
+        }
+
+        async function connectBluetooth() {
+            try {
+                await window.parent.connectBluetooth();
+            } catch (e) { console.error("SPA 프록시 블루투스 연결 대기 오류:", e); }
+        }
+
+        // 사용자가 수동으로 버튼을 누르면 파이썬(MicroPython) 코드를 허브에 전송합니다 (Raw REPL 모드 사용)
+        async function sendPythonCode() {
+            if (!window.parent.connectionType) {
+                addLog("❌ 먼저 '1. 허브 연결'을 진행하세요!");
+                return;
+            }
+
+            if (window.parent.connectionType === 'BLE') {
+                addLog("✅ 블루투스는 별도로 코드를 주입할 필요가 없습니다!");
+                addLog("💡 <b>USB와 달리 연결 직후부터 항상 센서 신호를 받아오고 있습니다. 당장 허브를 기울여보세요!</b>");
+                return;
+            }
+            try {
+                // 1) Ctrl+C를 두 번 보내서 현재 실행 중인 코드 강제 중단
+                await writeToHub('\x03\x03');
+
+                // 2) Ctrl+A를 보내서 'Raw REPL' 모드로 진입 (자동 들여쓰기로 인한 Syntax에러 방지)
+                await writeToHub('\x01');
+
+                // 3) 주입할 파이썬 코드
+                const pyCode = `import hub, utime
+print("READY_TO_TILT")
+
+while True:
+    try:
+        ac = hub.motion.accelerometer()
+        x, y = ac[0], ac[1]
+        
+        state_x = "CENTER_X"
+        state_y = "CENTER_Y"
+        
+        if y > 15:
+            state_y = "TILT_UP"
+        elif y < -15:
+            state_y = "TILT_DOWN"
+            
+        if x > 15:
+            state_x = "TILT_RIGHT"
+        elif x < -15:
+            state_x = "TILT_LEFT"
+
+        print(state_x + "|" + state_y)
+    except Exception as e:
+        print("ERR:", e)
+    utime.sleep_ms(200)
+`;
+                // 코드 전송
+                await writeToHub(pyCode);
+
+                // 4) Ctrl+D를 보내서 전송 완료 및 실행 명령 하달
+                await writeToHub('\x04');
+
+                addLog("✅ 센서 코드 주입 명령 하달 완료! (허브를 좌우로 흔들어보세요)");
+            } catch (e) {
+                addLog("❌ 코드 주입 실패: " + e);
+            }
+        }
+
+        // ── 역할별 사이드바 초기화 ────────────────────────────────
+        async function initRoleUI() {
+            let displayName = 'Guest_익명';
+            let role = 'student';
+
+            // Firebase Auth 우선
+            if (typeof firebaseAuth !== 'undefined' && firebaseAuth && firebaseAuth.currentUser) {
+                const user = firebaseAuth.currentUser;
+                const profile = await BrickSyncAuth.getUserProfile(user.uid);
+                if (profile) {
+                    displayName = profile.displayName || user.email || '학생';
+                    role = profile.role || 'student';
+                }
+            } else {
+                // 레거시 세션 폴백
+                try {
+                    const s = JSON.parse(localStorage.getItem('bricksync_student_session') || '{}');
+                    displayName = s.name || 'Guest_익명';
+                    role = s.role || 'student';
+                } catch(e) {}
+            }
+
+            // 이름 표시
+            const nameEl = document.getElementById('display-student-name');
+            if (nameEl) nameEl.textContent = displayName + ' ' + (role === 'teacher' ? '교사' : role === 'parent' ? '학부모' : '학생');
+
+            // 역할별 대시보드 메뉴 표시
+            const dashItem = document.getElementById('nav-dashboard-item');
+            const dashLabel = document.getElementById('nav-dashboard-label');
+            if (role === 'teacher') {
+                if (dashItem) dashItem.style.display = '';
+                if (dashLabel) dashLabel.textContent = '교사 대시보드';
+            } else {
+                if (dashItem) dashItem.style.display = 'none';
+            }
+
+            // Lucide 아이콘 갱신
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function goToDashboard() {
+            if (typeof firebaseAuth !== 'undefined' && firebaseAuth && firebaseAuth.currentUser) {
+                BrickSyncAuth.getUserProfile(firebaseAuth.currentUser.uid).then(profile => {
+                    const role = profile?.role;
+                    if (role === 'teacher') window.location.href = 'dashboard_v2.html';
+                });
+            } else {
+                try {
+                    const s = JSON.parse(localStorage.getItem('bricksync_student_session') || '{}');
+                    if (s.role === 'teacher') window.location.href = 'dashboard_v2.html';
+                } catch(e) {}
+            }
+        }
+
+        function doLogout() {
+            if (typeof BrickSyncAuth !== 'undefined') {
+                BrickSyncAuth.signOut();
+            } else {
+                localStorage.removeItem('bricksync_student_session');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function logoutStudent() { doLogout(); }
+
+        function updateStudentGreeting(lang) {
+            try {
+                const sessionDataStr = localStorage.getItem('bricksync_student_session');
+                const nameDisp = document.getElementById('display-student-name');
+                if (nameDisp) {
+                    let rawName = 'Guest_익명';
+                    if (sessionDataStr) {
+                        const sessionData = JSON.parse(sessionDataStr);
+                        rawName = sessionData.name || 'Guest_익명';
+                    }
+                    if (lang === 'en') {
+                        const cleanName = rawName.replace('Guest_익명', 'Guest_Anonymous').replace('익명', 'Anonymous');
+                        nameDisp.innerText = 'Student ' + cleanName;
+                    } else {
+                        nameDisp.innerText = rawName + ' 학생';
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // 초기화 리스너
+        window.addEventListener('DOMContentLoaded', () => {
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            updateStudentGreeting(currentLang);
+            if (typeof firebaseAuth !== 'undefined' && firebaseAuth) {
+                firebaseAuth.onAuthStateChanged((user) => { initRoleUI(); });
+            } else {
+                initRoleUI();
+            }
+        });
+
+        // 다국어 실시간 감지 이벤트 리스너 추가
+        window.addEventListener('bricksync-language-changed', (e) => {
+            const lang = e.detail.lang;
+            updateStudentGreeting(lang);
+        });
+    </script>
+    <script src="settings.js"></script>
+</body>
+
+</html>
