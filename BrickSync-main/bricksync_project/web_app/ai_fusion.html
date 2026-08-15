@@ -31,62 +31,102 @@
     <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
     <!-- 🚀 웹캠 0.001초 즉시 직통 가동 자립형 스크립트 (외부 CDN/JS 지연 원천 차단) -->
-    <script>
-        (function() {
-            async function startInstantWebcam() {
-                const urlParams = new URLSearchParams(window.location.search);
-                let unit = urlParams.get('unit') || localStorage.getItem('brickSyncLastUnit');
-                if (String(unit) === '2' || String(unit) === '7') {
-                    // 2단원 및 7단원 (AI 음성 인식 단원)은 웹캠을 켜지 않음
-                    return;
-                }
-                const videoEl = document.getElementById('webcam');
-                const statusLabel = document.getElementById('ai-status');
-                if (!videoEl) {
-                    setTimeout(startInstantWebcam, 50);
-                    return;
-                }
-                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
-                const isEn = currentLang === 'en';
-                if (statusLabel) {
-                    statusLabel.innerHTML = isEn ? '<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>Connecting Camera Stream...</strong>' : '<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>웹캠 직통 연결 중...</strong>';
-                    statusLabel.style.backgroundColor = '#e0f2fe';
-                    statusLabel.style.color = '#0369a1';
-                }
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        video: { width: { ideal: 640 }, height: { ideal: 480 } }
-                    });
-                    videoEl.srcObject = stream;
-                    videoEl.muted = true;
-                    videoEl.setAttribute('playsinline', 'true');
-                    videoEl.setAttribute('autoplay', 'true');
-                    await videoEl.play();
-                    console.log('[Instant WebCam] Successfully mounted video stream in 0.001s!');
-                    if (statusLabel) {
-                        statusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Camera Stream Connected Successfully!</strong>' : '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>웹캠 100% 라이브 연결 성공!</strong>';
-                        statusLabel.style.backgroundColor = '#d1fae5';
-                        statusLabel.style.color = '#065f46';
-                    }
-                } catch (err) {
-                    console.warn('[Instant WebCam Error]', err);
-                    if (statusLabel) {
-                        const statusTitle = isEn ? 'Camera Connection Status: ' : '카메라 연결 상태: ';
-                        const btnText = isEn ? '<i class="fas fa-redo"></i> Turn On Camera 📷' : '<i class="fas fa-redo"></i> 웹캠 켜기 📷';
-                        statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> ${statusTitle} ${err.message || err}<br><button onclick="window.startInstantWebcamGlobal()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;">${btnText}</button>`;
-                        statusLabel.style.backgroundColor = '#fee2e2';
-                        statusLabel.style.color = '#991b1b';
-                    }
-                }
-            }
-            window.startInstantWebcamGlobal = startInstantWebcam;
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', startInstantWebcam);
-            } else {
-                startInstantWebcam();
-            }
-        })();
-    </script>
+                <script>
+                (function() {
+                    try {
+                        const u = new URLSearchParams(window.location.search).get('unit') || localStorage.getItem('brickSyncLastUnit');
+                        const isEn = (localStorage.getItem('bricksync_lang') || 'ko') === 'en';
+
+                        if (String(u) === '2' || String(u) === '7') {
+                            const p = document.getElementById('ai-left-panel-content');
+                            const t = document.getElementById('ai-panel-title-text');
+                            if (t) {
+                                t.setAttribute('data-i18n', 'lbl_ai_voice_title');
+                                t.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 인식';
+                            }
+                            if (p) {
+                                p.innerHTML = `
+                                    <div style="width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center;">
+                                        <div id="voice-mic-container" style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
+                                            <div id="mic-icon-glow" style="width: 80px; height: 80px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 36px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); transition: all 0.2s;">
+                                                <i class="fas fa-microphone"></i>
+                                            </div>
+                                            <div id="voice-waveform-canvas-container" style="width: 80%; height: 40px; display: flex; justify-content: center; align-items: center; gap: 4px;">
+                                                <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                                <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                                <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                                <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                                <div class="wave-bar" style="width: 6px; height: 8px; background: #3b82f6; border-radius: 3px; transition: height 0.1s;"></div>
+                                            </div>
+                                            <div style="position: absolute; bottom: 15px; background: rgba(0,0,0,0.7); color: #fff; padding: 6px 15px; border-radius: 20px; font-weight: 800; font-size: 0.95rem; backdrop-filter: blur(4px);">
+                                                <span id="voice-recognized-text">${isEn ? 'Waiting...' : '대기 중...'}</span>
+                                            </div>
+                                        </div>
+
+                                        <div id="voice-status-box" style="width: 100%; padding: 12px; background: #dbeafe; border: 1px solid #bfdbfe; border-radius: 8px; color: #1e3a8a; font-weight: 700; text-align: center; font-size: 0.95rem;">
+                                            <i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Waiting for microphone activation...' : '마이크 활성화 대기 중...'}
+                                        </div>
+
+                                        <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                            <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '⌨️ Text Command Input (Mic Backup)' : '⌨️ 텍스트 명령 입력 (마이크 백업용)'}</div>
+                                            <div style="display: flex; gap: 8px; width: 100%;">
+                                                <input type="text" id="voice-text-input" placeholder="${isEn ? 'e.g. Turn 5 times forward' : '예: 앞으로 5바퀴 돌아'}" style="flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; outline: none; font-weight: 600; font-family: inherit;" />
+                                                <button id="btn-send-voice-text" style="background: #3b82f6; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.1s;">${isEn ? 'Submit' : '입력'}</button>
+                                            </div>
+                                        </div>
+
+                                        <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                            <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '📋 Recent Voice Log' : '📋 최근 인식된 음성 기록'}</div>
+                                            <div id="voice-command-log" style="font-size: 0.85rem; font-weight: 600; color: #475569; display: flex; flex-direction: column; gap: 6px; max-height: 80px; overflow-y: auto;">
+                                                <span style="color: #94a3b8;">${isEn ? 'No history yet' : '인식 기록 없음'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        } else if (String(u) === '3' || String(u) === '8') {
+                            const p = document.getElementById('ai-left-panel-content');
+                            const t = document.getElementById('ai-panel-title-text');
+                            if (t) {
+                                t.setAttribute('data-i18n', 'lbl_ai_vision_title');
+                                t.innerHTML = isEn ? '<i class="fas fa-dragon" style="color: #f97316;"></i> AI Vision Image Recognition' : '<i class="fas fa-dragon" style="color: #f97316;"></i> AI 비전 이미지 인식';
+                            }
+                            if (p) {
+                                p.innerHTML = `
+                                    <div style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155;">
+                                        <video id="webcam" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);"></video>
+                                        <div id="ai-result-overlay" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 8px 20px; border-radius: 20px; font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; backdrop-filter: blur(4px);">
+                                            <i class="fas fa-eye"></i> <span id="current-gesture">${isEn ? 'Waiting...' : '대기 중...'}</span>
+                                        </div>
+                                    </div>
+
+                                    <div id="ai-status" style="width: 100%; padding: 12px; background: #dbeafe; border: 1px solid #bfdbfe; border-radius: 8px; color: #1e3a8a; font-weight: 700; text-align: center; font-size: 0.95rem;">
+                                        <i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Loading AI Engine...' : 'AI 엔진 로딩 중...'}
+                                    </div>
+
+                                    <div style="width: 100%; display: flex; flex-direction: column; gap: 10px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                        <div style="font-size: 0.9rem; font-weight: 800; color: #64748b; margin-bottom: 5px;">${isEn ? 'Model Training Control' : '인식 모델 학습 기능'}</div>
+                                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                            <button onclick="addExample(0)" style="background:#ef4444; color:white; border:none; padding:12px; border-radius:8px; font-weight:800; cursor:pointer; box-shadow:0 3px 0 #b91c1c; transition:transform 0.1s; font-size: 1rem;"><i class="fas fa-dragon"></i> <span>${isEn ? '👾 Monster' : '👾 몬스터'}</span></button>
+                                            <button onclick="addExample(1)" style="background:#64748b; color:white; border:none; padding:12px; border-radius:8px; font-weight:800; cursor:pointer; box-shadow:0 3px 0 #475569; transition:transform 0.1s; font-size: 1rem;"><i class="fas fa-ban"></i> <span>${isEn ? '🚫 Background' : '🚫 배경'}</span></button>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-around; font-size: 0.85rem; color: #64748b; font-weight: 700; padding: 0 5px; margin-top: 5px;">
+                                            <span id="count-rock">0개</span>
+                                            <span id="count-none">0개</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            const t = document.getElementById('ai-panel-title-text');
+                            if (t) {
+                                t.setAttribute('data-i18n', 'lbl_ai_vision_title');
+                                t.innerHTML = isEn ? '<i class="fas fa-camera" style="color: #8b5cf6;"></i> AI Vision Gesture Recognition' : '<i class="fas fa-camera" style="color: #8b5cf6;"></i> AI 비전 제스처 인식';
+                            }
+                        }
+                    } catch(e) {}
+                })();
+            </script>
     <!-- Firebase SDK 및 공통 설정 연동 -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <!-- firebase-auth-compat disabled for Firestore Cloud Auth Engine -->
@@ -4774,14 +4814,13 @@ print("BrickSync Sandbox Run")
                             { id: ['motor_cw', 'motor_ccw'], text: '모터를 반시계 방향으로 3회 회전하기' }
                         ]
                     },
-                    '8': {
-                        badge: 'STAGE 8', title: '몬스터를 보여줘! 경보 알림켜기', desc: '재생(시작) 블록 연결하기 / AI 카메라 인식 블록 연결하기 / 대기 블록 연결하기 / LED 매트릭스 경보등 블록 연결하기',
+                                        '8': {
+                        badge: 'STAGE 8', title: '몬스터를 보여줘! 경보 알림켜기', desc: 'AI 비전 이미지 인식 블록 연결하기 / 5초 대기하기 / 모터를 반시계 방향으로 3회 회전하기',
                         pinCode: '8932',
                         tasks: [
-                            { id: 'start', text: '재생(시작) 블록 연결하기' },
-                            { id: 'event_ai_gesture', text: 'AI 카메라 인식 블록 연결하기' },
-                            { id: 'flow_wait', text: '대기 블록 연결하기' },
-                            { id: 'matrix_pixel', text: 'LED 매트릭스 경보등 블록 연결하기' }
+                            { id: 'event_ai_gesture', text: 'AI 비전 이미지 인식 블록 연결하기' },
+                            { id: 'flow_wait', text: '5초 대기하기' },
+                            { id: ['motor_cw', 'motor_ccw'], text: '모터를 반시계 방향으로 3회 회전하기' }
                         ]
                     }
                 },
@@ -4805,14 +4844,13 @@ print("BrickSync Sandbox Run")
                             { id: ['motor_cw', 'motor_ccw'], text: 'Rotate the motor counterclockwise 3 times' }
                         ]
                     },
-                    '8': {
-                        badge: 'STAGE 8', title: 'Animal Alert Ranger (Monster Camera)', desc: 'Connect Play (Start) block / Connect AI Camera Recognition block / Connect Wait block / Connect LED Matrix Alert block',
+                                        '8': {
+                        badge: 'STAGE 8', title: 'Show the Monster! Turn on Alarm Alert', desc: 'Connect the AI Vision Image Recognition block / Wait 5 seconds / Rotate the motor counterclockwise 3 times',
                         pinCode: '8932',
                         tasks: [
-                            { id: 'start', text: 'Connect Play (Start) block' },
-                            { id: 'event_ai_gesture', text: 'Connect the AI Camera Recognition block' },
-                            { id: 'flow_wait', text: 'Connect the Wait block' },
-                            { id: 'matrix_pixel', text: 'Connect the LED Matrix Alert block' }
+                            { id: 'event_ai_gesture', text: 'Connect the AI Vision Image Recognition block' },
+                            { id: 'flow_wait', text: 'Wait 5 seconds' },
+                            { id: ['motor_cw', 'motor_ccw'], text: 'Rotate the motor counterclockwise 3 times' }
                         ]
                     }
                 }
@@ -6415,15 +6453,15 @@ print("BrickSync Sandbox Run")
 
                     if (result.confidences[result.label] > aiConfidenceThreshold) {
                         const detectedGesture = parseInt(result.label);
-                        let labels = isEn
+                                                let labels = isEn
                             ? ['Rock', 'Paper', 'Scissors', 'Background (None)']
                             : ['주먹 (Rock)', '보 (Paper)', '가위 (Scissors)', '배경 (None)'];
                         let icons = ['fa-hand-rock', 'fa-hand-paper', 'fa-hand-scissors', 'fa-ban'];
                         if (String(unit) === '3' || String(unit) === '8') {
                             labels = isEn
-                                ? ['Monster', 'Paper', 'Scissors', 'Background (None)']
-                                : ['몬스터 (Monster)', '보 (Paper)', '가위 (Scissors)', '배경 (None)'];
-                            icons = ['fa-dragon', 'fa-hand-paper', 'fa-hand-scissors', 'fa-ban'];
+                                ? ['👾 Monster', '🚫 Background', 'Scissors', 'Background (None)']
+                                : ['👾 몬스터', '🚫 배경', '가위 (Scissors)', '배경 (None)'];
+                            icons = ['fa-dragon', 'fa-ban', 'fa-hand-scissors', 'fa-ban'];
                         }
                         // ↑ [BUGFIX] 중복 icons 할당(5791)과 여분의 }(5792) 제거 → 구문 오류 수정
 
