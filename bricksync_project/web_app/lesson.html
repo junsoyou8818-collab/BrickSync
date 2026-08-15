@@ -58,21 +58,19 @@
         }
 
         /* Top Navigation Bar */
-        .top-bar {
-            height: 84px;
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+                .top-bar {
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 30px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+            padding: 0 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             z-index: 10;
         }
 
-                .home-btn {
+        .home-btn {
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -115,86 +113,45 @@
         }
 
         .action-btn {
-            padding: 12px 24px;
-            border: 2px solid rgba(148, 163, 184, 0.8);
-            border-radius: 24px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            padding: 8px 20px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background: #fff;
             color: #1e293b;
-            font-weight: 900;
-            font-size: 1.3rem;
+            font-weight: 700;
+            font-size: 0.95rem;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 
-                inset 0 3px 6px rgba(255, 255, 255, 0.6),
-                0 5px 0 #cbd5e1,
-                0 8px 16px rgba(0, 0, 0, 0.08);
         }
 
         .action-btn:hover {
-            border-color: rgba(100, 116, 139, 1.0);
-            background: #ffffff;
-            transform: translateY(-2px);
-            box-shadow: 
-                inset 0 3px 6px rgba(255, 255, 255, 0.7),
-                0 7px 0 #cbd5e1,
-                0 10px 20px rgba(0, 0, 0, 0.12);
-        }
-
-        .action-btn:active {
-            transform: translateY(4px);
-            box-shadow: 
-                inset 0 2px 4px rgba(0, 0, 0, 0.15),
-                0 0 0 #cbd5e1,
-                0 2px 4px rgba(0, 0, 0, 0.05);
+            border-color: #94a3b8;
+            background: #f8fafc;
         }
 
         .run-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: #10b981;
+            border: none;
             color: #fff;
-            box-shadow: 
-                inset 0 3px 6px rgba(255, 255, 255, 0.4),
-                0 5px 0 #047857,
-                0 8px 16px rgba(16, 185, 129, 0.35);
+            font-weight: 800;
         }
 
         .run-btn:hover {
-            background: linear-gradient(135deg, #34d399, #059669);
-            box-shadow: 
-                inset 0 3px 6px rgba(255, 255, 255, 0.5),
-                0 7px 0 #047857,
-                0 10px 20px rgba(16, 185, 129, 0.45);
-        }
-
-        .run-btn:active {
-            transform: translateY(4px);
-            box-shadow: 
-                inset 0 2px 4px rgba(0, 0, 0, 0.2),
-                0 0 0 #047857,
-                0 2px 4px rgba(16, 185, 129, 0.15);
+            background: #059669;
         }
 
         .stop-btn {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            border: 2px solid rgba(255, 255, 255, 0.5);
+            background: #ef4444;
+            border: none;
             color: #fff;
-            box-shadow: 
-                inset 0 3px 6px rgba(255, 255, 255, 0.4),
-                0 5px 0 #b91c1c,
-                0 8px 16px rgba(239, 68, 68, 0.35);
+            font-weight: 800;
         }
 
         .stop-btn:hover {
-            background: linear-gradient(135deg, #f87171, #dc2626);
-            box-shadow: 
-                inset 0 3px 6px rgba(255, 255, 255, 0.5),
-                0 7px 0 #b91c1c,
-                0 10px 20px rgba(239, 68, 68, 0.45);
+            background: #dc2626;
         }
 
         .stop-btn:active {
@@ -849,21 +806,17 @@
 
 <body>
 
-    <div class="top-bar">
-        <a href="#" onclick="console.log('▶ [HOME_CLICK] Clicked!'); console.log('window.parent:', window.parent); console.log('navigateIframe:', window.parent ? window.parent.navigateIframe : 'no parent'); if (window.parent && window.parent.navigateIframe) { console.log('▶ [HOME_CLICK] Calling parent.navigateIframe'); window.parent.navigateIframe('index.html'); } else { console.log('▶ [HOME_CLICK] Fallback navigation'); window.location.href='index.html?v=' + new Date().getTime(); } return false;" class="home-btn">
+        <div class="top-bar">
+        <a href="#" onclick="if (window.parent && window.parent.navigateIframe) { window.parent.navigateIframe('index.html'); } else { window.location.href='index.html?v=' + new Date().getTime(); } return false;" class="home-btn">
             <i class="fas fa-home"></i> <span data-i18n="btn_back_home">홈으로 가기</span>
         </a>
-        <div
-            style="font-size: 1.55rem; font-weight: 900; color: #0f172a; display: flex; align-items: center; gap: 12px; letter-spacing: -0.5px;">
-            <i class="fas fa-cubes" style="color: #a855f7; font-size: 1.9rem; filter: drop-shadow(0 2px 8px rgba(168, 85, 247, 0.3));"></i>
+        <div style="font-size: 1.2rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-cubes" style="color: #c084fc;"></i>
             <span data-i18n="lbl_workspace_title">BrickSync Essential 아이콘 코딩</span>
         </div>
         <div class="top-actions" style="align-items: center;">
-            <div id="hubStatusIndicator"
-                style="display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.25rem; color: #334155; padding: 12px 24px; background: rgba(241, 245, 249, 0.85); border-radius: 24px; border: 2px solid rgba(203, 213, 225, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.4), 0 4px 10px rgba(0,0,0,0.03);">
-                <div id="hubStatusDot"
-                    style="width: 14px; height: 14px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.65);">
-                </div>
+            <div id="hubStatusIndicator" style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #64748b; padding: 8px 16px; background: #f1f5f9; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div id="hubStatusDot" style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);"></div>
                 <span id="hubStatusText" data-i18n="lbl_hub_not_connected">허브 연결 안 됨</span>
             </div>
             <button class="action-btn" onclick="openConnectModal()" id="connBtn">
@@ -882,118 +835,28 @@
     </div>
 
     <!-- 상단 미션 및 진행도 현황창 -->
-    <div id="missionStatusBar"
-        style="display: none; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); padding: 10px 24px; border-bottom: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08); z-index: 9; position: relative; overflow: hidden; white-space: nowrap; gap: 15px;">
-        <!-- 뒷배경 유려한 네온 빛 망울 장식 -->
-        <div class="glow-blob blob-yellow" style="position: absolute; width: 250px; height: 250px; border-radius: 50%; filter: blur(80px); z-index: 1; opacity: 0.5; pointer-events: none; background: rgba(250, 204, 21, 0.3); top: -100px; right: 20%;"></div>
-        <div class="glow-blob blob-pink" style="position: absolute; width: 250px; height: 250px; border-radius: 50%; filter: blur(80px); z-index: 1; opacity: 0.5; pointer-events: none; background: rgba(244, 114, 182, 0.3); top: -120px; right: 5%;"></div>
-
-        <div style="display: flex; align-items: center; gap: 10px; position: relative; z-index: 2; min-width: 0; flex: 1 1 auto; overflow: hidden;">
-            <div id="m-badge"
-                style="background: linear-gradient(135deg, #facc15, #f59e0b); color: #451a03; font-weight: 900; font-size: 0.85rem; padding: 4px 10px; border-radius: 20px; flex-shrink: 0;">
-                STAGE 1</div>
+    <div id="missionStatusBar" style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 24px; border-bottom: 2px solid #e2e8f0; z-index: 9; white-space: nowrap; overflow: hidden; gap: 15px;">
+        <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 auto; overflow: hidden;">
+            <div id="m-badge" style="background: linear-gradient(135deg, #facc15, #f59e0b); color: #451a03; font-weight: 900; font-size: 0.85rem; padding: 4px 10px; border-radius: 20px; flex-shrink: 0;">STAGE 1</div>
             <div id="m-title" style="font-size: 1.05rem; font-weight: 800; color: #0f172a; white-space: nowrap; flex-shrink: 0; letter-spacing: -0.3px;">미션 제목</div>
-            <div id="m-desc"
-                style="font-size: 0.9rem; color: #334155; font-weight: 600; margin-left: 5px; border-left: 2px solid rgba(203, 213, 225, 0.9); padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0; letter-spacing: -0.4px;">
-                미션 설명 텍스트</div>
+            <div id="m-desc" style="font-size: 0.9rem; color: #334155; font-weight: 600; margin-left: 5px; border-left: 2px solid rgba(203, 213, 225, 0.9); padding-left: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1 1 auto; min-width: 0; letter-spacing: -0.4px;">미션 설명 텍스트</div>
         </div>
-        <div style="display: flex; align-items: center; gap: 12px; position: relative; z-index: 2; flex-shrink: 0; margin-left: auto;">
-            <!-- 미션 달성도 진행 바 컨테이너 -->
-            <div id="m-progress-container" style="display: none; align-items: center; gap: 10px;">
-                <span style="font-size: 0.85rem; font-weight: 800; color: #1e293b; white-space: nowrap;"
-                    data-i18n="lbl_mission_progress">미션 달성도</span>
-                <div
-                    style="width: 140px; height: 18px; background: rgba(203, 213, 225, 0.85); border-radius: 12px; overflow: hidden; position: relative; border: 1px solid rgba(0, 0, 0, 0.08); box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);">
-                    <div id="m-progress"
-                        style="width: 0%; height: 100%; background: linear-gradient(90deg, #34d399, #10b981); transition: width 0.5s ease; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.35);">
-                    </div>
+        <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0; margin-left: auto;">
+            <div id="m-progress-container" style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: #1e293b; white-space: nowrap;" data-i18n="lbl_mission_progress">미션 달성도</span>
+                <div style="width: 140px; height: 18px; background: rgba(203, 213, 225, 0.85); border-radius: 12px; overflow: hidden; position: relative; border: 1px solid rgba(0, 0, 0, 0.08); box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);">
+                    <div id="m-progress" style="width: 0%; height: 100%; background: linear-gradient(90deg, #34d399, #10b981); transition: width 0.5s ease; border-radius: 12px; box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.35);"></div>
                 </div>
-                <span id="m-percent"
-                    style="font-size: 1rem; font-weight: 900; color: #059669; width: 42px; text-align: right; margin-right: 5px;">0%</span>
+                <span id="m-percent" style="font-size: 1rem; font-weight: 900; color: #059669; width: 42px; text-align: right; margin-right: 5px;">0%</span>
             </div>
-
             <button id="btn-go-mission" onclick="openMissionBriefing()" class="btn-go-mission">
-                <i class="fas fa-trophy"></i> <span data-i18n="btn_try_mission">미션하러가기</span>
+                <i class="fas fa-trophy"></i> <span data-i18n="btn_try_mission">미션 도전하기 🚀</span>
             </button>
             <button id="btn-check-tasks" onclick="toggleMissionTasks()" class="btn-check-tasks">
-                <i class="fas fa-list-check"></i> <span data-i18n="btn_check_tasks">과제 확인</span>
+                <i class="fas fa-list-check"></i> <span data-i18n="btn_check_tasks">미션 과제 체크</span>
             </button>
         </div>
     </div>
-
-    <!-- 미션 과제 확인 패널 -->
-    <div id="missionTasksPanel"
-        style="display: none; position: absolute; right: 30px; top: 130px; width: 320px; background: white; border: 2px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 1000; padding: 20px;">
-        <h3
-            style="font-size: 1.1rem; color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-clipboard-check" style="color: #10b981;"></i> <span data-i18n="lbl_required_tasks">필수 수행
-                과제</span>
-        </h3>
-        <ul id="m-tasks-list" style="list-style: none; display: flex; flex-direction: column; gap: 12px;">
-            <!-- 과제들이 여기에 동적으로 들어감 -->
-        </ul>
-        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e2e8f0; text-align: right;">
-            <button onclick="toggleMissionTasks()"
-                style="background: none; border: none; color: #64748b; font-weight: 700; cursor: pointer;"
-                data-i18n="btn_close">닫기</button>
-        </div>
-    </div>
-
-    <!-- Main Workspace Area -->
-    <div class="main-layout">
-        <div class="coding-area" id="workspaceArea">
-            <div class="hint-text">
-                <i class="fas fa-hand-pointer" style="font-size: 48px;"></i>
-                <span data-i18n="hint_drag_assemble">하단에서 아이콘 블럭을 끌어와 조립해보세요!</span>
-            </div>
-        </div>
-
-        <div class="trash-area" id="trashArea">
-            <i class="fas fa-trash-can"></i>
-        </div>
-        <div class="drag-selection-box" id="dragSelectionBox"></div>
-    </div>
-
-    <!-- Bottom Toolbox (28 Blocks utilizing FontAwesome Solid to match Spike EXACTLY) -->
-    <div class="toolbox" id="palette">
-
-        <!-- 1. 제어(노랑) 시작/조건 블럭 -->
-        <div class="spike-block bg-yellow" draggable="true" data-action="start">
-            <i class="fas fa-play block-icon"></i>
-        </div>
-
-        <!-- NEW 대기(시간 기다리기) 블록 -->
-        <div class="spike-block bg-yellow" draggable="true" data-action="flow_wait">
-            <div class="block-icon" style="display:flex; align-items:center; justify-content:center;">
-                <i class="far fa-clock" style="color: white; font-size: 30px;"></i>
-            </div>
-            <div class="block-param" style="border-radius:16px; min-width:32px; padding:2px 8px;">1</div>
-        </div>
-
-        <!-- NEW 컬러 센서 이벤트 블록 -->
-        <div class="spike-block bg-yellow" draggable="true"
-            style="padding-bottom:15px; position:relative; overflow:visible;" data-action="event_color_sensor">
-            <div
-                style="position:relative; width:34px; height:34px; background:white; border-radius:8px; border:2px solid #cbd5e1; display:flex; justify-content:center; align-items:center; margin-left:-5px;">
-                <!-- 내부 원 (렌즈) -->
-                <div style="width:14px; height:14px; border:3px solid #94a3b8; border-radius:50%;"></div>
-
-                <!-- 레고 블럭 장식 (초기값 빨강, .color-brick-icon) -->
-                <div class="color-brick-icon"
-                    style="position:absolute; bottom:-6px; right:-8px; width:18px; height:12px; background:#ef4444; border-radius:2px; box-shadow:0 1px 2px rgba(0,0,0,0.2);">
-                    <div
-                        style="position:absolute; top:-2px; left:2px; width:4px; height:2px; background:inherit; border-radius:1px;">
-                    </div>
-                    <div
-                        style="position:absolute; top:-2px; right:2px; width:4px; height:2px; background:inherit; border-radius:1px;">
-                    </div>
-
-                    <!-- no_color일 때 보여줄 빨간 빗금 (기본적으론 숨김) -->
-                    <div class="no-color-slash"
-                        style="display:none; position:absolute; width:22px; height:2px; background:#ef4444; top:5px; left:-2px; transform:rotate(-45deg);">
-                    </div>
-                </div>
-            </div>
             <!-- 화살표 탭 (block-param) -->
             <div class="block-param param-dropdown" data-val="9"
                 style="position:absolute; bottom:-12px; left:50%; transform:translateX(-50%); width:30px; height:22px; border-radius:0 0 15px 15px; background:#eab308; border:none; display:flex; justify-content:center; align-items:center; box-shadow:0 3px 5px rgba(0,0,0,0.2); cursor:pointer;">
