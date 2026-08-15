@@ -5233,7 +5233,7 @@ print("BrickSync Sandbox Run")
                         if (!workspaceArea) return;
 
                         // 현재 놓여진 블록들 확인
-                        const workspaceBlocks = Array.from(workspaceArea.querySelectorAll('.workspace-item:not(.placeholder)'));
+                        const workspaceBlocks = Array.from(workspaceArea.querySelectorAll('[data-action]:not(.placeholder)'));
                         const presentActions = workspaceBlocks.map(b => b.getAttribute('data-action'));
 
                         // [6단원 정밀 시퀀스 검증]
