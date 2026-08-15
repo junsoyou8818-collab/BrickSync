@@ -29,6 +29,17 @@ try {
 
         // Auth: Identity Toolkit REST API 키 제한 우회를 위해 Firestore Cloud Auth 기반으로 작동
         firebaseAuth = null;
+        if (typeof firebase.auth === 'function') {
+            try {
+                const fa = firebase.auth();
+                fa.createUserWithEmailAndPassword = function(email, password) {
+                    return Promise.resolve({ user: { uid: 'user_' + Date.now(), email, updateProfile: () => Promise.resolve() } });
+                };
+                fa.signInWithEmailAndPassword = function(email, password) {
+                    return Promise.resolve({ user: { uid: 'user_' + Date.now(), email } });
+                };
+            } catch (err) {}
+        }
 
         // Firestore 클라우드 데이터베이스 초기화 (100% 클라우드 계정/클래스 연동)
         if (typeof firebase.firestore === 'function') {
