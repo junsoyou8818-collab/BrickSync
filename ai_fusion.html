@@ -4351,6 +4351,16 @@ print("BrickSync Sandbox Run")
                         lastTriggeredAiGesture = -1;
                     }
                     console.log('✅ [Block Engine] Sequence completed. Ready for next gesture trigger.');
+                    
+                    // 모터/블록 실행이 정상적으로 완수되었을 때 미션 성공 팝업 및 폭축 발사!
+                    const progressEl = document.getElementById('m-progress');
+                    if (progressEl && progressEl.dataset.completed === 'true') {
+                        try {
+                            if (typeof triggerSuccessConfetti === 'function') {
+                                triggerSuccessConfetti();
+                            }
+                        } catch (e) { console.warn('Confetti launch error:', e); }
+                    }
                 }, totalSequenceDurationMs);
 
                 const executeBleQueue = async () => {
@@ -5314,11 +5324,7 @@ print("BrickSync Sandbox Run")
 
                         if (percent >= 100 && progressEl && !progressEl.dataset.completed) {
                             progressEl.dataset.completed = 'true';
-                            try {
-                                if (typeof triggerSuccessConfetti === 'function') {
-                                    triggerSuccessConfetti();
-                                }
-                            } catch (e) { console.warn('Confetti launch error:', e); }
+                            console.log('🎯 [Mission Engine] All required blocks assembled (100%). Waiting for code execution to trigger completion modal.');
                         } else if (percent < 100 && progressEl) {
                             progressEl.dataset.completed = ''; // 블럭 떨어져나가면 달성도 리셋
                         }
