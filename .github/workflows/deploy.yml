@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'BrickSync-main/bricksync_project/web_app/**'
 
 jobs:
   deploy:
