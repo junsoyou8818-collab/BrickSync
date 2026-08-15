@@ -3789,11 +3789,15 @@
                     // GUI "실행" 버튼 클릭 시에도 AI 제스처 블록이 시작인 스택 실행 허용 (테스트 편의성 제공)
                     return action === 'start' || action === 'event_ai_gesture' || action.startsWith('event_');
                 } else {
-                    // 시스템(AI 락다운 머신)에서 특정 제스처로 트리거했을 때
+                    // 시스템(AI 락다운 머신)에서 특정 제스처/음성으로 트리거했을 때
                     if (action === triggerAction) {
+                        const nu = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
+                        if (nu === '7' || action === 'event_ai_gesture') {
+                            return true; // 7단원 음성 명령 수신 시(마이크 또는 텍스트 입력) 즉시 블록 코딩 전체 자동 실행!
+                        }
                         const paramEl = firstBlock.querySelector('.block-param');
                         if (paramEl && parseInt(paramEl.getAttribute('data-val')) === triggerVal) {
-                            return true; // 매칭된 스택만 골라냄! (시소 방어 핵심루트)
+                            return true;
                         }
                     }
                     return false;
