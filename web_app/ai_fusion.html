@@ -4876,6 +4876,7 @@ print("BrickSync Sandbox Run")
                             <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; font-weight: 700; padding: 0 5px; margin-top: 5px;">
                                 <span id="count-rock">0개</span> <span id="count-paper">0개</span> <span id="count-scissors">0개</span> <span id="count-none">0개</span>
                             </div>
+                            <button onclick="clearClassifier()" style="width:100%; margin-top:6px; background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; padding:6px; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:all 0.2s;"><i class="fas fa-trash-alt"></i> ${isEn ? 'Reset Training Data 🔄' : '학습 데이터 리셋 🔄'}</button>
                         </div>
                     `;
                     setTimeout(() => {
@@ -4982,6 +4983,7 @@ print("BrickSync Sandbox Run")
                                 <span id="count-rock">0개</span>
                                 <span id="count-none">0개</span>
                             </div>
+                            <button onclick="clearClassifier()" style="width:100%; margin-top:6px; background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; padding:6px; border-radius:8px; font-weight:700; font-size:0.88rem; cursor:pointer; transition:all 0.2s;"><i class="fas fa-trash-alt"></i> ${isEn ? 'Reset Training Data 🔄' : '학습 데이터 리셋 🔄'}</button>
                         </div>
                     `;
                     setTimeout(() => {
@@ -6482,21 +6484,19 @@ print("BrickSync Sandbox Run")
                         if (candidateAiGesture === detectedGesture) {
                             consecutiveAiFrames++;
                             if (consecutiveAiFrames >= 10 && lastTriggeredAiGesture !== detectedGesture) {
-                                if (window.isBlockExecutionRunning) {
-                                    // 현재 블록 스택 시퀀스(대기, 회전, 정지)가 실행 중일 때는 중복/방해 트리거 차단
-                                    return;
-                                }
-                                lastTriggeredAiGesture = detectedGesture;
-                                console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
-                                runBlocks('event_ai_gesture', detectedGesture);
+                                if (!window.isBlockExecutionRunning) {
+                                    lastTriggeredAiGesture = detectedGesture;
+                                    console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
+                                    runBlocks('event_ai_gesture', detectedGesture);
 
-                                // 3단원 몬스터 감지(0) 시 UEFN 경보 웹소켓 전송
-                                if (((unit === '3' || unit === '8')) && detectedGesture === 0) {
-                                    try {
-                                        window.parent.sendWebSocketAction({ action: "MONSTER_ALERT" });
-                                        console.log("포트나이트 연동 신호(MONSTER_ALERT) 전송 완료 [AI 2단원]");
-                                    } catch (e) {
-                                        console.error("Fortnite websocket transmission failed:", e);
+                                    // 3단원 몬스터 감지(0) 시 UEFN 경보 웹소켓 전송
+                                    if (((unit === '3' || unit === '8')) && detectedGesture === 0) {
+                                        try {
+                                            window.parent.sendWebSocketAction({ action: "MONSTER_ALERT" });
+                                            console.log("포트나이트 연동 신호(MONSTER_ALERT) 전송 완료 [AI 2단원]");
+                                        } catch (e) {
+                                            console.error("Fortnite websocket transmission failed:", e);
+                                        }
                                     }
                                 }
                             }
@@ -6514,7 +6514,31 @@ print("BrickSync Sandbox Run")
             }
         }
 
-                function addExample(classId) {
+                        function clearClassifier() {
+            if (classifier) {
+                try { classifier.clearAllClasses(); } catch(e) {}
+            }
+            examplesCount = [0, 0, 0, 0];
+            updateCountDisplay();
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
+            if (currentGestureLabel) {
+                currentGestureLabel.innerHTML = `<i class="fas fa-eye"></i> ${isEn ? 'Waiting...' : '대기 중...'}`;
+            }
+            if (aiStatusLabel) {
+                aiStatusLabel.innerHTML = isEn
+                    ? '<i class="fas fa-check-circle"></i> Training data reset. Start training again!'
+                    : '<i class="fas fa-check-circle"></i> 학습 데이터가 초기화되었습니다. 다시 학습해 보세요!';
+                aiStatusLabel.style.backgroundColor = '#e0f2fe';
+                aiStatusLabel.style.color = '#0369a1';
+            }
+            lastTriggeredAiGesture = -1;
+            candidateAiGesture = -1;
+            consecutiveAiFrames = 0;
+        }
+        window.clearClassifier = clearClassifier;
+
+        function addExample(classId) {
             webcamElement = webcamElement || document.getElementById('webcam');
             aiStatusLabel = aiStatusLabel || document.getElementById('ai-status');
             currentGestureLabel = currentGestureLabel || document.getElementById('current-gesture');
