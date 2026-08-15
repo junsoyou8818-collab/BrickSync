@@ -251,8 +251,7 @@ const BrickSyncAuth = (function () {
 
         try {
             const existingCloud = await findUserByEmailFromFirestore(cleanEmail);
-            const existingLocal = findLocalUser(cleanEmail);
-            if (existingCloud || existingLocal) {
+            if (existingCloud) {
                 const err = new Error('이미 등록된 이메일 계정입니다.');
                 err.code = 'auth/email-already-in-use';
                 throw err;
@@ -308,8 +307,7 @@ const BrickSyncAuth = (function () {
 
         try {
             const existingCloud = await findUserByEmailFromFirestore(cleanEmail);
-            const existingLocal = findLocalUser(cleanEmail);
-            if (existingCloud || existingLocal) {
+            if (existingCloud) {
                 const err = new Error('이미 등록된 이메일 계정입니다.');
                 err.code = 'auth/email-already-in-use';
                 throw err;
@@ -378,8 +376,7 @@ const BrickSyncAuth = (function () {
 
         try {
             const existingCloud = await findUserByEmailFromFirestore(cleanEmail);
-            const existingLocal = findLocalUser(cleanEmail);
-            if (existingCloud || existingLocal) {
+            if (existingCloud) {
                 const err = new Error('이미 등록된 이메일 계정입니다.');
                 err.code = 'auth/email-already-in-use';
                 throw err;
