@@ -4395,6 +4395,46 @@ except:
         }
         window.openMissionBriefing = openMissionBriefing;
 
+                function customizePaletteBlocks(targetUnit) {
+            const palette = document.getElementById('palette');
+            if (!palette) return;
+
+            const children = Array.from(palette.children);
+            children.forEach(child => {
+                if (child.classList.contains('spike-block')) {
+                    const action = child.getAttribute('data-action');
+                    if (action === 'matrix_pixel' && targetUnit !== '5') {
+                        const innerPixels = child.querySelectorAll('div > div');
+                        innerPixels.forEach(pixel => {
+                            pixel.style.backgroundColor = '#ef4444';
+                            pixel.style.borderColor = '#ef4444';
+                        });
+                        const paramEl = child.querySelector('.block-param');
+                        if (paramEl) {
+                            paramEl.innerHTML = '';
+                            paramEl.style.backgroundColor = '#ef4444';
+                            paramEl.style.pointerEvents = 'none';
+                            paramEl.setAttribute('data-val', '9');
+                            paramEl.setAttribute('data-matrix', JSON.stringify([9,9,9,9,9,9,9,9,9]));
+                        }
+                    }
+                }
+            });
+        }
+        window.customizePaletteBlocks = customizePaletteBlocks;
+
+        function showAllPaletteBlocks(targetUnit) {
+            const palette = document.getElementById('palette');
+            if (!palette) return;
+            customizePaletteBlocks(targetUnit);
+
+            const children = Array.from(palette.children);
+            children.forEach(child => {
+                child.style.display = '';
+            });
+        }
+        window.showAllPaletteBlocks = showAllPaletteBlocks;
+
         function setupMissionToolbox(targetUnit) {
             const palette = document.getElementById('palette');
             if (!palette) return;
