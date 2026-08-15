@@ -3928,15 +3928,18 @@ print("BrickSync Sandbox Run")
                     let paramEl = null;
 
                     if (action === 'motor_cw' || action === 'motor_ccw' || action.startsWith('car_') && action !== 'car_speed_set') {
+                        let explicitBlockVal = null;
                         const timeEl = block.querySelector('.block-param');
                         if (timeEl) {
-                            if (timeEl.hasAttribute('data-val')) timeVal = parseFloat(timeEl.getAttribute('data-val'));
+                            if (timeEl.hasAttribute('data-val')) explicitBlockVal = parseFloat(timeEl.getAttribute('data-val'));
                             else {
                                 const textVal = timeEl.innerText.trim();
-                                if (!isNaN(textVal) && textVal !== "") timeVal = parseFloat(textVal);
+                                if (!isNaN(textVal) && textVal !== "") explicitBlockVal = parseFloat(textVal);
                             }
                         }
-                        if ((unit === '2' || unit === '7') && window.lastParsedSpeechTurns) {
+                        if (explicitBlockVal !== null && !isNaN(explicitBlockVal)) {
+                            timeVal = explicitBlockVal;
+                        } else if ((unit === '2' || unit === '7') && window.lastParsedSpeechTurns) {
                             timeVal = window.lastParsedSpeechTurns;
                         }
                     } else {
@@ -4222,17 +4225,22 @@ print("BrickSync Sandbox Run")
                         let paramEl = null;
 
                         if (action === 'motor_cw' || action === 'motor_ccw' || action.startsWith('car_') && action !== 'car_speed_set') {
+                            let explicitBlockVal = null;
                             const timeEl = block.querySelector('.block-param');
                             if (timeEl) {
-                                if (timeEl.hasAttribute('data-val')) timeVal = parseFloat(timeEl.getAttribute('data-val'));
+                                if (timeEl.hasAttribute('data-val')) explicitBlockVal = parseFloat(timeEl.getAttribute('data-val'));
                                 else {
                                     const textVal = timeEl.innerText.trim();
-                                    if (!isNaN(textVal) && textVal !== "") timeVal = parseFloat(textVal);
+                                    if (!isNaN(textVal) && textVal !== "") explicitBlockVal = parseFloat(textVal);
                                 }
                             }
-                            const currentNormUnit = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
-                            if ((currentNormUnit === '2' || currentNormUnit === '7' || currentNormUnit === '3' || currentNormUnit === '8') && window.lastParsedSpeechTurns) {
-                                timeVal = window.lastParsedSpeechTurns;
+                            if (explicitBlockVal !== null && !isNaN(explicitBlockVal)) {
+                                timeVal = explicitBlockVal;
+                            } else {
+                                const currentNormUnit = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
+                                if ((currentNormUnit === '2' || currentNormUnit === '7' || currentNormUnit === '3' || currentNormUnit === '8') && window.lastParsedSpeechTurns) {
+                                    timeVal = window.lastParsedSpeechTurns;
+                                }
                             }
                         } else {
                             paramEl = block.querySelector('.block-param:not(.param-time)');
