@@ -4871,7 +4871,7 @@ print("BrickSync Sandbox Run")
                     `;
                 }
             }
-            // 🟣 UNIT 7 (Voice Magic Swing)
+                        // 🟣 UNIT 7 (Voice Magic Swing)
             else if (nu === '7') {
                 if (titleEl) {
                     titleEl.setAttribute('data-i18n', 'lbl_ai_voice_title');
@@ -4883,7 +4883,7 @@ print("BrickSync Sandbox Run")
                     panelContent.innerHTML = `
                         <div style="width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center;">
                             <div id="voice-mic-container" style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
-                                <div id="mic-icon-glow" style="width: 80px; height: 80px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 36px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); transition: all 0.2s; cursor: pointer;">
+                                <div id="mic-icon-glow" class="mic-idle" style="width: 80px; height: 80px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 36px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); transition: all 0.2s; cursor: pointer;">
                                     <i class="fas fa-microphone"></i>
                                 </div>
                                 <div id="voice-waveform-canvas-container" style="width: 80%; height: 40px; display: flex; justify-content: center; align-items: center; gap: 4px;">
@@ -4898,14 +4898,14 @@ print("BrickSync Sandbox Run")
                                 </div>
                             </div>
 
-                            <div id="voice-status-box" style="width: 100%; padding: 12px; background: #dbeafe; border: 1px solid #bfdbfe; border-radius: 8px; color: #1e3a8a; font-weight: 700; text-align: center; font-size: 0.95rem;">
-                                <i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Waiting for microphone activation...' : '마이크 활성화 대기 중...'}
+                            <div id="voice-status-box" style="width: 100%; padding: 12px; background: #d1fae5; border: 1px solid #a7f3d0; border-radius: 8px; color: #065f46; font-weight: 700; text-align: center; font-size: 0.95rem;">
+                                <i class="fas fa-check-circle" style="color:#10b981;"></i> ${isEn ? 'Microphone connected! Click mic to speak.' : '마이크가 연결되었습니다. 마이크를 누르고 말씀하세요!'}
                             </div>
 
                             <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
                                 <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '⌨️ Text Command Input (Mic Backup)' : '⌨️ 텍스트 명령 입력 (마이크 백업용)'}</div>
                                 <div style="display: flex; gap: 8px; width: 100%;">
-                                    <input type="text" id="voice-text-input" placeholder="${isEn ? 'e.g. Turn 5 times forward' : '예: 앞으로 5바퀴 돌아'}" style="flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; outline: none; font-weight: 600; font-family: inherit;" />
+                                    <input type="text" id="voice-text-input" placeholder="${isEn ? 'e.g. Turn 2 times forward' : '예: 앞으로 2바퀴 돌아'}" style="flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; outline: none; font-weight: 600; font-family: inherit;" />
                                     <button id="btn-send-voice-text" style="background: #3b82f6; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.1s;">${isEn ? 'Submit' : '입력'}</button>
                                 </div>
                             </div>
@@ -5302,6 +5302,12 @@ print("BrickSync Sandbox Run")
 
             window.addEventListener('bricksync-language-changed', (e) => {
                 renderActiveMission();
+                if (typeof initUnitUI === 'function' && typeof unit !== 'undefined' && unit) {
+                    initUnitUI(unit);
+                    if (getNormUnit(unit) === '7' && typeof setupTextInputOnly === 'function') {
+                        setupTextInputOnly();
+                    }
+                }
                 if (typeof window.applyBrickSyncLanguage === 'function') {
                     window.applyBrickSyncLanguage(e.detail ? e.detail.lang : null);
                 }
@@ -6232,11 +6238,13 @@ print("BrickSync Sandbox Run")
                 const nu = getNormUnit(unit);
                 if (nu === '7') {
                     if (voiceStatusBox) {
+                        const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                        const isEn = currentLang === 'en';
                         voiceStatusBox.innerHTML = isEn
-                            ? '<i class="fas fa-microphone"></i> Click mic to speak command'
-                            : '<i class="fas fa-microphone"></i> 마이크를 눌러 명령을 시작하세요';
-                        voiceStatusBox.style.background = '#f1f5f9';
-                        voiceStatusBox.style.color = '#334155';
+                            ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> Microphone connected! Click mic to speak.'
+                            : '<i class="fas fa-check-circle" style="color:#10b981;"></i> 마이크가 연결되었습니다. 마이크를 누르고 말씀하세요!';
+                        voiceStatusBox.style.background = '#d1fae5';
+                        voiceStatusBox.style.color = '#065f46';
                     }
                 }
             }, 3500);
