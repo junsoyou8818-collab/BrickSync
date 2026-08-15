@@ -4931,17 +4931,9 @@ print("BrickSync Sandbox Run")
                             </div>
 
                             <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                                <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '🗣️ Quick Voice Presets' : '🗣️ 빠른 음성 명령 실행'}</div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                    <button onclick="executeVoiceCommandDirect('앞으로 두 바퀴')" style="background:#8b5cf6; color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer;"><i class="fas fa-comment-dots"></i> ${isEn ? '"Turn 2 Times"' : '"앞으로 2바퀴"'}</button>
-                                    <button onclick="executeVoiceCommandDirect('반시계 2회')" style="background:#ec4899; color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer;"><i class="fas fa-sync-alt"></i> ${isEn ? '"Rotate CCW"' : '"반시계 2회"'}</button>
-                                </div>
-                            </div>
-
-                            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
                                 <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '⌨️ Text Command Input (Mic Backup)' : '⌨️ 텍스트 명령 입력 (마이크 백업용)'}</div>
                                 <div style="display: flex; gap: 8px; width: 100%;">
-                                    <input type="text" id="voice-text-input" placeholder="${isEn ? 'e.g. Turn 2 times forward' : '예: 앞으로 2바퀴 돌아'}" style="flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; outline: none; font-weight: 600; font-family: inherit;" />
+                                    <input type="text" id="voice-text-input" onkeydown="if(event.key==='Enter') submitVoiceTextInput()" placeholder="${isEn ? 'e.g. Turn 2 times forward' : '예: 앞으로 2바퀴 돌아'}" style="flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; outline: none; font-weight: 600; font-family: inherit;" />
                                     <button id="btn-send-voice-text" onclick="submitVoiceTextInput()" style="background: #3b82f6; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.1s;">${isEn ? 'Submit' : '입력'}</button>
                                 </div>
                             </div>
@@ -6110,13 +6102,16 @@ print("BrickSync Sandbox Run")
 
             speechRecognition.onerror = (event) => {
                 console.warn("Speech error:", event.error);
-                isSpeechListening = false;
-                if (audioAnimFrame) cancelAnimationFrame(audioAnimFrame);
-                const micIcon = document.getElementById('mic-icon-glow');
-                if (micIcon) {
-                    micIcon.className = 'mic-idle';
-                    micIcon.style.background = '#3b82f6';
-                    micIcon.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.6)';
+                // 브라우저 음성 에러 시에도 마이크 활성 상태 및 안내유지 (사용자가 단어 말하기 또는 텍스트 입력 유도)
+                const voiceStatusBox = document.getElementById('voice-status-box');
+                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                const isEn = currentLang === 'en';
+                if (voiceStatusBox && isSpeechListening) {
+                    voiceStatusBox.innerHTML = isEn
+                        ? '<i class="fas fa-microphone" style="color:#ef4444;"></i> Listening... Please say "Turn 2 times forward" or use text input below!'
+                        : '<i class="fas fa-microphone" style="color:#ef4444;"></i> 음성 수신 중입니다. 마이크에 "앞으로 두 바퀴"를 말씀하시거나 아래 텍스트 창에 입력하세요!';
+                    voiceStatusBox.style.background = '#fee2e2';
+                    voiceStatusBox.style.color = '#991b1b';
                 }
             };
         }
