@@ -5289,7 +5289,12 @@ print("BrickSync Sandbox Run")
 
                         if (percent >= 100 && progressEl && !progressEl.dataset.completed) {
                             progressEl.dataset.completed = 'true';
-                            console.log('🎯 [Mission Engine] All required blocks assembled (100%). Waiting for code execution to trigger completion modal.');
+                            console.log('🎯 [Mission Engine] All required blocks assembled (100%). Launching completion modal & fireworks!');
+                            try {
+                                if (typeof triggerSuccessConfetti === 'function') {
+                                    triggerSuccessConfetti();
+                                }
+                            } catch(e) { console.warn('Confetti launch error:', e); }
                         } else if (percent < 100 && progressEl) {
                             progressEl.dataset.completed = ''; // 블럭 떨어져나가면 달성도 리셋
                         }
@@ -5970,13 +5975,39 @@ print("BrickSync Sandbox Run")
         let isSpeechListening = false;
         let speechCooldown = false;
 
+        function ensureSpeechRecognitionReady() {
+            if (!speechRecognition) {
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SR) {
+                    try {
+                        speechRecognition = new SR();
+                        const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                        speechRecognition.continuous = false;
+                        speechRecognition.interimResults = false;
+                        speechRecognition.lang = (currentLang === 'en') ? 'en-US' : 'ko-KR';
+                        bindSpeechEvents();
+                    } catch(e) {
+                        console.error("[Speech] Creation error:", e);
+                    }
+                }
+            }
+        }
+
         function toggleSpeechRecognition() {
             if (speechCooldown) return;
+            ensureSpeechRecognitionReady();
             if (!speechRecognition) {
-                initSpeechEngine();
-            }
-            if (!speechRecognition) {
-                console.warn("[Speech] SpeechRecognition API not ready.");
+                console.warn("[Speech] SpeechRecognition API not ready on this browser.");
+                const voiceStatusBox = document.getElementById('voice-status-box');
+                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                const isEn = currentLang === 'en';
+                if (voiceStatusBox) {
+                    voiceStatusBox.innerHTML = isEn
+                        ? '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> Speech Recognition not supported on this browser. Please use text input below.'
+                        : '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> 이 브라우저는 음성 인식을 지원하지 않습니다. 아래 텍스트 입력창을 사용하세요.';
+                    voiceStatusBox.style.background = '#fee2e2';
+                    voiceStatusBox.style.color = '#991b1b';
+                }
                 return;
             }
 
@@ -6031,7 +6062,7 @@ print("BrickSync Sandbox Run")
                 micBtn.onclick = () => { toggleSpeechRecognition(); };
             }
 
-            // 1. Request microphone permission
+            // Request microphone permission
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({ audio: true }).then(() => {
                     if (voiceStatusBox && !isSpeechListening && !speechCooldown) {
@@ -6053,28 +6084,11 @@ print("BrickSync Sandbox Run")
                 });
             }
 
-            // 2. Browser Speech Recognition API check
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                if (voiceStatusBox) {
-                    voiceStatusBox.innerHTML = isEn
-                        ? '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> Browser does not support speech recognition. Use text input below.'
-                        : '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> 이 브라우저는 음성 인식을 지원하지 않습니다. 텍스트 창을 이용하세요.';
-                    voiceStatusBox.style.background = '#fee2e2';
-                    voiceStatusBox.style.color = '#991b1b';
-                }
-                setupTextInputOnly();
-                return;
-            }
+            ensureSpeechRecognitionReady();
+        }
 
-            if (speechRecognition) {
-                try { speechRecognition.abort(); } catch(e) {}
-            }
-
-            speechRecognition = new SpeechRecognition();
-            speechRecognition.continuous = false;
-            speechRecognition.interimResults = false;
-            speechRecognition.lang = isEn ? 'en-US' : 'ko-KR';
+        function bindSpeechEvents() {
+                if (!speechRecognition) return;
 
             let waveInterval;
             function startWaveformAnimation() {
