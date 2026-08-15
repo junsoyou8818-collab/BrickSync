@@ -4013,7 +4013,7 @@ print("BrickSync Sandbox Run")
                             break;
                         }
                         case 'motor_cw':
-                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1644)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1315)) \n${indent}sm() \n`;
                             if (unit !== '8') {
                                 localActionsQueue.push({ action: 'motor_cw', delay: cumulativeDelayMs });
                                 cumulativeDelayMs += (timeVal * 1150);
@@ -4024,7 +4024,7 @@ print("BrickSync Sandbox Run")
                             cumulativeDelayMs += 800; // 관성 및 반대 방향 회전 충돌 방지 브레이크 휴식 800ms
                             break;
                         case 'motor_ccw':
-                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1644)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1315)) \n${indent}sm() \n`;
                             if (unit !== '8') {
                                 localActionsQueue.push({ action: 'motor_ccw', delay: cumulativeDelayMs });
                                 cumulativeDelayMs += (timeVal * 1150);
@@ -4282,7 +4282,7 @@ print("BrickSync Sandbox Run")
                                 break;
                             }
                             case 'motor_cw': {
-                                const runDuration = Math.round(timeVal * 1644);
+                                const runDuration = Math.round(timeVal * 1315);
                                 bleQueue.push({ action: 'motor_cw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
                                 currentBleDelay += runDuration;
                                 bleQueue.push({ action: 'motor_stop_cw', speed: 0, delay: currentBleDelay });
@@ -4290,7 +4290,7 @@ print("BrickSync Sandbox Run")
                                 break;
                             }
                             case 'motor_ccw': {
-                                const runDuration = Math.round(timeVal * 1644);
+                                const runDuration = Math.round(timeVal * 1315);
                                 bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
                                 currentBleDelay += runDuration;
                                 bleQueue.push({ action: 'motor_stop_ccw', speed: 0, delay: currentBleDelay });
