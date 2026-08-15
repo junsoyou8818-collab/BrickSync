@@ -5338,9 +5338,19 @@ print("BrickSync Sandbox Run")
                         if (percentEl) percentEl.textContent = percent + '%';
 
                         if (percent >= 100 && progressEl) {
+                            if (!progressEl.dataset.confettiFired) {
+                                progressEl.dataset.confettiFired = 'true';
+                                console.log('🎉 [Mission Task 100%] Launching celebration fireworks!');
+                                try {
+                                    if (typeof triggerSuccessConfetti === 'function') {
+                                        triggerSuccessConfetti();
+                                    }
+                                } catch(e) { console.warn('Confetti error:', e); }
+                            }
                             progressEl.dataset.completed = 'true';
                         } else if (percent < 100 && progressEl) {
                             progressEl.dataset.completed = ''; // 블럭 떨어져나가면 달성도 리셋
+                            progressEl.dataset.confettiFired = '';
                         }
                     };
 
