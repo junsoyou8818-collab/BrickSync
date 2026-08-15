@@ -5295,14 +5295,9 @@ print("BrickSync Sandbox Run")
                             const li = document.getElementById('task-item-' + idx);
                             if (!li) return;
                             
-                            let isCompleted = false;
-                            if (unit === '6' || unit === '1') {
-                                isCompleted = eventStackActions.includes(task.id);
-                            } else {
-                                isCompleted = Array.isArray(task.id)
-                                    ? task.id.some(id => presentActions.includes(id))
-                                    : presentActions.includes(task.id);
-                            }
+                            let isCompleted = Array.isArray(task.id)
+                                ? task.id.some(id => presentActions.includes(id) || eventStackActions.includes(id))
+                                : (presentActions.includes(task.id) || eventStackActions.includes(task.id));
 
                             if (isCompleted) {
                                 completedTasks++;
