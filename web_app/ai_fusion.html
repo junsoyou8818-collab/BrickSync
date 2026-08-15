@@ -4955,6 +4955,13 @@ print("BrickSync Sandbox Run")
                 console.log(`[BrickSync] Fortnite-compatible toolbox loaded for Unit ${targetUnit}`);
             };
 
+            // Run toolbox filter immediately on page load for the active unit
+            if (typeof unit !== 'undefined' && unit) {
+                try {
+                    setupMissionToolbox(unit);
+                } catch(e) {}
+            }
+
             dismissMissionBriefingModal = function () {
                 const modal = document.getElementById('missionBriefingModal');
                 if (modal) modal.style.display = 'none';
