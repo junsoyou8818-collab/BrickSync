@@ -4705,13 +4705,13 @@ print("BrickSync Sandbox Run")
             const missionData = {
                 ko: {
                     '6': {
-                        badge: 'STAGE 6', title: '가위, 바위, 보로 여닫는 오두막 지붕', desc: '재생(시작) 블록 연결하기 / AI 제스처 인식 블록 연결하기 / 모터 우회전(열기) 블록 연결하기 / 모터 좌회전(닫기) 블록 연결하기',
+                        badge: 'STAGE 6', title: '가위, 바위, 보로 여닫는 오두막 지붕', desc: 'AI 제스처 인식 블록 연결하기 / 5초 대기하기 / 모터 우회전(열기) 1회 회전하기 / 모터 좌회전(닫기) 1회 회전하기',
                         pinCode: '7241',
                         tasks: [
-                            { id: 'start', text: '재생(시작) 블록 연결하기' },
                             { id: 'event_ai_gesture', text: 'AI 제스처 인식 블록 연결하기' },
-                            { id: 'motor_cw', text: '모터 우회전(열기) 블록 연결하기' },
-                            { id: 'motor_ccw', text: '모터 좌회전(닫기) 블록 연결하기' }
+                            { id: 'flow_wait', text: '5초 대기하기' },
+                            { id: 'motor_cw', text: '모터 우회전(열기) 1회 회전하기' },
+                            { id: 'motor_ccw', text: '모터 좌회전(닫기) 1회 회전하기' }
                         ]
                     },
                     '7': {
@@ -4735,13 +4735,13 @@ print("BrickSync Sandbox Run")
                 },
                 en: {
                     '6': {
-                        badge: 'STAGE 6', title: 'RPS Gesture-Controlled Cabin Roof (Open/Close)', desc: 'Connect Play (Start) block / Connect AI Gesture block / Connect Motor Clockwise (Open) block / Connect Motor Counter-Clockwise (Close) block',
+                        badge: 'STAGE 6', title: 'RPS Gesture-Controlled Cabin Roof (Open/Close)', desc: 'Connect AI Gesture block / Wait 5 seconds / Rotate motor clockwise (Open) 1 time / Rotate motor counterclockwise (Close) 1 time',
                         pinCode: '7241',
                         tasks: [
-                            { id: 'start', text: 'Connect Play (Start) block' },
                             { id: 'event_ai_gesture', text: 'Connect the AI Gesture block' },
-                            { id: 'motor_cw', text: 'Connect the Motor Clockwise (Open) block' },
-                            { id: 'motor_ccw', text: 'Connect the Motor Counter-Clockwise (Close) block' }
+                            { id: 'flow_wait', text: 'Wait 5 seconds' },
+                            { id: 'motor_cw', text: 'Rotate the motor clockwise (Open) 1 time' },
+                            { id: 'motor_ccw', text: 'Rotate the motor counterclockwise (Close) 1 time' }
                         ]
                     },
                     '7': {
