@@ -6116,49 +6116,73 @@ print("BrickSync Sandbox Run")
         function parseVoiceCommand(text) {
             if (speechCooldown) return;
 
+            const lowerText = String(text || '').toLowerCase().trim();
             console.log("🎤 음성 명령 인식: ", text);
 
-            // 1. Direction extraction (Forward vs Backward)
-            // 앞으로, 시계, 전진, 앞 -> FORWARD (0)
-            // 뒤로, 반시계, 후진, 뒤 -> BACKWARD (1)
+            // 1. Direction extraction (Forward/0 vs Backward/1)
             let directionVal = 0; // default Forward
             let directionLabel = "앞으로";
-            if (text.includes("뒤") || text.includes("후진") || text.includes("반시계")) {
+
+            if (
+                lowerText.includes("뒤") ||
+                lowerText.includes("후진") ||
+                lowerText.includes("반시계") ||
+                lowerText.includes("backward") ||
+                lowerText.includes("back") ||
+                lowerText.includes("counterclockwise") ||
+                lowerText.includes("reverse")
+            ) {
                 directionVal = 1;
                 directionLabel = "뒤로";
             }
 
             // 2. Turns extraction
             let turns = 1;
-            const numberMatch = text.match(/\d+/);
-            if (numberMatch) {
-                turns = parseInt(numberMatch[0]);
+
+            if (lowerText.includes("twice") || lowerText.includes("2 times") || lowerText.includes("2바퀴") || lowerText.includes("두바퀴") || lowerText.includes("두 번") || lowerText.includes("두번")) {
+                turns = 2;
+            } else if (lowerText.includes("thrice") || lowerText.includes("3 times") || lowerText.includes("3바퀴") || lowerText.includes("세바퀴") || lowerText.includes("세 번") || lowerText.includes("세번")) {
+                turns = 3;
+            } else if (lowerText.includes("once") || lowerText.includes("1 time") || lowerText.includes("1바퀴") || lowerText.includes("한바퀴") || lowerText.includes("한 번") || lowerText.includes("한번")) {
+                turns = 1;
+            } else if (lowerText.includes("4 times") || lowerText.includes("4바퀴") || lowerText.includes("네바퀴") || lowerText.includes("네 번") || lowerText.includes("네번")) {
+                turns = 4;
+            } else if (lowerText.includes("5 times") || lowerText.includes("5바퀴") || lowerText.includes("다섯바퀴") || lowerText.includes("다섯 번") || lowerText.includes("다섯번")) {
+                turns = 5;
             } else {
-                if (text.includes("한") || text.includes("하나")) turns = 1;
-                else if (text.includes("두") || text.includes("둘")) turns = 2;
-                else if (text.includes("세") || text.includes("셋")) turns = 3;
-                else if (text.includes("네") || text.includes("넷")) turns = 4;
-                else if (text.includes("다섯")) turns = 5;
-                else if (text.includes("여섯")) turns = 6;
-                else if (text.includes("일곱")) turns = 7;
-                else if (text.includes("여덟")) turns = 8;
-                else if (text.includes("아홉")) turns = 9;
-                else if (text.includes("열")) turns = 10;
+                const numberMatch = lowerText.match(/\d+/);
+                if (numberMatch) {
+                    turns = parseInt(numberMatch[0]);
+                } else {
+                    if (lowerText.includes("one") || lowerText.includes("하나") || lowerText.includes("한")) turns = 1;
+                    else if (lowerText.includes("two") || lowerText.includes("둘") || lowerText.includes("두")) turns = 2;
+                    else if (lowerText.includes("three") || lowerText.includes("셋") || lowerText.includes("세")) turns = 3;
+                    else if (lowerText.includes("four") || lowerText.includes("넷") || lowerText.includes("네")) turns = 4;
+                    else if (lowerText.includes("five") || lowerText.includes("다섯")) turns = 5;
+                    else if (lowerText.includes("six") || lowerText.includes("여섯")) turns = 6;
+                    else if (lowerText.includes("seven") || lowerText.includes("일곱")) turns = 7;
+                    else if (lowerText.includes("eight") || lowerText.includes("여덟")) turns = 8;
+                    else if (lowerText.includes("nine") || lowerText.includes("아홉")) turns = 9;
+                    else if (lowerText.includes("ten") || lowerText.includes("열")) turns = 10;
+                }
             }
 
-            // 3. Cooldown Lockout (Seesaw Effect / Double trigger protection)
-            // Cooldown prevents mic from catching echo or double spoken commands while running.
+            // 3. Cooldown Lockout
             speechCooldown = true;
-            try { speechRecognition.stop(); } catch (e) { }
+            try { if (typeof speechRecognition !== 'undefined' && speechRecognition) speechRecognition.stop(); } catch (e) { }
 
             const micIcon = document.getElementById('mic-icon-glow');
             if (micIcon) {
                 micIcon.className = 'mic-cooldown';
             }
 
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
+
             const voiceStatusBox = document.getElementById('voice-status-box');
             if (voiceStatusBox) {
-                voiceStatusBox.innerHTML = `<i class="fas fa-check-circle" style="color:#059669;"></i> 인식 완료: <strong>${directionLabel} ${turns}바퀴</strong>`;
+                const dirDisplay = isEn ? (directionVal === 0 ? "Forward" : "Backward") : directionLabel;
+                voiceStatusBox.innerHTML = `<i class="fas fa-check-circle" style="color:#059669;"></i> ${isEn ? 'Recognized:' : '인식 완료:'} <strong>${dirDisplay} ${turns}${isEn ? ' turns' : '바퀴'}</strong>`;
                 voiceStatusBox.style.background = '#d1fae5';
                 voiceStatusBox.style.color = '#065f46';
             }
@@ -6166,27 +6190,25 @@ print("BrickSync Sandbox Run")
             // Update recognized log
             const logPanel = document.getElementById('voice-command-log');
             if (logPanel) {
-                if (logPanel.innerText.includes("인식 기록 없음")) {
+                if (logPanel.innerText.includes("인식 기록 없음") || logPanel.innerText.includes("No history yet")) {
                     logPanel.innerHTML = '';
                 }
                 const now = new Date();
                 const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
                 const logItem = document.createElement('div');
                 logItem.style.cssText = 'padding: 4px 8px; background: white; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between;';
-                logItem.innerHTML = `<span>🗣️ ${directionLabel} ${turns}바퀴</span> <span style="color: #94a3b8;">${timeStr}</span>`;
+                const dirDisplay = isEn ? (directionVal === 0 ? "Forward" : "Backward") : directionLabel;
+                logItem.innerHTML = `<span>🗣️ "${text}" (${dirDisplay} ${turns}${isEn ? ' turns' : '바퀴'})</span> <span style="color: #94a3b8;">${timeStr}</span>`;
                 logPanel.insertBefore(logItem, logPanel.firstChild);
             }
 
-            // Update dynamic global turns variable
             window.lastParsedSpeechTurns = turns;
 
-            // 4. Trigger Workspace Block execution (0 = Forward, 1 = Backward)
             if (typeof lastTriggeredAiGesture !== 'undefined') {
                 lastTriggeredAiGesture = directionVal;
             }
             runBlocks('event_ai_gesture', directionVal);
 
-            // 5. Send control action to Fortnite bridge
             try {
                 window.parent.sendWebSocketAction({
                     action: "SWING_CONTROL",
@@ -6197,18 +6219,20 @@ print("BrickSync Sandbox Run")
                 console.error("Fortnite websocket transmission failed:", e);
             }
 
-            // Cooldown release after 3.5 seconds (prevents double triggers / seesaw)
             setTimeout(() => {
                 speechCooldown = false;
                 const micIcon = document.getElementById('mic-icon-glow');
                 if (micIcon) {
                     micIcon.className = 'mic-idle';
                 }
-                if (String(unit) === '2' || String(unit) === '7') {
+                const nu = getNormUnit(unit);
+                if (nu === '7') {
                     if (voiceStatusBox) {
-                        voiceStatusBox.innerHTML = '<i class="fas fa-microphone"></i> 마이크를 눌러 명령을 시작하세요';
+                        voiceStatusBox.innerHTML = isEn
+                            ? '<i class="fas fa-microphone"></i> Click mic to speak command'
+                            : '<i class="fas fa-microphone"></i> 마이크를 눌러 명령을 시작하세요';
                         voiceStatusBox.style.background = '#f1f5f9';
-                        voiceStatusBox.style.color = '#475569';
+                        voiceStatusBox.style.color = '#334155';
                     }
                 }
             }, 3500);
