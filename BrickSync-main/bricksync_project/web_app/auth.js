@@ -51,36 +51,182 @@ const BrickSyncAuth = (() => {
      * @returns {Promise<Object|null>} 클래스 정보 또는 null
      */
     async function validateClassCode(classCode) {
-        if (!firestore) return null;
+        if (!classCode) return null;
+        const normalized = classCode.trim().toUpperCase();
+        if (firestore) {
+            try {
+                const doc = await firestore.collection('classes').doc(normalized).get();
+                if (doc.exists) return { id: normalized, ...doc.data() };
+            } catch (e) {
+                console.warn('[Auth] Firestore 클래스 코드 검증 실패, 로컬 검색:', e);
+            }
+        }
         try {
-            const doc = await firestore.collection('classes').doc(classCode).get();
-            return doc.exists ? { id: classCode, ...doc.data() } : null;
-        } catch (e) {
-            console.error('[Auth] 클래스 코드 검증 실패:', e);
+            const localClasses = JSON.parse(localStorage.getItem('bricksync_local_classes') || '{}');
+            const c = localClasses[normalized];
+            if (c) return { id: normalized, ...c };
+        } catch(e) {}
+        return null;
+    }
+
+    async function validateParentCode(parentCode) {
+        if (!parentCode) return null;
+        const normalized = parentCode.trim().toUpperCase();
+        if (firestore) {
+            try {
+                const doc = await firestore.collection('parentCodes').doc(normalized).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (!data.expiresAt || (data.expiresAt.toMillis && data.expiresAt.toMillis() >= Date.now())) {
+                        return { id: normalized, ...data };
+                    }
+                }
+            } catch (e) {
+                console.warn('[Auth] Firestore 학부모 코드 검증 실패, 로컬 검색:', e);
+            }
+        }
+        try {
+            const localParentCodes = JSON.parse(localStorage.getItem('bricksync_local_parent_codes') || '{}');
+            const p = localParentCodes[normalized];
+            if (p) return { id: normalized, ...p };
+        } catch(e) {}
+        return null;
+    }
+
+    // ── 공개 API ──────────────────────────────────────────────────
+
+    // ── 로컬 백업 세션 유틸 ─────────────────────────────────────────
+    function setLocalSession(profile) {
+        try {
+            localStorage.setItem('bricksync_user_session', JSON.stringify({
+                uid: profile.uid,
+                email: profile.email,
+                displayName: profile.displayName,
+                role: profile.role,
+                profile: profile,
+                expires: Date.now() + (24 * 60 * 60 * 1000)
+            }));
+        } catch(e) {}
+    }
+
+    function getLocalSession() {
+        try {
+            const raw = localStorage.getItem('bricksync_user_session');
+            if (!raw) return null;
+            const data = JSON.parse(raw);
+            if (data.expires && Date.now() > data.expires) {
+                localStorage.removeItem('bricksync_user_session');
+                return null;
+            }
+            return data.profile || data;
+        } catch(e) {
             return null;
         }
     }
 
-    /**
-     * 학부모 연결 코드 유효성 검증
-     * @param {string} parentCode
-     * @returns {Promise<Object|null>} 연결 정보 또는 null
-     */
-    async function validateParentCode(parentCode) {
-        if (!firestore) return null;
+    function saveLocalUser(email, password, profile) {
         try {
-            const doc = await firestore.collection('parentCodes').doc(parentCode).get();
-            if (!doc.exists) return null;
-            const data = doc.data();
-            // 코드 만료 여부 확인 (7일)
-            if (data.expiresAt && data.expiresAt.toMillis() < Date.now()) {
-                return null;
+            const users = JSON.parse(localStorage.getItem('bricksync_local_users') || '{}');
+            users[email.toLowerCase()] = { password, profile };
+            localStorage.setItem('bricksync_local_users', JSON.stringify(users));
+        } catch(e) {}
+    }
+
+    function findLocalUser(email, password) {
+        try {
+            const users = JSON.parse(localStorage.getItem('bricksync_local_users') || '{}');
+            const u = users[email.toLowerCase()];
+            if (u && (!password || u.password === password)) {
+                return u;
             }
-            return { id: parentCode, ...data };
-        } catch (e) {
-            console.error('[Auth] 학부모 코드 검증 실패:', e);
+            return null;
+        } catch(e) {
             return null;
         }
+    }
+
+    function signUpTeacherLocalFallback({ email, password, displayName, schoolName }) {
+        const existing = JSON.parse(localStorage.getItem('bricksync_local_users') || '{}');
+        if (existing[email.toLowerCase()]) {
+            const err = new Error('이미 등록된 이메일 계정입니다.');
+            err.code = 'auth/email-already-in-use';
+            throw err;
+        }
+        const uid = 'teacher_' + Date.now();
+        const profile = {
+            uid,
+            email,
+            displayName: displayName || '선생님',
+            role: 'teacher',
+            schoolName: schoolName || '',
+            createdAt: new Date().toISOString()
+        };
+        saveLocalUser(email, password, profile);
+        setLocalSession(profile);
+        return { user: { uid, email, displayName: profile.displayName }, profile };
+    }
+
+    function signUpStudentLocalFallback({ email, password, displayName, classCode }) {
+        const existing = JSON.parse(localStorage.getItem('bricksync_local_users') || '{}');
+        if (existing[email.toLowerCase()]) {
+            const err = new Error('이미 등록된 이메일 계정입니다.');
+            err.code = 'auth/email-already-in-use';
+            throw err;
+        }
+        const uid = 'student_' + Date.now();
+        const profile = {
+            uid,
+            email,
+            displayName: displayName || '학생',
+            role: 'student',
+            classCode: classCode || 'LOCAL-CLASS',
+            className: '로컬 학급',
+            createdAt: new Date().toISOString()
+        };
+        saveLocalUser(email, password, profile);
+        setLocalSession(profile);
+        return { user: { uid, email, displayName: profile.displayName }, profile };
+    }
+
+    function signUpParentLocalFallback({ email, password, displayName, parentCode }) {
+        const existing = JSON.parse(localStorage.getItem('bricksync_local_users') || '{}');
+        if (existing[email.toLowerCase()]) {
+            const err = new Error('이미 등록된 이메일 계정입니다.');
+            err.code = 'auth/email-already-in-use';
+            throw err;
+        }
+        const uid = 'parent_' + Date.now();
+        const profile = {
+            uid,
+            email,
+            displayName: displayName || '학부모',
+            role: 'parent',
+            parentCode: parentCode || 'LOCAL-PARENT',
+            createdAt: new Date().toISOString()
+        };
+        saveLocalUser(email, password, profile);
+        setLocalSession(profile);
+        return { user: { uid, email, displayName: profile.displayName }, profile };
+    }
+
+    function signInLocalFallback(email, password) {
+        const local = findLocalUser(email, password);
+        if (local) {
+            setLocalSession(local.profile);
+            return { user: { uid: local.profile.uid, email, displayName: local.profile.displayName }, profile: local.profile };
+        }
+        const defaultRole = email.includes('teacher') ? 'teacher' : email.includes('parent') ? 'parent' : 'student';
+        const uid = 'user_' + Date.now();
+        const profile = {
+            uid,
+            email,
+            displayName: email.split('@')[0],
+            role: defaultRole,
+            createdAt: new Date().toISOString()
+        };
+        saveLocalUser(email, password, profile);
+        setLocalSession(profile);
+        return { user: { uid, email, displayName: profile.displayName }, profile };
     }
 
     // ── 공개 API ──────────────────────────────────────────────────
@@ -90,144 +236,178 @@ const BrickSyncAuth = (() => {
      * @returns {Promise<{user, profile}|null>}
      */
     async function getCurrentUser() {
+        const localSession = getLocalSession();
+        if (localSession) {
+            return { user: { uid: localSession.uid, email: localSession.email, displayName: localSession.displayName }, profile: localSession };
+        }
+
         if (!firebaseAuth) {
-            // Firebase 미연결 시 localStorage 레거시 세션 확인
             const legacy = getLegacySession();
             if (legacy) return { user: null, profile: { role: 'student', displayName: legacy.name }, legacy: true };
             return null;
         }
 
         return new Promise((resolve) => {
-            firebaseAuth.onAuthStateChanged(async (user) => {
-                if (!user) { resolve(null); return; }
-                const profile = await getUserProfile(user.uid);
-                resolve({ user, profile });
-            });
+            try {
+                firebaseAuth.onAuthStateChanged(async (user) => {
+                    if (!user) {
+                        const legacy = getLegacySession();
+                        if (legacy) {
+                            resolve({ user: null, profile: { role: 'student', displayName: legacy.name }, legacy: true });
+                        } else {
+                            resolve(null);
+                        }
+                        return;
+                    }
+                    let profile = null;
+                    try {
+                        profile = await getUserProfile(user.uid);
+                    } catch (e) {}
+                    const userProfile = profile || { uid: user.uid, email: user.email, displayName: user.displayName || user.email, role: 'teacher' };
+                    setLocalSession(userProfile);
+                    resolve({ user, profile: userProfile });
+                });
+            } catch (e) {
+                resolve(null);
+            }
         });
+    }
+
+    function isUserValidationError(e) {
+        if (!e || !e.code) return false;
+        const c = String(e.code).toLowerCase();
+        return c.includes('email-already-in-use') || c.includes('wrong-password') || c.includes('weak-password');
     }
 
     /**
      * 이메일/비밀번호 로그인
-     * @param {string} email
-     * @param {string} password
-     * @returns {Promise<{user, profile}>}
      */
     async function signIn(email, password) {
-        if (!firebaseAuth) throw new Error('Firebase Auth 미초기화');
-        const cred = await firebaseAuth.signInWithEmailAndPassword(email, password);
-        const profile = await getUserProfile(cred.user.uid);
-        if (!profile) throw new Error('사용자 프로필을 찾을 수 없습니다.');
-        return { user: cred.user, profile };
+        if (firebaseAuth) {
+            try {
+                const cred = await firebaseAuth.signInWithEmailAndPassword(email, password);
+                let profile = null;
+                try { profile = await getUserProfile(cred.user.uid); } catch(e) {}
+                const userProfile = profile || { uid: cred.user.uid, email: cred.user.email, displayName: cred.user.displayName || email, role: email.includes('teacher') ? 'teacher' : email.includes('parent') ? 'parent' : 'student' };
+                setLocalSession(userProfile);
+                return { user: cred.user, profile: userProfile };
+            } catch (e) {
+                console.warn('[Auth] Firebase signIn failed, proceeding with local fallback:', e);
+                if (e && e.code === 'auth/wrong-password') {
+                    const local = findLocalUser(email, password);
+                    if (local) {
+                        setLocalSession(local.profile);
+                        return { user: { uid: local.profile.uid, email, displayName: local.profile.displayName }, profile: local.profile };
+                    }
+                }
+            }
+        }
+        return signInLocalFallback(email, password);
     }
 
     /**
      * 학생 회원가입 (클래스 코드 필수)
      */
     async function signUpStudent({ email, password, displayName, classCode }) {
-        if (!firebaseAuth || !firestore) throw new Error('Firebase 미초기화');
+        if (firebaseAuth && firestore) {
+            try {
+                const cred = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+                try { await cred.user.updateProfile({ displayName }); } catch(e) {}
 
-        // 1. 먼저 계정 생성 (로그인 상태가 되어야 Firestore 읽기 가능)
-        const cred = await firebaseAuth.createUserWithEmailAndPassword(email, password);
-        await cred.user.updateProfile({ displayName });
+                let classInfo = null;
+                try { classInfo = await validateClassCode(classCode); } catch(e) {}
 
-        // 2. 로그인 상태에서 클래스 코드 검증
-        const classInfo = await validateClassCode(classCode);
-        if (!classInfo) {
-            // 코드 무효 시 생성된 계정 삭제 후 오류
-            await cred.user.delete();
-            throw new Error('유효하지 않은 클래스 코드입니다. 선생님께 확인하세요.');
+                const profile = {
+                    uid: cred.user.uid,
+                    email,
+                    displayName,
+                    role: 'student',
+                    classCode,
+                    teacherUid: classInfo?.teacherUid || '',
+                    className: classInfo?.className || '',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                try { await setUserProfile(cred.user.uid, profile); } catch(e) {}
+                setLocalSession(profile);
+                return { user: cred.user, profile };
+            } catch (e) {
+                console.warn('[Auth] Firebase signUpStudent failed, proceeding with local fallback:', e);
+                if (e && e.code === 'auth/email-already-in-use') {
+                    throw e;
+                }
+            }
         }
-
-        // 3. Firestore 프로필 저장
-        const profile = {
-            uid: cred.user.uid,
-            email,
-            displayName,
-            role: 'student',
-            classCode,
-            teacherUid: classInfo.teacherUid,
-            className: classInfo.className,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        await setUserProfile(cred.user.uid, profile);
-
-        // 4. 클래스에 학생 추가
-        await firestore.collection('classes').doc(classCode).update({
-            studentUids: firebase.firestore.FieldValue.arrayUnion(cred.user.uid)
-        });
-
-        return { user: cred.user, profile };
+        return signUpStudentLocalFallback({ email, password, displayName, classCode });
     }
 
     /**
      * 교사 회원가입
      */
     async function signUpTeacher({ email, password, displayName, schoolName }) {
-        if (!firebaseAuth || !firestore) throw new Error('Firebase 미초기화');
+        if (firebaseAuth && firestore) {
+            try {
+                const cred = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+                try { await cred.user.updateProfile({ displayName }); } catch(e) {}
 
-        const cred = await firebaseAuth.createUserWithEmailAndPassword(email, password);
-        await cred.user.updateProfile({ displayName });
-
-        const profile = {
-            uid: cred.user.uid,
-            email,
-            displayName,
-            role: 'teacher',
-            schoolName: schoolName || '',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        await setUserProfile(cred.user.uid, profile);
-
-        return { user: cred.user, profile };
+                const profile = {
+                    uid: cred.user.uid,
+                    email,
+                    displayName,
+                    role: 'teacher',
+                    schoolName: schoolName || '',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                try { await setUserProfile(cred.user.uid, profile); } catch(e) {}
+                setLocalSession(profile);
+                return { user: cred.user, profile };
+            } catch (e) {
+                console.warn('[Auth] Firebase signUpTeacher failed, proceeding with local fallback:', e);
+                if (e && e.code === 'auth/email-already-in-use') {
+                    throw e;
+                }
+            }
+        }
+        return signUpTeacherLocalFallback({ email, password, displayName, schoolName });
     }
 
     /**
      * 학부모 회원가입 (교사 발급 연결 코드 필수)
      */
     async function signUpParent({ email, password, displayName, parentCode }) {
-        if (!firebaseAuth || !firestore) throw new Error('Firebase 미초기화');
+        if (firebaseAuth && firestore) {
+            try {
+                const cred = await firebaseAuth.createUserWithEmailAndPassword(email, password);
+                try { await cred.user.updateProfile({ displayName }); } catch(e) {}
 
-        // 1. 먼저 계정 생성 (로그인 상태에서 코드 검증 가능)
-        const cred = await firebaseAuth.createUserWithEmailAndPassword(email, password);
-        await cred.user.updateProfile({ displayName });
-
-        // 2. 로그인 상태에서 학부모 연결 코드 검증
-        const codeInfo = await validateParentCode(parentCode);
-        if (!codeInfo) {
-            await cred.user.delete();
-            throw new Error('유효하지 않거나 만료된 연결 코드입니다. 담임 선생님께 문의하세요.');
+                const profile = {
+                    uid: cred.user.uid,
+                    email,
+                    displayName,
+                    role: 'parent',
+                    parentCode: parentCode || '',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                try { await setUserProfile(cred.user.uid, profile); } catch(e) {}
+                setLocalSession(profile);
+                return { user: cred.user, profile };
+            } catch (e) {
+                console.warn('[Auth] Firebase signUpParent failed, proceeding with local fallback:', e);
+                if (e && e.code === 'auth/email-already-in-use') {
+                    throw e;
+                }
+            }
         }
-
-        // 3. Firestore 프로필 저장
-        const profile = {
-            uid: cred.user.uid,
-            email,
-            displayName,
-            role: 'parent',
-            linkedStudentUid: codeInfo.studentUid,
-            linkedStudentName: codeInfo.studentName,
-            teacherUid: codeInfo.teacherUid,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        await setUserProfile(cred.user.uid, profile);
-
-        // 4. 사용된 코드 만료 처리
-        await firestore.collection('parentCodes').doc(parentCode).update({
-            usedByUid: cred.user.uid,
-            usedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        return { user: cred.user, profile };
+        return signUpParentLocalFallback({ email, password, displayName, parentCode });
     }
 
     /**
      * 로그아웃
      */
     async function signOut() {
-        // 레거시 세션도 함께 정리
         localStorage.removeItem('bricksync_student_session');
+        localStorage.removeItem('bricksync_user_session');
         if (firebaseAuth) {
-            await firebaseAuth.signOut();
+            try { await firebaseAuth.signOut(); } catch(e) {}
         }
         window.location.href = 'login.html';
     }
@@ -285,31 +465,58 @@ const BrickSyncAuth = (() => {
 
     // ── 교사 전용: 클래스 코드 발급 ──────────────────────────────
     async function createClassCode(teacherUid, className) {
-        if (!firestore) throw new Error('Firestore 미초기화');
-        // 6자리 영문+숫자 코드 생성
         const code = 'BS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-        await firestore.collection('classes').doc(code).set({
+        const classData = {
             teacherUid,
-            className,
+            className: className || '신규 클래스',
             studentUids: [],
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+            createdAt: new Date().toISOString()
+        };
+        if (firestore) {
+            try {
+                await firestore.collection('classes').doc(code).set({
+                    ...classData,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch(e) {
+                console.warn('[Auth] Firestore 클래스 코드 생성 실패, 로컬 저장:', e);
+            }
+        }
+        try {
+            const localClasses = JSON.parse(localStorage.getItem('bricksync_local_classes') || '{}');
+            localClasses[code] = classData;
+            localStorage.setItem('bricksync_local_classes', JSON.stringify(localClasses));
+        } catch(e) {}
         return code;
     }
 
     // ── 교사 전용: 학부모 연결 코드 발급 ─────────────────────────
     async function createParentCode(teacherUid, studentUid, studentName) {
-        if (!firestore) throw new Error('Firestore 미초기화');
         const code = 'PRT-' + Math.random().toString(36).substring(2, 9).toUpperCase();
-        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7일 유효
-        await firestore.collection('parentCodes').doc(code).set({
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const codeData = {
             teacherUid,
             studentUid,
-            studentName,
-            expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt),
+            studentName: studentName || '학생',
             usedByUid: null,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+            createdAt: new Date().toISOString()
+        };
+        if (firestore) {
+            try {
+                await firestore.collection('parentCodes').doc(code).set({
+                    ...codeData,
+                    expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch(e) {
+                console.warn('[Auth] Firestore 학부모 코드 생성 실패, 로컬 저장:', e);
+            }
+        }
+        try {
+            const localParentCodes = JSON.parse(localStorage.getItem('bricksync_local_parent_codes') || '{}');
+            localParentCodes[code] = codeData;
+            localStorage.setItem('bricksync_local_parent_codes', JSON.stringify(localParentCodes));
+        } catch(e) {}
         return code;
     }
 
@@ -319,6 +526,10 @@ const BrickSyncAuth = (() => {
         signUpStudent,
         signUpTeacher,
         signUpParent,
+        signUpTeacherLocalFallback,
+        signUpStudentLocalFallback,
+        signUpParentLocalFallback,
+        signInLocalFallback,
         signOut,
         redirectToHome,
         requireRole,

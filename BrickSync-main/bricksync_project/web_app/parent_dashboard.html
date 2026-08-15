@@ -11,8 +11,9 @@
 body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
 
 .sidebar{width:240px;background:#1e293b;border-right:1px solid #334155;padding:24px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
-.sidebar-brand{font-size:1.4rem;font-weight:900;color:#facc15;padding:8px 12px;margin-bottom:16px}
-.sidebar-brand span{font-size:.75rem;color:#64748b;font-weight:500;display:block;margin-top:2px}
+.sidebar-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px 8px;margin-bottom:16px;width:100%}
+.sidebar-logo{max-width:160px;width:100%;height:auto;display:block;margin:0 auto;object-fit:contain}
+.sidebar-subtext{font-size:.75rem;color:#94a3b8;font-weight:600;display:block;margin-top:6px;text-align:center}
 .nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;color:#94a3b8;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;border:none;background:none;width:100%;text-align:left}
 .nav-item:hover{background:#0f172a;color:#fff}
 .nav-item.active{background:linear-gradient(135deg,#db2777,#9333ea);color:#fff}
@@ -99,7 +100,10 @@ body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
 <body>
 
 <aside class="sidebar">
-  <div class="sidebar-brand">🧱 BrickSync <span>학부모 리포트</span></div>
+  <div class="sidebar-brand">
+    <img src="./assets/bslogo.png" alt="BrickSync" class="sidebar-logo">
+    <span class="sidebar-subtext">학부모 리포트</span>
+  </div>
   <button class="nav-item active" onclick="showSection('report')"><i class="fas fa-chart-line"></i> 학습 리포트</button>
   <button class="nav-item" onclick="showSection('missions')"><i class="fas fa-trophy"></i> 미션 현황</button>
   <button class="nav-item" onclick="showSection('activity')"><i class="fas fa-history"></i> 활동 기록</button>

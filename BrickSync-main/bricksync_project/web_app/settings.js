@@ -125,6 +125,12 @@
             lbl_class_code: "클래스 코드 (선생님 제공)",
             lbl_parent_code: "학부모 연결 코드 (선생님 제공)",
             btn_signup: "계정 만들기",
+            lbl_password_placeholder: "비밀번호 입력",
+            lbl_name_placeholder: "홍길동",
+            lbl_signup_password_placeholder: "비밀번호 설정",
+            lbl_school_placeholder: "○○초등학교",
+            lbl_class_code_placeholder: "예: BS-A1B2C3",
+            lbl_parent_code_placeholder: "예: PRT-X7Y8Z9",
 
             // Workspace & Dashboard UI Keys
             lbl_device_sync: "시스템 연결",
@@ -192,8 +198,8 @@
             lesson_5: "5. 동굴 자동차를 타고 여행해요",
 
             ai_lesson_1: "6. 가위, 바위, 보로 여닫는 오두막 지붕",
-            ai_lesson_2: "7. 몬스터를 보여줘! 경보 알림켜기.",
-            ai_lesson_3: "8. 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네",
+            ai_lesson_2: "7. 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네",
+            ai_lesson_3: "8. 몬스터를 보여줘! 경보 알림켜기.",
 
             // Modal & Workspace UI
             lbl_required_tasks: "📋 미션 달성 과제",
@@ -322,6 +328,12 @@
             lbl_class_code: "Class Code (From Teacher)",
             lbl_parent_code: "Parent Link Code (From Teacher)",
             btn_signup: "Create Account",
+            lbl_password_placeholder: "Enter Password",
+            lbl_name_placeholder: "e.g. John Doe",
+            lbl_signup_password_placeholder: "Set Password",
+            lbl_school_placeholder: "e.g. Lincoln Elementary",
+            lbl_class_code_placeholder: "e.g. BS-A1B2C3",
+            lbl_parent_code_placeholder: "e.g. PRT-X7Y8Z9",
 
             // Workspace & Dashboard UI Keys
             lbl_device_sync: "System Connection",
@@ -389,8 +401,8 @@
             lesson_5: "5. Ride a cave car and travel",
 
             ai_lesson_1: "6. RPS Gesture-Controlled Cabin Roof (Open/Close)",
-            ai_lesson_2: "7. Squats! Riding the Magic Tree Elevator",
-            ai_lesson_3: "8. Shout into the Mic! Control the Magic Swing with Your Voice",
+            ai_lesson_2: "7. Shout into the Mic! Control the Magic Swing with Your Voice",
+            ai_lesson_3: "8. Animal Alert Ranger (Monster Camera)",
 
             // Modal & Workspace UI
             lbl_required_tasks: "📋 Required Tasks",

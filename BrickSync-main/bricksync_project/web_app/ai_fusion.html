@@ -1531,12 +1531,12 @@
         function showAIGestureModal(paramEl) {
             modalBox.innerHTML = '';
             modalBox.style.cssText = 'background: #8b5cf6; display: flex; gap: 10px; padding: 10px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #7c3aed; width: auto; max-width: 250px;';
-            if ((unit === '3' || (unit === '8' || unit === '3'))) {
+            if ((unit === '2' || (unit === '7' || unit === '2'))) {
                 options = [
                     { type: 'forward', val: 0, icon: '<i class="fas fa-arrow-up"></i>' },
                     { type: 'backward', val: 1, icon: '<i class="fas fa-arrow-down"></i>' }
                 ];
-            } else if ((unit === '2' || (unit === '7' || unit === '2'))) {
+            } else if ((unit === '3' || (unit === '8' || unit === '3'))) {
                 options = [
                     { type: 'monster', val: 0, icon: '<i class="fas fa-dragon"></i>' },
                     { type: 'none', val: 3, icon: '<i class="fas fa-ban"></i>' }
@@ -3843,7 +3843,7 @@ print("BrickSync Sandbox Run")
                                 if (!isNaN(textVal) && textVal !== "") timeVal = parseFloat(textVal);
                             }
                         }
-                        if (((unit === '3' || (unit === '8' || unit === '3')) || (unit === '8' || unit === '3')) && window.lastParsedSpeechTurns) {
+                        if (((unit === '2' || (unit === '7' || unit === '2')) || (unit === '7' || unit === '2')) && window.lastParsedSpeechTurns) {
                             timeVal = window.lastParsedSpeechTurns;
                         }
                     } else {
@@ -3955,7 +3955,7 @@ print("BrickSync Sandbox Run")
                             let lightDuration = matEl ? (parseFloat(matEl.getAttribute('data-val')) || 2) : 2;
 
                             // 2단원/7단원 조명 매트릭스 실행 시점에 포트나이트 경보 발동 신호를 지연 큐에 주입 (2초 대기 연동 실현)
-                            if (unit === '7' || unit === '2') {
+                            if (unit === '8' || unit === '3') {
                                 localActionsQueue.push({ action: 'MONSTER_ALERT', delay: cumulativeDelayMs });
                                 if (isMissionActive) {
                                     pyCode += `${indent}print("Mission Complete!")\n`;
@@ -4039,17 +4039,17 @@ print("BrickSync Sandbox Run")
 
             // 스크립트가 순식간에 0.1초만에 종료되어버리면, 허브 본체가 프로그램 종료로 간주하고 조명/모터를 바로 꺼버리는 것을 방지!
             pyCode += 'utime.sleep_ms(300)\n';
-            if (isMissionActive && unit !== '7' && unit !== '2') {
+            if (isMissionActive && unit !== '8' && unit !== '3') {
                 pyCode += 'print("Mission Complete!")\n';
             }
 
             if (isMissionActive && blockCount > 1) {
                 // [보상 시스템] 블록 조립 코드를 성공적으로 완성하고 런(Run) 버튼을 누르면
-                if ((unit === '2' || (unit === '7' || unit === '2'))) {
-                    // 2단원: 몬스터 경보 및 보상 신호 송출 (MONSTER_ALERT는 매트릭스 블록 실행 시 지연 송출되므로 여기서는 제거)
+                if ((unit === '3' || (unit === '8' || unit === '3'))) {
+                    // 3단원: 몬스터 경보 및 보상 신호 송출 (MONSTER_ALERT는 매트릭스 블록 실행 시 지연 송출되므로 여기서는 제거)
                     try {
                         window.parent.sendWebSocketAction({ action: "ITEM_GRANT_REWARD" });
-                        console.log("포트나이트 연동 신호(ITEM_GRANT_REWARD) 전송 완료 [AI 2단원 성공]");
+                        console.log("포트나이트 연동 신호(ITEM_GRANT_REWARD) 전송 완료 [AI 3단원 성공]");
                     } catch (e) { }
                 } else {
                     // 기본 (고양이 먹이 주기)
@@ -4309,7 +4309,7 @@ print("BrickSync Sandbox Run")
                                     }
                                 } else if (cmd.action === 'matrix') {
                                     try { window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
-                                    if (isMissionActive && (unit === '7' || unit === '2') && window.bleEngineRunCounter === currentRunId) {
+                                    if (isMissionActive && (unit === '8' || unit === '3') && window.bleEngineRunCounter === currentRunId) {
                                         if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
                                     }
                                     let encodedColors = cmd.colors.map(c => { const val = Number(c); return val > 0 ? val + 160 : 0; });
@@ -4637,22 +4637,22 @@ print("BrickSync Sandbox Run")
                         ]
                     },
                     '7': {
-                        badge: 'STAGE 7', title: '몬스터를 보여줘! 경보 알림켜기', desc: '재생(시작) 블록 연결하기 / AI 카메라 인식 블록 연결하기 / 대기 블록 연결하기 / LED 매트릭스 경보등 블록 연결하기',
+                        badge: 'STAGE 7', title: '마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네', desc: '재생(시작) 블록 연결하기 / AI 음성 인식 블록 연결하기 / 그네 회전 모터 블록 연결하기',
+                        pinCode: '5019',
+                        tasks: [
+                            { id: 'start', text: '재생(시작) 블록 연결하기' },
+                            { id: 'event_ai_gesture', text: 'AI 음성 인식 블록 연결하기' },
+                            { id: ['motor_cw', 'motor_ccw'], text: '그네 회전 모터 블록 연결하기' }
+                        ]
+                    },
+                    '8': {
+                        badge: 'STAGE 8', title: '몬스터를 보여줘! 경보 알림켜기', desc: '재생(시작) 블록 연결하기 / AI 카메라 인식 블록 연결하기 / 대기 블록 연결하기 / LED 매트릭스 경보등 블록 연결하기',
                         pinCode: '8932',
                         tasks: [
                             { id: 'start', text: '재생(시작) 블록 연결하기' },
                             { id: 'event_ai_gesture', text: 'AI 카메라 인식 블록 연결하기' },
                             { id: 'flow_wait', text: '대기 블록 연결하기' },
                             { id: 'matrix_pixel', text: 'LED 매트릭스 경보등 블록 연결하기' }
-                        ]
-                    },
-                    '8': {
-                        badge: 'STAGE 8', title: '마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네', desc: '재생(시작) 블록 연결하기 / AI 음성 인식 블록 연결하기 / 그네 회전 모터 블록 연결하기',
-                        pinCode: '5019',
-                        tasks: [
-                            { id: 'start', text: '재생(시작) 블록 연결하기' },
-                            { id: 'event_ai_gesture', text: 'AI 음성 인식 블록 연결하기' },
-                            { id: ['motor_cw', 'motor_ccw'], text: '그네 회전 모터 블록 연결하기' }
                         ]
                     }
                 },
@@ -4668,22 +4668,22 @@ print("BrickSync Sandbox Run")
                         ]
                     },
                     '7': {
-                        badge: 'STAGE 7', title: 'Animal Alert Ranger (Monster Camera)', desc: 'Connect Play (Start) block / Connect AI Camera Recognition block / Connect Wait block / Connect LED Matrix Alert block',
+                        badge: 'STAGE 7', title: 'Shout into the Mic! Control the Magic Swing with Your Voice', desc: 'Connect Play (Start) block / Connect AI Voice Recognition block / Connect Swing Motor block',
+                        pinCode: '5019',
+                        tasks: [
+                            { id: 'start', text: 'Connect Play (Start) block' },
+                            { id: 'event_ai_gesture', text: 'Connect the AI Voice Recognition block' },
+                            { id: ['motor_cw', 'motor_ccw'], text: 'Connect swing motor block' }
+                        ]
+                    },
+                    '8': {
+                        badge: 'STAGE 8', title: 'Animal Alert Ranger (Monster Camera)', desc: 'Connect Play (Start) block / Connect AI Camera Recognition block / Connect Wait block / Connect LED Matrix Alert block',
                         pinCode: '8932',
                         tasks: [
                             { id: 'start', text: 'Connect Play (Start) block' },
                             { id: 'event_ai_gesture', text: 'Connect the AI Camera Recognition block' },
                             { id: 'flow_wait', text: 'Connect the Wait block' },
                             { id: 'matrix_pixel', text: 'Connect the LED Matrix Alert block' }
-                        ]
-                    },
-                    '8': {
-                        badge: 'STAGE 8', title: 'Shout into the Mic! Control the Magic Swing with Your Voice', desc: 'Connect Play (Start) block / Connect AI Voice Recognition block / Connect Swing Motor block',
-                        pinCode: '5019',
-                        tasks: [
-                            { id: 'start', text: 'Connect Play (Start) block' },
-                            { id: 'event_ai_gesture', text: 'Connect the AI Voice Recognition block' },
-                            { id: ['motor_cw', 'motor_ccw'], text: 'Connect swing motor block' }
                         ]
                     }
                 }
@@ -5061,13 +5061,13 @@ print("BrickSync Sandbox Run")
             const projectNames = {
                 ko: {
                     '1': 'AI 단원 1: 가위, 바위, 보로 여닫는 오두막 지붕',
-                    '2': 'AI 단원 2: 몬스터를 보여줘! 경보 알림켜기.',
-                    '3': 'AI 단원 3: 카메라에 맛있는 과일을 보여주고 간식 선물받기'
+                    '2': 'AI 단원 2: 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네',
+                    '3': 'AI 단원 3: 몬스터를 보여줘! 경보 알림켜기.'
                 },
                 en: {
                     '1': 'AI Lesson 1: Rock Paper Scissors! Finger-controlled Arctic Racing',
-                    '2': 'AI Lesson 2: Squats! Riding the Magic Tree Elevator',
-                    '3': 'AI Lesson 3: Show delicious fruit to the camera and get a snack treat'
+                    '2': 'AI Lesson 2: Shout into the Mic! Control the Magic Swing with Your Voice',
+                    '3': 'AI Lesson 3: Animal Alert Ranger (Monster Camera)'
                 }
             };
 
@@ -5741,7 +5741,7 @@ print("BrickSync Sandbox Run")
                 if (micIcon) {
                     micIcon.className = 'mic-idle';
                 }
-                if ((unit === '3' || (unit === '8' || unit === '3'))) {
+                if ((unit === '2' || (unit === '7' || unit === '2'))) {
                     if (voiceStatusBox) {
                         voiceStatusBox.innerHTML = '<i class="fas fa-microphone"></i> 마이크를 눌러 명령을 시작하세요';
                         voiceStatusBox.style.background = '#f1f5f9';
@@ -5752,8 +5752,8 @@ print("BrickSync Sandbox Run")
         }
 
         async function app() {
-            if ((unit === '2' || (unit === '7' || unit === '2'))) {
-                // Dynamically modify block icon & defaults in the palette for Unit 2
+            if ((unit === '3' || (unit === '8' || unit === '3'))) {
+                // Dynamically modify block icon & defaults in the palette for Unit 3
                 const aiBlock = document.querySelector('#palette [data-action="event_ai_gesture"]');
                 if (aiBlock) {
                     const iconContainer = aiBlock.querySelector('.block-icon div:nth-child(2)');
@@ -5801,11 +5801,11 @@ print("BrickSync Sandbox Run")
                 if (countScissors) countScissors.style.display = 'none';
             }
 
-            if ((unit === '3' || (unit === '8' || unit === '3'))) {
+            if ((unit === '2' || (unit === '7' || unit === '2'))) {
                 const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
                 const isEn = currentLang === 'en';
 
-                // Dynamically modify block icon & defaults in the palette for Unit 3
+                // Dynamically modify block icon & defaults in the palette for Unit 2
                 const aiBlock = document.querySelector('#palette [data-action="event_ai_gesture"]');
                 if (aiBlock) {
                     const iconContainer = aiBlock.querySelector('.block-icon div:nth-child(2)');
@@ -6001,7 +6001,7 @@ print("BrickSync Sandbox Run")
                             ? ['Rock', 'Paper', 'Scissors', 'Background (None)']
                             : ['주먹 (Rock)', '보 (Paper)', '가위 (Scissors)', '배경 (None)'];
                         let icons = ['fa-hand-rock', 'fa-hand-paper', 'fa-hand-scissors', 'fa-ban'];
-                        if ((unit === '2' || (unit === '7' || unit === '2')) || (unit === '7' || unit === '2')) {
+                        if ((unit === '3' || (unit === '8' || unit === '3')) || (unit === '8' || unit === '3')) {
                             labels = isEn
                                 ? ['Monster', 'Paper', 'Scissors', 'Background (None)']
                                 : ['몬스터 (Monster)', '보 (Paper)', '가위 (Scissors)', '배경 (None)'];
@@ -6020,8 +6020,8 @@ print("BrickSync Sandbox Run")
                                 console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
                                 runBlocks('event_ai_gesture', detectedGesture);
 
-                                // 2단원 몬스터 감지(0) 시 UEFN 경보 웹소켓 전송
-                                if (((unit === '2' || (unit === '7' || unit === '2')) || (unit === '7' || unit === '2')) && detectedGesture === 0) {
+                                // 3단원 몬스터 감지(0) 시 UEFN 경보 웹소켓 전송
+                                if (((unit === '3' || (unit === '8' || unit === '3')) || (unit === '8' || unit === '3')) && detectedGesture === 0) {
                                     try {
                                         window.parent.sendWebSocketAction({ action: "MONSTER_ALERT" });
                                         console.log("포트나이트 연동 신호(MONSTER_ALERT) 전송 완료 [AI 2단원]");

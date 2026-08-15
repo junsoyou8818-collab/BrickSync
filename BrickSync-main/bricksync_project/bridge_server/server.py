@@ -25,13 +25,22 @@ except ImportError:
 import sys
 
 # PyInstaller exe 여부에 따라 web_app 경로 결정
-# 설치 후: resources/bridge/server.exe → web_app: resources/web_app/
 if getattr(sys, 'frozen', False):
     _BASE_DIR = os.path.dirname(sys.executable)
 else:
     _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+_candidate_dirs = [
+    os.path.join(_BASE_DIR, "..", "web_app"),
+    os.path.join(_BASE_DIR, "bricksync_project", "web_app"),
+    r"C:\Users\PC\Documents\GitHub\BrickSync\BrickSync-main\bricksync_project\web_app",
+    r"C:\Users\PC\Documents\GitHub\BrickSync\bricksync_project\web_app"
+]
 web_app_dir = os.path.join(_BASE_DIR, "..", "web_app")
+for _cand in _candidate_dirs:
+    if os.path.exists(_cand) and os.path.isdir(_cand):
+        web_app_dir = os.path.abspath(_cand)
+        break
 
 
 

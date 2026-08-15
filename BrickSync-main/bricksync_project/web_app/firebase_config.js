@@ -27,10 +27,15 @@ try {
             firebase.initializeApp(firebaseConfig);
         }
 
-        // Auth 초기화
+        // Auth 초기화 (구글 파이어베이스 클라우드 인증 지원)
         if (typeof firebase.auth === 'function') {
-            firebaseAuth = firebase.auth();
-            console.log('[BrickSync] Firebase Auth 초기화 완료');
+            try {
+                firebaseAuth = firebase.auth();
+                console.log('[BrickSync] Firebase Auth 클라우드 서비스 초기화 완료');
+            } catch (e) {
+                console.warn('[BrickSync] Firebase Auth 초기화 경고 (로컬 모드 호환):', e);
+                firebaseAuth = null;
+            }
         }
 
         // Firestore 초기화

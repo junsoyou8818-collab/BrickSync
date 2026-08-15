@@ -12,8 +12,9 @@ body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
 
 /* 사이드바 */
 .sidebar{width:240px;background:#1e293b;border-right:1px solid #334155;padding:24px 16px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
-.sidebar-brand{font-size:1.4rem;font-weight:900;color:#facc15;padding:8px 12px;margin-bottom:16px}
-.sidebar-brand span{font-size:.75rem;color:#64748b;font-weight:500;display:block;margin-top:2px}
+.sidebar-brand{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px 8px;margin-bottom:16px;width:100%}
+.sidebar-logo{max-width:160px;width:100%;height:auto;display:block;margin:0 auto;object-fit:contain}
+.sidebar-subtext{font-size:.75rem;color:#94a3b8;font-weight:600;display:block;margin-top:6px;text-align:center}
 .nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:10px;color:#94a3b8;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;border:none;background:none;width:100%;text-align:left}
 .nav-item:hover{background:#0f172a;color:#fff}
 .nav-item.active{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff}
@@ -91,7 +92,10 @@ body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
 <body>
 
 <aside class="sidebar">
-  <div class="sidebar-brand">🧱 BrickSync <span>교사 관리 대시보드</span></div>
+  <div class="sidebar-brand">
+    <img src="./assets/bslogo.png" alt="BrickSync" class="sidebar-logo">
+    <span class="sidebar-subtext">교사 관리 대시보드</span>
+  </div>
   <button class="nav-item active" onclick="showSection('overview')"><i class="fas fa-home"></i> 홈</button>
   <button class="nav-item" onclick="showSection('students')"><i class="fas fa-users"></i> 학생 관리</button>
   <button class="nav-item" onclick="showSection('classcodes')"><i class="fas fa-key"></i> 클래스 코드</button>

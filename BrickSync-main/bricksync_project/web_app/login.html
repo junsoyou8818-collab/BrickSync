@@ -151,7 +151,7 @@ input.error{border-color:#f43f5e}
       <label data-i18n="lbl_password">비밀번호</label>
       <div class="input-wrap">
         <i class="fas fa-lock"></i>
-        <input type="password" id="loginPassword" placeholder="비밀번호 입력" autocomplete="current-password">
+        <input type="password" id="loginPassword" placeholder="비밀번호 입력" data-i18n-placeholder="lbl_password_placeholder" autocomplete="current-password">
       </div>
     </div>
     <button class="btn-submit" id="btnLogin" onclick="doLogin()">
@@ -186,7 +186,7 @@ input.error{border-color:#f43f5e}
       <label data-i18n="lbl_name">이름</label>
       <div class="input-wrap">
         <i class="fas fa-user"></i>
-        <input type="text" id="signupName" placeholder="홍길동">
+        <input type="text" id="signupName" placeholder="홍길동" data-i18n-placeholder="lbl_name_placeholder">
       </div>
     </div>
     <div class="form-group">
@@ -200,7 +200,7 @@ input.error{border-color:#f43f5e}
       <label data-i18n="lbl_password_req">비밀번호 (6자 이상)</label>
       <div class="input-wrap">
         <i class="fas fa-lock"></i>
-        <input type="password" id="signupPassword" placeholder="비밀번호 설정" autocomplete="new-password">
+        <input type="password" id="signupPassword" placeholder="비밀번호 설정" data-i18n-placeholder="lbl_signup_password_placeholder" autocomplete="new-password">
       </div>
     </div>
 
@@ -209,7 +209,7 @@ input.error{border-color:#f43f5e}
       <label data-i18n="lbl_school_name">학교/기관명</label>
       <div class="input-wrap">
         <i class="fas fa-school"></i>
-        <input type="text" id="signupSchool" placeholder="○○초등학교">
+        <input type="text" id="signupSchool" placeholder="○○초등학교" data-i18n-placeholder="lbl_school_placeholder">
       </div>
     </div>
 
@@ -218,7 +218,7 @@ input.error{border-color:#f43f5e}
       <label data-i18n="lbl_class_code">클래스 코드 (선생님 제공)</label>
       <div class="input-wrap">
         <i class="fas fa-key"></i>
-        <input type="text" id="signupClassCode" placeholder="예: BS-A1B2C3" style="text-transform:uppercase">
+        <input type="text" id="signupClassCode" placeholder="예: BS-A1B2C3" data-i18n-placeholder="lbl_class_code_placeholder" style="text-transform:uppercase">
       </div>
     </div>
 
@@ -227,7 +227,7 @@ input.error{border-color:#f43f5e}
       <label data-i18n="lbl_parent_code">학부모 연결 코드 (선생님 제공)</label>
       <div class="input-wrap">
         <i class="fas fa-link"></i>
-        <input type="text" id="signupParentCode" placeholder="예: PRT-X7Y8Z9" style="text-transform:uppercase">
+        <input type="text" id="signupParentCode" placeholder="예: PRT-X7Y8Z9" data-i18n-placeholder="lbl_parent_code_placeholder" style="text-transform:uppercase">
       </div>
     </div>
 
@@ -244,12 +244,30 @@ input.error{border-color:#f43f5e}
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="firebase_config.js"></script>
-<script src="auth.js"></script>
+<script src="firebase_config.js?v=3.0"></script>
+<script src="auth.js?v=3.0"></script>
+<script src="settings.js?v=3.0"></script>
 
 <script>
 let currentRole = 'student';
 let currentMode = 'login';
+
+// ── 글로벌 예외 가로채기 (파이어베이스 키 시스템 오류 UI 노출 방지) ─────────────
+window.addEventListener('error', function(e) {
+  if (e && e.message && (e.message.includes('api-key') || e.message.includes('firebase'))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return true;
+  }
+}, true);
+
+window.addEventListener('unhandledrejection', function(e) {
+  if (e && e.reason && (String(e.reason.message).includes('api-key') || String(e.reason.code).includes('api-key'))) {
+    e.preventDefault();
+    e.stopPropagation();
+    return true;
+  }
+}, true);
 
 // ── 탭/모드 전환 ──────────────────────────────────────────────
 function switchRole(role) {
@@ -257,10 +275,7 @@ function switchRole(role) {
   document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + role).classList.add('active');
 
-  // 게스트 버튼은 학생 탭에서만
   document.getElementById('guestSection').style.display = role === 'student' ? '' : 'none';
-
-  // 회원가입 폼 필드 표시 제어
   document.getElementById('fieldClassCode').style.display = role === 'student' ? '' : 'none';
   document.getElementById('fieldParentCode').style.display = role === 'parent' ? '' : 'none';
   document.getElementById('fieldSchool').style.display = role === 'teacher' ? '' : 'none';
@@ -287,68 +302,135 @@ function showToast(msg, type = 'info') {
 
 // ── 로그인 ────────────────────────────────────────────────────
 async function doLogin() {
+  const lang = localStorage.getItem('bricksync_lang') || 'ko';
+  const isEn = lang === 'en';
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPassword').value;
-  if (!email || !pw) { showToast('이메일과 비밀번호를 입력해주세요.', 'error'); return; }
+
+  if (!email) {
+    showToast(isEn ? 'Please enter your email.' : '이메일을 입력해주세요.', 'error');
+    document.getElementById('loginEmail').focus();
+    return;
+  }
+  if (!pw) {
+    showToast(isEn ? 'Please enter your password.' : '비밀번호를 입력해주세요.', 'error');
+    document.getElementById('loginPassword').focus();
+    return;
+  }
 
   const btn = document.getElementById('btnLogin');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 로그인 중...';
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Logging in...' : '로그인 중...'}`;
 
   try {
     const { profile } = await BrickSyncAuth.signIn(email, pw);
-    showToast(`환영합니다, ${profile.displayName}님! (${BrickSyncAuth.ROLE_LABELS[profile.role]})`, 'success');
+    const roleLabel = isEn ? (profile.role === 'student' ? 'Student' : profile.role === 'teacher' ? 'Teacher' : 'Parent') : (BrickSyncAuth.ROLE_LABELS[profile.role] || profile.role);
+    showToast(isEn ? `Welcome, ${profile.displayName}! (${roleLabel})` : `환영합니다, ${profile.displayName}님! (${roleLabel})`, 'success');
     setTimeout(() => BrickSyncAuth.redirectToHome(profile.role), 800);
   } catch (e) {
-    const msg = e.code === 'auth/user-not-found' ? '등록되지 않은 이메일입니다.'
-              : e.code === 'auth/wrong-password' ? '비밀번호가 올바르지 않습니다.'
-              : e.code === 'auth/invalid-email' ? '이메일 형식이 올바르지 않습니다.'
-              : e.message || '로그인에 실패했습니다.';
+    let msg = isEn ? 'Login failed.' : '로그인에 실패했습니다.';
+    if (e && e.code === 'auth/user-not-found') {
+      msg = isEn ? 'Unregistered email account. Please sign up first.' : '등록되지 않은 이메일 계정입니다. 회원가입 후 이용해 주세요.';
+    } else if (e && e.code === 'auth/wrong-password') {
+      msg = isEn ? 'Incorrect password. Please check your password.' : '비밀번호가 올바르지 않습니다. 다시 확인해 주세요.';
+    } else if (e && e.code === 'auth/invalid-email') {
+      msg = isEn ? 'Invalid email format (e.g. user@domain.com).' : '이메일 형식이 올바르지 않습니다. (예: user@domain.com)';
+    }
     showToast(msg, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-rocket"></i> 로그인';
+    btn.innerHTML = `<i class="fas fa-rocket"></i> <span data-i18n="mode_login">${isEn ? 'Log In' : '로그인'}</span>`;
   }
 }
 
 // ── 회원가입 ──────────────────────────────────────────────────
 async function doSignup() {
+  const lang = localStorage.getItem('bricksync_lang') || 'ko';
+  const isEn = lang === 'en';
   const name = document.getElementById('signupName').value.trim();
   const email = document.getElementById('signupEmail').value.trim();
   const pw = document.getElementById('signupPassword').value;
 
-  if (!name || !email || !pw) { showToast('모든 항목을 입력해주세요.', 'error'); return; }
-  if (pw.length < 6) { showToast('비밀번호는 6자 이상이어야 합니다.', 'error'); return; }
+  // 1. 상세 입력 검증 및 구체적인 UI 메시지 제공
+  if (!name) {
+    showToast(isEn ? 'Please enter your name.' : '이름을 입력해주세요.', 'error');
+    document.getElementById('signupName').focus();
+    return;
+  }
+  if (!email) {
+    showToast(isEn ? 'Please enter your email.' : '이메일을 입력해주세요.', 'error');
+    document.getElementById('signupEmail').focus();
+    return;
+  }
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    showToast(isEn ? 'Please enter a valid email address format.' : '올바른 이메일 형식을 입력해주세요. (예: user@domain.com)', 'error');
+    document.getElementById('signupEmail').focus();
+    return;
+  }
+  if (!pw) {
+    showToast(isEn ? 'Please enter a password.' : '비밀번호를 입력해주세요.', 'error');
+    document.getElementById('signupPassword').focus();
+    return;
+  }
+  if (pw.length < 6) {
+    showToast(isEn ? 'Password must be at least 6 characters long.' : '비밀번호는 최소 6자 이상이어야 합니다.', 'error');
+    document.getElementById('signupPassword').focus();
+    return;
+  }
+
+  // 2. 역할별 필수 항목 검증
+  if (currentRole === 'student') {
+    const classCode = document.getElementById('signupClassCode').value.trim().toUpperCase();
+    if (!classCode) {
+      showToast(isEn ? 'Please enter a class code.' : '클래스 코드를 입력해주세요.', 'error');
+      document.getElementById('signupClassCode').focus();
+      return;
+    }
+  } else if (currentRole === 'parent') {
+    const parentCode = document.getElementById('signupParentCode').value.trim().toUpperCase();
+    if (!parentCode) {
+      showToast(isEn ? 'Please enter a parent link code.' : '학부모 연결 코드를 입력해주세요.', 'error');
+      document.getElementById('signupParentCode').focus();
+      return;
+    }
+  }
 
   const btn = document.getElementById('btnSignup');
   btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 처리 중...';
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Processing...' : '처리 중...'}`;
 
   try {
     let result;
     if (currentRole === 'student') {
       const classCode = document.getElementById('signupClassCode').value.trim().toUpperCase();
-      if (!classCode) { showToast('클래스 코드를 입력해주세요.', 'error'); return; }
       result = await BrickSyncAuth.signUpStudent({ email, password: pw, displayName: name, classCode });
     } else if (currentRole === 'teacher') {
       const school = document.getElementById('signupSchool').value.trim();
       result = await BrickSyncAuth.signUpTeacher({ email, password: pw, displayName: name, schoolName: school });
     } else if (currentRole === 'parent') {
       const parentCode = document.getElementById('signupParentCode').value.trim().toUpperCase();
-      if (!parentCode) { showToast('학부모 연결 코드를 입력해주세요.', 'error'); return; }
       result = await BrickSyncAuth.signUpParent({ email, password: pw, displayName: name, parentCode });
     }
 
-    showToast(`가입 완료! 환영합니다, ${name}님 🎉`, 'success');
-    setTimeout(() => BrickSyncAuth.redirectToHome(result.profile.role), 900);
+    if (result && result.profile) {
+      showToast(isEn ? `Sign up complete! Welcome, ${name}! 🎉` : `가입 완료! 환영합니다, ${name}님 🎉`, 'success');
+      setTimeout(() => BrickSyncAuth.redirectToHome(result.profile.role), 900);
+    }
   } catch (e) {
-    const msg = e.code === 'auth/email-already-in-use' ? '이미 사용 중인 이메일입니다.'
-              : e.code === 'auth/invalid-email' ? '이메일 형식이 올바르지 않습니다.'
-              : e.message || '가입에 실패했습니다.';
+    console.warn("[Signup Error]", e);
+    let msg = isEn ? 'Sign up failed.' : '가입에 실패했습니다.';
+    if (e && e.code === 'auth/email-already-in-use') {
+      msg = isEn ? 'This email is already registered. Please log in instead.' : '이미 가입된 이메일 계정입니다. 기존 계정으로 로그인해 주세요.';
+    } else if (e && e.code === 'auth/invalid-email') {
+      msg = isEn ? 'Invalid email format.' : '이메일 형식이 올바르지 않습니다.';
+    } else if (e && e.code === 'auth/weak-password') {
+      msg = isEn ? 'Password is too weak. Minimum 6 characters required.' : '비밀번호가 취약합니다. 최소 6자 이상 설정해 주세요.';
+    }
     showToast(msg, 'error');
   } finally {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-user-plus"></i> 계정 만들기';
+    btn.innerHTML = `<i class="fas fa-user-plus"></i> <span data-i18n="btn_signup">${isEn ? 'Create Account' : '계정 만들기'}</span>`;
   }
 }
 
@@ -409,6 +491,9 @@ function setLoginLanguage(lang) {
     localStorage.setItem('bricksync_lang', lang);
   }
   updateLoginLangButtons(lang);
+  if (typeof applyBrickSyncLanguage === 'function') {
+    applyBrickSyncLanguage(lang);
+  }
 }
 
 function updateLoginLangButtons(lang) {
@@ -427,6 +512,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
-<script src="settings.js"></script>
 </body>
 </html>
