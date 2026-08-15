@@ -888,6 +888,24 @@
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 4px 6px rgba(0, 0, 0, 0.2) !important;
         }
     </style>
+<script>
+    (function() {
+        try {
+            const u = new URLSearchParams(window.location.search).get('unit') || localStorage.getItem('brickSyncLastUnit');
+            if (u) {
+                const isAi = String(u) >= '6';
+                const type = isAi ? 'ai' : 'lesson';
+                let recent = JSON.parse(localStorage.getItem('bricksync_recent_units') || '[]');
+                recent = recent.filter(item => !(String(item.unit) === String(u) && item.type === type));
+                recent.push({ unit: String(u), type: type, time: Date.now() });
+                if (recent.length > 3) {
+                    recent = recent.slice(-3);
+                }
+                localStorage.setItem('bricksync_recent_units', JSON.stringify(recent));
+            }
+        } catch(e) {}
+    })();
+</script>
 </head>
 
 <body>

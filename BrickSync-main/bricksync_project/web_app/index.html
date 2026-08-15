@@ -1271,118 +1271,126 @@
         }
 
 
+                function recordUnitVisited(unit, type) {
+            try {
+                let recent = JSON.parse(localStorage.getItem('bricksync_recent_units') || '[]');
+                recent = recent.filter(item => !(String(item.unit) === String(unit) && item.type === type));
+                recent.push({ unit: String(unit), type: type, time: Date.now() });
+                if (recent.length > 3) {
+                    recent = recent.slice(-3);
+                }
+                localStorage.setItem('bricksync_recent_units', JSON.stringify(recent));
+            } catch(e) {}
+        }
+        window.recordUnitVisited = recordUnitVisited;
+
+        function deleteProject(unitKey, cloudId, unit, type) {
+            if (confirm('이 프로젝트를 삭제하시겠습니까?')) {
+                try {
+                    let recent = JSON.parse(localStorage.getItem('bricksync_recent_units') || '[]');
+                    recent = recent.filter(item => !(String(item.unit) === String(unit) && item.type === type));
+                    localStorage.setItem('bricksync_recent_units', JSON.stringify(recent));
+                } catch(e) {}
+                if (unitKey) localStorage.removeItem(unitKey);
+                renderProjects();
+            }
+        }
+        window.deleteProject = deleteProject;
+
         async function renderProjects() {
             const container = document.getElementById('projects-list-container');
             if (!container) return;
 
-            const studentName = getStudentName();
-            const studentPrefix = studentName + '_project_';
-            const projectMap = new Map(); // id → project (중복 방지)
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            let recentUnits = [];
+            try {
+                recentUnits = JSON.parse(localStorage.getItem('bricksync_recent_units') || '[]');
+            } catch(e) {}
 
-            // 1순위: Firestore에서 프로젝트 목록 로드
-            if (typeof BrickSyncCloud !== 'undefined' && BrickSyncCloud.isAvailable()) {
-                try {
-                    const cloudProjects = await BrickSyncCloud.listProjects();
-                    cloudProjects.forEach(p => {
-                        if (!p.blocks || p.blocks.length === 0) return;
-                        const isAi = p.id.startsWith('ai_');
-                        const unit = p.unit || p.id.replace(/^(unit_|ai_)/, '');
-                        // localStorage key와 일치하는 id 생성
-                        const localKey = studentPrefix + (isAi ? '' : 'unit_') + (isAi ? p.id : p.id.replace('unit_', 'unit_'));
-                        projectMap.set(p.id, {
-                            id: localKey,
-                            cloudId: p.id,
-                            name: p.name || '무제 프로젝트',
-                            unit,
-                            type: isAi ? 'ai' : 'lesson',
-                            blocksCount: p.blocks.length,
-                            updatedAt: p.updatedAt?.toMillis ? p.updatedAt.toMillis() : (p.updatedAt || Date.now())
-                        });
-                    });
-                } catch (e) {
-                    console.warn('[Cloud] 프로젝트 목록 실패, localStorage 폴백:', e);
+            // Seed recentUnits from existing localStorage projects if bricksync_recent_units is empty
+            if (recentUnits.length === 0) {
+                const existing = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!key || !(key.includes('_project_unit_') || key.includes('_project_ai_'))) continue;
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key) || '{}');
+                        if (data && data.unit) {
+                            const isAi = key.includes('_project_ai_');
+                            existing.push({ unit: String(data.unit), type: isAi ? 'ai' : 'lesson', time: data.updatedAt || Date.now() });
+                        }
+                    } catch(e) {}
+                }
+                existing.sort((a, b) => a.time - b.time); // Oldest first
+                recentUnits = existing.slice(-3);
+                if (recentUnits.length > 0) {
+                    localStorage.setItem('bricksync_recent_units', JSON.stringify(recentUnits));
                 }
             }
 
-            // 2순위: localStorage 스캔 - 학생 이름 무관하게 모든 _project_ 키 스캔
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (!key || !(key.includes('_project_unit_') || key.includes('_project_ai_'))) continue;
-                try {
-                    const rawData = localStorage.getItem(key);
-                    if (!rawData) continue;
-                    const projectData = JSON.parse(rawData);
-                    if (!projectData || !projectData.blocks || projectData.blocks.length === 0) {
-                        localStorage.removeItem(key); i--; continue;
-                    }
-                    // cloudId 추출
-                    const isAi = key.includes('_project_ai_');
-                    const m = key.match(/_project_(?:ai|unit)_(.+)$/);
-                    const extractedUnit = m ? m[1] : '1';
-                    const cloudId = isAi
-                        ? 'ai_' + (projectData.unit || extractedUnit)
-                        : 'unit_' + (projectData.unit || extractedUnit);
-                    if (!projectMap.has(cloudId)) {
-                        projectMap.set(cloudId, {
-                            id: key,
-                            cloudId,
-                            name: projectData.name || '무제 프로젝트',
-                            unit: projectData.unit || extractedUnit,
-                            type: isAi ? 'ai' : 'lesson',
-                            blocksCount: projectData.blocks.length,
-                            updatedAt: projectData.updatedAt || Date.now()
-                        });
-                    }
-                } catch (e) { console.error('Project load error:', e); }
-            }
+            const unitTitlesKo = {
+                '1': '1. 요리조리 기울여서 탐험보트를 출발시켜요',
+                '2': '2. 바닷속 잠수함으로 바다를 탐험해요',
+                '3': '3. 대관람차 회전하기',
+                '4': '4. 탐험 자동차를 만들어요',
+                '5': '5. 동굴 자동차를 타고 여행해요',
+                '6': '6. 가위, 바위, 보로 여닫는 오두막 지붕',
+                '7': '7. 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네',
+                '8': '8. 몬스터를 보여줘! 경보 알림켜기'
+            };
 
-            const projects = Array.from(projectMap.values()).sort((a, b) => b.updatedAt - a.updatedAt);
-
-            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const unitTitlesEn = {
                 '1': 'Lesson 1: Start the Expedition Boat',
                 '2': 'Lesson 2: Explore Underwater Submarine',
                 '3': 'Lesson 3: Operate Ferris Wheel Safely',
                 '4': 'Lesson 4: Build an Expedition Car',
                 '5': 'Lesson 5: Build a Colorful Light Gate',
-                '6': 'AI Lesson 1: RPS North Pole Racing',
-                '7': 'AI Lesson 2: Monster Alarm Camera',
-                '8': 'AI Lesson 3: Voice-Controlled Magic Swing'
+                '6': 'AI Lesson 1: RPS Cabin Roof Open/Close',
+                '7': 'AI Lesson 2: Voice Control Magic Swing',
+                '8': 'AI Lesson 3: Monster Alarm Camera'
             };
 
             let html = '';
             for (let i = 0; i < 3; i++) {
-                if (i < projects.length) {
-                    const p = projects[i];
-                    const isAi = p.type === 'ai';
+                if (i < recentUnits.length) {
+                    const item = recentUnits[i];
+                    const unit = item.unit;
+                    const isAi = item.type === 'ai' || String(unit) >= '6';
                     const badgeText = currentLang === 'en'
-                        ? (isAi ? `AI Lesson ${p.unit}` : `Lesson ${p.unit}`)
-                        : (isAi ? `AI 단원 ${p.unit}` : `일반 단원 ${p.unit}`);
+                        ? (isAi ? `AI Lesson ${unit}` : `Lesson ${unit}`)
+                        : (isAi ? `AI 단원 ${unit}` : `일반 단원 ${unit}`);
                     const badgeClass = isAi ? 'project-badge ai-badge' : 'project-badge';
-                    const targetUrl = isAi ? `ai_fusion.html?unit=${p.unit}&v=${Date.now()}` : `lesson.html?unit=${p.unit}&v=${Date.now()}`;
-                    const blocksText = currentLang === 'en' ? `Blocks: ${p.blocksCount}` : `블록 수: ${p.blocksCount}개`;
-                    const modifiedText = currentLang === 'en' ? 'Modified' : '최근 수정';
+                    const targetUrl = isAi ? `ai_fusion.html?unit=${unit}&v=${Date.now()}` : `lesson.html?unit=${unit}&v=${Date.now()}`;
                     
-                    let displayName = p.name || '무제 프로젝트';
-                    if (currentLang === 'en') {
-                        if (displayName.includes('학습') || displayName === '무제 프로젝트') {
-                            displayName = unitTitlesEn[p.unit] || (displayName.replace('학습 ', 'Lesson ').replace('무제 프로젝트', 'Untitled Project'));
+                    // Check saved blocks count
+                    let blocksCount = 1;
+                    const studentName = getStudentName();
+                    const localKey = studentName + '_project_' + (isAi ? 'ai_' : 'unit_') + unit;
+                    try {
+                        const raw = localStorage.getItem(localKey);
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            if (parsed.blocks && parsed.blocks.length > 0) blocksCount = parsed.blocks.length;
                         }
-                    }
+                    } catch(e) {}
+
+                    const blocksText = currentLang === 'en' ? `Blocks: ${blocksCount}` : `블록 수: ${blocksCount}개`;
+                    const modifiedText = currentLang === 'en' ? 'Modified' : '최근 수정';
+                    const displayName = (currentLang === 'en' ? unitTitlesEn[unit] : unitTitlesKo[unit]) || `Lesson ${unit}`;
 
                     html += `
-                        <div class="project-card active-project" style="cursor: pointer;" onclick="openProject('${p.unit}','${p.cloudId}',${isAi})">
+                        <div class="project-card active-project" style="cursor: pointer;" onclick="recordUnitVisited('${unit}','${isAi?'ai':'lesson'}'); location.href='${targetUrl}'">
                             <div class="project-card-inner">
                                 <div class="project-card-top">
                                     <span class="${badgeClass}">${badgeText}</span>
-                                    <button class="project-delete-btn" onclick="deleteProject('${p.id}','${p.cloudId}'); event.stopPropagation();">
+                                    <button class="project-delete-btn" onclick="deleteProject('${localKey}','', '${unit}','${isAi?'ai':'lesson'}'); event.stopPropagation();">
                                         <i data-lucide="trash-2"></i>
                                     </button>
                                 </div>
                                 <div class="project-card-name">${escapeHtml(displayName)}</div>
                                 <div class="project-card-bottom">
                                     <div class="project-info-text">${blocksText}<br>${modifiedText}</div>
-                                    <button class="project-play-btn" onclick="event.stopPropagation(); openProject('${p.unit}','${p.cloudId}',${isAi})">
+                                    <button class="project-play-btn" onclick="event.stopPropagation(); recordUnitVisited('${unit}','${isAi?'ai':'lesson'}'); location.href='${targetUrl}'">
                                         <i data-lucide="play" style="width:16px;height:16px;fill:currentColor;"></i>
                                     </button>
                                 </div>
