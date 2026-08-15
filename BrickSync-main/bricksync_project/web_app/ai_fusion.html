@@ -3742,6 +3742,11 @@
         };
 
         async function haltExecution() {
+            window.isBlockExecutionRunning = false;
+            if (window.blockExecutionTimer) clearTimeout(window.blockExecutionTimer);
+            if (typeof lastTriggeredAiGesture !== 'undefined') {
+                lastTriggeredAiGesture = -1;
+            }
             window.bleEngineRunCounter = (window.bleEngineRunCounter || 0) + 1;
             if (window.parent && window.parent.connectionType === 'BLE') {
                 // 부모 프록시의 디바이스 맵에 존재하는 활성 포트만 추출
@@ -3773,6 +3778,7 @@
             } else {
                 window.guiExecutionActive = false;
             }
+            window.isBlockExecutionRunning = true;
             // 실행 가능한 스택 찾기 (방어 로직 탑재)
             const validStacks = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).filter(stack => {
                 const firstBlock = stack.querySelector('.workspace-item');
@@ -4330,7 +4336,17 @@ print("BrickSync Sandbox Run")
                         maxGlobalDelay = currentBleDelay;
                     }
 
-                    const executeBleQueue = async () => {
+                    const totalSequenceDurationMs = currentBleDelay + 1000;
+                if (window.blockExecutionTimer) clearTimeout(window.blockExecutionTimer);
+                window.blockExecutionTimer = setTimeout(() => {
+                    window.isBlockExecutionRunning = false;
+                    if (typeof lastTriggeredAiGesture !== 'undefined') {
+                        lastTriggeredAiGesture = -1;
+                    }
+                    console.log('✅ [Block Engine] Sequence completed. Ready for next gesture trigger.');
+                }, totalSequenceDurationMs);
+
+                const executeBleQueue = async () => {
                         let lastExecutionTime = 0;
                         for (const cmd of bleQueue) {
                             if (window.bleEngineRunCounter !== currentRunId) return; // ?전 ?행 루프 취소
@@ -6487,6 +6503,10 @@ print("BrickSync Sandbox Run")
                         if (candidateAiGesture === detectedGesture) {
                             consecutiveAiFrames++;
                             if (consecutiveAiFrames >= 10 && lastTriggeredAiGesture !== detectedGesture) {
+                                if (window.isBlockExecutionRunning) {
+                                    // 현재 블록 스택 시퀀스(대기, 회전, 정지)가 실행 중일 때는 중복/방해 트리거 차단
+                                    return;
+                                }
                                 lastTriggeredAiGesture = detectedGesture;
                                 console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
                                 runBlocks('event_ai_gesture', detectedGesture);
