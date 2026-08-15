@@ -4343,18 +4343,21 @@ print("BrickSync Sandbox Run")
                     if (typeof lastTriggeredAiGesture !== 'undefined') {
                         lastTriggeredAiGesture = -1;
                     }
-                    console.log('✅ [Block Engine] Sequence completed. Checking for 100% mission modal trigger...');
-                    const progressEl = document.getElementById('m-progress');
-                    const percentEl = document.getElementById('m-percent');
-                    const currentPercent = percentEl ? parseInt(percentEl.textContent) : 0;
-                    if (currentPercent >= 100 || (progressEl && progressEl.dataset.completed === 'true')) {
-                        console.log('🎉 [Mission Complete] Motor rotation finished! Popping up PIN modal & fireworks.');
-                        try {
-                            if (typeof triggerSuccessConfetti === 'function') {
-                                triggerSuccessConfetti();
-                            }
-                        } catch(e) { console.warn('Confetti launch error:', e); }
-                    }
+                    console.log('✅ [Block Engine] Sequence completed! Popping up Mission Success PIN Modal & fireworks.');
+                    try {
+                        // 100% 달성도 갱신 및 폭죽/PIN 모달 즉시 팝업
+                        const progressEl = document.getElementById('m-progress');
+                        const percentEl = document.getElementById('m-percent');
+                        if (progressEl) {
+                            progressEl.style.width = '100%';
+                            progressEl.dataset.completed = 'true';
+                        }
+                        if (percentEl) percentEl.textContent = '100%';
+
+                        if (typeof triggerSuccessConfetti === 'function') {
+                            triggerSuccessConfetti();
+                        }
+                    } catch(e) { console.warn('Confetti launch error:', e); }
                 }, totalSequenceDurationMs);
 
                 const executeBleQueue = async () => {
