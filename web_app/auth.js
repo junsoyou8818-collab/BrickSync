@@ -1,8 +1,8 @@
 /**
- * BrickSync - Firestore Cloud Authentication Engine (v3.6 Self-Healing)
+ * BrickSync - Firestore Cloud Authentication Engine (v3.7 Smart Login)
  * ============================================================
  * Google Firestore Cloud Database 기반 실시간 계정/클래스 연동 시스템
- * 파이어베이스 Auth 키 제한 에러를 내부에서 무소음 가로채어 Firestore DB로 100% 가입 성공 처리
+ * 이메일(student01@gmail.com) 및 아이디(student01) 겸용 간편 로그인 지원
  */
 
 const BrickSyncAuth = (function () {
@@ -23,7 +23,6 @@ const BrickSyncAuth = (function () {
     const LOCAL_CLASSES_KEY = 'bricksync_local_classes';
     const LOCAL_PARENT_CODES_KEY = 'bricksync_local_parent_codes';
 
-    // ── 세션 관리 ──────────────────────────────────────────────────
     function setLocalSession(profile) {
         try {
             const sessionData = {
@@ -75,7 +74,6 @@ const BrickSyncAuth = (function () {
         }
     }
 
-    // ── Firestore 데이터베이스 프로필 연동 ─────────────────────────
     async function getUserProfileFromFirestore(uid) {
         if (!firestore) return null;
         try {
@@ -117,7 +115,6 @@ const BrickSyncAuth = (function () {
         }
     }
 
-    // ── 클래스 & 학부모 코드 검증 ──────────────────────────────────
     async function validateClassCode(classCode) {
         if (!classCode) return null;
         const normalized = classCode.trim().toUpperCase();
@@ -159,8 +156,6 @@ const BrickSyncAuth = (function () {
         return null;
     }
 
-    // ── 공개 인증 API ──────────────────────────────────────────────
-
     async function getCurrentUser() {
         const session = getLocalSession();
         if (session) {
@@ -181,47 +176,64 @@ const BrickSyncAuth = (function () {
         return null;
     }
 
-    async function signIn(email, password) {
-        const cleanEmail = email.trim().toLowerCase();
-
-        // 1. Firebase Auth 시도 (실패시 무소음 예외 처리후 Firestore로 자동 전환)
-        if (firebaseAuth) {
-            try {
-                const cred = await firebaseAuth.signInWithEmailAndPassword(cleanEmail, password);
-                if (cred && cred.user) {
-                    const cloudProfile = await getUserProfileFromFirestore(cred.user.uid);
-                    const profile = cloudProfile || { uid: cred.user.uid, email: cleanEmail, role: 'student', displayName: cred.user.displayName || cleanEmail.split('@')[0] };
-                    setLocalSession(profile);
-                    saveLocalUser(cleanEmail, password, profile);
-                    return { user: cred.user, profile };
-                }
-            } catch (fbErr) {
-                console.warn('[Auth] Firebase Auth 실패, Firestore Cloud DB로 즉시 전환:', fbErr);
-            }
-        }
+    // ── 스마트 로그인 (이메일 및 아이디 겸용) ───────────────────────
+    async function signIn(emailInput, password) {
+        let cleanInput = emailInput.trim().toLowerCase();
+        let candidateEmails = [cleanInput];
         
-        // 2. Firestore Cloud DB에서 사용자 조회
-        const cloudUser = await findUserByEmailFromFirestore(cleanEmail);
-        if (cloudUser) {
-            if (cloudUser.password && cloudUser.password !== password) {
-                const err = new Error('비밀번호가 올바르지 않습니다.');
-                err.code = 'auth/wrong-password';
-                throw err;
+        if (!cleanInput.includes('@')) {
+            candidateEmails.push(cleanInput + '@gmail.com');
+            candidateEmails.push(cleanInput + '@bricksync.com');
+        }
+
+        // 1. Check Firestore Cloud DB for candidate emails or displayName
+        if (firestore) {
+            try {
+                for (const em of candidateEmails) {
+                    const cloudUser = await findUserByEmailFromFirestore(em);
+                    if (cloudUser) {
+                        if (cloudUser.password && cloudUser.password !== password) {
+                            const err = new Error('비밀번호가 올바르지 않습니다.');
+                            err.code = 'auth/wrong-password';
+                            throw err;
+                        }
+                        setLocalSession(cloudUser);
+                        saveLocalUser(em, password, cloudUser);
+                        return { user: { uid: cloudUser.uid || cloudUser.id, email: em, displayName: cloudUser.displayName }, profile: cloudUser };
+                    }
+                }
+                
+                // Check by displayName
+                const snapName = await firestore.collection('users')
+                    .where('displayName', '==', emailInput.trim())
+                    .limit(1)
+                    .get();
+                if (!snapName.empty) {
+                    const cloudUser = snapName.docs[0].data();
+                    if (cloudUser.password && cloudUser.password !== password) {
+                        const err = new Error('비밀번호가 올바르지 않습니다.');
+                        err.code = 'auth/wrong-password';
+                        throw err;
+                    }
+                    setLocalSession(cloudUser);
+                    saveLocalUser(cloudUser.email, password, cloudUser);
+                    return { user: { uid: cloudUser.uid, email: cloudUser.email, displayName: cloudUser.displayName }, profile: cloudUser };
+                }
+            } catch (e) {
+                if (e.code === 'auth/wrong-password') throw e;
             }
-            setLocalSession(cloudUser);
-            saveLocalUser(cleanEmail, password, cloudUser);
-            return { user: { uid: cloudUser.uid || cloudUser.id, email: cleanEmail, displayName: cloudUser.displayName }, profile: cloudUser };
         }
 
-        // 3. 로컬 백업 DB에서 사용자 조회
-        const local = findLocalUser(cleanEmail, password);
-        if (local) {
-            setLocalSession(local.profile);
-            return { user: { uid: local.profile.uid, email: cleanEmail, displayName: local.profile.displayName }, profile: local.profile };
+        // 2. Check local users
+        for (const em of candidateEmails) {
+            const local = findLocalUser(em, password);
+            if (local) {
+                setLocalSession(local.profile);
+                return { user: { uid: local.profile.uid, email: em, displayName: local.profile.displayName }, profile: local.profile };
+            }
         }
 
-        // 4. 존재하지 않는 계정
-        const err = new Error('등록되지 않은 이메일 계정입니다.');
+        const err = new Error('등록되지 않은 계정입니다. 회원가입 후 이용해 주세요.');
         err.code = 'auth/user-not-found';
         throw err;
     }
@@ -229,7 +241,6 @@ const BrickSyncAuth = (function () {
     async function signUpTeacher({ email, password, displayName, schoolName }) {
         const cleanEmail = email.trim().toLowerCase();
 
-        // 1. 중복 이메일 체크
         try {
             const existingCloud = await findUserByEmailFromFirestore(cleanEmail);
             const existingLocal = findLocalUser(cleanEmail);
@@ -242,7 +253,6 @@ const BrickSyncAuth = (function () {
             if (e.code === 'auth/email-already-in-use') throw e;
         }
 
-        // 2. Firebase Auth 시도 (API키 제한 에러 감지시 무소음으로 Firestore Cloud Engine 전환)
         if (firebaseAuth) {
             try {
                 const cred = await firebaseAuth.createUserWithEmailAndPassword(cleanEmail, password);
@@ -262,11 +272,10 @@ const BrickSyncAuth = (function () {
                     return { user: cred.user, profile };
                 }
             } catch (fbErr) {
-                console.warn('[Auth] Firebase Auth 에러 감지 -> Firestore Cloud Engine으로 즉시 가입 처리:', fbErr);
+                console.warn('[Auth] Firebase Auth 에러 감지 -> Firestore Cloud Engine으로 전환:', fbErr);
             }
         }
 
-        // 3. 신규 교사 프로필 생성 (Firestore Cloud DB 저장)
         const uid = 'teacher_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
         const profile = {
             uid,
@@ -287,11 +296,8 @@ const BrickSyncAuth = (function () {
 
     async function signUpStudent({ email, password, displayName, classCode }) {
         const cleanEmail = email.trim().toLowerCase();
-
-        // 1. 클래스 코드 유효성 검증
         const classInfo = await validateClassCode(classCode);
 
-        // 2. 중복 이메일 체크
         try {
             const existingCloud = await findUserByEmailFromFirestore(cleanEmail);
             const existingLocal = findLocalUser(cleanEmail);
@@ -304,7 +310,6 @@ const BrickSyncAuth = (function () {
             if (e.code === 'auth/email-already-in-use') throw e;
         }
 
-        // 3. Firebase Auth 시도 (실패시 Firestore Engine 전환)
         if (firebaseAuth) {
             try {
                 const cred = await firebaseAuth.createUserWithEmailAndPassword(cleanEmail, password);
@@ -326,11 +331,10 @@ const BrickSyncAuth = (function () {
                     return { user: cred.user, profile };
                 }
             } catch (fbErr) {
-                console.warn('[Auth] Firebase Auth 에러 감지 -> Firestore Cloud Engine으로 즉시 가입 처리:', fbErr);
+                console.warn('[Auth] Firebase Auth 에러 감지 -> Firestore Cloud Engine으로 전환:', fbErr);
             }
         }
 
-        // 4. 신규 학생 프로필 생성
         const uid = 'student_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
         const profile = {
             uid,
@@ -362,11 +366,8 @@ const BrickSyncAuth = (function () {
 
     async function signUpParent({ email, password, displayName, parentCode }) {
         const cleanEmail = email.trim().toLowerCase();
-
-        // 1. 학부모 연결 코드 유효성 검증
         const parentInfo = await validateParentCode(parentCode);
 
-        // 2. 중복 이메일 체크
         try {
             const existingCloud = await findUserByEmailFromFirestore(cleanEmail);
             const existingLocal = findLocalUser(cleanEmail);
@@ -379,7 +380,6 @@ const BrickSyncAuth = (function () {
             if (e.code === 'auth/email-already-in-use') throw e;
         }
 
-        // 3. Firebase Auth 시도 (실패시 Firestore Engine 전환)
         if (firebaseAuth) {
             try {
                 const cred = await firebaseAuth.createUserWithEmailAndPassword(cleanEmail, password);
@@ -402,11 +402,10 @@ const BrickSyncAuth = (function () {
                     return { user: cred.user, profile };
                 }
             } catch (fbErr) {
-                console.warn('[Auth] Firebase Auth 에러 감지 -> Firestore Cloud Engine으로 즉시 가입 처리:', fbErr);
+                console.warn('[Auth] Firebase Auth 에러 감지 -> Firestore Cloud Engine으로 전환:', fbErr);
             }
         }
 
-        // 4. 신규 학부모 프로필 생성
         const uid = 'parent_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
         const profile = {
             uid,
