@@ -4901,14 +4901,26 @@ print("BrickSync Sandbox Run")
                             webcamElement = document.getElementById('webcam');
                             aiStatusLabel = document.getElementById('ai-status');
                             currentGestureLabel = document.getElementById('current-gesture');
+                            
+                            // 1. 웹캠 즉시 연결
                             if (typeof setupWebcam === 'function') {
                                 setupWebcam().then(() => {
-                                    if (aiStatusLabel && (aiStatusLabel.innerText.includes('Loading') || aiStatusLabel.innerText.includes('로딩') || aiStatusLabel.innerText.includes('Connecting') || aiStatusLabel.innerText.includes('마운트'))) {
-                                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Ready for model training.' : '<i class="fas fa-check-circle"></i> 웹캠 연결 완료! 모델 학습을 시작할 수 있습니다.';
-                                        aiStatusLabel.style.color = '#0369a1';
-                                        aiStatusLabel.style.backgroundColor = '#e0f2fe';
+                                    if (aiStatusLabel) {
+                                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Ready for model training.' : '<i class="fas fa-check-circle"></i> 웹캠 연결 완료! 하단 버튼으로 학습을 시작하세요.';
+                                        aiStatusLabel.style.color = '#10b981';
+                                        aiStatusLabel.style.backgroundColor = '#d1fae5';
+                                        aiStatusLabel.style.borderColor = '#a7f3d0';
                                     }
-                                }).catch(e => console.warn('[Unit 6 WebCam Instant Init]', e));
+                                }).catch(e => {
+                                    console.warn('[Unit 6 WebCam Instant Init]', e);
+                                    if (aiStatusLabel) {
+                                        aiStatusLabel.innerHTML = `<i class="fas fa-video"></i> ${isEn ? 'Camera Ready. Click below to start stream:' : '카메라 연결 대기 중. 아래 버튼으로 켜세요:'}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 16px; background:#0284c7; color:#fff; border:none; border-radius:18px; font-weight:800; cursor:pointer;">${isEn ? 'Turn On Camera 📷' : '카메라 켜기 📷'}</button>`;
+                                    }
+                                });
+                            }
+                            // 2. AI 엔진 백그라운드 가동
+                            if (typeof initAiEngine === 'function') {
+                                initAiEngine();
                             }
                         } catch(e) {}
                     }, 30);
@@ -5008,14 +5020,24 @@ print("BrickSync Sandbox Run")
                             webcamElement = document.getElementById('webcam');
                             aiStatusLabel = document.getElementById('ai-status');
                             currentGestureLabel = document.getElementById('current-gesture');
+                            
                             if (typeof setupWebcam === 'function') {
                                 setupWebcam().then(() => {
-                                    if (aiStatusLabel && (aiStatusLabel.innerText.includes('Loading') || aiStatusLabel.innerText.includes('로딩') || aiStatusLabel.innerText.includes('Connecting') || aiStatusLabel.innerText.includes('마운트'))) {
-                                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Ready for model training.' : '<i class="fas fa-check-circle"></i> 웹캠 연결 완료! 모델 학습을 시작할 수 있습니다.';
-                                        aiStatusLabel.style.color = '#0369a1';
-                                        aiStatusLabel.style.backgroundColor = '#e0f2fe';
+                                    if (aiStatusLabel) {
+                                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Ready for model training.' : '<i class="fas fa-check-circle"></i> 웹캠 연결 완료! 하단 버튼으로 학습을 시작하세요.';
+                                        aiStatusLabel.style.color = '#10b981';
+                                        aiStatusLabel.style.backgroundColor = '#d1fae5';
+                                        aiStatusLabel.style.borderColor = '#a7f3d0';
                                     }
-                                }).catch(e => console.warn('[Unit 8 WebCam Instant Init]', e));
+                                }).catch(e => {
+                                    console.warn('[Unit 8 WebCam Instant Init]', e);
+                                    if (aiStatusLabel) {
+                                        aiStatusLabel.innerHTML = `<i class="fas fa-video"></i> ${isEn ? 'Camera Ready. Click below to start stream:' : '카메라 연결 대기 중. 아래 버튼으로 켜세요:'}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 16px; background:#0284c7; color:#fff; border:none; border-radius:18px; font-weight:800; cursor:pointer;">${isEn ? 'Turn On Camera 📷' : '카메라 켜기 📷'}</button>`;
+                                    }
+                                });
+                            }
+                            if (typeof initAiEngine === 'function') {
+                                initAiEngine();
                             }
                         } catch(e) {}
                     }, 30);
@@ -5946,6 +5968,9 @@ print("BrickSync Sandbox Run")
 
         // [BUG-03 FIX & WEBCAM ENHANCEMENT] 웹캠 완벽 연결 및 재생 보장
         async function setupWebcam() {
+            webcamElement = document.getElementById('webcam') || webcamElement;
+            aiStatusLabel = document.getElementById('ai-status') || aiStatusLabel;
+            currentGestureLabel = document.getElementById('current-gesture') || currentGestureLabel;
             stopExistingWebcam();
 
             if (webcamElement) {
