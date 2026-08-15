@@ -3788,15 +3788,26 @@
                     // GUI "실행" 버튼 클릭 시에도 AI 제스처 블록이 시작인 스택 실행 허용 (테스트 편의성 제공)
                     return action === 'start' || action === 'event_ai_gesture' || action.startsWith('event_');
                 } else {
-                    // 시스템(AI 락다운 머신)에서 특정 제스처/음성으로 트리거했을 때
+                    // 시스템(AI 비전 / 음성 엔진)에서 특정 제스처/음성으로 트리거했을 때
                     if (action === triggerAction) {
                         const nu = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
-                        if (nu === '7' || action === 'event_ai_gesture') {
-                            return true; // 7단원 음성 명령 수신 시(마이크 또는 텍스트 입력) 즉시 블록 코딩 전체 자동 실행!
-                        }
-                        const paramEl = firstBlock.querySelector('.block-param');
-                        if (paramEl && parseInt(paramEl.getAttribute('data-val')) === triggerVal) {
+                        if (nu === '7') {
                             return true;
+                        }
+                        if (action === 'event_ai_gesture') {
+                            const paramEl = firstBlock.querySelector('.block-param');
+                            let blockVal = 1; // 기본 보(1)
+                            if (paramEl) {
+                                if (paramEl.hasAttribute('data-val')) blockVal = parseInt(paramEl.getAttribute('data-val'));
+                                else {
+                                    const txt = paramEl.innerText.trim();
+                                    if (!isNaN(txt) && txt !== '') blockVal = parseInt(txt);
+                                }
+                            }
+                            // 제스처 매칭 또는 단원 6 기본 실행 허용
+                            if (triggerVal === -1 || triggerVal === blockVal || nu === '6') {
+                                return true;
+                            }
                         }
                     }
                     return false;
@@ -6497,11 +6508,16 @@ print("BrickSync Sandbox Run")
 
                         // 🔒 시소 이펙트 철통 방어 (연속 프레임 교차 검증) 🔒
                         // 사유: 학습 데이터가 적을 때 1~2프레임 단위로 예측이 요동치는(Flicker) 현상 방지. 최소 10프레임 이상 연속 일치해야만 통과.
+                        // 배경(3 또는 None) 감지 시 트리거 락 즉시 해제하여 다음 제스처 반응 100% 즉시 보장
+                        if (detectedGesture === 3) {
+                            lastTriggeredAiGesture = -1;
+                        }
+
                         if (candidateAiGesture === detectedGesture) {
                             consecutiveAiFrames++;
-                            if (consecutiveAiFrames >= 10 && lastTriggeredAiGesture !== detectedGesture) {
+                            // 초고속 3프레임 연속 검증으로 제스처 반응 속도 극대화
+                            if (consecutiveAiFrames >= 3 && lastTriggeredAiGesture !== detectedGesture && detectedGesture !== 3) {
                                 if (window.isBlockExecutionRunning) {
-                                    // 현재 블록 스택 시퀀스가 실행 중일 때는 블록 실행 중복만 스킵하고 AI 비전 감지 루프는 100% 계속 유지
                                     await tf.nextFrame();
                                     continue;
                                 }
@@ -6509,14 +6525,10 @@ print("BrickSync Sandbox Run")
                                 console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
                                 runBlocks('event_ai_gesture', detectedGesture);
 
-                                // 3단원 몬스터 감지(0) 시 UEFN 경보 웹소켓 전송
                                 if (((unit === '3' || unit === '8')) && detectedGesture === 0) {
                                     try {
                                         window.parent.sendWebSocketAction({ action: "MONSTER_ALERT" });
-                                        console.log("포트나이트 연동 신호(MONSTER_ALERT) 전송 완료 [AI 2단원]");
-                                    } catch (e) {
-                                        console.error("Fortnite websocket transmission failed:", e);
-                                    }
+                                    } catch (e) { }
                                 }
                             }
                         } else {
