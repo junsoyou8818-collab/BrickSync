@@ -4883,7 +4883,7 @@ print("BrickSync Sandbox Run")
                     panelContent.innerHTML = `
                         <div style="width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center;">
                             <div id="voice-mic-container" style="width: 100%; aspect-ratio: 4/3; background: #1e293b; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 4px solid #334155; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
-                                <div id="mic-icon-glow" class="mic-idle" style="width: 80px; height: 80px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 36px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); transition: all 0.2s; cursor: pointer;">
+                                <div id="mic-icon-glow" onclick="toggleSpeechRecognition()" class="mic-idle" style="width: 80px; height: 80px; background: #3b82f6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 36px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); transition: all 0.2s; cursor: pointer;">
                                     <i class="fas fa-microphone"></i>
                                 </div>
                                 <div id="voice-waveform-canvas-container" style="width: 80%; height: 40px; display: flex; justify-content: center; align-items: center; gap: 4px;">
@@ -4918,6 +4918,12 @@ print("BrickSync Sandbox Run")
                             </div>
                         </div>
                     `;
+                    setTimeout(() => {
+                        try {
+                            if (typeof initSpeechEngine === 'function') initSpeechEngine();
+                            if (typeof setupTextInputOnly === 'function') setupTextInputOnly();
+                        } catch(e) {}
+                    }, 50);
                 }
             }
             // 🟧 UNIT 8 (Monster Camera)
@@ -5945,14 +5951,40 @@ print("BrickSync Sandbox Run")
         let isSpeechListening = false;
         let speechCooldown = false;
 
-        function toggleSpeechRecognition() {
+                function toggleSpeechRecognition() {
             if (speechCooldown) return;
-            if (!speechRecognition) return;
+            if (!speechRecognition) {
+                initSpeechEngine();
+            }
+            if (!speechRecognition) {
+                console.warn("[Speech] SpeechRecognition API not ready.");
+                return;
+            }
             if (isSpeechListening) {
                 try {
                     speechRecognition.stop();
                 } catch (e) { }
             } else {
+                try {
+                    const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                    speechRecognition.lang = (currentLang === 'en') ? 'en-US' : 'ko-KR';
+                    speechRecognition.start();
+                } catch (e) {
+                    console.error("Speech start error:", e);
+                    try {
+                        speechRecognition.stop();
+                        setTimeout(() => {
+                            try {
+                                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                                speechRecognition.lang = (currentLang === 'en') ? 'en-US' : 'ko-KR';
+                                speechRecognition.start();
+                            } catch(err) {}
+                        }, 200);
+                    } catch(err) {}
+                }
+            }
+        }
+        window.toggleSpeechRecognition = toggleSpeechRecognition; else {
                 try {
                     speechRecognition.start();
                 } catch (e) {
