@@ -424,33 +424,38 @@
     // 2. CSS 스타일 주입 (Glassmorphic Custom UI matching Lego Fortnite)
     // ----------------------------------------------------
     const styles = `
-        .home-btn, a.home-btn {
+                .home-btn, a.home-btn {
             display: inline-flex !important;
             align-items: center !important;
-            gap: 10px !important;
-            padding: 10px 22px !important;
-            border-radius: 24px !important;
-            background: rgba(14, 165, 233, 0.22) !important;
-            border: 2px solid rgba(14, 165, 233, 0.6) !important;
-            backdrop-filter: blur(10px) !important;
-            -webkit-backdrop-filter: blur(10px) !important;
-            color: #0369a1 !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            padding: 7px 20px !important;
+            border-radius: 30px !important;
+            background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+            border: 2px solid #0284c7 !important;
+            color: #0284c7 !important;
             text-decoration: none !important;
-            font-weight: 900 !important;
-            font-size: 1.25rem !important;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-            box-shadow: inset 0 3px 6px rgba(255, 255, 255, 0.5), 0 5px 0 #0284c7, 0 8px 16px rgba(14, 165, 233, 0.2) !important;
+            font-weight: 800 !important;
+            font-size: 0.95rem !important;
+            white-space: nowrap !important;
+            transition: all 0.15s ease !important;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.9), 0 3px 0 #0284c7, 0 5px 12px rgba(2, 132, 199, 0.18) !important;
+            position: relative !important;
             cursor: pointer !important;
         }
-        .home-btn:hover, a.home-btn:hover, [data-i18n="btn_back_home"]:hover {
-            background: rgba(14, 165, 233, 0.35) !important;
-            transform: translateY(-2px) !important;
+        .home-btn i, a.home-btn i {
             color: #0284c7 !important;
-            box-shadow: inset 0 3px 6px rgba(255, 255, 255, 0.6), 0 7px 0 #0284c7, 0 10px 20px rgba(14, 165, 233, 0.3) !important;
+            font-size: 1.05rem !important;
         }
-        .home-btn:active, a.home-btn:active, [data-i18n="btn_back_home"]:active {
-            transform: translateY(4px) !important;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 0 #0284c7, 0 2px 4px rgba(14, 165, 233, 0.1) !important;
+        .home-btn:hover, a.home-btn:hover {
+            background: linear-gradient(180deg, #ffffff 0%, #bae6fd 100%) !important;
+            transform: translateY(-1px) !important;
+            color: #0284c7 !important;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 1), 0 4px 0 #0284c7, 0 7px 14px rgba(2, 132, 199, 0.25) !important;
+        }
+        .home-btn:active, a.home-btn:active {
+            transform: translateY(2px) !important;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 0 #0284c7, 0 2px 4px rgba(2, 132, 199, 0.1) !important;
         }
         .bs-settings-overlay {
             position: fixed;
