@@ -3687,20 +3687,22 @@ print("BrickSync Sandbox Run")
                             break;
                         }
                         case 'motor_cw':
-                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1400)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1150)) \n${indent}sm() \n`;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_RIGHT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 1400;
+                                cumulativeDelayMs += 1150;
                             }
-                            cumulativeDelayMs += 600; // UEFN 엔진 비동기 충돌 회피용 안전 딜레이
+                            localActionsQueue.push({ action: 'STOP_MWHEEL_RIGHT', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += 800; // 관성 및 반대 회전 충돌 방지용 브레이크 휴식 800ms
                             break;
                         case 'motor_ccw':
-                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 975)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1150)) \n${indent}sm() \n`;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_LEFT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 975;
+                                cumulativeDelayMs += 1150;
                             }
-                            cumulativeDelayMs += 600; // UEFN 엔진 비동기 충돌 회피용 안전 딜레이
+                            localActionsQueue.push({ action: 'STOP_MWHEEL_LEFT', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += 800; // 관성 및 반대 회전 충돌 방지용 브레이크 휴식 800ms
                             break;
                         case 'motor_stop':
                             pyCode += `${indent}sm() \n`;
@@ -4731,7 +4733,7 @@ except:
                         const action = block.getAttribute('data-action') || '';
                         
                         let paramVal = 1;
-                        let paramEl = block.querySelector(':scope > .block-param:not(.param-time)') || block.querySelector('.block-param');
+                        let paramEl = block.querySelector('.block-param') || block.querySelector('.param-time') || block.querySelector('.param-badge') || block.querySelector('[data-val]');
                         if (paramEl) {
                             if (paramEl.hasAttribute('data-val')) paramVal = parseFloat(paramEl.getAttribute('data-val'));
                             else {
@@ -4800,12 +4802,22 @@ except:
                         } else if (unit === '2') {
                             if (task_id === 'start') {
                                 isCompleted = presentActions.includes('start');
-                            } else if (task_id === 'flow_wait_5') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && cmd.val === 5);
-                            } else if (task_id === 'motor_cw_3') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && cmd.val === 3);
-                            } else if (task_id === 'motor_ccw_3') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && cmd.val === 3);
+                            } else if (task_id === 'flow_wait_5' || task_id === 'flow_wait') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && (cmd.val === 5 || cmd.val === '5'));
+                            } else if (task_id === 'motor_cw_3' || task_id === 'motor_cw') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && (cmd.val === 3 || cmd.val === '3'));
+                            } else if (task_id === 'motor_ccw_3' || task_id === 'motor_ccw') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && (cmd.val === 3 || cmd.val === '3'));
+                            }
+                        } else if (unit === '3') {
+                            if (task_id === 'start') {
+                                isCompleted = presentActions.includes('start');
+                            } else if (task_id === 'flow_wait_5' || task_id === 'flow_wait') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && (cmd.val === 5 || cmd.val === '5'));
+                            } else if (task_id === 'motor_cw_3' || task_id === 'motor_cw') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && (cmd.val === 3 || cmd.val === '3'));
+                            } else if (task_id === 'motor_ccw_2' || task_id === 'motor_ccw') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && (cmd.val === 2 || cmd.val === '2'));
                             }
                         } else if (unit === '4') {
                             if (task_id === 'start') {
@@ -5340,7 +5352,7 @@ except:
 
                     const blockData = { action: action };
 
-                    const paramEl = block.querySelector(':scope > .block-param:not(.param-time)') || block.querySelector('.color-brick-icon');
+                    const paramEl = block.querySelector(':scope > .block-param') || block.querySelector('.param-time') || block.querySelector('.color-brick-icon');
                     if (paramEl) {
                         blockData.paramVal = paramEl.hasAttribute('data-val') ? paramEl.getAttribute('data-val') : paramEl.innerText.trim();
                         if (paramEl.hasAttribute('data-matrix')) {
@@ -5512,7 +5524,7 @@ except:
                         block.classList.add('workspace-item');
 
                         if (blockData.paramVal !== undefined) {
-                            const paramEl = block.querySelector(':scope > .block-param:not(.param-time)') || block.querySelector('.color-brick-icon');
+                            const paramEl = block.querySelector(':scope > .block-param') || block.querySelector('.param-time') || block.querySelector('.color-brick-icon');
                             if (paramEl) {
                                 paramEl.setAttribute('data-val', blockData.paramVal);
                                 if (paramEl.classList.contains('color-brick-icon')) {

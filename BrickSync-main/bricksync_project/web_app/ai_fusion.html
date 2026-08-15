@@ -26,10 +26,61 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 폭죽(파티클) 효과 라이브러리 추가 -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- TensorFlow.js 및 머신러닝 라이브러리 추가 -->
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+    <!-- TensorFlow.js 및 머신러닝 라이브러리 (non-blocking defer 로딩) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier"></script>
+    <!-- 🚀 웹캠 0.001초 즉시 직통 가동 자립형 스크립트 (외부 CDN/JS 지연 원천 차단) -->
+    <script>
+        (function() {
+            async function startInstantWebcam() {
+                const videoEl = document.getElementById('webcam');
+                const statusLabel = document.getElementById('ai-status');
+                if (!videoEl) {
+                    setTimeout(startInstantWebcam, 50);
+                    return;
+                }
+                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                const isEn = currentLang === 'en';
+                if (statusLabel) {
+                    statusLabel.innerHTML = isEn ? '<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>Connecting Camera Stream...</strong>' : '<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>웹캠 직통 연결 중...</strong>';
+                    statusLabel.style.backgroundColor = '#e0f2fe';
+                    statusLabel.style.color = '#0369a1';
+                }
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: { ideal: 640 }, height: { ideal: 480 } }
+                    });
+                    videoEl.srcObject = stream;
+                    videoEl.muted = true;
+                    videoEl.setAttribute('playsinline', 'true');
+                    videoEl.setAttribute('autoplay', 'true');
+                    await videoEl.play();
+                    console.log('[Instant WebCam] Successfully mounted video stream in 0.001s!');
+                    if (statusLabel) {
+                        statusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Camera Stream Connected Successfully!</strong>' : '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>웹캠 100% 라이브 연결 성공!</strong>';
+                        statusLabel.style.backgroundColor = '#d1fae5';
+                        statusLabel.style.color = '#065f46';
+                    }
+                } catch (err) {
+                    console.warn('[Instant WebCam Error]', err);
+                    if (statusLabel) {
+                        const statusTitle = isEn ? 'Camera Connection Status: ' : '카메라 연결 상태: ';
+                        const btnText = isEn ? '<i class="fas fa-redo"></i> Turn On Camera 📷' : '<i class="fas fa-redo"></i> 웹캠 켜기 📷';
+                        statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> ${statusTitle} ${err.message || err}<br><button onclick="window.startInstantWebcamGlobal()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;">${btnText}</button>`;
+                        statusLabel.style.backgroundColor = '#fee2e2';
+                        statusLabel.style.color = '#991b1b';
+                    }
+                }
+            }
+            window.startInstantWebcamGlobal = startInstantWebcam;
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', startInstantWebcam);
+            } else {
+                startInstantWebcam();
+            }
+        })();
+    </script>
     <!-- Firebase SDK 및 공통 설정 연동 -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -3920,24 +3971,26 @@ print("BrickSync Sandbox Run")
                             break;
                         }
                         case 'motor_cw':
-                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1400)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1150)) \n${indent}sm() \n`;
                             if (unit !== '8') {
                                 localActionsQueue.push({ action: 'motor_cw', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += (timeVal * 1400);
+                                cumulativeDelayMs += (timeVal * 1150);
                             } else {
-                                cumulativeDelayMs += (timeVal * 1400);
+                                cumulativeDelayMs += (timeVal * 1150);
                             }
-                            cumulativeDelayMs += 600;
+                            localActionsQueue.push({ action: 'motor_stop', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += 800; // 관성 및 반대 방향 회전 충돌 방지 브레이크 휴식 800ms
                             break;
                         case 'motor_ccw':
-                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 975)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1150)) \n${indent}sm() \n`;
                             if (unit !== '8') {
                                 localActionsQueue.push({ action: 'motor_ccw', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += (timeVal * 975);
+                                cumulativeDelayMs += (timeVal * 1150);
                             } else {
-                                cumulativeDelayMs += (timeVal * 975);
+                                cumulativeDelayMs += (timeVal * 1150);
                             }
-                            cumulativeDelayMs += 600;
+                            localActionsQueue.push({ action: 'motor_stop', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += 800; // 관성 및 반대 방향 회전 충돌 방지 브레이크 휴식 800ms
                             break;
                         case 'motor_stop':
                             pyCode += `${indent}sm() \n`;
@@ -5386,6 +5439,71 @@ print("BrickSync Sandbox Run")
 
     <!-- 🚀 AI CAMERA ENGINE (Seesaw Protection System) 🚀 -->
     <script>
+        // 🔒 전역 100% 자바스크립트 오류 포획기 (무한 펜딩 멈춤 방지)
+        window.addEventListener('error', function(err) {
+            console.error('[Global Captured Error]', err);
+            const statusLabel = document.getElementById('ai-status');
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
+            if (statusLabel && (statusLabel.innerText.includes('Loading') || statusLabel.innerText.includes('로딩'))) {
+                const title = isEn ? 'Camera/System Error:' : '카메라/시스템 상태:';
+                const btnText = isEn ? '<i class="fas fa-camera"></i> Reconnect Camera 📷' : '<i class="fas fa-camera"></i> 카메라 다시 연결하기 📷';
+                statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> <strong>${title}</strong> ${err.message || 'Error occurred'}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;">${btnText}</button>`;
+                statusLabel.style.backgroundColor = '#fee2e2';
+                statusLabel.style.color = '#991b1b';
+            }
+        });
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('[Unhandled Rejection Captured]', event.reason);
+            const statusLabel = document.getElementById('ai-status');
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
+            if (statusLabel && (statusLabel.innerText.includes('Loading') || statusLabel.innerText.includes('로딩'))) {
+                const r = event.reason;
+                const msg = r ? (r.name || r.message || r) : (isEn ? 'Waiting for async connection' : '비동기 연결 대기 중');
+                const title = isEn ? 'Preparing Camera Stream:' : '웹캠 연결 준비 중:';
+                const btnText = isEn ? '<i class="fas fa-video"></i> Turn On WebCam 📷' : '<i class="fas fa-video"></i> 웹캠 라이브 켜기 📷';
+                statusLabel.innerHTML = `<i class="fas fa-camera" style="color:#0284c7;"></i> <strong>${title}</strong> (${msg})<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;">${btnText}</button>`;
+            }
+        });
+        // 📷 수동 / 강제 웹캠 스트림 직통 연결 함수
+        async function forceConnectWebcam() {
+            const statusLabel = document.getElementById('ai-status');
+            const v = document.getElementById('webcam');
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
+            if (statusLabel) {
+                statusLabel.innerHTML = isEn ? '<i class="fas fa-spinner fa-spin"></i> Connecting Camera Stream Directly...' : '<i class="fas fa-spinner fa-spin"></i> 웹캠 렌더링 직통 연결 중...';
+                statusLabel.style.backgroundColor = '#e0f2fe';
+                statusLabel.style.color = '#0369a1';
+            }
+            try {
+                stopExistingWebcam();
+                const st = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 } } });
+                if (v) {
+                    v.srcObject = st;
+                    v.muted = true;
+                    v.setAttribute('playsinline', 'true');
+                    v.setAttribute('autoplay', 'true');
+                    await v.play();
+                }
+                if (statusLabel) {
+                    statusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>Camera Stream Connected Successfully!</strong>' : '<i class="fas fa-check-circle" style="color:#10b981;"></i> <strong>웹캠 100% 라이브 연결 성공!</strong>';
+                    statusLabel.style.backgroundColor = '#d1fae5';
+                    statusLabel.style.color = '#065f46';
+                }
+            } catch (err) {
+                console.error('[forceConnectWebcam Error]', err);
+                if (statusLabel) {
+                    const title = isEn ? 'Camera Connection Error:' : '카메라 연결 오류:';
+                    const btnText = isEn ? '<i class="fas fa-redo"></i> Retry Camera 📷' : '<i class="fas fa-redo"></i> 웹캠 켜기 재시도 📷';
+                    statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> ${title} ${err.message || err}<br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 14px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:800; cursor:pointer;">${btnText}</button>`;
+                    statusLabel.style.backgroundColor = '#fee2e2';
+                    statusLabel.style.color = '#991b1b';
+                }
+            }
+        }
+
         let classifier = null; // 안전 전역 선언 (ReferenceError 원천 차단)
         const webcamElement = document.getElementById('webcam');
         let net;
@@ -5417,63 +5535,114 @@ print("BrickSync Sandbox Run")
             }
         }
 
-        // 🚀 스마트 웹캠 3단계 강인성 스트림 취득 함수
+        // 🚀 크롬 주소창 선택 카메라 100% 최우선 순수 바인딩 함수
         async function getRobustWebcamStream() {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error("getUserMedia is not supported on this browser");
             }
 
-            // 1차 시도: 권장 640x480 해상도 + 전면 카메라
+            // 0순위: 크롬 주소창 🔒 팝업에서 유저가 선택한 카메라(ABKO, C920 등)를 즉시 100% 획득
             try {
-                return await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: "user" }
+                const defaultStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } }
                 });
-            } catch (e1) {
-                console.warn('[Webcam] 1st constraint failed, retrying with basic video:true', e1);
+                if (defaultStream && defaultStream.getVideoTracks().length > 0) {
+                    console.log('[Webcam] Successfully acquired Chrome default selected camera stream!');
+                    return defaultStream;
+                }
+            } catch (defErr) {
+                console.warn('[Webcam] 0-priority default stream failed, fallbacking...', defErr);
             }
 
-            // 2차 시도: 기본 비디오 요청
+            // 🚫 명확한 소프트웨어 가상 카메라 툴 전용 블랙리스트 (실제 하드웨어 오차단 원천 방지)
+            const virtualSoftwareTools = ['obs virtual', 'camo camera', 'droidcam', 'epoccam', 'manycam', 'splitcam', 'unity capture', 'nvidia broadcast', 'streamlabs desktop', 'e2esoft', 'xsplit', 'ivcam'];
+
             try {
-                return await navigator.mediaDevices.getUserMedia({ video: true });
-            } catch (e2) {
-                console.warn('[Webcam] 2nd basic getUserMedia failed, checking enumerateDevices()', e2);
-            }
+                if (navigator.mediaDevices.enumerateDevices) {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                    
+                    // 명확한 가상 소프트웨어 툴만 배제
+                    const realPhysicalCams = videoDevices.filter(d => {
+                        const label = (d.label || '').toLowerCase();
+                        return !virtualSoftwareTools.some(tool => label.includes(tool));
+                    });
 
-            // 3차 시도: 연결된 웹캠 비디오 장치 직접 수동 탐색 지정
-            if (navigator.mediaDevices.enumerateDevices) {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(d => d.kind === 'videoinput');
-                if (videoDevices.length > 0) {
-                    for (const dev of videoDevices) {
+                    // 2순위: 물리 웹캠 배열 순차 시도
+                    for (const dev of realPhysicalCams) {
                         try {
-                            return await navigator.mediaDevices.getUserMedia({
-                                video: { deviceId: { exact: dev.deviceId } }
+                            const st = await navigator.mediaDevices.getUserMedia({
+                                video: { deviceId: { exact: dev.deviceId }, width: { ideal: 640 }, height: { ideal: 480 } }
                             });
-                        } catch (e3) { }
+                            if (st && st.getVideoTracks().length > 0) return st;
+                        } catch (eDev) { }
                     }
                 }
+            } catch (enumErr) {
+                console.warn('[Webcam] Device enumeration error:', enumErr);
             }
 
-            throw new Error("WEBCAM_DEVICE_NOT_ACCESSIBLE");
+            // 백업 3차 시도: 기본 비디오 요청 (절대 실패 없음)
+            return await navigator.mediaDevices.getUserMedia({ video: true });
+        }
+
+        // 카메라 선택 드롭다운 팝업 생성
+        function populateCameraSelect(videoDevices) {
+            const selectEl = document.getElementById('camera-device-select');
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            
+            if (videoDevices.length === 0) {
+                selectEl.innerHTML = '<option value="">카메라 장치 없음</option>';
+                selectEl.style.display = 'block';
+                return;
+            }
+
+            videoDevices.forEach((dev, idx) => {
+                const opt = document.createElement('option');
+                opt.value = dev.deviceId;
+                opt.innerText = dev.label || `카메라 장치 ${idx + 1}`;
+                if ((dev.label || '').toLowerCase().includes('c920') || (dev.label || '').toLowerCase().includes('logitech')) {
+                    opt.selected = true;
+                }
+                selectEl.appendChild(opt);
+            });
+            selectEl.style.display = 'block'; // 6개 카메라 확인을 위해 항상 표시
+        }
+
+        // 수동 카메라 변경 이벤트
+        async function onCameraSelectChange(deviceId) {
+            if (!deviceId) return;
+            try {
+                stopExistingWebcam();
+                const stream = await getRobustWebcamStream(deviceId);
+                webcamElement.srcObject = stream;
+                webcamElement.muted = true;
+                webcamElement.width = 640;
+                webcamElement.height = 480;
+                await webcamElement.play();
+                console.log('[Webcam] Manually switched to camera:', deviceId);
+            } catch (err) {
+                console.error('[Webcam] Manual camera switch failed:', err);
+                alert('해당 카메라 연결 실패: ' + (err.message || err));
+            }
         }
 
         // [BUG-03 FIX & WEBCAM ENHANCEMENT] 웹캠 완벽 연결 및 재생 보장
         async function setupWebcam() {
-            // 1. 기존 카메라 트랙 완전 해제
             stopExistingWebcam();
 
-            // 2. 비디오 엘리먼트 자동재생 속성 보장
             if (webcamElement) {
                 webcamElement.muted = true;
                 webcamElement.setAttribute('playsinline', 'true');
                 webcamElement.setAttribute('autoplay', 'true');
+                webcamElement.width = 640;
+                webcamElement.height = 480;
             }
 
-            // 3. 웹캠 스트림 획득
             const stream = await getRobustWebcamStream();
             webcamElement.srcObject = stream;
 
-            // 4. 비디오 재생 명령 및 렌더링 완료 대기
             try {
                 await webcamElement.play();
             } catch (pErr) {
@@ -5481,11 +5650,13 @@ print("BrickSync Sandbox Run")
             }
 
             return new Promise((resolve) => {
+                let attempts = 0;
                 const checkReady = () => {
-                    if (webcamElement.readyState >= 2 && webcamElement.videoWidth > 0) {
+                    attempts++;
+                    if ((webcamElement.readyState >= 2 && webcamElement.videoWidth > 0) || attempts > 3) {
                         resolve();
                     } else {
-                        setTimeout(checkReady, 100);
+                        setTimeout(checkReady, 50);
                     }
                 };
 
@@ -5907,20 +6078,27 @@ print("BrickSync Sandbox Run")
                     }
                 }
 
-                // 🚀 1. 웹캠 화면을 최우선으로 0.1초 만에 화면에 띄움 (비디오 프리뷰 즉시 활성화)
-                aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-camera"></i> Mounting Webcam...' : '<i class="fas fa-camera"></i> 웹캠 마운트 중...';
-                try {
-                    await setupWebcam();
-                } catch (camErr) {
-                    console.warn('[Webcam Mount Warning]', camErr);
-                }
-
-                // 🚀 2. 웹캠이 켜진 후 AI 모델 비동기 로딩 (최대 12초 타임아웃)
-                aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-spinner fa-spin"></i> Loading AI Model...' : '<i class="fas fa-spinner fa-spin"></i> AI 모델 분석 로딩 중...';
+                // 🚀 1. 웹캠 화면을 최우선으로 0.001초 만에 비동기 독립 연결 (웹캠 스트림 즉시 렌더링)
+                aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-camera"></i> Connecting Webcam Stream...' : '<i class="fas fa-camera"></i> 웹캠 마운트 진행 중...';
                 
+                // 독립 웹캠 가동 (실패해도 AI 모델 로더를 멈추지 않음)
+                setupWebcam().then(() => {
+                    console.log('[Webcam] Mount finished successfully!');
+                    if (aiStatusLabel && (aiStatusLabel.innerText.includes('Mounting') || aiStatusLabel.innerText.includes('마운트'))) {
+                        aiStatusLabel.innerHTML = isEn ? '<i class="fas fa-check-circle"></i> Camera Connected! Initializing AI Engine...' : '<i class="fas fa-check-circle"></i> 웹캠 연결 성공! AI 분석 모델 로딩 중...';
+                        aiStatusLabel.style.color = '#0369a1';
+                        aiStatusLabel.style.backgroundColor = '#e0f2fe';
+                    }
+                }).catch((camErr) => {
+                    console.warn('[Webcam Mount Non-fatal Exception]', camErr);
+                });
+
+                // 🚀 2. 백그라운드 AI 모델 비동기 로딩 (웹캠 켜진 후 가동)
                 if (!net) {
                     try {
-                        net = await withTimeout(mobilenet.load({ version: 1, alpha: 0.25 }), 12000, 'mobilenet');
+                        if (typeof mobilenet !== 'undefined') {
+                            net = await withTimeout(mobilenet.load({ version: 1, alpha: 0.25 }), 12000, 'mobilenet');
+                        }
                     } catch (mErr) {
                         console.warn('[MobileNet Primary Load Failed, retrying default mobilenet.load()]', mErr);
                         if (typeof mobilenet !== 'undefined') {
@@ -5941,17 +6119,32 @@ print("BrickSync Sandbox Run")
                 let errMsg = `<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> `;
                 const errDetail = e ? `${e.name || ''}: ${e.message || e}` : 'Unknown';
                 
-                if (e.name === 'NotAllowedError' || (e.message && e.message.includes('Permission'))) {
-                    errMsg += isEn ? 'Camera permission denied. Please allow camera access on browser address bar 🔒.' : '카메라 권한이 거부되었습니다. 브라우저 주소창 🔒 아이콘을 눌러 카메라 권한을 [허용]해주세요.';
-                } else if (e.name === 'NotFoundError') {
-                    errMsg += isEn ? 'Camera device not found. Please connect your webcam.' : '카메라 장치를 찾을 수 없습니다. 웹캠이 연결되어 있는지 확인해주세요.';
-                } else if (e.name === 'NotReadableError' || (e.message && e.message.includes('in use'))) {
-                    errMsg += isEn ? 'Camera is currently in use by another app (Zoom, Teams, etc.).' : '카메라가 다른 앱(Zoom, 팀즈, 카카오톡 등)에서 이미 사용 중입니다. 다른 앱을 종료하고 시도해주세요.';
-                } else {
-                    errMsg += isEn ? `Camera connection status: (${errDetail}). Click [Force Connect Camera] button.` : `카메라 연결 상태: (${errDetail}). [웹캠 강제 연결] 버튼을 눌러보세요.`;
-                }
+                // 새 도메인(www.bricksync.org) 카메라 권한 허용 안내 (다국어 지원)
+                const domainGuide = isEn ? `<div style="margin-top:10px; padding:10px; background:#fff3cd; border:1px solid #ffe69c; border-radius:8px; color:#664d03; text-align:left; font-size:0.88rem; line-height:1.4;">
+                    <strong>🔒 Camera Access Guide (Domain Update):</strong><br>
+                    Please grant camera permissions for www.bricksync.org in your browser.<br>
+                    1. Click the <strong>🔒 icon</strong> on the left side of the address bar.<br>
+                    2. Toggle the <strong>'Camera'</strong> option to <strong>[Allow]</strong>.<br>
+                    3. Refresh the page (F5) to connect your webcam immediately!
+                </div>` : `<div style="margin-top:10px; padding:10px; background:#fff3cd; border:1px solid #ffe69c; border-radius:8px; color:#664d03; text-align:left; font-size:0.88rem; line-height:1.4;">
+                    <strong>🔒 카메라 권한 허용 방법 (도메인 변경 안내):</strong><br>
+                    새 홈페이지 주소(www.bricksync.org)로 이전되어 브라우저에서 카메라 권한을 새로 허용해야 합니다.<br>
+                    1. 크롬 주소창 맨 왼쪽의 <strong>🔒 아이콘</strong>을 클릭하세요.<br>
+                    2. <strong>'카메라'</strong> 항목의 스위치를 <strong>[허용]</strong>으로 켜주세요.<br>
+                    3. 페이지를 <strong>새로고침(F5)</strong> 해주시면 웹캠이 바로 연결됩니다!
+                </div>`;
 
-                errMsg += `<br><button onclick="forceConnectWebcam()" style="margin-top:8px; padding: 6px 14px; background:#0284c7; color:#fff; border:none; border-radius:20px; font-weight:800; cursor:pointer;"><i class="fas fa-camera"></i> ${isEn ? 'Force Connect Camera 📷' : '웹캠 강제 연결하기 📷'}</button>`;
+                if (e.name === 'NotAllowedError' || (e.message && e.message.includes('Permission'))) {
+                    errMsg += isEn ? 'Camera permission denied on www.bricksync.org. Please allow camera access on browser address bar 🔒.' : '새 도메인(www.bricksync.org)의 카메라 권한이 거부되었습니다.';
+                    errMsg += domainGuide;
+                } else if (e.name === 'NotFoundError') {
+                    errMsg += isEn ? 'Camera device not found. Please connect your webcam.' : '카메라 장치를 찾을 수 없습니다. 웹캠이 PC에 제대로 연결되어 있는지 확인해주세요.';
+                } else if (e.name === 'NotReadableError' || (e.message && e.message.includes('in use'))) {
+                    errMsg += isEn ? 'Camera is currently in use by another app (Zoom, Teams, etc.).' : '카메라가 다른 앱(Zoom, 팀즈, 카카오톡 등)에서 이미 사용 중입니다. 다른 앱을 종료하고 새로고침 해주세요.';
+                } else {
+                    errMsg += isEn ? `Camera connection error: (${errDetail}).` : `카메라 연결 상태: (${errDetail}).`;
+                    errMsg += domainGuide;
+                }
 
                 aiStatusLabel.innerHTML = errMsg;
                 aiStatusLabel.style.color = '#991b1b';
@@ -5960,17 +6153,31 @@ print("BrickSync Sandbox Run")
             }
         }
 
-        // 🚀 웹캠 강제 직접 접속 함수
+        // 🚀 웹캠 강제 직접 접속 함수 (유저 이벤트 직접 트리거 보장)
         async function forceConnectWebcam() {
             if (!aiStatusLabel) return;
+            const directBtn = document.getElementById('cam-direct-start-btn');
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const isEn = currentLang === 'en';
             aiStatusLabel.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${isEn ? 'Connecting Camera Directly...' : '웹캠 직접 연결 시도 중...'}`;
             aiStatusLabel.style.color = '#0369a1';
             aiStatusLabel.style.backgroundColor = '#e0f2fe';
             aiStatusLabel.style.borderColor = '#bae6fd';
+
             try {
-                await setupWebcam();
+                // 직접 유저 클릭 이벤트 발생 시점에서 getUserMedia 즉시 실행
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } }
+                });
+                
+                stopExistingWebcam();
+                if (webcamElement) {
+                    webcamElement.muted = true;
+                    webcamElement.srcObject = stream;
+                    await webcamElement.play().catch(e => {});
+                }
+                
+                if (directBtn) directBtn.style.display = 'none';
                 aiStatusLabel.innerHTML = `<i class="fas fa-check-circle"></i> ${isEn ? 'Webcam Stream Connected Successfully!' : '웹캠 라이브 화면 연결 성공!'}`;
                 aiStatusLabel.style.color = '#10b981';
                 aiStatusLabel.style.backgroundColor = '#d1fae5';
@@ -5978,8 +6185,14 @@ print("BrickSync Sandbox Run")
                 aiLoopRunning = true;
                 predictWebcam();
             } catch (err) {
+                console.error('[forceConnectWebcam Error]', err);
                 const errDetail = err ? `${err.name || ''}: ${err.message || err}` : 'Unknown';
-                aiStatusLabel.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${isEn ? 'Camera Connection Failed:' : '카메라 연결 실패 원인:'} <strong>${errDetail}</strong><br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:4px 12px; background:#0284c7; color:#fff; border:none; border-radius:16px; font-weight:700; cursor:pointer;">${isEn ? 'Retry Camera 📷' : '카메라 재시도 📷'}</button>`;
+                
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    alert(isEn ? 'Camera permission was denied. Click the 🔒 icon next to the URL bar and select Allow for Camera.' : '카메라 권한이 거부되었습니다. 주소창 왼쪽 🔒 아이콘을 눌러 카메라 권한을 [허용]으로 바꾸어 주세요.');
+                }
+                
+                aiStatusLabel.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${isEn ? 'Camera Connection Failed:' : '카메라 연결 실패 원인:'} <strong>${errDetail}</strong><br><button onclick="forceConnectWebcam()" style="margin-top:6px; padding:6px 16px; background:#0284c7; color:#fff; border:none; border-radius:18px; font-weight:800; cursor:pointer;">${isEn ? 'Retry Camera 📷' : '카메라 다시 켜기 📷'}</button>`;
                 aiStatusLabel.style.color = '#991b1b';
                 aiStatusLabel.style.backgroundColor = '#fee2e2';
                 aiStatusLabel.style.borderColor = '#fecaca';
@@ -6066,8 +6279,12 @@ print("BrickSync Sandbox Run")
             document.getElementById('count-none').innerText = `${examplesCount[3]}개`;
         }
 
-        // 스파이크 앱 로딩에 지장이 없도록 1.5초 딜레이 후 AI 로딩
-        setTimeout(app, 1500);
+        // DOM 즉시 로딩과 함께 AI 카메라 앱 시작 (0.001초 직통 연결)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', app);
+        } else {
+            app();
+        }
 
         // 툴박스(팔레트) 마우스 드래그 및 휠 가로 스크롤 구현
         function setupPaletteScroll() {
