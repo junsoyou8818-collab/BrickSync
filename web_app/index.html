@@ -1129,13 +1129,13 @@
                 }
             } catch(e) {}
 
-            // 이름 표시 - [역할] [이름] (예: Student student01 / 학생 student01)
+            // 이름 표시 - [역할 | 이름] (예: Student | student01)
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const nameEl = document.getElementById('display-student-name');
             if (nameEl) {
                 const rolePrefix = currentLang === 'en'
-                    ? (role === 'teacher' ? 'Teacher ' : role === 'parent' ? 'Parent ' : 'Student ')
-                    : (role === 'teacher' ? '교사 ' : role === 'parent' ? '학부모 ' : '학생 ');
+                    ? (role === 'teacher' ? 'Teacher | ' : role === 'parent' ? 'Parent | ' : 'Student | ')
+                    : (role === 'teacher' ? '교사 | ' : role === 'parent' ? '학부모 | ' : 'Student | ');
                 const cleanName = displayName.replace('Guest_익명', 'Guest_Anonymous').replace('익명', 'Anonymous');
                 nameEl.textContent = rolePrefix + cleanName;
             }
@@ -1471,10 +1471,10 @@
                     }
                     const cleanName = rawName.replace('Guest_익명', 'Guest_Anonymous').replace('익명', 'Anonymous');
                     if (lang === 'en') {
-                        const rolePrefix = role === 'teacher' ? 'Teacher ' : role === 'parent' ? 'Parent ' : 'Student ';
+                        const rolePrefix = role === 'teacher' ? 'Teacher | ' : role === 'parent' ? 'Parent | ' : 'Student | ';
                         nameDisp.innerText = rolePrefix + cleanName;
                     } else {
-                        const rolePrefix = role === 'teacher' ? '교사 ' : role === 'parent' ? '학부모 ' : '학생 ';
+                        const rolePrefix = role === 'teacher' ? '교사 | ' : role === 'parent' ? '학부모 | ' : 'Student | ';
                         nameDisp.innerText = rolePrefix + cleanName;
                     }
                 }

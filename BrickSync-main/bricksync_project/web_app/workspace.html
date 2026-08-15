@@ -532,9 +532,13 @@ while True:
                 } catch(e) {}
             }
 
-            // 이름 표시
+            // 이름 표시 (예: Student | student01)
             const nameEl = document.getElementById('display-student-name');
-            if (nameEl) nameEl.textContent = displayName + ' ' + (role === 'teacher' ? '교사' : role === 'parent' ? '학부모' : '학생');
+            if (nameEl) {
+                const rolePrefix = (role === 'teacher' ? 'Teacher | ' : role === 'parent' ? 'Parent | ' : 'Student | ');
+                const cleanName = displayName.replace('Guest_익명', 'Guest_Anonymous').replace('익명', 'Anonymous');
+                nameEl.textContent = rolePrefix + cleanName;
+            }
 
             // 역할별 대시보드 메뉴 표시
             const dashItem = document.getElementById('nav-dashboard-item');
@@ -577,20 +581,19 @@ while True:
 
         function updateStudentGreeting(lang) {
             try {
-                const sessionDataStr = localStorage.getItem('bricksync_student_session');
+                const sessionDataStr = localStorage.getItem('bricksync_user_session') || localStorage.getItem('bricksync_student_session');
                 const nameDisp = document.getElementById('display-student-name');
                 if (nameDisp) {
-                    let rawName = 'Guest_익명';
+                    let rawName = 'student01';
+                    let role = 'student';
                     if (sessionDataStr) {
                         const sessionData = JSON.parse(sessionDataStr);
-                        rawName = sessionData.name || 'Guest_익명';
+                        rawName = sessionData.displayName || sessionData.name || sessionData.email || 'student01';
+                        role = sessionData.role || 'student';
                     }
-                    if (lang === 'en') {
-                        const cleanName = rawName.replace('Guest_익명', 'Guest_Anonymous').replace('익명', 'Anonymous');
-                        nameDisp.innerText = 'Student ' + cleanName;
-                    } else {
-                        nameDisp.innerText = rawName + ' 학생';
-                    }
+                    const cleanName = rawName.replace('Guest_익명', 'Guest_Anonymous').replace('익명', 'Anonymous');
+                    const rolePrefix = (role === 'teacher' ? 'Teacher | ' : role === 'parent' ? 'Parent | ' : 'Student | ');
+                    nameDisp.innerText = rolePrefix + cleanName;
                 }
             } catch(e) {}
         }
