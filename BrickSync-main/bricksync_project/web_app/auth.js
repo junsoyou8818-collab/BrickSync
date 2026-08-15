@@ -372,6 +372,16 @@ const BrickSyncAuth = (function () {
 
     async function signUpParent({ email, password, displayName, parentCode }) {
         const cleanEmail = email.trim().toLowerCase();
+
+        // Stale local cache auto-purge
+        try {
+            const users = JSON.parse(localStorage.getItem(LOCAL_USERS_KEY) || '{}');
+            if (users[cleanEmail]) {
+                delete users[cleanEmail];
+                localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
+            }
+        } catch (e) {}
+
         const parentInfo = await validateParentCode(parentCode);
 
         try {
