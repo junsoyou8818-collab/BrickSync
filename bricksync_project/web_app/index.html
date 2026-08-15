@@ -2,13 +2,6 @@
 <html lang="ko">
 
 <head>
-    <!-- 최상위 윈도우 자동 래핑 리다이렉트 스크립트 -->
-    <script>
-        if (window === window.parent) {
-            // 첫 방문 시 항상 인트로 페이지로 이동
-            window.location.href = 'intro.html';
-        }
-    </script>
     <!-- Firebase SDK (Auth + Firestore + Realtime DB) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <!-- firebase-auth-compat disabled for Firestore Cloud Auth Engine -->
@@ -17,32 +10,19 @@
     <script src="firebase_config.js"></script>
     <script src="auth.js"></script>
     <script>
-        // [v2.0] Firebase Auth 우선 세션 체크 + localStorage 레거시 호환
-        (function () {
-            function checkLegacySession() {
-                try {
-                    const s = localStorage.getItem('bricksync_student_session');
-                    if (!s) return false;
-                    const d = JSON.parse(s);
-                    if (Date.now() >= d.expires) { localStorage.removeItem('bricksync_student_session'); return false; }
-                    return true;
-                } catch (e) { return false; }
-            }
-
-            // Firebase Auth가 로드된 경우 onAuthStateChanged로 체크
-            if (typeof firebaseAuth !== 'undefined' && firebaseAuth) {
-                firebaseAuth.onAuthStateChanged((user) => {
-                    if (!user && !checkLegacySession()) {
-                        window.location.href = 'login.html';
-                    }
-                });
-            } else {
-                // Firebase 미로드 시 레거시 세션으로 폴백
-                if (!checkLegacySession()) {
+        // 로그인 세션 체킹 (세션이 없는 경우 로그인 화면으로 이동)
+        (async function () {
+            try {
+                const user = await BrickSyncAuth.getCurrentUser();
+                const session = localStorage.getItem('bricksync_user_session') || localStorage.getItem('bricksync_student_session');
+                if (!user && !session) {
                     window.location.href = 'login.html';
-                    return;
                 }
+            } catch (e) {
+                console.warn('[Index] 세션 체크 경고:', e);
             }
+        })();
+    </script>
 
             // 타 탭 로그아웃 동기화
             window.addEventListener('storage', (e) => {
