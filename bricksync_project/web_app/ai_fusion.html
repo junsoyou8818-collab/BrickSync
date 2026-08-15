@@ -6085,7 +6085,7 @@ print("BrickSync Sandbox Run")
                 const panelContent = document.getElementById('ai-left-panel-content') || (document.getElementById('webcam') ? document.getElementById('webcam').parentElement.parentElement : null);
                 const titleEl = document.getElementById('ai-panel-title-text') || document.querySelector('[data-i18n="lbl_ai_vision_title"]');
                 if (titleEl) {
-                    titleEl.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 명령 인식';
+                    titleEl.setAttribute('data-i18n', 'lbl_ai_voice_title'); titleEl.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 인식';
                 }
 
                 if (panelContent) {
