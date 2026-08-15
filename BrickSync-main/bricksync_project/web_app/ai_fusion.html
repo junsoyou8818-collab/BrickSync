@@ -4931,10 +4931,18 @@ print("BrickSync Sandbox Run")
                             </div>
 
                             <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '🗣️ Quick Voice Presets' : '🗣️ 빠른 음성 명령 실행'}</div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <button onclick="executeVoiceCommandDirect('앞으로 두 바퀴')" style="background:#8b5cf6; color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer;"><i class="fas fa-comment-dots"></i> ${isEn ? '"Turn 2 Times"' : '"앞으로 2바퀴"'}</button>
+                                    <button onclick="executeVoiceCommandDirect('반시계 2회')" style="background:#ec4899; color:white; border:none; padding:8px 12px; border-radius:8px; font-weight:700; font-size:0.85rem; cursor:pointer;"><i class="fas fa-sync-alt"></i> ${isEn ? '"Rotate CCW"' : '"반시계 2회"'}</button>
+                                </div>
+                            </div>
+
+                            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; background: #f1f5f9; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
                                 <div style="font-size: 0.9rem; font-weight: 800; color: #64748b;">${isEn ? '⌨️ Text Command Input (Mic Backup)' : '⌨️ 텍스트 명령 입력 (마이크 백업용)'}</div>
                                 <div style="display: flex; gap: 8px; width: 100%;">
                                     <input type="text" id="voice-text-input" placeholder="${isEn ? 'e.g. Turn 2 times forward' : '예: 앞으로 2바퀴 돌아'}" style="flex: 1; padding: 10px; border-radius: 8px; border: 2px solid #cbd5e1; outline: none; font-weight: 600; font-family: inherit;" />
-                                    <button id="btn-send-voice-text" style="background: #3b82f6; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.1s;">${isEn ? 'Submit' : '입력'}</button>
+                                    <button id="btn-send-voice-text" onclick="submitVoiceTextInput()" style="background: #3b82f6; color: white; border: none; padding: 0 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.1s;">${isEn ? 'Submit' : '입력'}</button>
                                 </div>
                             </div>
 
@@ -5975,6 +5983,144 @@ print("BrickSync Sandbox Run")
         let isSpeechListening = false;
         let speechCooldown = false;
 
+        let audioContext = null;
+        let audioAnalyser = null;
+        let audioStreamSource = null;
+        let audioAnimFrame = null;
+
+        function startRealtimeAudioVisualizer(stream) {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                audioAnalyser = audioContext.createAnalyser();
+                audioAnalyser.fftSize = 64;
+                audioStreamSource = audioContext.createMediaStreamSource(stream);
+                audioStreamSource.connect(audioAnalyser);
+
+                const dataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+                const waveBars = document.querySelectorAll('.wave-bar');
+
+                function updateWaveVolume() {
+                    if (!isSpeechListening) {
+                        waveBars.forEach(bar => { bar.style.height = '8px'; });
+                        return;
+                    }
+                    audioAnalyser.getByteFrequencyData(dataArray);
+                    let sum = 0;
+                    for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+                    let average = sum / dataArray.length;
+
+                    waveBars.forEach((bar, idx) => {
+                        let h = Math.min(36, Math.max(8, (average * 0.8) + (Math.random() * 8)));
+                        bar.style.height = h + 'px';
+                    });
+
+                    audioAnimFrame = requestAnimationFrame(updateWaveVolume);
+                }
+                updateWaveVolume();
+            } catch(e) { console.warn("[WebAudio] Visualizer init warning:", e); }
+        }
+
+        function executeVoiceCommandDirect(cmdText) {
+            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+            const isEn = currentLang === 'en';
+            console.log("🎤 [Voice Direct Execution]:", cmdText);
+
+            const recognizedTextEl = document.getElementById('voice-recognized-text');
+            if (recognizedTextEl) recognizedTextEl.textContent = `"${cmdText}"`;
+
+            const logContainer = document.getElementById('voice-command-log');
+            if (logContainer) {
+                const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const item = document.createElement('div');
+                item.innerHTML = `<span style="color:#94a3b8;">[${timeStr}]</span> 🗣️ <strong>${cmdText}</strong>`;
+                if (logContainer.querySelector('span') && logContainer.querySelector('span').innerText.includes('기록 없음')) {
+                    logContainer.innerHTML = '';
+                }
+                logContainer.prepend(item);
+            }
+
+            if (typeof runBlocks === 'function') {
+                runBlocks('event_ai_speech', cmdText);
+            }
+        }
+        window.executeVoiceCommandDirect = executeVoiceCommandDirect;
+
+        function submitVoiceTextInput() {
+            const inputEl = document.getElementById('voice-text-input');
+            if (inputEl && inputEl.value.trim() !== '') {
+                executeVoiceCommandDirect(inputEl.value.trim());
+                inputEl.value = '';
+            }
+        }
+        window.submitVoiceTextInput = submitVoiceTextInput;
+
+        function bindSpeechEvents() {
+            if (!speechRecognition) return;
+
+            speechRecognition.onstart = () => {
+                isSpeechListening = true;
+                const micIcon = document.getElementById('mic-icon-glow');
+                if (micIcon) {
+                    micIcon.className = 'mic-active';
+                    micIcon.style.background = '#ef4444';
+                    micIcon.style.boxShadow = '0 0 30px rgba(239, 68, 68, 0.8)';
+                }
+                const voiceStatusBox = document.getElementById('voice-status-box');
+                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                const isEn = currentLang === 'en';
+                if (voiceStatusBox && !speechCooldown) {
+                    voiceStatusBox.innerHTML = isEn
+                        ? '<i class="fas fa-volume-up"></i> Listening... Say "Turn 2 times forward"!'
+                        : '<i class="fas fa-volume-up"></i> 귀기울여 듣고 있어요... "앞으로 두 바퀴"를 말씀하세요!';
+                    voiceStatusBox.style.background = '#fee2e2';
+                    voiceStatusBox.style.color = '#991b1b';
+                }
+            };
+
+            speechRecognition.onend = () => {
+                isSpeechListening = false;
+                if (audioAnimFrame) cancelAnimationFrame(audioAnimFrame);
+                const micIcon = document.getElementById('mic-icon-glow');
+                if (micIcon) {
+                    micIcon.className = 'mic-idle';
+                    micIcon.style.background = '#3b82f6';
+                    micIcon.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.6)';
+                }
+                const voiceStatusBox = document.getElementById('voice-status-box');
+                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                const isEn = currentLang === 'en';
+                if (voiceStatusBox && !speechCooldown) {
+                    voiceStatusBox.innerHTML = isEn
+                        ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> Microphone connected! Click mic to speak.'
+                        : '<i class="fas fa-check-circle" style="color:#10b981;"></i> 마이크가 연결되었습니다. 마이크를 누르고 말씀하세요!';
+                    voiceStatusBox.style.background = '#d1fae5';
+                    voiceStatusBox.style.color = '#065f46';
+                }
+            };
+
+            speechRecognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.trim();
+                executeVoiceCommandDirect(transcript);
+            };
+
+            speechRecognition.onerror = (event) => {
+                console.warn("Speech error:", event.error);
+                isSpeechListening = false;
+                if (audioAnimFrame) cancelAnimationFrame(audioAnimFrame);
+                const micIcon = document.getElementById('mic-icon-glow');
+                if (micIcon) {
+                    micIcon.className = 'mic-idle';
+                    micIcon.style.background = '#3b82f6';
+                    micIcon.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.6)';
+                }
+            };
+        }
+
         function ensureSpeechRecognitionReady() {
             if (!speechRecognition) {
                 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -5995,31 +6141,22 @@ print("BrickSync Sandbox Run")
 
         function toggleSpeechRecognition() {
             if (speechCooldown) return;
-            ensureSpeechRecognitionReady();
-            if (!speechRecognition) {
-                console.warn("[Speech] SpeechRecognition API not ready on this browser.");
-                const voiceStatusBox = document.getElementById('voice-status-box');
-                const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
-                const isEn = currentLang === 'en';
-                if (voiceStatusBox) {
-                    voiceStatusBox.innerHTML = isEn
-                        ? '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> Speech Recognition not supported on this browser. Please use text input below.'
-                        : '<i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i> 이 브라우저는 음성 인식을 지원하지 않습니다. 아래 텍스트 입력창을 사용하세요.';
-                    voiceStatusBox.style.background = '#fee2e2';
-                    voiceStatusBox.style.color = '#991b1b';
-                }
-                return;
-            }
-
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const isEn = currentLang === 'en';
 
+            const micIcon = document.getElementById('mic-icon-glow');
+            const voiceStatusBox = document.getElementById('voice-status-box');
+
             if (isSpeechListening) {
                 isSpeechListening = false;
-                try { speechRecognition.stop(); } catch (e) { }
-                const micIcon = document.getElementById('mic-icon-glow');
-                if (micIcon) micIcon.className = 'mic-idle';
-                const voiceStatusBox = document.getElementById('voice-status-box');
+                if (audioAnimFrame) cancelAnimationFrame(audioAnimFrame);
+                try { if (speechRecognition) speechRecognition.stop(); } catch (e) { }
+
+                if (micIcon) {
+                    micIcon.className = 'mic-idle';
+                    micIcon.style.background = '#3b82f6';
+                    micIcon.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.6)';
+                }
                 if (voiceStatusBox) {
                     voiceStatusBox.innerHTML = isEn
                         ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> Microphone connected! Click mic to speak.'
@@ -6028,21 +6165,46 @@ print("BrickSync Sandbox Run")
                     voiceStatusBox.style.color = '#065f46';
                 }
             } else {
-                try {
-                    speechRecognition.lang = isEn ? 'en-US' : 'ko-KR';
-                    speechRecognition.start();
-                } catch (e) {
-                    console.error("Speech start error:", e);
+                // 즉시 UI 빨간색 라이브 상태 전환 (유저 클릭 피드백 100% 보장)
+                isSpeechListening = true;
+                if (micIcon) {
+                    micIcon.className = 'mic-active';
+                    micIcon.style.background = '#ef4444';
+                    micIcon.style.boxShadow = '0 0 30px rgba(239, 68, 68, 0.8)';
+                }
+                if (voiceStatusBox) {
+                    voiceStatusBox.innerHTML = isEn
+                        ? '<i class="fas fa-volume-up"></i> Listening... Say "Turn 2 times forward"!'
+                        : '<i class="fas fa-volume-up"></i> 귀기울여 듣고 있어요... "앞으로 두 바퀴"를 말씀하세요!';
+                    voiceStatusBox.style.background = '#fee2e2';
+                    voiceStatusBox.style.color = '#991b1b';
+                }
+
+                // 1. 실시간 마이크 오디오 입력 획득 및 볼륨 비주얼라이저 가동
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+                        startRealtimeAudioVisualizer(stream);
+                    }).catch(e => console.warn("[Mic Stream Warning]", e));
+                }
+
+                // 2. Web Speech API 음성 인식 가동
+                ensureSpeechRecognitionReady();
+                if (speechRecognition) {
                     try {
-                        speechRecognition.stop();
-                        setTimeout(() => {
-                            try {
-                                const curLang = localStorage.getItem('bricksync_lang') || 'ko';
-                                speechRecognition.lang = (curLang === 'en') ? 'en-US' : 'ko-KR';
-                                speechRecognition.start();
-                            } catch(err) { console.error("Speech retry failed:", err); }
-                        }, 150);
-                    } catch(err) {}
+                        speechRecognition.lang = isEn ? 'en-US' : 'ko-KR';
+                        speechRecognition.start();
+                    } catch (e) {
+                        console.warn("[Speech] start error, retrying...", e);
+                        try {
+                            speechRecognition.stop();
+                            setTimeout(() => {
+                                try {
+                                    speechRecognition.lang = isEn ? 'en-US' : 'ko-KR';
+                                    speechRecognition.start();
+                                } catch(err) { }
+                            }, 100);
+                        } catch(err) {}
+                    }
                 }
             }
         }
