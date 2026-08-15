@@ -1433,7 +1433,7 @@
                 </div>
 
                 <!-- NEW 모터 시계방향 작동 블록 -->
-                <div class="spike-block bg-blue" draggable="true" data-action="motor_cw" style="background: #0284c7;">
+                <div class="spike-block bg-blue" draggable="true" data-action="motor_cw" title="모터 우회전 (시계방향)" style="background: #0284c7;">
                     <div class="block-icon" style="display:flex; align-items:center; justify-content:center;">
                         <!-- 모터 방향 아이콘 조합 (시계) -->
                         <div
@@ -1464,7 +1464,7 @@
                 </div>
 
                 <!-- NEW 모터 반시계방향 작동 블록 -->
-                <div class="spike-block bg-blue" draggable="true" data-action="motor_ccw" style="background: #0284c7;">
+                <div class="spike-block bg-blue" draggable="true" data-action="motor_ccw" title="모터 좌회전 (반시계방향)" style="background: #0284c7;">
                     <div class="block-icon" style="display:flex; align-items:center; justify-content:center;">
                         <!-- 모터 방향 아이콘 조합 (반시계) -->
                         <div
@@ -4743,8 +4743,8 @@ print("BrickSync Sandbox Run")
                         tasks: [
                             { id: 'event_ai_gesture', text: 'AI 제스처 인식 블록 연결하기' },
                             { id: 'flow_wait', text: '5초 대기하기' },
-                            { id: 'motor_cw', text: '모터 우회전(열기) 1회 회전하기' },
-                            { id: 'motor_ccw', text: '모터 좌회전(닫기) 1회 회전하기' }
+                            { id: ['motor_cw', 'motor_ccw'], text: '모터 우회전(열기) 1회 회전하기' },
+                            { id: ['motor_cw', 'motor_ccw'], text: '모터 좌회전(닫기) 1회 회전하기' }
                         ]
                     },
                     '7': {
@@ -4773,8 +4773,8 @@ print("BrickSync Sandbox Run")
                         tasks: [
                             { id: 'event_ai_gesture', text: 'Connect the AI Gesture block' },
                             { id: 'flow_wait', text: 'Wait 5 seconds' },
-                            { id: 'motor_cw', text: 'Rotate the motor clockwise (Open) 1 time' },
-                            { id: 'motor_ccw', text: 'Rotate the motor counterclockwise (Close) 1 time' }
+                            { id: ['motor_cw', 'motor_ccw'], text: 'Rotate the motor clockwise (Open) 1 time' },
+                            { id: ['motor_cw', 'motor_ccw'], text: 'Rotate the motor counterclockwise (Close) 1 time' }
                         ]
                     },
                     '7': {
