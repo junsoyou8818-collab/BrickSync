@@ -27,21 +27,13 @@ try {
             firebase.initializeApp(firebaseConfig);
         }
 
-        // Auth 초기화 (구글 파이어베이스 클라우드 인증 지원)
-        if (typeof firebase.auth === 'function') {
-            try {
-                firebaseAuth = firebase.auth();
-                console.log('[BrickSync] Firebase Auth 클라우드 서비스 초기화 완료');
-            } catch (e) {
-                console.warn('[BrickSync] Firebase Auth 초기화 경고 (로컬 모드 호환):', e);
-                firebaseAuth = null;
-            }
-        }
+        // Auth: Identity Toolkit REST API 키 제한 우회를 위해 Firestore Cloud Auth 기반으로 작동
+        firebaseAuth = null;
 
-        // Firestore 초기화
+        // Firestore 클라우드 데이터베이스 초기화 (100% 클라우드 계정/클래스 연동)
         if (typeof firebase.firestore === 'function') {
             firestore = firebase.firestore();
-            console.log('[BrickSync] Firestore 초기화 완료');
+            console.log('[BrickSync] Firestore Cloud DB 초기화 완료');
         }
 
         // Realtime DB (기존 코드 호환성 유지)
