@@ -30,6 +30,14 @@ const BrickSyncAuth = (function () {
                 sessionExpires: Date.now() + 24 * 60 * 60 * 1000
             };
             localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(sessionData));
+            localStorage.setItem('bricksync_student_session', JSON.stringify({
+                name: profile.displayName || profile.email || '학생',
+                displayName: profile.displayName || profile.email || '학생',
+                email: profile.email,
+                role: profile.role || 'student',
+                expires: Date.now() + 24 * 60 * 60 * 1000,
+                loginTime: Date.now()
+            }));
         } catch (e) {
             console.warn('[Auth] 세션 저장 실패:', e);
         }
