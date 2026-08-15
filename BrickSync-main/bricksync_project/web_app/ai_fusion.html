@@ -6139,15 +6139,15 @@ print("BrickSync Sandbox Run")
             // 2. Turns extraction
             let turns = 1;
 
-            if (lowerText.includes("twice") || lowerText.includes("2 times") || lowerText.includes("2바퀴") || lowerText.includes("두바퀴") || lowerText.includes("두 번") || lowerText.includes("두번")) {
+            if (lowerText.includes("twice") || lowerText.includes("2 times") || lowerText.includes("2바퀴") || lowerText.includes("2 바퀴") || lowerText.includes("두바퀴") || lowerText.includes("두 바퀴") || lowerText.includes("두 번") || lowerText.includes("두번")) {
                 turns = 2;
-            } else if (lowerText.includes("thrice") || lowerText.includes("3 times") || lowerText.includes("3바퀴") || lowerText.includes("세바퀴") || lowerText.includes("세 번") || lowerText.includes("세번")) {
+            } else if (lowerText.includes("thrice") || lowerText.includes("3 times") || lowerText.includes("3바퀴") || lowerText.includes("3 바퀴") || lowerText.includes("세바퀴") || lowerText.includes("세 바퀴") || lowerText.includes("세 번") || lowerText.includes("세번")) {
                 turns = 3;
-            } else if (lowerText.includes("once") || lowerText.includes("1 time") || lowerText.includes("1바퀴") || lowerText.includes("한바퀴") || lowerText.includes("한 번") || lowerText.includes("한번")) {
+            } else if (lowerText.includes("once") || lowerText.includes("1 time") || lowerText.includes("1바퀴") || lowerText.includes("1 바퀴") || lowerText.includes("한바퀴") || lowerText.includes("한 바퀴") || lowerText.includes("한 번") || lowerText.includes("한번")) {
                 turns = 1;
-            } else if (lowerText.includes("4 times") || lowerText.includes("4바퀴") || lowerText.includes("네바퀴") || lowerText.includes("네 번") || lowerText.includes("네번")) {
+            } else if (lowerText.includes("4 times") || lowerText.includes("4바퀴") || lowerText.includes("4 바퀴") || lowerText.includes("네바퀴") || lowerText.includes("네 바퀴") || lowerText.includes("네 번") || lowerText.includes("네번")) {
                 turns = 4;
-            } else if (lowerText.includes("5 times") || lowerText.includes("5바퀴") || lowerText.includes("다섯바퀴") || lowerText.includes("다섯 번") || lowerText.includes("다섯번")) {
+            } else if (lowerText.includes("5 times") || lowerText.includes("5바퀴") || lowerText.includes("5 바퀴") || lowerText.includes("다섯바퀴") || lowerText.includes("다섯 바퀴") || lowerText.includes("다섯 번") || lowerText.includes("다섯번")) {
                 turns = 5;
             } else {
                 const numberMatch = lowerText.match(/\d+/);
