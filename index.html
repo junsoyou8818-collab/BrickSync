@@ -22,43 +22,41 @@
                 console.warn('[Index] 세션 체크 경고:', e);
             }
         })();
-    </script>
 
-            // 타 탭 로그아웃 동기화
-            window.addEventListener('storage', (e) => {
-                if (e.key === 'bricksync_student_session' && !e.newValue) {
+        // 타 탭 로그아웃 동기화
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'bricksync_student_session' && !e.newValue) {
+                window.location.href = 'login.html';
+            }
+        });
+
+        try {
+            const monitorChannel = new BroadcastChannel('bricksync_monitor');
+            monitorChannel.onmessage = (event) => {
+                if (event.data?.type === 'RESET_ALL') {
+                    localStorage.removeItem('bricksync_student_session');
                     window.location.href = 'login.html';
                 }
-            });
+            };
+        } catch(e) {}
 
+        if (typeof isFirebaseOnline !== 'undefined' && isFirebaseOnline && database) {
             try {
-                const monitorChannel = new BroadcastChannel('bricksync_monitor');
-                monitorChannel.onmessage = (event) => {
-                    if (event.data?.type === 'RESET_ALL') {
-                        localStorage.removeItem('bricksync_student_session');
-                        window.location.href = 'login.html';
-                    }
-                };
-            } catch(e) {}
-
-            if (typeof isFirebaseOnline !== 'undefined' && isFirebaseOnline && database) {
-                try {
-                    database.ref('bricksync_classroom/reset_signal').on('value', (snapshot) => {
-                        const resetTime = snapshot.val();
-                        if (resetTime) {
-                            const s = localStorage.getItem('bricksync_student_session');
-                            if (s) {
-                                const session = JSON.parse(s);
-                                if (resetTime > (session.loginTime || 0)) {
-                                    localStorage.removeItem('bricksync_student_session');
-                                    window.location.href = 'login.html';
-                                }
+                database.ref('bricksync_classroom/reset_signal').on('value', (snapshot) => {
+                    const resetTime = snapshot.val();
+                    if (resetTime) {
+                        const s = localStorage.getItem('bricksync_student_session');
+                        if (s) {
+                            const session = JSON.parse(s);
+                            if (resetTime > (session.loginTime || 0)) {
+                                localStorage.removeItem('bricksync_student_session');
+                                window.location.href = 'login.html';
                             }
                         }
-                    });
-                } catch(e) {}
-            }
-        })();
+                    }
+                });
+            } catch(e) {}
+        }
     </script>
 
     <meta charset="UTF-8">
