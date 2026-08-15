@@ -985,7 +985,7 @@
             <div
                 style="padding: 15px 20px; background: #f8fafc; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                 <div style="font-weight: 800; color: #1e293b; font-size: 1.1rem;">
-                    <span id="ai-panel-title-text" data-i18n="lbl_ai_vision_title"><i class="fas fa-robot" style="color: #8b5cf6;"></i> AI 비전 제스처 인식</span>
+                    <span id="ai-panel-title-text" data-i18n="lbl_ai_voice_title"><i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition</span>
                 </div>
             </div>
 
@@ -1041,7 +1041,7 @@
                             const p = document.getElementById('ai-left-panel-content');
                             const t = document.getElementById('ai-panel-title-text');
                             const isEn = (localStorage.getItem('bricksync_lang') || 'ko') === 'en';
-                            if (t) t.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI 음성 명령 인식';
+                            if (t) t.innerHTML = isEn ? '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition' : '<i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition';
                             if (p) {
                                 p.innerHTML = `
                                     <div style="width: 100%; display: flex; flex-direction: column; gap: 15px; align-items: center;">

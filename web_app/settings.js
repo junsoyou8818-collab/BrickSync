@@ -266,7 +266,7 @@
             hint_drag_assemble: "Drag and assemble icon blocks from below!",
             btn_back_home: "Go to Home",
             lbl_workspace_title: "BrickSync Essential Icon Coding",
-            lbl_ai_vision_title: "AI Vision Gesture Recognition",
+            lbl_ai_vision_title: "AI Voice Recognition",
             lbl_ai_voice_title: "AI Voice Recognition",
             lbl_model_training: "Model Training Control",
             lbl_btn_rock: "Rock",
