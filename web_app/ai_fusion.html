@@ -6561,7 +6561,8 @@ print("BrickSync Sandbox Run")
                         // 🔒 시소 이펙트 철통 방어 (연속 프레임 교차 검증) 🔒
                         // 사유: 학습 데이터가 적을 때 1~2프레임 단위로 예측이 요동치는(Flicker) 현상 방지. 최소 10프레임 이상 연속 일치해야만 통과.
                         // 배경(3 또는 None) 감지 시 트리거 락 즉시 해제하여 다음 제스처 반응 100% 즉시 보장
-                        const isBgGesture = (String(unit) === '3' || String(unit) === '8' || String(unit) === '2' || String(unit) === '7')
+                        const normUnit = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
+                        const isBgGesture = (normUnit === '8' || normUnit === '3')
                             ? (detectedGesture === 1 || detectedGesture === 3)
                             : (detectedGesture === 3);
 
