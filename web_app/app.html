@@ -474,6 +474,10 @@ window.addSystemLog = addSystemLog;
 
         // iframe 내에서 웹소켓에 직접 접근할 수 있도록 노출
         window.sendWebSocketAction = function (actionObj) {
+            if (window.isTrainingActive && actionObj && (actionObj.action === 'MONSTER_ALERT' || actionObj.action === 'ACTION_LIGHT')) {
+                console.log("🛑 [TRAINING LOCK] Blocked Fortnite keypress during AI training");
+                return;
+            }
             if (ws && ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify(actionObj));
             }

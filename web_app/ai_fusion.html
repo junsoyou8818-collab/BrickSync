@@ -6553,7 +6553,12 @@ print("BrickSync Sandbox Run")
                     const isEn = currentLang === 'en';
                     const img = await webcamElement;
                     const activation = net.infer(img, 'conv_preds');
-                    const result = await classifier.predictClass(activation);
+                    if (window.isTrainingActive || isTrainingActive || (window.parent && window.parent.isTrainingActive)) {
+                            tf.dispose(activation);
+                            await tf.nextFrame();
+                            continue;
+                        }
+                        const result = await classifier.predictClass(activation);
 
                     if (result.confidences[result.label] > aiConfidenceThreshold) {
                         const detectedGesture = parseInt(result.label);
@@ -6615,15 +6620,20 @@ print("BrickSync Sandbox Run")
             }
         }
 
-                let isTrainingActive = false;
+                        let isTrainingActive = false;
         let trainingTimer = null;
 
         function addExample(classId) {
+            window.isTrainingActive = true;
             isTrainingActive = true;
+            try { if (window.parent) window.parent.isTrainingActive = true; } catch(e) {}
+
             if (trainingTimer) clearTimeout(trainingTimer);
             trainingTimer = setTimeout(() => {
+                window.isTrainingActive = false;
                 isTrainingActive = false;
-            }, 1500);
+                try { if (window.parent) window.parent.isTrainingActive = false; } catch(e) {}
+            }, 2000);
             webcamElement = webcamElement || document.getElementById('webcam');
             aiStatusLabel = aiStatusLabel || document.getElementById('ai-status');
             currentGestureLabel = currentGestureLabel || document.getElementById('current-gesture');
