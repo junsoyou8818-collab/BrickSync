@@ -3806,7 +3806,7 @@ except:
                 console.log("[BrickSync] 하드웨어 미연결 상태: 시뮬레이션 모드 진행");
             }
 
-            if (window.parent.connectionType === 'BLE') {
+            if (activeConnType === 'BLE' || activeConnType === 'USB' || hasBluetooth) {
                 // BLE 무선 ?�시�?블록 ?�진 (버츄??머신)
                 // LWP3 공식 ?�로?�콜???�용??바이?�리 모터 ?�킷 ?�송
                 // ?�진 ?�행 ?�별??(중복 ?�행 방�? �??�전 루프 취소??
