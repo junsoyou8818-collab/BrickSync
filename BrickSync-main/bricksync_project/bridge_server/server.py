@@ -270,12 +270,26 @@ async def handle_websocket(request):
                         threading.Thread(target=press_swing_key, args=(key, turns), daemon=True).start()
                         
                     elif action == "motor_cw":
-                        print("▶ 쓰레기 괴물 입 열기 (H키 전송)")
-                        threading.Thread(target=lambda: [safe_key_down('h'), time.sleep(0.3), safe_key_up('h')], daemon=True).start()
+                        print("▶ 오두막 지붕 열기 / 모터 시계방향 (H키 1.3초 정밀 누름)")
+                        def press_motor_cw():
+                            with pydirectinput_lock:
+                                try:
+                                    safe_key_down('h')
+                                    time.sleep(1.3)
+                                    safe_key_up('h')
+                                except Exception: pass
+                        threading.Thread(target=press_motor_cw, daemon=True).start()
                         
                     elif action == "motor_ccw":
-                        print("▶ 쓰레기 괴물 입 닫기 (J키 전송)")
-                        threading.Thread(target=lambda: [safe_key_down('j'), time.sleep(0.3), safe_key_up('j')], daemon=True).start()
+                        print("▶ 오두막 지붕 닫기 / 모터 반시계방향 (J키 1.3초 정밀 누름)")
+                        def press_motor_ccw():
+                            with pydirectinput_lock:
+                                try:
+                                    safe_key_down('j')
+                                    time.sleep(1.3)
+                                    safe_key_up('j')
+                                except Exception: pass
+                        threading.Thread(target=press_motor_ccw, daemon=True).start()
 
                     elif action in ["motor_stop", "motor_stop_cw", "motor_stop_ccw", "motor_stop_generic"]:
                         print("▶ 쓰레기 괴물 동작 정지 수신 (K키 전송 제외 처리됨)")
