@@ -3808,6 +3808,21 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 } else {
                     // 시스템(AI 비전 / 음성 엔진)에서 특정 제스처/음성으로 트리거했을 때
                     if (action === triggerAction || action === 'event_ai_gesture' || action === 'event_voice' || action.startsWith('event_')) {
+                        if (action === 'event_ai_gesture' && triggerAction === 'event_ai_gesture') {
+                            const paramEl = firstBlock.querySelector('.block-param');
+                            let blockVal = 1;
+                            if (paramEl) {
+                                if (paramEl.hasAttribute('data-val')) blockVal = parseFloat(paramEl.getAttribute('data-val'));
+                                else {
+                                    const textVal = paramEl.innerText.trim();
+                                    if (!isNaN(textVal) && textVal !== "") blockVal = parseFloat(textVal);
+                                }
+                            }
+                            if (triggerVal !== undefined && triggerVal !== null && Math.round(triggerVal) !== Math.round(blockVal)) {
+                                console.log(`🔒 [AI MATCH SHIELD] Camera gesture (${triggerVal}) != Block gesture (${blockVal}). Skipping.`);
+                                return false;
+                            }
+                        }
                         return true;
                     }
                     return false;
