@@ -3794,20 +3794,9 @@
                         if (nu === '7') {
                             return true;
                         }
-                        if (action === 'event_ai_gesture') {
-                            const paramEl = firstBlock.querySelector('.block-param');
-                            let blockVal = 1; // 기본 보(1)
-                            if (paramEl) {
-                                if (paramEl.hasAttribute('data-val')) blockVal = parseInt(paramEl.getAttribute('data-val'));
-                                else {
-                                    const txt = paramEl.innerText.trim();
-                                    if (!isNaN(txt) && txt !== '') blockVal = parseInt(txt);
-                                }
-                            }
-                            // 제스처 매칭 또는 단원 6 기본 실행 허용
-                            if (triggerVal === -1 || triggerVal === blockVal || nu === '6') {
-                                return true;
-                            }
+                        if (action === 'event_ai_gesture' || action.startsWith('event_')) {
+                            // AI 융합 단원 (6/7/8 및 1/2/3) 전 단원 AI 트리거 블록 즉시 매칭 허용
+                            return true;
                         }
                     }
                     return false;
@@ -3815,8 +3804,13 @@
             });
 
             if (validStacks.length === 0) {
+                window.isBlockExecutionRunning = false;
+                if (typeof addSystemLog === 'function') addSystemLog('TRIGGER', '⚠️ 매칭되는 블록 스택이 없어 실행을 생략합니다. (시작 블록 확인 필요)');
                 console.log(`[BrickSync] 매칭되는 블록 스택이 없으므로 실행을 생략합니다. (Trigger: ${triggerAction}, Val: ${triggerVal})`);
                 return;
+            }
+            if (typeof addSystemLog === 'function') {
+                addSystemLog('TRIGGER', `🚀 AI 블록 구동 시작 (${validStacks.length}개 스택 연쇄 실행 중...)`);
             }
 
             // 스택들을 왼쪽에서 오른쪽으로 정렬
