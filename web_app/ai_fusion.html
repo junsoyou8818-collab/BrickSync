@@ -6566,7 +6566,7 @@ print("BrickSync Sandbox Run")
                             ? (detectedGesture === 1 || detectedGesture === 3)
                             : (detectedGesture === 3);
 
-                        if (isBgGesture) {
+                        if (isBgGesture && !window.isBlockExecutionRunning) {
                             lastTriggeredAiGesture = -1;
                         }
 
