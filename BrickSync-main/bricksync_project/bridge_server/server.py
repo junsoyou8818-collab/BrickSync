@@ -373,8 +373,28 @@ import webbrowser
 
 def open_browser():
     time.sleep(1.2)
+    url = "https://www.bricksync.org/intro.html"
+    chrome_paths = [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        os.path.expanduser(r"~\AppData\Local\Google\Chrome\Application\chrome.exe")
+    ]
+    chrome_bin = None
+    for p in chrome_paths:
+        if os.path.exists(p):
+            chrome_bin = p
+            break
+
+    if chrome_bin:
+        try:
+            webbrowser.register('chrome', None, webbrowser.BackgroundBrowser(chrome_bin))
+            webbrowser.get('chrome').open(url)
+            return
+        except Exception:
+            pass
+
     try:
-        webbrowser.open("https://www.bricksync.org/intro.html")
+        webbrowser.open(url)
     except Exception:
         pass
 
