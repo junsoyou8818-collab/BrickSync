@@ -6297,7 +6297,7 @@ print("BrickSync Sandbox Run")
             }
         }
 
-        function parseVoiceCommand(text) {
+                function parseVoiceCommand(text) {
             speechCooldown = false;
             window.isBlockExecutionRunning = false;
             try {
@@ -6326,77 +6326,35 @@ print("BrickSync Sandbox Run")
 
             // 2. Turns extraction
             let turns = 1;
-
-            if (lowerText.includes("twice") || lowerText.includes("2 times") || lowerText.includes("2바퀴") || lowerText.includes("2 바퀴") || lowerText.includes("두바퀴") || lowerText.includes("두 바퀴") || lowerText.includes("두 번") || lowerText.includes("두번")) {
+            if (lowerText.includes("twice") || lowerText.includes("2 times") || lowerText.includes("2바퀴") || lowerText.includes("2 바퀴") || lowerText.includes("두바퀴") || lowerText.includes("두 바퀴") || lowerText.includes("두 번") || lowerText.includes("두번") || lowerText.includes("2회") || lowerText.includes("2 회")) {
                 turns = 2;
             } else if (lowerText.includes("thrice") || lowerText.includes("3 times") || lowerText.includes("3바퀴") || lowerText.includes("3 바퀴") || lowerText.includes("세바퀴") || lowerText.includes("세 바퀴") || lowerText.includes("세 번") || lowerText.includes("세번")) {
                 turns = 3;
             } else if (lowerText.includes("once") || lowerText.includes("1 time") || lowerText.includes("1바퀴") || lowerText.includes("1 바퀴") || lowerText.includes("한바퀴") || lowerText.includes("한 바퀴") || lowerText.includes("한 번") || lowerText.includes("한번")) {
                 turns = 1;
-            } else if (lowerText.includes("4 times") || lowerText.includes("4바퀴") || lowerText.includes("4 바퀴") || lowerText.includes("네바퀴") || lowerText.includes("네 바퀴") || lowerText.includes("네 번") || lowerText.includes("네번")) {
-                turns = 4;
-            } else if (lowerText.includes("5 times") || lowerText.includes("5바퀴") || lowerText.includes("5 바퀴") || lowerText.includes("다섯바퀴") || lowerText.includes("다섯 바퀴") || lowerText.includes("다섯 번") || lowerText.includes("다섯번")) {
-                turns = 5;
             } else {
                 const numberMatch = lowerText.match(/\d+/);
                 if (numberMatch) {
                     turns = parseInt(numberMatch[0]);
-                } else {
-                    if (lowerText.includes("one") || lowerText.includes("하나") || lowerText.includes("한")) turns = 1;
-                    else if (lowerText.includes("two") || lowerText.includes("둘") || lowerText.includes("두")) turns = 2;
-                    else if (lowerText.includes("three") || lowerText.includes("셋") || lowerText.includes("세")) turns = 3;
-                    else if (lowerText.includes("four") || lowerText.includes("넷") || lowerText.includes("네")) turns = 4;
-                    else if (lowerText.includes("five") || lowerText.includes("다섯")) turns = 5;
-                    else if (lowerText.includes("six") || lowerText.includes("여섯")) turns = 6;
-                    else if (lowerText.includes("seven") || lowerText.includes("일곱")) turns = 7;
-                    else if (lowerText.includes("eight") || lowerText.includes("여덟")) turns = 8;
-                    else if (lowerText.includes("nine") || lowerText.includes("아홉")) turns = 9;
-                    else if (lowerText.includes("ten") || lowerText.includes("열")) turns = 10;
                 }
             }
 
-            // 3. Cooldown Lockout
-            speechCooldown = true;
-            try { if (typeof speechRecognition !== 'undefined' && speechRecognition) speechRecognition.stop(); } catch (e) { }
+            // 3. 🔥 Instant Direct LEGO Hub Motor Broadcast (Zero wait time!)
+            let speedInt = directionVal === 0 ? 40 : -40;
+            let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
+            const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
-            const micIcon = document.getElementById('mic-icon-glow');
-            if (micIcon) {
-                micIcon.className = 'mic-cooldown';
-            }
+            (async () => {
+                try {
+                    triggerSystemLog('HUB', `⚡ 레고 허브 음성 직결 모터 패킷 송출 (속도: ${speedInt})`);
+                    for (let p = 0; p < 6; p++) {
+                        await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(() => {});
+                        await new Promise(r => setTimeout(r, 20));
+                    }
+                } catch(e) {}
+            })();
 
-            const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
-            const isEn = currentLang === 'en';
-
-            const voiceStatusBox = document.getElementById('voice-status-box');
-            if (voiceStatusBox) {
-                const dirDisplay = isEn ? (directionVal === 0 ? "Forward" : "Backward") : directionLabel;
-                voiceStatusBox.innerHTML = `<i class="fas fa-check-circle" style="color:#059669;"></i> ${isEn ? 'Recognized:' : '인식 완료:'} <strong>${dirDisplay} ${turns}${isEn ? ' turns' : '바퀴'}</strong>`;
-                voiceStatusBox.style.background = '#d1fae5';
-                voiceStatusBox.style.color = '#065f46';
-            }
-
-            // Update recognized log
-            const logPanel = document.getElementById('voice-command-log');
-            if (logPanel) {
-                if (logPanel.innerText.includes("인식 기록 없음") || logPanel.innerText.includes("No history yet")) {
-                    logPanel.innerHTML = '';
-                }
-                const now = new Date();
-                const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-                const logItem = document.createElement('div');
-                logItem.style.cssText = 'padding: 4px 8px; background: white; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between;';
-                const dirDisplay = isEn ? (directionVal === 0 ? "Forward" : "Backward") : directionLabel;
-                logItem.innerHTML = `<span>🗣️ "${text}" (${dirDisplay} ${turns}${isEn ? ' turns' : '바퀴'})</span> <span style="color: #94a3b8;">${timeStr}</span>`;
-                logPanel.insertBefore(logItem, logPanel.firstChild);
-            }
-
-            window.lastParsedSpeechTurns = turns;
-
-            if (typeof lastTriggeredAiGesture !== 'undefined') {
-                lastTriggeredAiGesture = directionVal;
-            }
-            runBlocks('event_ai_gesture', directionVal);
-
+            // 4. 🎮 Fortnite WebSocket Action (Untouched!)
             try {
                 if (window.parent && window.parent.sendWebSocketAction) {
                     window.parent.sendWebSocketAction({
@@ -6407,28 +6365,23 @@ print("BrickSync Sandbox Run")
                 }
             } catch (e) {}
 
+            // 5. 🧩 Workspace Block Canvas Execution
+            window.lastParsedSpeechTurns = turns;
+            if (typeof lastTriggeredAiGesture !== 'undefined') {
+                lastTriggeredAiGesture = directionVal;
+            }
+            runBlocks('event_ai_gesture', directionVal);
+
             setTimeout(() => {
                 speechCooldown = false;
                 const micIcon = document.getElementById('mic-icon-glow');
                 if (micIcon) {
                     micIcon.className = 'mic-idle';
                 }
-                const nu = getNormUnit(unit);
-                if (nu === '7') {
-                    if (voiceStatusBox) {
-                        const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
-                        const isEn = currentLang === 'en';
-                        voiceStatusBox.innerHTML = isEn
-                            ? '<i class="fas fa-check-circle" style="color:#10b981;"></i> Microphone connected! Click mic to speak.'
-                            : '<i class="fas fa-check-circle" style="color:#10b981;"></i> 마이크가 연결되었습니다. 마이크를 누르고 말씀하세요!';
-                        voiceStatusBox.style.background = '#d1fae5';
-                        voiceStatusBox.style.color = '#065f46';
-                    }
-                }
             }, 3500);
         }
 
-                async function app() {
+        async function app() {
             const nu = getNormUnit(unit);
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const isEn = currentLang === 'en';
