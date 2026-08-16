@@ -555,7 +555,7 @@ window.addSystemLog = addSystemLog;
                 window.writer.releaseLock();
                 window.writer = null;
             } else if (window.connectionType === 'BLE' || window.txCharacteristic) {
-                bleWriteQueue = bleWriteQueue.then(async () => {
+                bleWriteQueue = bleWriteQueue.catch(() => {}).then(async () => {
                     for (let i = 0; i < buffer.byteLength; i += 20) {
                         let chunk = buffer.slice(i, i + 20);
                         if (window.txCharacteristic) {
