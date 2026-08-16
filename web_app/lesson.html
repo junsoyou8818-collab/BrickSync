@@ -4589,10 +4589,10 @@ except:
         const unit = urlParams.get('unit');
 
         const themeDescriptions = {
-            '1': '5초 대기 후 앞으로 3번 이동하고, 좌회전 1번 후 뒤로 2번 이동하세요.',
-            '2': '5초 대기 후 시계방향 3번, 반시계방향 3번 작동하세요.',
-            '3': '5초 대기 후 모터를 시계방향 3번, 반시계방향 2번 회전시켜보세요.',
-            '4': '5초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.',
+            '1': '2초 대기 후 앞으로 3번 이동하고, 좌회전 1번 후 뒤로 2번 이동하세요.',
+            '2': '2초 대기 후 시계방향 3번, 반시계방향 3번 작동하세요.',
+            '3': '2초 대기 후 모터를 시계방향 3번, 반시계방향 2번 회전시켜보세요.',
+            '4': '2초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.',
             '5': '2초 대기 후에 빨간 불이 켜지도록 만들어보세요.'
         };
         const themeDescriptionsEn = {
@@ -4606,42 +4606,42 @@ except:
         const missionDataAll = {
             ko: {
                 '1': {
-                    badge: 'STAGE 1', title: '탐험보트를 출발시켜요', desc: '5초 대기 후 앞으로 3번 이동하고, 좌회전 1번 후 뒤로 2번 이동하세요.',
+                    badge: 'STAGE 1', title: '탐험보트를 출발시켜요', desc: '2초 대기 후 앞으로 3번 이동하고, 좌회전 1번 후 뒤로 2번 이동하세요.',
                     pinCode: '7241',
                     tasks: [
                         { id: 'start', text: '재생(시작) 블록 연결하기' },
-                        { id: 'flow_wait_5', text: '5초 대기하기' },
+                        { id: 'flow_wait_5', text: '2초 대기하기' },
                         { id: 'car_forward_3', text: '앞으로 3번 이동하기' },
                         { id: 'car_left_1', text: '좌회전 1번 작동하기' },
                         { id: 'car_backward_2', text: '뒤로 2번 이동하기' }
                     ]
                 },
                 '2': {
-                    badge: 'STAGE 2', title: '바닷속 잠수함으로 바다를 탐험해요', desc: '5초 대기 후 시계방향 회전 3번, 반시계방향 회전 3번 작동하세요.',
+                    badge: 'STAGE 2', title: '바닷속 잠수함으로 바다를 탐험해요', desc: '2초 대기 후 시계방향 회전 3번, 반시계방향 회전 3번 작동하세요.',
                     pinCode: '8932',
                     tasks: [
                         { id: 'start', text: '재생(시작) 블록 연결하기' },
-                        { id: 'flow_wait_5', text: '5초 대기하기' },
+                        { id: 'flow_wait_5', text: '2초 대기하기' },
                         { id: 'motor_cw_3', text: '시계방향 회전 3번 실행하기' },
                         { id: 'motor_ccw_3', text: '반시계방향 회전 3번 실행하기' }
                     ]
                 },
                 '3': {
-                    badge: 'STAGE 3', title: '대관람차 회전하기', desc: '5초 대기 후 모터를 시계방향 회전 3번, 반시계방향 회전 2번 실행시켜 대관람차를 운행하세요.',
+                    badge: 'STAGE 3', title: '대관람차 회전하기', desc: '2초 대기 후 모터를 시계방향 회전 3번, 반시계방향 회전 2번 실행시켜 대관람차를 운행하세요.',
                     pinCode: '5019',
                     tasks: [
                         { id: 'start', text: '재생(시작) 블록 연결하기' },
-                        { id: 'flow_wait_5', text: '5초 대기하기' },
+                        { id: 'flow_wait_5', text: '2초 대기하기' },
                         { id: 'motor_cw', text: '시계방향 회전 3회 실행하기' },
                         { id: 'motor_ccw', text: '반시계방향 회전 2회 실행하기' }
                     ]
                 },
                 '4': {
-                    badge: 'STAGE 4', title: '탐험 자동차를 만들어요', desc: '5초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.',
+                    badge: 'STAGE 4', title: '탐험 자동차를 만들어요', desc: '2초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.',
                     pinCode: '3370',
                     tasks: [
                         { id: 'start', text: '재생(시작) 블록 연결하기' },
-                        { id: 'flow_wait', text: '5초 대기하기' },
+                        { id: 'flow_wait', text: '2초 대기하기' },
                         { id: 'car_forward_4', text: '앞으로 4번 이동하기' },
                         { id: 'car_right_1', text: '우회전 1번 작동하기' },
                         { id: 'car_forward_2', text: '앞으로 2번 이동하기' }
