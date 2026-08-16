@@ -5103,10 +5103,14 @@ print("BrickSync Sandbox Run")
                         if (String(targetUnit) === '2' || String(targetUnit) === '7') {
                             if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-microphone"></i>';
                             if (paramEl) {
-                                paramEl.style.display = 'none'; // 하단 화살표 선택 버튼 숨김
+                                paramEl.setAttribute('data-val', '0');
+                                paramEl.style.display = 'none'; // UI 화면 버튼 감춤 (내부 DOM 파라미터 100% 보존)
                             }
                             const wsParams = document.querySelectorAll('#workspaceArea .spike-block[data-action="event_ai_gesture"] .block-param');
-                            wsParams.forEach(p => p.style.display = 'none');
+                            wsParams.forEach(p => {
+                                p.setAttribute('data-val', '0');
+                                p.style.display = 'none';
+                            });
                         } else if (String(targetUnit) === '3' || String(targetUnit) === '8') {
                             if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-dragon"></i>';
                             if (paramEl) {
