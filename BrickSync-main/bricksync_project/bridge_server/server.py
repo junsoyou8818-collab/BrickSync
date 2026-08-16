@@ -223,9 +223,20 @@ async def handle_websocket(request):
                         print("🧹 [CLEANUP] 모든 조작 가상 키 강제 해제 실행")
                         release_all_steering_keys()
 
-                    elif action == "ACTION_LIGHT":
-                        print("▶ 네온사인 조명 대표 ON ([키 전송)")
-                        threading.Thread(target=lambda: safe_press('['), daemon=True).start()
+                    elif action in ["ACTION_LIGHT", "MONSTER_ALERT"]:
+                        print(f"▶ 몬스터 경보/조명 발동 수신 ({action} ➔ [키 정밀 전송)")
+                        def press_light_key():
+                            with pydirectinput_lock:
+                                try:
+                                    for edit_k in ['g', 'e', 'f']:
+                                        pydirectinput.keyUp(edit_k)
+                                    time.sleep(0.02)
+                                    pydirectinput.keyDown('[')
+                                    time.sleep(0.12)
+                                    pydirectinput.keyUp('[')
+                                except Exception:
+                                    pass
+                        threading.Thread(target=press_light_key, daemon=True).start()
                     elif action == "ACTION_SOUND":
                         print("▶ 사운드 재생 (p키 전송)")
                         threading.Thread(target=lambda: safe_press('p'), daemon=True).start()
@@ -237,9 +248,6 @@ async def handle_websocket(request):
                     elif action == "HUB_LOG":
                         msg_text = data.get("msg", "⚡ [LEGO HUB] 모터 제어 패킷 송출")
                         print(f"⚡ [LEGO HUB LOG] {msg_text}")
-                    elif action == "MONSTER_ALERT":
-                        print("[ALERT] 몬스터 감지 경보 발동! [키 (조명 켜기)")
-                        threading.Thread(target=lambda: safe_press('['), daemon=True).start()
                         
                     elif action == "SWING_CONTROL":
                         direction = data.get("dir")
