@@ -1317,18 +1317,7 @@
         }
         window.recordUnitVisited = recordUnitVisited;
 
-        function deleteProject(unitKey, cloudId, unit, type) {
-            if (confirm('이 프로젝트를 삭제하시겠습니까?')) {
-                try {
-                    let recent = JSON.parse(localStorage.getItem('bricksync_recent_units') || '[]');
-                    recent = recent.filter(item => !(String(item.unit) === String(unit) && item.type === type));
-                    localStorage.setItem('bricksync_recent_units', JSON.stringify(recent));
-                } catch(e) {}
-                if (unitKey) localStorage.removeItem(unitKey);
-                renderProjects();
-            }
-        }
-        window.deleteProject = deleteProject;
+        
 
         async function renderProjects() {
             const container = document.getElementById('projects-list-container');
@@ -1476,18 +1465,47 @@
                 : `lesson.html?unit=${unit}&v=${v}`;
         }
 
-        async function deleteProject(localId, cloudId) {
+                async function deleteProject(unitKey, cloudId, unit, type) {
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const confirmMsg = currentLang === 'en' ? 'Are you sure you want to delete this project?' : '정말 이 프로젝트를 삭제하시겠습니까?';
             if (!confirm(confirmMsg)) return;
-            // localStorage 삭제
-            localStorage.removeItem(localId);
-            // Firestore 삭제 (비동기)
-            if (cloudId && typeof BrickSyncCloud !== 'undefined' && BrickSyncCloud.isAvailable()) {
-                await BrickSyncCloud.deleteProject(cloudId);
+
+            // 1. Remove from bricksync_recent_units
+            try {
+                let recent = JSON.parse(localStorage.getItem('bricksync_recent_units') || '[]');
+                recent = recent.filter(item => !(String(item.unit) === String(unit) && item.type === type));
+                localStorage.setItem('bricksync_recent_units', JSON.stringify(recent));
+            } catch(e) {}
+
+            // 2. Remove unitKey if provided
+            if (unitKey) {
+                localStorage.removeItem(unitKey);
             }
+
+            // 3. Clean up any matching local project keys
+            try {
+                const targetKeyPart = (type === 'ai' ? '_project_ai_' : '_project_unit_') + unit;
+                const toRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    if (k && k.includes(targetKeyPart)) {
+                        toRemove.push(k);
+                    }
+                }
+                toRemove.forEach(k => localStorage.removeItem(k));
+            } catch(e) {}
+
+            // 4. Cloud delete if cloudId exists
+            if (cloudId && typeof BrickSyncCloud !== 'undefined' && BrickSyncCloud.isAvailable()) {
+                try {
+                    await BrickSyncCloud.deleteProject(cloudId);
+                } catch(e) {}
+            }
+
+            // 5. Re-render project shelf immediately
             renderProjects();
         }
+        window.deleteProject = deleteProject;
 
         function escapeHtml(str) {
             return str
