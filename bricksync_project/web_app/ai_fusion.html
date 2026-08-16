@@ -4620,7 +4620,14 @@ print("BrickSync Sandbox Run")
                                     lastExecutionTime = cmd.delay;
                                 }
                             } catch (e) {
-                                console.error("??[BLE_ENGINE] Command Error:", e);
+                                console.error("⚠️ [BLE_ENGINE] Command Error:", e);
+                            }
+                        }
+                        if (isMissionActive && blockCount > 1 && anySequenceFound && window.bleEngineRunCounter === currentRunId) {
+                            if (unit !== '7' && unit !== '2') {
+                                console.log('🎉 [BLE_ENGINE] Sequence 100% finished! Popping up Mission Modal.');
+                                if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
+                                try { window.parent.sendWebSocketAction({ action: "CAT_FEED_REWARD" }); } catch (e) { }
                             }
                         }
                     };
