@@ -3806,15 +3806,8 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     return action === 'start' || action === 'event_ai_gesture' || action.startsWith('event_');
                 } else {
                     // 시스템(AI 비전 / 음성 엔진)에서 특정 제스처/음성으로 트리거했을 때
-                    if (action === triggerAction) {
-                        const nu = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
-                        if (nu === '7') {
-                            return true;
-                        }
-                        if (action === 'event_ai_gesture' || action.startsWith('event_')) {
-                            // AI 융합 단원 (6/7/8 및 1/2/3) 전 단원 AI 트리거 블록 즉시 매칭 허용
-                            return true;
-                        }
+                    if (action === triggerAction || action === 'event_ai_gesture' || action === 'event_voice' || action.startsWith('event_')) {
+                        return true;
                     }
                     return false;
                 }
