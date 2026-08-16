@@ -4017,23 +4017,15 @@ print("BrickSync Sandbox Run")
                         }
                         case 'motor_cw':
                             pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} >= 3 ? ${pythonTimeVal} * 2175 : ${pythonTimeVal} * 1315)) \n${indent}sm() \n`;
-                            if (unit !== '8') {
-                                localActionsQueue.push({ action: 'motor_cw', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += (timeVal * 1150);
-                            } else {
-                                cumulativeDelayMs += (timeVal * 1150);
-                            }
+                            localActionsQueue.push({ action: 'motor_cw', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += (timeVal * 1150);
                             localActionsQueue.push({ action: 'motor_stop', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800; // 관성 및 반대 방향 회전 충돌 방지 브레이크 휴식 800ms
                             break;
                         case 'motor_ccw':
                             pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} >= 3 ? ${pythonTimeVal} * 2175 : ${pythonTimeVal} * 1315)) \n${indent}sm() \n`;
-                            if (unit !== '8') {
-                                localActionsQueue.push({ action: 'motor_ccw', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += (timeVal * 1315);
-                            } else {
-                                cumulativeDelayMs += (timeVal * 1315);
-                            }
+                            localActionsQueue.push({ action: 'motor_ccw', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += (timeVal * 1315);
                             localActionsQueue.push({ action: 'motor_stop', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800; // 관성 및 반대 방향 회전 충돌 방지 브레이크 휴식 800ms
                             break;
@@ -6542,12 +6534,12 @@ print("BrickSync Sandbox Run")
                             consecutiveAiFrames++;
                             // 초고속 3프레임 연속 검증으로 제스처 반응 속도 극대화
                             if (consecutiveAiFrames >= 3 && lastTriggeredAiGesture !== detectedGesture && detectedGesture !== 3) {
+                                lastTriggeredAiGesture = detectedGesture;
+                                console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
                                 if (window.isBlockExecutionRunning) {
                                     await tf.nextFrame();
                                     continue;
                                 }
-                                lastTriggeredAiGesture = detectedGesture;
-                                console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
                                 runBlocks('event_ai_gesture', detectedGesture);
 
                                 if (((unit === '3' || unit === '8')) && detectedGesture === 0) {
