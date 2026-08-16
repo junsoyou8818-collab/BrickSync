@@ -224,18 +224,18 @@ async def handle_websocket(request):
                         release_all_steering_keys()
 
                     elif action in ["ACTION_LIGHT", "MONSTER_ALERT"]:
-                        print(f"▶ 몬스터 경보/조명 발동 수신 ({action} ➔ [키 2회 연사 정밀 전송)")
+                        print(f"▶ 몬스터 경보/조명 발동 수신 ({action} ➔ 조명 키 combo 정밀 전송)")
                         def press_light_key():
                             with pydirectinput_lock:
                                 try:
-                                    for edit_k in ['g', 'e', 'f']:
+                                    for edit_k in ['g', 'f']:
                                         pydirectinput.keyUp(edit_k)
                                     time.sleep(0.05)
-                                    for _ in range(2):
-                                        pydirectinput.keyDown('[')
-                                        time.sleep(0.25)
-                                        pydirectinput.keyUp('[')
-                                        time.sleep(0.1)
+                                    for l_key in ['[', 'p', 'e', 'l', 't', 'n']:
+                                        pydirectinput.keyDown(l_key)
+                                        time.sleep(0.15)
+                                        pydirectinput.keyUp(l_key)
+                                        time.sleep(0.05)
                                 except Exception as e:
                                     print(f"⚠ 조명 키 전송 오류: {e}")
                         threading.Thread(target=press_light_key, daemon=True).start()

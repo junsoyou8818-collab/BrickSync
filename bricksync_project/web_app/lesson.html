@@ -4064,14 +4064,16 @@ except:
                                     for (let p = 0; p < 6; p++) {
                                         let configPayload = [10, 0, 0x41, p, 2, 1, 0, 0, 0, 0];
                                         await sendFn(new Uint8Array(configPayload)).catch(() => {});
-                                        await new Promise(r => setTimeout(r, 15));
+                                        await new Promise(r => setTimeout(r, 10));
                                         let payload = [16, 0, 0x81, p, 0x10, 0x51, 0x02, ...encodedColors];
                                         await sendFn(new Uint8Array(payload)).catch(() => {});
-                                        await new Promise(r => setTimeout(r, 15));
+                                        await new Promise(r => setTimeout(r, 10));
                                     }
 
-                                    // 2. Send Hub Center LED Red Payload (0x09 = Red)
+                                    // 2. Send Hub Center LED Red Payloads (Spike Prime 0x3F & Spike Essential 0x3C Red 0x09)
                                     await sendFn(new Uint8Array([8, 0, 0x81, 0x3F, 0x10, 0x51, 0x00, 0x09])).catch(() => {});
+                                    await sendFn(new Uint8Array([7, 0, 0x81, 0x3F, 0x11, 0x07, 0x09])).catch(() => {});
+                                    await sendFn(new Uint8Array([8, 0, 0x81, 0x3C, 0x10, 0x51, 0x00, 0x09])).catch(() => {});
                                 } else if (cmd.action === 'matrix_clear') {
                                     let hubWin = window;
                                     for (let i = 0; i < 5; i++) {
