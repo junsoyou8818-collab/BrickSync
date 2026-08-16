@@ -4057,11 +4057,14 @@ print("BrickSync Sandbox Run")
                             let lightDuration = matEl ? (parseFloat(matEl.getAttribute('data-val')) || 2) : 2;
 
                             // 2단원/7단원 조명 매트릭스 실행 시점에 포트나이트 경보 발동 신호를 지연 큐에 주입 (2초 대기 연동 실현)
-                            if (String(unit) === '3' || String(unit) === '8') {
-                                localActionsQueue.push({ action: 'MONSTER_ALERT', delay: cumulativeDelayMs });
-                                if (isMissionActive) {
-                                    pyCode += `${indent}print("Mission Complete!")\n`;
-                                }
+                            let redColors = [0, 9, 0, 0, 9, 0, 0, 9, 0];
+                            try {
+                                if (matrixArr) redColors = JSON.parse(matrixArr);
+                            } catch(e) {}
+                            localActionsQueue.push({ action: 'matrix', colors: redColors, delay: cumulativeDelayMs });
+                            localActionsQueue.push({ action: 'MONSTER_ALERT', delay: cumulativeDelayMs });
+                            if ((String(unit) === '3' || String(unit) === '8') && isMissionActive) {
+                                pyCode += `${indent}print("Mission Complete!")\n`;
                             }
 
                             if (matrixArr) {
@@ -4469,7 +4472,11 @@ print("BrickSync Sandbox Run")
                                         mCnt++;
                                         if (mCnt >= 2) break;
                                     }
+                                } else if (cmd.action === 'MONSTER_ALERT') {
+                                    try { window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
+                                    try { window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
                                 } else if (cmd.action === 'matrix') {
+                                    try { window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
                                     try { window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
                                     if (isMissionActive && (unit === '3' || unit === '8') && window.bleEngineRunCounter === currentRunId) {
                                         if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
