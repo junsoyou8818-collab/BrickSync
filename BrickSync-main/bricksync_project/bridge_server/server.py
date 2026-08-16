@@ -158,7 +158,7 @@ async def handle_websocket(request):
                     data = json.loads(msg.data)
                     action = data.get("action")
                     
-                    if action and action in ["STEER_UP", "STEER_DOWN", "STEER_LEFT", "STEER_RIGHT", "MWHEEL_LEFT", "MWHEEL_RIGHT", "SWING_CONTROL", "motor_cw", "motor_ccw", "CAT_FEED_REWARD", "MONSTER_ALERT", "HUB_LOG"]:
+                    if action and action in ["STEER_UP", "STEER_DOWN", "STEER_LEFT", "STEER_RIGHT", "MWHEEL_LEFT", "MWHEEL_RIGHT", "SWING_CONTROL", "motor_cw", "motor_ccw", "CAT_FEED_REWARD", "MONSTER_ALERT", "ACTION_LIGHT", "HUB_LOG"]:
                         focus_fortnite()
                     
                     if action == "STEER_UP":

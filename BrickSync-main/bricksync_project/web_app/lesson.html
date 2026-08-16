@@ -4039,8 +4039,15 @@ except:
                                         }
                                     }
                                     if (targetPorts.length === 0) {
-                                        targetPorts = [0, 1, 2, 3, 4, 5];
+                                        targetPorts = [0, 1];
                                     }
+                                    try {
+                                        const hubLogMsg = `⚡ 레고 허브 신호 송출: Red Light Matrix ON (Port A, B)`;
+                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', hubLogMsg);
+                                        if (window.parent && window.parent.sendWebSocketAction) {
+                                            window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
+                                        }
+                                    } catch(e) {}
                                     let writeWin = window;
                                     for (let i = 0; i < 5; i++) {
                                         if (writeWin.writeToHub) break;
@@ -4075,8 +4082,15 @@ except:
                                         }
                                     }
                                     if (targetPorts.length === 0) {
-                                        targetPorts = [0, 1, 2, 3, 4, 5];
+                                        targetPorts = [0, 1];
                                     }
+                                    try {
+                                        const hubLogMsg = `⚡ 레고 허브 신호 송출: Red Light Matrix ON (Port A, B)`;
+                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', hubLogMsg);
+                                        if (window.parent && window.parent.sendWebSocketAction) {
+                                            window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
+                                        }
+                                    } catch(e) {}
                                     let writeWin = window;
                                     for (let i = 0; i < 5; i++) {
                                         if (writeWin.writeToHub) break;
