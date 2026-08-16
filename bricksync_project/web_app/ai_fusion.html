@@ -7107,24 +7107,45 @@ print("BrickSync Sandbox Run")
         window.clearLiveConsoleLogs = clearLiveConsoleLogs;
 
         function addSystemLog(category, message) {
-            const list = document.getElementById('liveConsoleLogList');
-            if (!list) return;
+            const targets = [];
+            try {
+                const l1 = document.getElementById('liveConsoleLogList');
+                if (l1) targets.push(l1);
+            } catch(e) {}
+            try {
+                if (window.parent && window.parent.document) {
+                    const l2 = window.parent.document.getElementById('liveConsoleLogList');
+                    if (l2 && !targets.includes(l2)) targets.push(l2);
+                }
+            } catch(e) {}
+            try {
+                const iframe = document.querySelector('iframe');
+                if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
+                    const l3 = iframe.contentWindow.document.getElementById('liveConsoleLogList');
+                    if (l3 && !targets.includes(l3)) targets.push(l3);
+                }
+            } catch(e) {}
+
+            if (targets.length === 0) return;
+
             const now = new Date();
             const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
             
-            let color = '#38bdf8'; // 기본 하늘색
+            let color = '#38bdf8';
             let icon = 'ℹ️';
-            if (category === 'AI') { color = '#a855f7'; icon = '📸'; }
+            if (category === 'AI') { color = '#a855f7'; icon = '🗣️'; }
             else if (category === 'TRIGGER') { color = '#facc15'; icon = '🚀'; }
             else if (category === 'HUB') { color = '#3b82f6'; icon = '⚡'; }
             else if (category === 'FORTNITE') { color = '#10b981'; icon = '🎮'; }
             else if (category === 'MISSION') { color = '#ec4899'; icon = '🎉'; }
 
-            const entry = document.createElement('div');
-            entry.style.cssText = `border-left: 3px solid ${color}; padding-left: 8px; word-break: break-all;`;
-            entry.innerHTML = `<span style="color: #64748b;">[${timeStr}]</span> <strong style="color: ${color};">${icon} [${category}]</strong> ${message}`;
-            list.appendChild(entry);
-            list.scrollTop = list.scrollHeight;
+            targets.forEach(list => {
+                const entry = document.createElement('div');
+                entry.style.cssText = `border-left: 3px solid ${color}; padding-left: 8px; word-break: break-all; margin-bottom: 4px;`;
+                entry.innerHTML = `<span style="color: #64748b;">[${timeStr}]</span> <strong style="color: ${color};">${icon} [${category}]</strong> ${message}`;
+                list.appendChild(entry);
+                list.scrollTop = list.scrollHeight;
+            });
         }
         window.addSystemLog = addSystemLog;
     </script>
