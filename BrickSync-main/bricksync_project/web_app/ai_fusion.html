@@ -3797,7 +3797,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             }
             window.isBlockExecutionRunning = true;
             // 실행 가능한 스택 찾기 (방어 로직 탑재)
-            const validStacks = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).filter(stack => {
+            let validStacks = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).filter(stack => {
                 const firstBlock = stack.querySelector('.workspace-item');
                 const action = (firstBlock && firstBlock.getAttribute('data-action')) || '';
 
@@ -4754,7 +4754,7 @@ print("BrickSync Sandbox Run")
                     finalPin = currentMission.pinCode;
                 }
                 let presentActions = [];
-                const validStacks = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).filter(stack => {
+                let validStacks = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).filter(stack => {
                     const firstBlock = stack.querySelector('.workspace-item');
                     const action = (firstBlock && firstBlock.getAttribute('data-action')) || '';
                     return action === 'start' || action.startsWith('event_');
