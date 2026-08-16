@@ -4030,9 +4030,9 @@ print("BrickSync Sandbox Run")
                             pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} >= 3 ? ${pythonTimeVal} * 2175 : ${pythonTimeVal} * 1315)) \n${indent}sm() \n`;
                             if (unit !== '8') {
                                 localActionsQueue.push({ action: 'motor_ccw', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += (timeVal * 1150);
+                                cumulativeDelayMs += (timeVal * 1315);
                             } else {
-                                cumulativeDelayMs += (timeVal * 1150);
+                                cumulativeDelayMs += (timeVal * 1315);
                             }
                             localActionsQueue.push({ action: 'motor_stop', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800; // 관성 및 반대 방향 회전 충돌 방지 브레이크 휴식 800ms

@@ -3633,10 +3633,10 @@ print("BrickSync Sandbox Run")
                             cumulativeDelayMs += 800; // 관성 및 반대 회전 충돌 방지용 브레이크 휴식 800ms
                             break;
                         case 'motor_ccw':
-                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1150)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} >= 3 ? ${pythonTimeVal} * 2175 : ${pythonTimeVal} * 1315)) \n${indent}sm() \n`;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_LEFT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 1150;
+                                cumulativeDelayMs += 1315;
                             }
                             localActionsQueue.push({ action: 'STOP_MWHEEL_LEFT', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800; // 관성 및 반대 회전 충돌 방지용 브레이크 휴식 800ms
@@ -3898,10 +3898,10 @@ except:
                                 currentBleDelay += 600;
                                 break;
                             case 'motor_ccw':
-                                // 1회전당 975ms 기준 (실측 관성보정 2바퀴 720도 정적중)
+                                // 1회전당 1400ms 기준 (시계방향과 동일 360도 정밀 회전 보정)
                                 for (let i = 0; i < timeVal; i++) {
                                     bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 975;
+                                    currentBleDelay += 1400;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 600;
