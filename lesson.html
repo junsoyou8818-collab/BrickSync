@@ -4534,7 +4534,7 @@ except:
         };
         const themeDescriptionsEn = {
             '1': 'Wait 5 seconds, move forward 3 times, turn left once, and move backward 2 times.',
-            '2': 'Wait 5 seconds, run right rotation 3 times, left rotation 3 times.',
+            '2': 'Wait 5 seconds, run Clockwise rotation 3 times, Counter clockwise rotation 3 times.',
             '3': 'Wait 5 seconds, rotate the motor right 3 times and left 2 times.',
             '4': 'Wait 5 seconds, move forward 4 times, turn right once, and move forward 2 times.',
             '5': 'Make the red light turn on after waiting 2 seconds.'
@@ -4554,23 +4554,23 @@ except:
                     ]
                 },
                 '2': {
-                    badge: 'STAGE 2', title: '바닷속 잠수함으로 바다를 탐험해요', desc: '5초 대기 후 시계방향 3번, 반시계방향 3번 작동하세요.',
+                    badge: 'STAGE 2', title: '바닷속 잠수함으로 바다를 탐험해요', desc: '5초 대기 후 시계방향 회전 3번, 반시계방향 회전 3번 작동하세요.',
                     pinCode: '8932',
                     tasks: [
                         { id: 'start', text: '재생(시작) 블록 연결하기' },
                         { id: 'flow_wait_5', text: '5초 대기하기' },
-                        { id: 'motor_cw_3', text: '시계방향 3번 실행하기' },
-                        { id: 'motor_ccw_3', text: '반시계방향 3번 실행하기' }
+                        { id: 'motor_cw_3', text: '시계방향 회전 3번 실행하기' },
+                        { id: 'motor_ccw_3', text: '반시계방향 회전 3번 실행하기' }
                     ]
                 },
                 '3': {
-                    badge: 'STAGE 3', title: '대관람차 회전하기', desc: '5초 대기 후 모터를 시계방향 3번, 반시계방향 2번 회전시켜 대관람차를 운행하세요.',
+                    badge: 'STAGE 3', title: '대관람차 회전하기', desc: '5초 대기 후 모터를 시계방향 회전 3번, 반시계방향 회전 2번 실행시켜 대관람차를 운행하세요.',
                     pinCode: '5019',
                     tasks: [
                         { id: 'start', text: '재생(시작) 블록 연결하기' },
                         { id: 'flow_wait_5', text: '5초 대기하기' },
-                        { id: 'motor_cw', text: '시계방향 3회 실행하기' },
-                        { id: 'motor_ccw', text: '반시계방향 2회 실행하기' }
+                        { id: 'motor_cw', text: '시계방향 회전 3회 실행하기' },
+                        { id: 'motor_ccw', text: '반시계방향 회전 2회 실행하기' }
                     ]
                 },
                 '4': {
@@ -4607,23 +4607,23 @@ except:
                     ]
                 },
                 '2': {
-                    badge: 'STAGE 2', title: 'Explore the sea with an underwater submarine', desc: 'Wait 5 seconds, turn right 3 times, and turn left 3 times.',
+                    badge: 'STAGE 2', title: 'Explore the sea with an underwater submarine', desc: 'Wait 5 seconds, run Clockwise rotation 3 times and Counter clockwise rotation 3 times.',
                     pinCode: '8932',
                     tasks: [
                         { id: 'start', text: 'Connect Play (Start) block' },
                         { id: 'flow_wait_5', text: 'Wait 5 seconds' },
-                        { id: 'motor_cw_3', text: 'Run right rotation 3 times' },
-                        { id: 'motor_ccw_3', text: 'Run left rotation 3 times' }
+                        { id: 'motor_cw_3', text: 'Run Clockwise rotation 3 times' },
+                        { id: 'motor_ccw_3', text: 'Run Counter clockwise rotation 3 times' }
                     ]
                 },
                 '3': {
-                    badge: 'STAGE 3', title: 'Rotate the Ferris Wheel', desc: 'Wait 5 seconds, rotate the motor right 3 times and left 2 times.',
+                    badge: 'STAGE 3', title: 'Rotate the Ferris Wheel', desc: 'Wait 5 seconds, run Clockwise rotation 3 times and Counter clockwise rotation 2 times.',
                     pinCode: '5019',
                     tasks: [
                         { id: 'start', text: 'Connect Play (Start) block' },
                         { id: 'flow_wait_5', text: 'Wait 5 seconds' },
-                        { id: 'motor_cw', text: 'Run right rotation 3 times' },
-                        { id: 'motor_ccw', text: 'Run left rotation 2 times' }
+                        { id: 'motor_cw', text: 'Run Clockwise rotation 3 times' },
+                        { id: 'motor_ccw', text: 'Run Counter clockwise rotation 2 times' }
                     ]
                 },
                 '4': {

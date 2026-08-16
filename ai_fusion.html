@@ -4764,61 +4764,61 @@ print("BrickSync Sandbox Run")
             const missionData = {
                 ko: {
                     '6': {
-                        badge: 'STAGE 6', title: '가위, 바위, 보로 여닫는 오두막 지붕', desc: 'AI 제스처 인식 블록 연결하기 / 5초 대기하기 / 모터 시계방향(열기) 1회 회전하기 / 모터 반시계방향(닫기) 1회 회전하기',
+                        badge: 'STAGE 6', title: '가위, 바위, 보로 여닫는 오두막 지붕', desc: 'AI 제스처 인식 블록 연결하기 / 5초 대기하기 / 시계방향 회전 1회 실행하기 / 반시계방향 회전 1회 실행하기',
                         pinCode: '7241',
                         tasks: [
                             { id: 'event_ai_gesture', text: 'AI 제스처 인식 블록 연결하기' },
                             { id: 'flow_wait', text: '5초 대기하기' },
-                            { id: 'motor_cw', text: '모터 시계방향(열기) 1회 회전하기' },
-                            { id: 'motor_ccw', text: '모터 반시계방향(닫기) 1회 회전하기' }
+                            { id: 'motor_cw', text: '시계방향 회전 1회 실행하기' },
+                            { id: 'motor_ccw', text: '반시계방향 회전 1회 실행하기' }
                         ]
                     },
                     '7': {
-                        badge: 'STAGE 7', title: '마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네', desc: 'AI 음성 인식 블록 연결하기 / 5초 대기하기 / 모터를 반시계 방향으로 2회 회전하기',
+                        badge: 'STAGE 7', title: '마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네', desc: 'AI 음성 인식 블록 연결하기 / 5초 대기하기 / 반시계방향 회전 2회 실행하기',
                         pinCode: '5019',
                         tasks: [
                             { id: 'event_ai_gesture', text: 'AI 음성 인식 블록 연결하기' },
                             { id: 'flow_wait', text: '5초 대기하기' },
-                            { id: ['motor_cw', 'motor_ccw'], text: '모터를 반시계 방향으로 2회 회전하기' }
+                            { id: ['motor_cw', 'motor_ccw'], text: '반시계방향 회전 2회 실행하기' }
                         ]
                     },
                                         '8': {
-                        badge: 'STAGE 8', title: '몬스터를 보여줘! 경보 알림켜기', desc: 'AI 비전 이미지 인식 블록 연결하기 / 5초 대기하기 / 모터를 반시계 방향으로 3회 회전하기',
+                        badge: 'STAGE 8', title: '몬스터를 보여줘! 경보 알림켜기', desc: 'AI 비전 이미지 인식 블록 연결하기 / 5초 대기하기 / 반시계방향 회전 3회 실행하기',
                         pinCode: '8932',
                         tasks: [
                             { id: 'event_ai_gesture', text: 'AI 비전 이미지 인식 블록 연결하기' },
                             { id: 'flow_wait', text: '5초 대기하기' },
-                            { id: ['motor_cw', 'motor_ccw'], text: '모터를 반시계 방향으로 3회 회전하기' }
+                            { id: ['motor_cw', 'motor_ccw'], text: '반시계방향 회전 3회 실행하기' }
                         ]
                     }
                 },
                 en: {
                     '6': {
-                        badge: 'STAGE 6', title: 'RPS Gesture-Controlled Cabin Roof (Open/Close)', desc: 'Connect AI Gesture block / Wait 5 seconds / Rotate motor clockwise (Open) 1 time / Rotate motor counterclockwise (Close) 1 time',
+                        badge: 'STAGE 6', title: 'RPS Gesture-Controlled Cabin Roof (Open/Close)', desc: 'Connect AI Gesture block / Wait 5 seconds / Run Clockwise rotation 1 time / Run Counter clockwise rotation 1 time',
                         pinCode: '7241',
                         tasks: [
                             { id: 'event_ai_gesture', text: 'Connect the AI Gesture block' },
                             { id: 'flow_wait', text: 'Wait 5 seconds' },
-                            { id: 'motor_cw', text: 'Rotate the motor clockwise (Open) 1 time' },
-                            { id: 'motor_ccw', text: 'Rotate the motor counterclockwise (Close) 1 time' }
+                            { id: 'motor_cw', text: 'Run Clockwise rotation 1 time' },
+                            { id: 'motor_ccw', text: 'Run Counter clockwise rotation 1 time' }
                         ]
                     },
                     '7': {
-                        badge: 'STAGE 7', title: 'Shout into the Mic! Control the Magic Swing with Your Voice', desc: 'Connect the AI Voice Recognition block / Wait 5 seconds / Rotate the motor counterclockwise twice',
+                        badge: 'STAGE 7', title: 'Shout into the Mic! Control the Magic Swing with Your Voice', desc: 'Connect AI Voice Recognition block / Wait 5 seconds / Run Counter clockwise rotation 2 times',
                         pinCode: '5019',
                         tasks: [
                             { id: 'event_ai_gesture', text: 'Connect the AI Voice Recognition block' },
                             { id: 'flow_wait', text: 'Wait 5 seconds' },
-                            { id: ['motor_cw', 'motor_ccw'], text: 'Rotate the motor counterclockwise twice' }
+                            { id: ['motor_cw', 'motor_ccw'], text: 'Run Counter clockwise rotation 2 times' }
                         ]
                     },
                                         '8': {
-                        badge: 'STAGE 8', title: 'Show the Monster! Turn on Alarm Alert', desc: 'Connect the AI Vision Image Recognition block / Wait 5 seconds / Rotate the motor counterclockwise 3 times',
+                        badge: 'STAGE 8', title: 'Show the Monster! Turn on Alarm Alert', desc: 'Connect AI Vision Image Recognition block / Wait 5 seconds / Run Counter clockwise rotation 3 times',
                         pinCode: '8932',
                         tasks: [
                             { id: 'event_ai_gesture', text: 'Connect the AI Vision Image Recognition block' },
                             { id: 'flow_wait', text: 'Wait 5 seconds' },
-                            { id: ['motor_cw', 'motor_ccw'], text: 'Rotate the motor counterclockwise 3 times' }
+                            { id: ['motor_cw', 'motor_ccw'], text: 'Run Counter clockwise rotation 3 times' }
                         ]
                     }
                 }
