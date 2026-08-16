@@ -3803,7 +3803,14 @@ except:
             const activeConnType = (window.parent && window.parent.connectionType) || window.connectionType;
             const hasBluetooth = (window.parent && window.parent.txCharacteristic) || window.txCharacteristic;
             if (!activeConnType && !hasBluetooth) {
+                if (typeof addSystemLog === 'function') {
+                    addSystemLog('HUB', '⚠️ 레고 허브가 연결되어 있지 않습니다. 상단의 [블루투스/USB 연결] 버튼을 눌러 레고 허브를 연결해주세요!');
+                }
                 console.log("[BrickSync] 하드웨어 미연결 상태: 시뮬레이션 모드 진행");
+            } else {
+                if (typeof addSystemLog === 'function') {
+                    addSystemLog('HUB', `🟢 레고 허브 연결 확인됨 (${activeConnType || 'BLE'}). 모터 패킷 전송을 시작합니다.`);
+                }
             }
 
             if (activeConnType === 'BLE' || activeConnType === 'USB' || hasBluetooth) {
