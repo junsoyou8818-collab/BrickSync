@@ -238,8 +238,8 @@ async def handle_websocket(request):
                         msg_text = data.get("msg", "⚡ [LEGO HUB] 모터 제어 패킷 송출")
                         print(f"⚡ [LEGO HUB LOG] {msg_text}")
                     elif action == "MONSTER_ALERT":
-                        print("[ALERT] 몬스터 감지 경보 발동! G키")
-                        threading.Thread(target=lambda: safe_press('g'), daemon=True).start()
+                        print("[ALERT] 몬스터 감지 경보 발동! [키 (조명 켜기)")
+                        threading.Thread(target=lambda: safe_press('['), daemon=True).start()
                         
                     elif action == "SWING_CONTROL":
                         direction = data.get("dir")
