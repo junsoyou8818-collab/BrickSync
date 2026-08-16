@@ -270,24 +270,28 @@ async def handle_websocket(request):
                         threading.Thread(target=press_swing_key, args=(key, turns), daemon=True).start()
                         
                     elif action == "motor_cw":
-                        print("▶ 오두막 지붕 열기 / 모터 시계방향 (H키 1.3초 정밀 누름)")
+                        print("▶ 오두막 지붕 열기 / 모터 시계방향 수신 (H키 정밀 탭 전송)")
                         def press_motor_cw():
                             with pydirectinput_lock:
                                 try:
+                                    pydirectinput.keyUp('h')
+                                    time.sleep(0.05)
                                     pydirectinput.keyDown('h')
-                                    time.sleep(1.3)
+                                    time.sleep(0.15)
                                     pydirectinput.keyUp('h')
                                 except Exception as e:
                                     print(f"⚠ H키 전송 오류: {e}")
                         threading.Thread(target=press_motor_cw, daemon=True).start()
                         
                     elif action == "motor_ccw":
-                        print("▶ 오두막 지붕 닫기 / 모터 반시계방향 (J키 1.3초 정밀 누름)")
+                        print("▶ 오두막 지붕 닫기 / 모터 반시계방향 수신 (J키 정밀 탭 전송)")
                         def press_motor_ccw():
                             with pydirectinput_lock:
                                 try:
+                                    pydirectinput.keyUp('j')
+                                    time.sleep(0.05)
                                     pydirectinput.keyDown('j')
-                                    time.sleep(1.3)
+                                    time.sleep(0.15)
                                     pydirectinput.keyUp('j')
                                 except Exception as e:
                                     print(f"⚠ J키 전송 오류: {e}")
