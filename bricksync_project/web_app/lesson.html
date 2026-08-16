@@ -4773,7 +4773,8 @@ except:
 
                     let completedTasks = 0;
 
-                    currentMission.tasks.forEach((task, idx) => {
+                    const activeMission = (typeof getMissionData === 'function' ? getMissionData()[unit] : null) || currentMission;
+                    activeMission.tasks.forEach((task, idx) => {
                         const li = document.getElementById('task-item-' + idx);
                         if (!li) return;
                         
@@ -4864,7 +4865,8 @@ except:
                         }
                     });
 
-                    const percent = Math.min(100, Math.round((completedTasks / currentMission.tasks.length) * 100));
+                    const activeMissionPct = (typeof getMissionData === 'function' ? getMissionData()[unit] : null) || currentMission;
+                    const percent = Math.min(100, Math.round((completedTasks / (activeMissionPct.tasks ? activeMissionPct.tasks.length : 1)) * 100));
 
                     document.getElementById('m-progress').style.width = percent + '%';
                     document.getElementById('m-percent').textContent = percent + '%';

@@ -5278,7 +5278,9 @@ print("BrickSync Sandbox Run")
                     const tasksEl = document.getElementById('m-tasks-list');
                     if (tasksEl) {
                         tasksEl.innerHTML = '';
-                        currentMission.tasks.forEach((task, idx) => {
+                        const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                    const activeMission = (missionData[currentLang] || missionData['ko'])[unit] || currentMission;
+                    activeMission.tasks.forEach((task, idx) => {
                             const li = document.createElement('li');
                             li.id = 'task-item-' + idx;
                             li.style.cssText = 'display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 500; color: #64748b; transition: all 0.3s ease;';
@@ -5318,7 +5320,9 @@ print("BrickSync Sandbox Run")
 
                         let completedTasks = 0;
 
-                        currentMission.tasks.forEach((task, idx) => {
+                        const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
+                    const activeMission = (missionData[currentLang] || missionData['ko'])[unit] || currentMission;
+                    activeMission.tasks.forEach((task, idx) => {
                             const li = document.getElementById('task-item-' + idx);
                             if (!li) return;
                             
@@ -5336,7 +5340,9 @@ print("BrickSync Sandbox Run")
                             }
                         });
 
-                        let percent = Math.min(100, Math.round((completedTasks / currentMission.tasks.length) * 100));
+                        const currentLangPct = localStorage.getItem('bricksync_lang') || 'ko';
+                    const activeMissionPct = (missionData[currentLangPct] || missionData['ko'])[unit] || currentMission;
+                    let percent = Math.min(100, Math.round((completedTasks / (activeMissionPct.tasks ? activeMissionPct.tasks.length : 1)) * 100));
                         if (unit === '6' && !isSequenceValid) {
                             percent = Math.min(80, percent); // 올바른 순서 결합 전까지 100% 제한
                         }
