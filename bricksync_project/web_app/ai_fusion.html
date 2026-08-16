@@ -4320,7 +4320,7 @@ print("BrickSync Sandbox Run")
                             }
                             case 'motor_cw': {
                                 const runDuration = timeVal >= 3 ? Math.round(timeVal * 2175) : Math.round(timeVal * 1315);
-                                bleQueue.push({ action: 'motor_cw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
+                                bleQueue.push({ action: 'motor_cw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
                                 currentBleDelay += runDuration;
                                 bleQueue.push({ action: 'motor_stop_cw', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 600;
@@ -4328,7 +4328,7 @@ print("BrickSync Sandbox Run")
                             }
                             case 'motor_ccw': {
                                 const runDuration = timeVal >= 3 ? Math.round(timeVal * 2175) : Math.round(timeVal * 1315);
-                                bleQueue.push({ action: 'motor_ccw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
+                                bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
                                 currentBleDelay += runDuration;
                                 bleQueue.push({ action: 'motor_stop_ccw', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 600;

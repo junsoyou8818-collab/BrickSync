@@ -3918,7 +3918,7 @@ except:
                             case 'motor_cw':
                                 // 1회전당 1400ms 기준 (실측 3바퀴 1080도 정적중)
                                 for (let i = 0; i < timeVal; i++) {
-                                    bleQueue.push({ action: 'motor_cw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
+                                    bleQueue.push({ action: 'motor_cw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
                                     currentBleDelay += 1400;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
@@ -3927,7 +3927,7 @@ except:
                             case 'motor_ccw':
                                 // 1회전당 1400ms 기준 (시계방향과 동일 360도 정밀 회전 보정)
                                 for (let i = 0; i < timeVal; i++) {
-                                    bleQueue.push({ action: 'motor_ccw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
+                                    bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
                                     currentBleDelay += 1400;
                                 }
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
