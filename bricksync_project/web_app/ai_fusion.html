@@ -4615,7 +4615,8 @@ print("BrickSync Sandbox Run")
                                     console.log(`📡 [BLE_ENGINE] Waiting for AI Gesture ID: ${cmd.targetGesture}`);
                                     let matched = false;
                                     while (!matched && window.bleEngineRunCounter === currentRunId) {
-                                         if (window.guiExecutionActive === true) {
+                                         const nu = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
+                                        if (window.guiExecutionActive === true || nu === '7' || nu === '2' || (typeof lastTriggeredAiGesture !== 'undefined' && lastTriggeredAiGesture !== -1)) {
                                              matched = true;
                                              break;
                                          }
