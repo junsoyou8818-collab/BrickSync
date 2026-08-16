@@ -3795,6 +3795,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             } else {
                 window.guiExecutionActive = false;
             }
+            if (triggerAction !== 'gui' && window.isBlockExecutionRunning) { console.log('🔒 Shield active'); return; }
             window.isBlockExecutionRunning = true;
             // 실행 가능한 스택 찾기 (방어 로직 탑재)
             let validStacks = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).filter(stack => {
