@@ -6297,7 +6297,7 @@ print("BrickSync Sandbox Run")
             }
         }
 
-                function parseVoiceCommand(text) {
+                        function parseVoiceCommand(text) {
             speechCooldown = false;
             window.isBlockExecutionRunning = false;
             try {
@@ -6339,22 +6339,7 @@ print("BrickSync Sandbox Run")
                 }
             }
 
-            // 3. 🔥 Instant Direct LEGO Hub Motor Broadcast (Zero wait time!)
-            let speedInt = directionVal === 0 ? 40 : -40;
-            let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
-            const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
-
-            (async () => {
-                try {
-                    triggerSystemLog('HUB', `⚡ 레고 허브 음성 직결 모터 패킷 송출 (속도: ${speedInt})`);
-                    for (let p = 0; p < 6; p++) {
-                        await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(() => {});
-                        await new Promise(r => setTimeout(r, 20));
-                    }
-                } catch(e) {}
-            })();
-
-            // 4. 🎮 Fortnite WebSocket Action (Untouched!)
+            // 3. 🎮 Fortnite WebSocket Action (Untouched!)
             try {
                 if (window.parent && window.parent.sendWebSocketAction) {
                     window.parent.sendWebSocketAction({
@@ -6365,12 +6350,42 @@ print("BrickSync Sandbox Run")
                 }
             } catch (e) {}
 
-            // 5. 🧩 Workspace Block Canvas Execution
+            // 4. 🧩 Workspace Block Canvas Execution
             window.lastParsedSpeechTurns = turns;
             if (typeof lastTriggeredAiGesture !== 'undefined') {
                 lastTriggeredAiGesture = directionVal;
             }
             runBlocks('event_ai_gesture', directionVal);
+
+            // 5. 🔥 Exact 2s Timer Wait -> 8-Byte LWP3 Motor Rotation -> Timed Stop Packet (Ports A~F)
+            let speedInt = directionVal === 0 ? 40 : -40;
+            let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
+            const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
+
+            (async () => {
+                try {
+                    // [1단계] 블록 타이머 2초 대기
+                    triggerSystemLog('TRIGGER', '⏳ [블록 타이머] 2초 대기 시작...');
+                    await new Promise(r => setTimeout(r, 2000));
+
+                    // [2단계] 레고 허브 포트 A~F로 8바이트 LWP3 모터 회전 제어 패킷 송출
+                    triggerSystemLog('HUB', `⚡ 레고 허브 모터 패킷 전송 (속도: ${speedInt}, 설정 회전수: ${turns}바퀴)`);
+                    for (let p = 0; p < 6; p++) {
+                        await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(() => {});
+                        await new Promise(r => setTimeout(r, 20));
+                    }
+
+                    // [3단계] 지정한 회전수(turns * 1315ms)만큼 정확히 구동 후 모터 정지 패킷 송출
+                    const runDurationMs = Math.round(turns * 1315);
+                    await new Promise(r => setTimeout(r, runDurationMs));
+
+                    triggerSystemLog('HUB', `🛑 레고 허브 모터 정지 패킷 송출 (회전 완료: ${turns}바퀴)`);
+                    for (let p = 0; p < 6; p++) {
+                        await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, 0x00])).catch(() => {});
+                        await new Promise(r => setTimeout(r, 20));
+                    }
+                } catch(e) {}
+            })();
 
             setTimeout(() => {
                 speechCooldown = false;
