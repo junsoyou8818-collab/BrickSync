@@ -543,15 +543,10 @@ window.addSystemLog = addSystemLog;
         });
 
 
-        let bleWriteQueue = Promise.resolve();
+                let bleWriteQueue = Promise.resolve();
 
         // --- 2. Web Bluetooth 및 USB 통신 영역 ---
         window.writeToHub = async function (data) {
-            try {
-                if (typeof data !== 'string') {
-                    console.log("⚡ [LEGO HUB PACKET]", data);
-                }
-            } catch(e) {}
             let buffer = (typeof data === 'string') ? new TextEncoder().encode(data) : data;
 
             if (window.connectionType === 'USB') {
@@ -560,36 +555,21 @@ window.addSystemLog = addSystemLog;
                 window.writer.releaseLock();
                 window.writer = null;
             } else if (window.connectionType === 'BLE' || window.txCharacteristic) {
-                // Queue the BLE write to prevent GATT conflicts
                 bleWriteQueue = bleWriteQueue.then(async () => {
                     for (let i = 0; i < buffer.byteLength; i += 20) {
                         let chunk = buffer.slice(i, i + 20);
                         if (window.txCharacteristic) {
-                            let retries = 3;
-                            while (retries > 0) {
+                            try {
+                                await window.txCharacteristic.writeValueWithoutResponse(chunk);
+                            } catch (e) {
                                 try {
-                                    if (window.txCharacteristic.writeValueWithoutResponse) {
-                                        await window.txCharacteristic.writeValueWithoutResponse(chunk);
-                                    } else {
-                                        await window.txCharacteristic.writeValue(chunk);
-                                    }
-                                    break;
-                                } catch (e) {
-                                    try {
-                                        await window.txCharacteristic.writeValue(chunk);
-                                        break;
-                                    } catch (e2) {
-                                        console.log("BLE Write Error (retrying)", e2);
-                                        retries--;
-                                        await new Promise(r => setTimeout(r, 30));
-                                    }
-                                }
+                                    await window.txCharacteristic.writeValue(chunk);
+                                } catch(e2) {}
                             }
-                            // 시스템 BLE 큐 확보를 위해 청크 당 대기
                             await new Promise(r => setTimeout(r, 20));
                         }
                     }
-                });
+                }).catch(() => {});
                 await bleWriteQueue;
             }
         };

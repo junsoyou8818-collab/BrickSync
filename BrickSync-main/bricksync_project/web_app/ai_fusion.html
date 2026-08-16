@@ -6398,14 +6398,14 @@ print("BrickSync Sandbox Run")
             runBlocks('event_ai_gesture', directionVal);
 
             try {
-                window.parent.sendWebSocketAction({
-                    action: "SWING_CONTROL",
-                    dir: directionVal === 0 ? "FORWARD" : "BACKWARD",
-                    val: turns
-                });
-            } catch (e) {
-                console.error("Fortnite websocket transmission failed:", e);
-            }
+                if (window.parent && window.parent.sendWebSocketAction) {
+                    window.parent.sendWebSocketAction({
+                        action: "SWING_CONTROL",
+                        dir: directionVal === 0 ? "FORWARD" : "BACKWARD",
+                        val: turns
+                    });
+                }
+            } catch (e) {}
 
             setTimeout(() => {
                 speechCooldown = false;
