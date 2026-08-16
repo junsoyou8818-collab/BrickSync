@@ -3787,7 +3787,7 @@ except:
                 localActionsQueue.forEach(item => {
                     setTimeout(() => {
                         if (window.bleEngineRunCounter !== currentRunId) return; // 실행 종료/취소 감지
-                        try { window.parent.sendWebSocketAction({ action: item.action }); } catch (e) { }
+                        try { window.parent.sendWebSocketAction({ action: item.action }); if (typeof addSystemLog === 'function') addSystemLog('FORTNITE', '🎮 포트나이트 액션 연동 송출: ' + item.action); } catch (e) { }
                     }, item.delay);
                 });
             }
@@ -5693,6 +5693,68 @@ except:
             </div>
         </div>
     </div>
+
+    <!-- 📟 실시간 시스템 통신 로그 패널 (Live System Log Console) -->
+    <button id="btn-toggle-log" onclick="toggleLiveLogConsole()" class="btn-check-tasks" style="margin-left: 8px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #38bdf8; border: 1px solid #38bdf8;">
+        <i class="fas fa-terminal"></i> <span data-i18n="btn_live_log">통신 로그</span>
+    </button>
+
+    <div id="liveLogConsoleModal" style="display: none; position: fixed; right: 20px; bottom: 20px; width: 440px; height: 320px; background: #0f172a; border: 2px solid #38bdf8; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); z-index: 9999; flex-direction: column; overflow: hidden; font-family: 'Consolas', 'Courier New', monospace;">
+        <div style="background: #1e293b; padding: 10px 16px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 700; color: #38bdf8;">
+                <i class="fas fa-microchip"></i> <span>BrickSync Live System Log</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="clearLiveConsoleLogs()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 0.8rem;" title="Clear Logs"><i class="fas fa-trash-alt"></i></button>
+                <button onclick="toggleLiveLogConsole()" style="background: none; border: none; color: #f43f5e; cursor: pointer; font-size: 1rem; font-weight: bold;">&times;</button>
+            </div>
+        </div>
+        <div id="liveConsoleLogList" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; color: #f8fafc; line-height: 1.4;">
+            <div style="color: #64748b; font-style: italic;">[System] 통신 로그 모니터링 준비 완료 (AI 비전 / 레고 허브 / 포트나이트)</div>
+        </div>
+    </div>
+
+    <script>
+        function toggleLiveLogConsole() {
+            const panel = document.getElementById('liveLogConsoleModal');
+            if (panel) {
+                const isHidden = panel.style.display === 'none' || panel.style.display === '';
+                panel.style.display = isHidden ? 'flex' : 'none';
+            }
+        }
+        window.toggleLiveLogConsole = toggleLiveLogConsole;
+
+        function clearLiveConsoleLogs() {
+            const list = document.getElementById('liveConsoleLogList');
+            if (list) {
+                list.innerHTML = '<div style="color: #64748b; font-style: italic;">[System] 로그가 초기화되었습니다.</div>';
+            }
+        }
+        window.clearLiveConsoleLogs = clearLiveConsoleLogs;
+
+        function addSystemLog(category, message) {
+            const list = document.getElementById('liveConsoleLogList');
+            if (!list) return;
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+            
+            let color = '#38bdf8'; // 기본 하늘색
+            let icon = 'ℹ️';
+            if (category === 'AI') { color = '#a855f7'; icon = '📸'; }
+            else if (category === 'TRIGGER') { color = '#facc15'; icon = '🚀'; }
+            else if (category === 'HUB') { color = '#3b82f6'; icon = '⚡'; }
+            else if (category === 'FORTNITE') { color = '#10b981'; icon = '🎮'; }
+            else if (category === 'MISSION') { color = '#ec4899'; icon = '🎉'; }
+
+            const entry = document.createElement('div');
+            entry.style.cssText = `border-left: 3px solid ${color}; padding-left: 8px; word-break: break-all;`;
+            entry.innerHTML = `<span style="color: #64748b;">[${timeStr}]</span> <strong style="color: ${color};">${icon} [${category}]</strong> ${message}`;
+            list.appendChild(entry);
+            list.scrollTop = list.scrollHeight;
+        }
+        window.addSystemLog = addSystemLog;
+    </script>
+
 </body>
 
 </html>
