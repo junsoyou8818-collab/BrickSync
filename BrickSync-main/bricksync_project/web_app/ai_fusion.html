@@ -6573,13 +6573,13 @@ print("BrickSync Sandbox Run")
                         if (candidateAiGesture === detectedGesture) {
                             consecutiveAiFrames++;
                             if (consecutiveAiFrames >= 3 && lastTriggeredAiGesture !== detectedGesture && !isBgGesture) {
+                                lastTriggeredAiGesture = detectedGesture;
+                                console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
+                                if (typeof addSystemLog === 'function') triggerSystemLog('AI', `👾 AI 이미지 인식 성공: ${labels[detectedGesture]} (신뢰도: ${Math.round(result.confidences[result.label]*100)}%)`);
                                 if (window.isBlockExecutionRunning) {
                                     await tf.nextFrame();
                                     continue;
                                 }
-                                lastTriggeredAiGesture = detectedGesture;
-                                console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
-                                if (typeof addSystemLog === 'function') triggerSystemLog('AI', `👾 AI 이미지 인식 성공: ${labels[detectedGesture]} (신뢰도: ${Math.round(result.confidences[result.label]*100)}%)`);
                                 runBlocks('event_ai_gesture', detectedGesture);
 
                                 if (!isTrainingActive && ((unit === '3' || unit === '8')) && detectedGesture === 0) {
