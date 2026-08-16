@@ -4349,19 +4349,14 @@ print("BrickSync Sandbox Run")
                     if (typeof lastTriggeredAiGesture !== 'undefined') {
                         lastTriggeredAiGesture = -1;
                     }
-                    console.log('✅ [Block Engine] Sequence completed! Popping up Mission Success PIN Modal & fireworks.');
+                    console.log('✅ [Block Engine] Sequence execution ended.');
                     try {
-                        // 100% 달성도 갱신 및 폭죽/PIN 모달 즉시 팝업
                         const progressEl = document.getElementById('m-progress');
-                        const percentEl = document.getElementById('m-percent');
-                        if (progressEl) {
-                            progressEl.style.width = '100%';
-                            progressEl.dataset.completed = 'true';
-                        }
-                        if (percentEl) percentEl.textContent = '100%';
-
-                        if (typeof triggerSuccessConfetti === 'function') {
-                            triggerSuccessConfetti();
+                        // 오직 미션 과제가 100% 완수(completed === 'true')되었을 때만 폭죽 및 PIN 모달 팝업
+                        if (progressEl && progressEl.dataset.completed === 'true') {
+                            if (typeof triggerSuccessConfetti === 'function') {
+                                triggerSuccessConfetti();
+                            }
                         }
                     } catch(e) { console.warn('Confetti launch error:', e); }
                 }, totalSequenceDurationMs);
