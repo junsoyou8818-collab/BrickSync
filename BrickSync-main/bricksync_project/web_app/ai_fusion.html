@@ -4688,11 +4688,13 @@ print("BrickSync Sandbox Run")
         }
 
         function closePinCodeModal() {
-            document.getElementById('pinCodeModal').style.display = 'none';
+            window.pinModalManuallyClosed = true;
+            const modal = document.getElementById('pinCodeModal');
+            if (modal) modal.style.display = 'none';
         }
 
         window.onUsbMissionComplete = function() {
-            if (!isMissionActive) return;
+            if (!isMissionActive || window.pinModalManuallyClosed) return;
             // 오직 미션 달성도 100% 완료 상태일 때만 보상 연동 및 팝업 작동
             const isMissionComplete = document.getElementById('m-progress') && document.getElementById('m-progress').dataset.completed === 'true';
             if (isMissionComplete) {
