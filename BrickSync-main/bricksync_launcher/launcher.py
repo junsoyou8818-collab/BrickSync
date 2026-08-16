@@ -57,11 +57,10 @@ def start_server():
         # 🛠 개발판: python server.py 실행
         cmd = [PYTHON_EXE, SERVER_PY]
 
+    # ✅ 실시간 시스템/포트나이트 연동 통신 터미널 콘솔 창 가시화 (CREATE_NEW_CONSOLE 사용)
     proc = subprocess.Popen(
         cmd,
-        creationflags=subprocess.CREATE_NO_WINDOW,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
+        creationflags=subprocess.CREATE_NEW_CONSOLE
     )
     return proc
 
