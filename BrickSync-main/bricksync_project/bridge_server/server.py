@@ -274,10 +274,11 @@ async def handle_websocket(request):
                         def press_motor_cw():
                             with pydirectinput_lock:
                                 try:
-                                    safe_key_down('h')
+                                    pydirectinput.keyDown('h')
                                     time.sleep(1.3)
-                                    safe_key_up('h')
-                                except Exception: pass
+                                    pydirectinput.keyUp('h')
+                                except Exception as e:
+                                    print(f"⚠ H키 전송 오류: {e}")
                         threading.Thread(target=press_motor_cw, daemon=True).start()
                         
                     elif action == "motor_ccw":
@@ -285,10 +286,11 @@ async def handle_websocket(request):
                         def press_motor_ccw():
                             with pydirectinput_lock:
                                 try:
-                                    safe_key_down('j')
+                                    pydirectinput.keyDown('j')
                                     time.sleep(1.3)
-                                    safe_key_up('j')
-                                except Exception: pass
+                                    pydirectinput.keyUp('j')
+                                except Exception as e:
+                                    print(f"⚠ J키 전송 오류: {e}")
                         threading.Thread(target=press_motor_ccw, daemon=True).start()
 
                     elif action in ["motor_stop", "motor_stop_cw", "motor_stop_ccw", "motor_stop_generic"]:
