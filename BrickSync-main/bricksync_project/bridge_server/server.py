@@ -158,7 +158,7 @@ async def handle_websocket(request):
                     data = json.loads(msg.data)
                     action = data.get("action")
                     
-                    if action and action in ["STEER_UP", "STEER_DOWN", "STEER_LEFT", "STEER_RIGHT", "MWHEEL_LEFT", "MWHEEL_RIGHT", "SWING_CONTROL", "motor_cw", "motor_ccw", "CAT_FEED_REWARD", "MONSTER_ALERT"]:
+                    if action and action in ["STEER_UP", "STEER_DOWN", "STEER_LEFT", "STEER_RIGHT", "MWHEEL_LEFT", "MWHEEL_RIGHT", "SWING_CONTROL", "motor_cw", "motor_ccw", "CAT_FEED_REWARD", "MONSTER_ALERT", "HUB_LOG"]:
                         focus_fortnite()
                     
                     if action == "STEER_UP":
@@ -234,6 +234,9 @@ async def handle_websocket(request):
                         print("[REWARD] 보상 발동! E키")
                         threading.Thread(target=lambda: safe_press('e'), daemon=True).start()
                         
+                    elif action == "HUB_LOG":
+                        msg_text = data.get("msg", "⚡ [LEGO HUB] 모터 제어 패킷 송출")
+                        print(f"⚡ [LEGO HUB LOG] {msg_text}")
                     elif action == "MONSTER_ALERT":
                         print("[ALERT] 몬스터 감지 경보 발동! G키")
                         threading.Thread(target=lambda: safe_press('g'), daemon=True).start()

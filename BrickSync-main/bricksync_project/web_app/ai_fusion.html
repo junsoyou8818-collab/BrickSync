@@ -4387,7 +4387,15 @@ print("BrickSync Sandbox Run")
 
                                 if (window.bleEngineRunCounter !== currentRunId) return;
 
+                                
                                 if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
+                                    try {
+                                        const hubLogMsg = `⚡ 레고 허브 신호 송출: ${cmd.action} (속도: ${cmd.speed || 0})`;
+                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', hubLogMsg);
+                                        if (window.parent && window.parent.sendWebSocketAction) {
+                                            window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
+                                        }
+                                    } catch(e) {}
                                     let speedInt = Math.round(cmd.speed);
                                     let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
                                     let motorSent = false;
