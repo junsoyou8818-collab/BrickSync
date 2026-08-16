@@ -832,7 +832,15 @@
             animation: none;
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.3), 0 4px 6px rgba(0, 0, 0, 0.2) !important;
         }
-    </style>
+    
+/* 7단원/2단원 음성 인식 블록 하단 화살표 선택 버튼 완전 제거 */
+.unit-2 .spike-block[data-action="event_ai_gesture"] .block-param,
+.unit-7 .spike-block[data-action="event_ai_gesture"] .block-param,
+body[data-unit="2"] .spike-block[data-action="event_ai_gesture"] .block-param,
+body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
+    display: none !important;
+}
+</style>
 <script>
     (function() {
         try {
@@ -5072,9 +5080,10 @@ print("BrickSync Sandbox Run")
                         if (String(targetUnit) === '2' || String(targetUnit) === '7') {
                             if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-microphone"></i>';
                             if (paramEl) {
-                                paramEl.setAttribute('data-val', '0');
-                                paramEl.innerHTML = '<i class="fas fa-arrow-up" style="color:#64748b;"></i>';
+                                paramEl.style.display = 'none'; // 하단 화살표 선택 버튼 숨김
                             }
+                            const wsParams = document.querySelectorAll('#workspaceArea .spike-block[data-action="event_ai_gesture"] .block-param');
+                            wsParams.forEach(p => p.style.display = 'none');
                         } else if (String(targetUnit) === '3' || String(targetUnit) === '8') {
                             if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-dragon"></i>';
                             if (paramEl) {
