@@ -3809,8 +3809,12 @@
                 console.log(`[BrickSync] 매칭되는 블록 스택이 없으므로 실행을 생략합니다. (Trigger: ${triggerAction}, Val: ${triggerVal})`);
                 return;
             }
+            // AI/음성 트리거 시 멀티 스택 이중 연쇄 실행(반대 방향 회전 추가) 방지: 단일 주 스택만 정밀 실행
+            if (triggerAction !== 'gui' && validStacks.length > 1) {
+                validStacks = [validStacks[0]];
+            }
             if (typeof addSystemLog === 'function') {
-                addSystemLog('TRIGGER', `🚀 AI 블록 구동 시작 (${validStacks.length}개 스택 연쇄 실행 중...)`);
+                addSystemLog('TRIGGER', `🚀 AI 블록 구동 시작 (${validStacks.length}개 스택 정밀 실행 중)`);
             }
 
             // 스택들을 왼쪽에서 오른쪽으로 정렬
