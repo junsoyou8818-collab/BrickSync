@@ -231,7 +231,7 @@ async def handle_websocket(request):
                                     for edit_k in ['g', 'f']:
                                         pydirectinput.keyUp(edit_k)
                                     time.sleep(0.05)
-                                    for l_key in ['[', 'p', 'l', 't', 'n']:
+                                    for l_key in ['[', 'p', 't', 'n']:
                                         pydirectinput.keyDown(l_key)
                                         time.sleep(0.15)
                                         pydirectinput.keyUp(l_key)
