@@ -369,6 +369,31 @@ def init_app():
         print(f"[SERVER] 웹앱 폴더 없음 → 클라우드 모드 (WebSocket only): ws://127.0.0.1:8000/ws")
     return app
 
+import webbrowser
+
+def open_browser():
+    time.sleep(1.2)
+    try:
+        webbrowser.open("https://www.bricksync.org/intro.html")
+    except Exception:
+        pass
+
+def free_port(port=8000):
+    try:
+        import subprocess
+        out = subprocess.check_output(f'netstat -ano | findstr :{port}', shell=True, stderr=subprocess.DEVNULL).decode('utf-8', errors='ignore')
+        my_pid = str(os.getpid())
+        for line in out.splitlines():
+            parts = line.strip().split()
+            if len(parts) >= 5 and parts[1].endswith(f':{port}'):
+                pid = parts[-1]
+                if pid != my_pid and pid != '0':
+                    subprocess.run(f'taskkill /F /PID {pid} /T', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception:
+        pass
+
 if __name__ == "__main__":
+    free_port(8000)
+    threading.Thread(target=open_browser, daemon=True).start()
     app = init_app()
     web.run_app(app, host="0.0.0.0", port=8000)
