@@ -4425,11 +4425,9 @@ print("BrickSync Sandbox Run")
                                     } else {
                                         // BLE 블루투스 연결 모드 (LWP3 공식 StartSpeed 0x07, StartPower 0x0D, DirectMode 0x51 전 포트 A~F 다중 브로드캐스팅)
                                         for (let p = 0; p < 6; p++) {
-                                            await sendFn(new Uint8Array([9, 0, 0x81, p, 0x11, 0x07, speedHex, 100, 0])).catch(e => { });
-                                            await sendFn(new Uint8Array([7, 0, 0x81, p, 0x11, 0x0D, speedHex])).catch(e => { });
                                             await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(e => { });
-                                            await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x01, speedHex])).catch(e => { });
-                                            await new Promise(r => setTimeout(r, 15));
+                                            await sendFn(new Uint8Array([9, 0, 0x81, p, 0x11, 0x07, speedHex, 100, 0])).catch(e => { });
+                                            await new Promise(r => setTimeout(r, 30));
                                         }
                                     }
                                 } else if (cmd.action.startsWith('car_') && cmd.action !== 'car_speed_set' && cmd.action !== 'car_stop') {

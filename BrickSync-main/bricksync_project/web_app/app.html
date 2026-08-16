@@ -526,12 +526,21 @@
                             let retries = 3;
                             while (retries > 0) {
                                 try {
-                                    await window.txCharacteristic.writeValueWithoutResponse(chunk);
+                                    if (window.txCharacteristic.writeValueWithoutResponse) {
+                                        await window.txCharacteristic.writeValueWithoutResponse(chunk);
+                                    } else {
+                                        await window.txCharacteristic.writeValue(chunk);
+                                    }
                                     break;
                                 } catch (e) {
-                                    console.log("BLE Write Error (GATT overload, retrying)", e);
-                                    retries--;
-                                    await new Promise(r => setTimeout(r, 50));
+                                    try {
+                                        await window.txCharacteristic.writeValue(chunk);
+                                        break;
+                                    } catch (e2) {
+                                        console.log("BLE Write Error (retrying)", e2);
+                                        retries--;
+                                        await new Promise(r => setTimeout(r, 30));
+                                    }
                                 }
                             }
                             // 시스템 BLE 큐 확보를 위해 청크 당 대기
