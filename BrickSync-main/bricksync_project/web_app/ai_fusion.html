@@ -6588,7 +6588,7 @@ print("BrickSync Sandbox Run")
                                 }
                                 runBlocks('event_ai_gesture', detectedGesture);
 
-                                if (((unit === '3' || unit === '8')) && detectedGesture === 0) {
+                                if (!isTrainingActive && ((unit === '3' || unit === '8')) && detectedGesture === 0) {
                                     try {
                                         window.parent.sendWebSocketAction({ action: "MONSTER_ALERT" });
                                     } catch (e) { }
@@ -6608,7 +6608,15 @@ print("BrickSync Sandbox Run")
             }
         }
 
-                function addExample(classId) {
+                let isTrainingActive = false;
+        let trainingTimer = null;
+
+        function addExample(classId) {
+            isTrainingActive = true;
+            if (trainingTimer) clearTimeout(trainingTimer);
+            trainingTimer = setTimeout(() => {
+                isTrainingActive = false;
+            }, 1500);
             webcamElement = webcamElement || document.getElementById('webcam');
             aiStatusLabel = aiStatusLabel || document.getElementById('ai-status');
             currentGestureLabel = currentGestureLabel || document.getElementById('current-gesture');
