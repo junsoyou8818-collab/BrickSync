@@ -3668,14 +3668,22 @@ print("BrickSync Sandbox Run")
                             localActionsQueue.push({ action: 'STOP_RIGHT', delay: cumulativeDelayMs });
                             break;
 
-                        case 'matrix_image':
+                                                case 'matrix_image':
                         case 'matrix_pixel':
                             const matEl = block.querySelector(':scope > .param-unified') || block.querySelector(':scope > .block-param:not(.param-time)') || paramEl;
                             let matrixArr = matEl ? (matEl.getAttribute('data-matrix') || JSON.stringify([0, 6, 0, 0, 0, 0, 6, 0, 6])) : JSON.stringify([0, 6, 0, 0, 0, 0, 6, 0, 6]);
                             let lightDuration = matEl ? (parseFloat(matEl.getAttribute('data-val')) || 2) : 2;
 
-                            // Send ACTION_LIGHT key to Fortnite
-                            localActionsQueue.push({ action: 'ACTION_LIGHT', delay: cumulativeDelayMs });
+                            let redColors = [0, 9, 0, 0, 9, 0, 0, 9, 0];
+                            try {
+                                if (matrixArr) redColors = JSON.parse(matrixArr);
+                            } catch(e) {}
+
+                            localActionsQueue.push({ action: 'matrix', colors: redColors, delay: cumulativeDelayMs });
+
+                            if ((String(unit) === '3' || String(unit) === '8') && isMissionActive) {
+                                pyCode += `${indent}print("Mission Complete!")\n`;
+                            }
 
                             if (matrixArr) {
                                 try {
@@ -3690,16 +3698,10 @@ print("BrickSync Sandbox Run")
                                 } catch (e) { }
                             }
 
-                            if (unit !== '5') {
-                                pyCode += `${indent}utime.sleep_ms(int(${lightDuration} * 1000)) 
-`;
-                                cumulativeDelayMs += (lightDuration * 1000);
-
-                                pyCode += `${indent}try:\n${indent}  import color_matrix\n${indent}  for p in range(6):\n${indent}    try: color_matrix.clear(p)\n${indent}    except: pass\n${indent}except: pass\n`;
-                                pyCode += `${indent}try:\n${indent}  import device\n${indent}  for p in range(6):\n${indent}    try: device.write(p, 2, [0]*9)\n${indent}    except: pass\n${indent}except: pass\n`;
-                                pyCode += `${indent}try:\n${indent}  hub.led(0)\n${indent}  import light_matrix; light_matrix.clear()\n${indent}except:\n${indent}  try: hub.display.clear()\n${indent}  except: pass\n`;
-                            }
+                            pyCode += `${indent}utime.sleep_ms(int(${lightDuration} * 1000)) \n`;
+                            cumulativeDelayMs += (lightDuration * 1000);
                             break;
+
                         case 'matrix_clear':
                             pyCode += `${indent}try:\n${indent}  import color_matrix\n${indent}  for p in range(6):\n${indent}    try: color_matrix.clear(p)\n${indent}    except: pass\n${indent}except: pass\n`;
                             pyCode += `${indent}try:\n${indent}  import device\n${indent}  for p in range(6):\n${indent}    try: device.write(p, 2, [0]*9)\n${indent}    except: pass\n${indent}except: pass\n`;
@@ -4048,52 +4050,28 @@ except:
                                 } else if (cmd.action === 'MONSTER_ALERT') {
                                     try { window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
                                     try { window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
-                                } else if (cmd.action === 'matrix') {
-                                    try { window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
-                                    try { window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
-                                    let encodedColors = cmd.colors.map(c => c > 0 ? c + 160 : 0);
-                                    let hubWin = window;
-                                    for (let i = 0; i < 5; i++) {
-                                        if (hubWin.hubDevices) break;
-                                        if (hubWin.parent && hubWin.parent !== hubWin) {
-                                            hubWin = hubWin.parent;
-                                        } else {
-                                            break;
-                                        }
+                                                                } else if (cmd.action === 'matrix' || cmd.action === 'MONSTER_ALERT') {
+                                    try { triggerSystemLog('HUB', '⚡ 레고 허브 & 포트나이트 라이트 켜기 (ACTION_LIGHT / [ 키)'); } catch(e) {}
+                                    try { if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
+                                    try { if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
+                                    if (isMissionActive && (unit === '3' || unit === '8') && window.bleEngineRunCounter === currentRunId) {
+                                        if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
                                     }
-                                    let targetPorts = [];
+                                    let encodedColors = (cmd.colors || [0, 9, 0, 0, 9, 0, 0, 9, 0]).map(c => { const val = Number(c); return val > 0 ? val + 160 : 0; });
+                                    const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
+                                    
+                                    // 1. Send 3x3 Light Matrix payload to all ports 0..5
                                     for (let p = 0; p < 6; p++) {
-                                        if (hubWin.hubDevices && hubWin.hubDevices[p] === 64) {
-                                            targetPorts.push(p);
-                                        }
+                                        let configPayload = [10, 0, 0x41, p, 2, 1, 0, 0, 0, 0];
+                                        await sendFn(new Uint8Array(configPayload)).catch(() => {});
+                                        await new Promise(r => setTimeout(r, 15));
+                                        let payload = [16, 0, 0x81, p, 0x10, 0x51, 0x02, ...encodedColors];
+                                        await sendFn(new Uint8Array(payload)).catch(() => {});
+                                        await new Promise(r => setTimeout(r, 15));
                                     }
-                                    if (targetPorts.length === 0) {
-                                        targetPorts = [0, 1];
-                                    }
-                                    try {
-                                        const hubLogMsg = `⚡ 레고 허브 신호 송출: Red Light Matrix ON (Port A, B)`;
-                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
-                                        if (window.parent && window.parent.sendWebSocketAction) {
-                                            window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
-                                        }
-                                    } catch(e) {}
-                                    let writeWin = window;
-                                    for (let i = 0; i < 5; i++) {
-                                        if (writeWin.writeToHub) break;
-                                        if (writeWin.parent && writeWin.parent !== writeWin) {
-                                            writeWin = writeWin.parent;
-                                        } else {
-                                            break;
-                                        }
-                                    }
-                                    for (const port of targetPorts) {
-                                        let payload = [16, 0, 0x81, port, 0x10, 0x51, 0x02, ...encodedColors];
-                                        await writeWin.writeToHub(new Uint8Array(payload)).catch(e => { });
-                                        if (targetPorts.length > 1) {
-                                            await new Promise(r => setTimeout(r, 80));
-                                        }
-                                    }
-                                    await new Promise(r => setTimeout(r, 40));
+
+                                    // 2. Send Hub Center LED Red Payload (0x09 = Red)
+                                    await sendFn(new Uint8Array([8, 0, 0x81, 0x3F, 0x10, 0x51, 0x00, 0x09])).catch(() => {});
                                 } else if (cmd.action === 'matrix_clear') {
                                     let hubWin = window;
                                     for (let i = 0; i < 5; i++) {
