@@ -517,7 +517,7 @@
                 await window.writer.write(buffer);
                 window.writer.releaseLock();
                 window.writer = null;
-            } else if (window.connectionType === 'BLE') {
+            } else if (window.connectionType === 'BLE' || window.txCharacteristic) {
                 // Queue the BLE write to prevent GATT conflicts
                 bleWriteQueue = bleWriteQueue.then(async () => {
                     for (let i = 0; i < buffer.byteLength; i += 20) {

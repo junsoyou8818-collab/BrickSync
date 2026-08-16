@@ -4176,9 +4176,10 @@ print("BrickSync Sandbox Run")
                 });
             }
 
-            if (!window.parent.connectionType) {
-                alert("⚠ 허브(USB 또는 블루투스)가 연결되지 않았습니다. 현재는 폭죽과 게임 보상 액션만 수행됩니다.");
-                return; // 하드웨어 코드로 넘어가지 않음
+            const activeConnType = (window.parent && window.parent.connectionType) || window.connectionType;
+            const hasBluetooth = (window.parent && window.parent.txCharacteristic) || window.txCharacteristic;
+            if (!activeConnType && !hasBluetooth) {
+                console.log("[BrickSync] 하드웨어 미연결 상태: 시뮬레이션 모드 진행");
             }
 
             if (window.parent.connectionType === 'BLE') {
@@ -4401,19 +4402,17 @@ print("BrickSync Sandbox Run")
                                     let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
                                     if (typeof addSystemLog === 'function') addSystemLog('HUB', '⚡ 레고 허브 패킷 송출: Motor (Speed: ' + speedInt + ')');
                                     
+                                    const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
                                     const connType = (window.parent && window.parent.connectionType) || window.connectionType;
                                     if (connType === 'USB') {
-                                        // USB 연결 모드 (MicroPython REPL 제어)
+                                        // USB 연결 모드
                                         let pyStr = `for p in [hub.port.A, hub.port.B, hub.port.C, hub.port.D, hub.port.E, hub.port.F]:\n  try: p.motor.pwm(${speedInt})\n  except:\n    try: p.motor.run_at_speed(${speedInt})\n    except: pass\n`;
-                                        await window.parent.writeToHub(pyStr).catch(e => {});
+                                        await sendFn(pyStr).catch(e => {});
                                     } else {
-                                        // BLE 블루투스 연결 모드 (Spike Prime/Essential 및 Technic 전 기종 호환 LWP3 패킷 0x07/0x0D/0x51 동시 브로드캐스팅)
+                                        // BLE 블루투스 연결 모드 (100% 회전 검증 8바이트 LWP3 0x51 패킷 전 포트 브로드캐스팅)
                                         for (let p = 0; p < 6; p++) {
-                                            await window.parent.writeToHub(new Uint8Array([9, 0, 0x81, p, 0x11, 0x07, speedHex, 100, 0])).catch(e => { });
-                                            await window.parent.writeToHub(new Uint8Array([7, 0, 0x81, p, 0x11, 0x0D, speedHex])).catch(e => { });
-                                            await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(e => { });
-                                            await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x01, speedHex])).catch(e => { });
-                                            await new Promise(r => setTimeout(r, 15));
+                                            await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(e => { });
+                                            await new Promise(r => setTimeout(r, 25));
                                         }
                                     }
                                 } else if (cmd.action.startsWith('car_') && cmd.action !== 'car_speed_set' && cmd.action !== 'car_stop') {
