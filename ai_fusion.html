@@ -995,17 +995,20 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                         <button onclick="addExample(0)"
                             style="background:#ef4444; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #b91c1c; transition:transform 0.1s;"><i
                                 class="fas fa-hand-rock"></i> <span data-i18n="lbl_btn_rock">주먹 (Rock)</span></button>
+                        <button onclick="addExample(1)"
+                            style="background:#3b82f6; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #1d4ed8; transition:transform 0.1s;"><i
+                                class="fas fa-hand-paper"></i> <span data-i18n="lbl_btn_paper">보 (Paper)</span></button>
                         <button onclick="addExample(2)"
                             style="background:#10b981; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #047857; transition:transform 0.1s;"><i
                                 class="fas fa-hand-scissors"></i> <span data-i18n="lbl_btn_scissors">가위
                                 (Scissors)</span></button>
                         <button onclick="addExample(3)"
-                            style="grid-column: span 2; background:#64748b; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #475569; transition:transform 0.1s;"><i
+                            style="background:#64748b; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #475569; transition:transform 0.1s;"><i
                                 class="fas fa-ban"></i> <span data-i18n="lbl_btn_none">배경 (None)</span></button>
                     </div>
                     <div
-                        style="display: flex; justify-content: space-around; font-size: 0.8rem; color: #94a3b8; font-weight: 700; padding: 0 5px; margin-top: 5px;">
-                        <span id="count-rock">0개</span> <span id="count-paper" style="display:none;">0개</span> <span
+                        style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; font-weight: 700; padding: 0 5px; margin-top: 5px;">
+                        <span id="count-rock">0개</span> <span id="count-paper">0개</span> <span
                             id="count-scissors">0개</span> <span id="count-none">0개</span>
                     </div>
                 </div>
@@ -1630,6 +1633,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             } else {
                 options = [
                     { type: 'rock', val: 0, icon: '<i class="fas fa-hand-rock"></i>' },
+                    { type: 'paper', val: 1, icon: '<i class="fas fa-hand-paper"></i>' },
                     { type: 'scissors', val: 2, icon: '<i class="fas fa-hand-scissors"></i>' },
                     { type: 'none', val: 3, icon: '<i class="fas fa-ban"></i>' }
                 ];
@@ -4960,11 +4964,12 @@ print("BrickSync Sandbox Run")
                             <div style="font-size: 0.9rem; font-weight: 800; color: #64748b; margin-bottom: 5px;">${isEn ? 'Model Training Control' : '인식 모델 학습 기능'}</div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                 <button onclick="addExample(0)" style="background:#ef4444; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #b91c1c; transition:transform 0.1s;"><i class="fas fa-hand-rock"></i> <span>${isEn ? 'Rock' : '주먹 (Rock)'}</span></button>
+                                <button onclick="addExample(1)" style="background:#3b82f6; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #1d4ed8; transition:transform 0.1s;"><i class="fas fa-hand-paper"></i> <span>${isEn ? 'Paper' : '보 (Paper)'}</span></button>
                                 <button onclick="addExample(2)" style="background:#10b981; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #047857; transition:transform 0.1s;"><i class="fas fa-hand-scissors"></i> <span>${isEn ? 'Scissors' : '가위 (Scissors)'}</span></button>
-                                <button onclick="addExample(3)" style="grid-column: span 2; background:#64748b; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #475569; transition:transform 0.1s;"><i class="fas fa-ban"></i> <span>${isEn ? 'Background' : '배경 (None)'}</span></button>
+                                <button onclick="addExample(3)" style="background:#64748b; color:white; border:none; padding:10px; border-radius:8px; font-weight:700; cursor:pointer; box-shadow:0 3px 0 #475569; transition:transform 0.1s;"><i class="fas fa-ban"></i> <span>${isEn ? 'Background' : '배경 (None)'}</span></button>
                             </div>
-                            <div style="display: flex; justify-content: space-around; font-size: 0.8rem; color: #94a3b8; font-weight: 700; padding: 0 5px; margin-top: 5px;">
-                                <span id="count-rock">0개</span> <span id="count-paper" style="display:none;">0개</span> <span id="count-scissors">0개</span> <span id="count-none">0개</span>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #94a3b8; font-weight: 700; padding: 0 5px; margin-top: 5px;">
+                                <span id="count-rock">0개</span> <span id="count-paper">0개</span> <span id="count-scissors">0개</span> <span id="count-none">0개</span>
                             </div>
                         </div>
                     `;
@@ -5212,8 +5217,8 @@ print("BrickSync Sandbox Run")
                                 } else {
                                     if (iconDiv) iconDiv.innerHTML = '<i class="fas fa-hand-sparkles"></i>';
                                     if (paramEl) {
-                                        paramEl.setAttribute('data-val', '0');
-                                        paramEl.innerHTML = '<i class="fas fa-hand-rock" style="color:#64748b;"></i>';
+                                        paramEl.setAttribute('data-val', '1');
+                                        paramEl.innerHTML = '<i class="fas fa-hand-paper" style="color:#64748b;"></i>';
                                     }
                                 }
                             }
