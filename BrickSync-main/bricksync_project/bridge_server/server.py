@@ -270,28 +270,24 @@ async def handle_websocket(request):
                         threading.Thread(target=press_swing_key, args=(key, turns), daemon=True).start()
                         
                     elif action == "motor_cw":
-                        print("▶ 오두막 지붕 열기 / 모터 시계방향 (H/Y/U 콤보 키 1.3초 정밀 누름)")
+                        print("▶ 오두막 지붕 열기 / 모터 시계방향 (H키 1.3초 정밀 누름)")
                         def press_motor_cw():
                             with pydirectinput_lock:
                                 try:
-                                    for k in ['h', 'y', 'u']:
-                                        pydirectinput.keyDown(k)
+                                    safe_key_down('h')
                                     time.sleep(1.3)
-                                    for k in ['h', 'y', 'u']:
-                                        pydirectinput.keyUp(k)
+                                    safe_key_up('h')
                                 except Exception: pass
                         threading.Thread(target=press_motor_cw, daemon=True).start()
                         
                     elif action == "motor_ccw":
-                        print("▶ 오두막 지붕 닫기 / 모터 반시계방향 (J/L/O 콤보 키 1.3초 정밀 누름)")
+                        print("▶ 오두막 지붕 닫기 / 모터 반시계방향 (J키 1.3초 정밀 누름)")
                         def press_motor_ccw():
                             with pydirectinput_lock:
                                 try:
-                                    for k in ['j', 'l', 'o']:
-                                        pydirectinput.keyDown(k)
+                                    safe_key_down('j')
                                     time.sleep(1.3)
-                                    for k in ['j', 'l', 'o']:
-                                        pydirectinput.keyUp(k)
+                                    safe_key_up('j')
                                 except Exception: pass
                         threading.Thread(target=press_motor_ccw, daemon=True).start()
 
