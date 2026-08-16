@@ -6354,7 +6354,7 @@ print("BrickSync Sandbox Run")
             runBlocks('event_ai_gesture', directionVal);
 
             // 5. 🔥 Exact 2s Timer Wait -> 8-Byte LWP3 Motor Rotation -> Timed Stop Packet (Ports A~F)
-            let speedInt = directionVal === 0 ? 40 : -40;
+            let speedInt = directionVal === 0 ? -40 : 40;
             let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
             const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
