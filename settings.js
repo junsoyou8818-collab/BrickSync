@@ -232,7 +232,7 @@
             lesson_2: "2. 바닷속 잠수함으로 바다를 탐험해요",
             lesson_3: "3. 대관람차 회전하기",
             lesson_4: "4. 탐험 자동차를 만들어요",
-            lesson_5: "5. 동굴 자동차를 타고 여행해요",
+            lesson_5: "5. 사이렌을 켜줘",
 
             ai_lesson_1: "6. 가위, 바위, 보로 여닫는 오두막 지붕",
             ai_lesson_2: "7. 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네",
@@ -473,7 +473,7 @@
             lesson_2: "2. Explore the sea with an underwater submarine",
             lesson_3: "3. Rotate the Ferris Wheel",
             lesson_4: "4. Ride a cave car and travel",
-            lesson_5: "5. Ride a cave car and travel",
+            lesson_5: "5. Turn on the siren",
 
             ai_lesson_1: "6. RPS Gesture-Controlled Cabin Roof (Open/Close)",
             ai_lesson_2: "7. Shout into the Mic! Control the Magic Swing with Your Voice",
