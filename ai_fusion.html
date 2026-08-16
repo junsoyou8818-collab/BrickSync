@@ -4182,7 +4182,7 @@ print("BrickSync Sandbox Run")
             if (localSoundsQueue.length > 0) {
                 localSoundsQueue.forEach(item => {
                     setTimeout(() => {
-                        if (window.bleEngineRunCounter !== currentRunId) return;
+                        if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return;
                         playBrowserBeep(item.track);
                     }, item.delay);
                 });
@@ -4192,7 +4192,7 @@ print("BrickSync Sandbox Run")
             if (localActionsQueue.length > 0) {
                 localActionsQueue.forEach(item => {
                     setTimeout(() => {
-                        if (window.bleEngineRunCounter !== currentRunId) return; // 실행 종료/취소 감지
+                        if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return; // 실행 종료/취소 감지
                         try { window.parent.sendWebSocketAction({ action: item.action }); if (typeof addSystemLog === 'function') addSystemLog('FORTNITE', '🎮 포트나이트 액션 연동 송출: ' + item.action); } catch (e) { }
                     }, item.delay);
                 });
@@ -4406,7 +4406,7 @@ print("BrickSync Sandbox Run")
                 const executeBleQueue = async () => {
                         let lastExecutionTime = 0;
                         for (const cmd of bleQueue) {
-                            if (window.bleEngineRunCounter !== currentRunId) return; // ?전 ?행 루프 취소
+                            if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return; // ?전 ?행 루프 취소
                             try {
                                 const waitTime = cmd.delay - lastExecutionTime;
 
@@ -4416,7 +4416,7 @@ print("BrickSync Sandbox Run")
                                     lastExecutionTime = cmd.delay;
                                 }
 
-                                if (window.bleEngineRunCounter !== currentRunId) return;
+                                if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return;
 
                                 
                                 if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
