@@ -4,6 +4,15 @@
 <head>
     <!-- 최상위 윈도우 자동 래핑 리다이렉트 스크립트 -->
     <script>
+function triggerSystemLog(category, msg) {
+    try {
+        if (typeof addSystemLog === 'function') addSystemLog(category, msg);
+    } catch(e) {}
+    try {
+        if (window.parent && typeof window.parent.addSystemLog === 'function') window.parent.addSystemLog(category, msg);
+    } catch(e) {}
+}
+
         if (window === window.parent) {
             let currentPage = window.location.pathname.split('/').pop() + window.location.search;
             if (!currentPage || currentPage.startsWith('?')) {
@@ -3804,12 +3813,12 @@ except:
             const hasBluetooth = (window.parent && window.parent.txCharacteristic) || window.txCharacteristic;
             if (!activeConnType && !hasBluetooth) {
                 if (typeof addSystemLog === 'function') {
-                    addSystemLog('HUB', '⚠️ 레고 허브가 연결되어 있지 않습니다. 상단의 [블루투스/USB 연결] 버튼을 눌러 레고 허브를 연결해주세요!');
+                    triggerSystemLog('HUB', '⚠️ 레고 허브가 연결되어 있지 않습니다. 상단의 [블루투스/USB 연결] 버튼을 눌러 레고 허브를 연결해주세요!');
                 }
                 console.log("[BrickSync] 하드웨어 미연결 상태: 시뮬레이션 모드 진행");
             } else {
                 if (typeof addSystemLog === 'function') {
-                    addSystemLog('HUB', `🟢 레고 허브 연결 확인됨 (${activeConnType || 'BLE'}). 모터 패킷 전송을 시작합니다.`);
+                    triggerSystemLog('HUB', `🟢 레고 허브 연결 확인됨 (${activeConnType || 'BLE'}). 모터 패킷 전송을 시작합니다.`);
                 }
             }
 
@@ -3998,7 +4007,7 @@ except:
                                 if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 신호 송출: ${cmd.action} (속도: ${cmd.speed || 0})`;
-                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', hubLogMsg);
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
                                         if (window.parent && window.parent.sendWebSocketAction) {
                                             window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }
@@ -4059,7 +4068,7 @@ except:
                                     }
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 신호 송출: Red Light Matrix ON (Port A, B)`;
-                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', hubLogMsg);
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
                                         if (window.parent && window.parent.sendWebSocketAction) {
                                             window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }
@@ -4102,7 +4111,7 @@ except:
                                     }
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 신호 송출: Red Light Matrix ON (Port A, B)`;
-                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', hubLogMsg);
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
                                         if (window.parent && window.parent.sendWebSocketAction) {
                                             window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }

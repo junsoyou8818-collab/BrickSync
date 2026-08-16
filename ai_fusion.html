@@ -4,6 +4,15 @@
 <head>
     <!-- 최상위 윈도우 자동 래핑 리다이렉트 스크립트 -->
     <script>
+function triggerSystemLog(category, msg) {
+    try {
+        if (typeof addSystemLog === 'function') addSystemLog(category, msg);
+    } catch(e) {}
+    try {
+        if (window.parent && typeof window.parent.addSystemLog === 'function') window.parent.addSystemLog(category, msg);
+    } catch(e) {}
+}
+
         if (window === window.parent) {
             let currentPage = window.location.pathname.split('/').pop() + window.location.search;
             if (!currentPage || currentPage.startsWith('?')) {
@@ -3813,7 +3822,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
 
             if (validStacks.length === 0) {
                 window.isBlockExecutionRunning = false;
-                if (typeof addSystemLog === 'function') addSystemLog('TRIGGER', '⚠️ 매칭되는 블록 스택이 없어 실행을 생략합니다. (시작 블록 확인 필요)');
+                if (typeof addSystemLog === 'function') triggerSystemLog('TRIGGER', '⚠️ 매칭되는 블록 스택이 없어 실행을 생략합니다. (시작 블록 확인 필요)');
                 console.log(`[BrickSync] 매칭되는 블록 스택이 없으므로 실행을 생략합니다. (Trigger: ${triggerAction}, Val: ${triggerVal})`);
                 return;
             }
@@ -3822,7 +3831,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 validStacks = [validStacks[0]];
             }
             if (typeof addSystemLog === 'function') {
-                addSystemLog('TRIGGER', `🚀 AI 블록 구동 시작 (${validStacks.length}개 스택 정밀 실행 중)`);
+                triggerSystemLog('TRIGGER', `🚀 AI 블록 구동 시작 (${validStacks.length}개 스택 정밀 실행 중)`);
             }
 
             // 스택들을 왼쪽에서 오른쪽으로 정렬
@@ -4184,12 +4193,12 @@ print("BrickSync Sandbox Run")
             const hasBluetooth = (window.parent && window.parent.txCharacteristic) || window.txCharacteristic;
             if (!activeConnType && !hasBluetooth) {
                 if (typeof addSystemLog === 'function') {
-                    addSystemLog('HUB', '⚠️ 레고 허브가 연결되어 있지 않습니다. 상단의 [블루투스/USB 연결] 버튼을 눌러 레고 허브를 연결해주세요!');
+                    triggerSystemLog('HUB', '⚠️ 레고 허브가 연결되어 있지 않습니다. 상단의 [블루투스/USB 연결] 버튼을 눌러 레고 허브를 연결해주세요!');
                 }
                 console.log("[BrickSync] 하드웨어 미연결 상태: 시뮬레이션 모드 진행");
             } else {
                 if (typeof addSystemLog === 'function') {
-                    addSystemLog('HUB', `🟢 레고 허브 연결 확인됨 (${activeConnType || 'BLE'}). 모터 패킷 전송을 시작합니다.`);
+                    triggerSystemLog('HUB', `🟢 레고 허브 연결 확인됨 (${activeConnType || 'BLE'}). 모터 패킷 전송을 시작합니다.`);
                 }
             }
 
@@ -4404,21 +4413,21 @@ print("BrickSync Sandbox Run")
                                 if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 신호 송출: ${cmd.action} (속도: ${cmd.speed || 0})`;
-                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', hubLogMsg);
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
                                         if (window.parent && window.parent.sendWebSocketAction) {
                                             window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }
                                     } catch(e) {}
                                     let speedInt = Math.round(cmd.speed || 0);
                                     let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
-                                    if (typeof addSystemLog === 'function') addSystemLog('HUB', '⚡ 레고 허브 패킷 송출: Motor (Speed: ' + speedInt + ')');
+                                    if (typeof addSystemLog === 'function') triggerSystemLog('HUB', '⚡ 레고 허브 패킷 송출: Motor (Speed: ' + speedInt + ')');
                                     
                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
                                     const connType = (window.parent && window.parent.connectionType) || window.connectionType;
                                     
                                     try {
                                         const statusLog = `⚡ 레고 허브(Spike Hub) 패킷 송출: 모터 (속도: ${speedInt})`;
-                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', statusLog);
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', statusLog);
                                         const voiceBox = document.getElementById('voice-status-box');
                                         if (voiceBox) {
                                             voiceBox.innerHTML = `<i class="fas fa-bolt" style="color:#eab308;"></i> 레고 허브 모터 구동 신호 송출 중... (${speedInt >= 0 ? '시계' : '반시계'})`;
@@ -4493,7 +4502,7 @@ print("BrickSync Sandbox Run")
                                     }
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 신호 송출: Red Light Matrix ON (Port A, B)`;
-                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', hubLogMsg);
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
                                         if (window.parent && window.parent.sendWebSocketAction) {
                                             window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }
@@ -4542,7 +4551,7 @@ print("BrickSync Sandbox Run")
                                     }
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 신호 송출: Red Light Matrix ON (Port A, B)`;
-                                        if (typeof addSystemLog === 'function') addSystemLog('HUB', hubLogMsg);
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
                                         if (window.parent && window.parent.sendWebSocketAction) {
                                             window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }
@@ -6277,7 +6286,11 @@ print("BrickSync Sandbox Run")
         }
 
         function parseVoiceCommand(text) {
-            if (speechCooldown) return;
+            speechCooldown = false;
+            window.isBlockExecutionRunning = false;
+            try {
+                triggerSystemLog('AI', `🗣️ 음성 명령어 수신: "${text}"`);
+            } catch(e) {}
 
             const lowerText = String(text || '').toLowerCase().trim();
             console.log("🎤 음성 명령 인식: ", text);
@@ -6588,7 +6601,7 @@ print("BrickSync Sandbox Run")
                             if (consecutiveAiFrames >= 3 && lastTriggeredAiGesture !== detectedGesture && !isBgGesture) {
                                 lastTriggeredAiGesture = detectedGesture;
                                 console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
-                                if (typeof addSystemLog === 'function') addSystemLog('AI', `👾 AI 이미지 인식 성공: ${labels[detectedGesture]} (신뢰도: ${Math.round(result.confidences[result.label]*100)}%)`);
+                                if (typeof addSystemLog === 'function') triggerSystemLog('AI', `👾 AI 이미지 인식 성공: ${labels[detectedGesture]} (신뢰도: ${Math.round(result.confidences[result.label]*100)}%)`);
                                 if (window.isBlockExecutionRunning) {
                                     await tf.nextFrame();
                                     continue;
