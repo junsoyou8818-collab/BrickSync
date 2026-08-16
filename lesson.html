@@ -4506,7 +4506,7 @@ except:
                 setupMissionToolbox(unit);
                 
                 // Transition header elements to Mission Mode
-                const currentMission = missionData[unit];
+                const currentMission = getMissionData()[unit];
                 if (currentMission) {
                     updateStatusBarText();
                     document.getElementById('m-progress-container').style.display = 'flex';
@@ -4678,6 +4678,22 @@ except:
                     descEl.style.display = '';
                 } else {
                     descEl.style.display = 'none';
+                }
+            }
+
+            // [i18n] 미션 과제 리스트 항목을 현재 언어(한글/영어)로 재렌더링
+            const tasksEl = document.getElementById('m-tasks-list');
+            if (tasksEl && currentMission.tasks) {
+                tasksEl.innerHTML = '';
+                currentMission.tasks.forEach((task, idx) => {
+                    const li = document.createElement('li');
+                    li.id = 'task-item-' + idx;
+                    li.style.cssText = 'display: flex; align-items: center; gap: 10px; font-size: 0.95rem; font-weight: 500; color: #64748b; transition: all 0.3s ease;';
+                    li.innerHTML = `<i class="far fa-circle" style="color: #cbd5e1; width:20px; font-size:1.1rem; text-align:center;"></i> ${task.text}`;
+                    tasksEl.appendChild(li);
+                });
+                if (typeof updateProgress === 'function') {
+                    updateProgress();
                 }
             }
         }
