@@ -4070,8 +4070,9 @@ print("BrickSync Sandbox Run")
 
                                                 case 'matrix_image':
                         case 'matrix_pixel':
+                        case 'matrix_pixel_red':
                             const matEl = block.querySelector(':scope > .param-unified') || block.querySelector(':scope > .block-param:not(.param-time)') || paramEl;
-                            let matrixArr = matEl ? (matEl.getAttribute('data-matrix') || JSON.stringify([0, 6, 0, 0, 0, 0, 6, 0, 6])) : JSON.stringify([0, 6, 0, 0, 0, 0, 6, 0, 6]);
+                            let matrixArr = matEl ? (matEl.getAttribute('data-matrix') || JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0])) : JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0]);
                             let lightDuration = matEl ? (parseFloat(matEl.getAttribute('data-val')) || 2) : 2;
 
                             let redColors = [0, 9, 0, 0, 9, 0, 0, 9, 0];
@@ -4080,6 +4081,7 @@ print("BrickSync Sandbox Run")
                             } catch(e) {}
 
                             localActionsQueue.push({ action: 'matrix', colors: redColors, delay: cumulativeDelayMs });
+                            localActionsQueue.push({ action: 'ACTION_LIGHT', delay: cumulativeDelayMs });
 
                             if ((String(unit) === '3' || String(unit) === '8') && isMissionActive) {
                                 pyCode += `${indent}print("Mission Complete!")\n`;
