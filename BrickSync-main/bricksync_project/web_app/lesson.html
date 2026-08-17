@@ -4877,8 +4877,8 @@ except:
                         if (unit === '1') {
                             if (task_id === 'start') {
                                 isCompleted = presentActions.includes('start');
-                            } else if (task_id === 'flow_wait_5') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && cmd.val === 5);
+                            } else if (task_id === 'flow_wait_5' || task_id === 'flow_wait') {
+                                isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait');
                             } else if (task_id === 'car_forward_3') {
                                 isCompleted = executionChain.some(cmd => cmd.action === 'car_forward' && cmd.val === 3);
                             } else if (task_id === 'car_left_1') {
