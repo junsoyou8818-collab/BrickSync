@@ -4511,34 +4511,33 @@ print("BrickSync Sandbox Run")
                                     }
                                 } else if (cmd.action === 'MONSTER_ALERT') {
                                     try { window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
-                                                                } else if (cmd.action === 'matrix' || cmd.action === 'MONSTER_ALERT') {
+                                                                                                } else if (cmd.action === 'matrix' || cmd.action === 'matrix_pixel_red' || cmd.action === 'MONSTER_ALERT') {
                                     try { triggerSystemLog('HUB', '⚡ 레고 허브 & 포트나이트 라이트 켜기 (ACTION_LIGHT / [ 키)'); } catch(e) {}
                                     try { if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
                                     if (isMissionActive && (unit === '3' || unit === '8') && window.bleEngineRunCounter === currentRunId) {
                                         if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
                                     }
                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
-                                    
-                                    // 1. Single LED Light Element on Port A & B (Mode 0 Power 100%)
-                                    for (let p = 0; p < 6; p++) {
-                                        await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, 100])).catch(() => {});
-                                        await sendFn(new Uint8Array([9, 0, 0x81, p, 0x11, 0x07, 100, 100, 0])).catch(() => {});
-                                        await sendFn(new Uint8Array([8, 0, 0x81, p, 0x11, 0x01, 100])).catch(() => {});
-                                    }
 
-                                    // 2. 3x3 Light Matrix Exact Red Payloads (SPIKE Palette Red Color 8 & 9)
-                                    for (let p = 0; p < 6; p++) {
-                                        await sendFn(new Uint8Array([10, 0, 0x41, p, 2, 1, 0, 0, 0, 0])).catch(() => {});
-                                        await new Promise(r => setTimeout(r, 20));
-                                        let exactRedPayload = [16, 0, 0x81, p, 0x10, 0x51, 0x02, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-                                        await sendFn(new Uint8Array(exactRedPayload)).catch(() => {});
+                                    // 사용자가 요청한 3x3 판 조명 커스텀 Mode 0 패킷 송출 (Port 0..5)
+                                    for (let LIGHT_PORT = 0; LIGHT_PORT < 6; LIGHT_PORT++) {
+                                        const brightness = 10;
+                                        const pixels = new Array(9).fill(brightness);
+
+                                        const payload = new Uint8Array([
+                                            16,        // length
+                                            0x00,      // hub id
+                                            0x81,      // Port Output Command
+                                            LIGHT_PORT,
+                                            0x11,      // startup + completion info
+                                            0x51,      // subcommand: Write Direct Mode Data
+                                            0x00,      // mode 0 (pixel brightness)
+                                            ...pixels  // 9칸 밝기값
+                                        ]);
+
+                                        await sendFn(payload).catch((e) => console.error('전송 실패:', e));
                                         await new Promise(r => setTimeout(r, 20));
                                     }
-
-                                    // 3. Hub Center LED Red (Ports 0x3F and 0x3C)
-                                    await sendFn(new Uint8Array([8, 0, 0x81, 0x3F, 0x10, 0x51, 0x00, 0x08])).catch(() => {});
-                                    await sendFn(new Uint8Array([7, 0, 0x81, 0x3F, 0x11, 0x07, 0x08])).catch(() => {});
-                                    await sendFn(new Uint8Array([8, 0, 0x81, 0x3C, 0x10, 0x51, 0x00, 0x08])).catch(() => {});
                                 } else if (cmd.action === 'matrix_clear') {
                                     let hubWin = window;
                                     for (let i = 0; i < 5; i++) {
