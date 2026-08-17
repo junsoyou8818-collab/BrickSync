@@ -4074,7 +4074,7 @@ except:
                                     }
                                 } else if (cmd.action === 'MONSTER_ALERT') {
                                     try { window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
-                                                                                                                                } else if (cmd.action === 'matrix' || cmd.action === 'matrix_pixel_red' || cmd.action === 'MONSTER_ALERT') {
+                                                                                                                                                                } else if (cmd.action === 'matrix' || cmd.action === 'matrix_pixel_red' || cmd.action === 'MONSTER_ALERT') {
                                     try { triggerSystemLog('HUB', '⚡ 레고 허브 & 포트나이트 라이트 켜기 (ACTION_LIGHT / [ 키)'); } catch(e) {}
                                     try { if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
                                     if (isMissionActive && (unit === '3' || unit === '8') && window.bleEngineRunCounter === currentRunId) {
@@ -4082,11 +4082,8 @@ except:
                                     }
                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
-                                    // 조명이 꽂힌 포트 번호를 직접 지정 (예: A포트 = 0)
+                                    // 🔴 Mode 1 (0x01 = 색상 모드) + Color ID 9 (빨간색 9칸) 정식 테스트
                                     for (let LIGHT_PORT = 0; LIGHT_PORT < 6; LIGHT_PORT++) {
-                                        const brightness = 10;
-                                        const pixels = new Array(9).fill(brightness);
-
                                         const payload = new Uint8Array([
                                             16,        // length
                                             0x00,      // hub id
@@ -4094,8 +4091,8 @@ except:
                                             LIGHT_PORT,
                                             0x11,      // startup + completion info
                                             0x51,      // subcommand: Write Direct Mode Data
-                                            0x00,      // mode 0 (pixel brightness)
-                                            ...pixels  // 9칸 밝기값
+                                            0x01,      // mode 1 (0x01 = 색상 모드)
+                                            9, 9, 9, 9, 9, 9, 9, 9, 9  // 9칸 모두 Color ID 9 (빨간색)
                                         ]);
 
                                         await sendFn(payload).catch((e) => console.error('전송 실패:', e));
