@@ -4093,7 +4093,7 @@ except:
                                     for (let p = 0; p < 6; p++) {
                                         await sendFn(new Uint8Array([10, 0, 0x41, p, 2, 1, 0, 0, 0, 0])).catch(() => {});
                                         await new Promise(r => setTimeout(r, 20));
-                                        let exactRedPayload = [16, 0, 0x81, p, 0x10, 0x51, 0x02, 8, 8, 8, 8, 8, 8, 8, 8, 8];
+                                        let exactRedPayload = [16, 0, 0x81, p, 0x10, 0x51, 0x02, 1, 1, 1, 1, 1, 1, 1, 1, 1];
                                         await sendFn(new Uint8Array(exactRedPayload)).catch(() => {});
                                         await new Promise(r => setTimeout(r, 20));
                                     }
