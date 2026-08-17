@@ -4091,16 +4091,13 @@ except:
                                         await sendFn(new Uint8Array([8, 0, 0x81, p, 0x11, 0x01, 100])).catch(() => {});
                                     }
 
-                                    // 2. 3x3 Light Matrix Mode Setup & Triple Mode Payloads (Color 9 Red & Brightness 100%)
+                                    // 2. 3x3 Light Matrix Pure Red Payload (Color 9 = Pure Red in SPIKE Palette)
                                     for (let p = 0; p < 6; p++) {
                                         await sendFn(new Uint8Array([10, 0, 0x41, p, 2, 1, 0, 0, 0, 0])).catch(() => {});
-                                        await new Promise(r => setTimeout(r, 15));
+                                        await new Promise(r => setTimeout(r, 20));
                                         let redPayload = [16, 0, 0x81, p, 0x10, 0x51, 0x02, 9, 9, 9, 9, 9, 9, 9, 9, 9];
                                         await sendFn(new Uint8Array(redPayload)).catch(() => {});
-                                        await new Promise(r => setTimeout(r, 15));
-                                        let levelPayload = [16, 0, 0x81, p, 0x10, 0x51, 0x02, 100, 100, 100, 100, 100, 100, 100, 100, 100];
-                                        await sendFn(new Uint8Array(levelPayload)).catch(() => {});
-                                        await new Promise(r => setTimeout(r, 15));
+                                        await new Promise(r => setTimeout(r, 20));
                                     }
 
                                     // 3. Hub Center LED Red (Ports 0x3F and 0x3C)
