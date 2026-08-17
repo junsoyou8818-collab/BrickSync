@@ -4205,6 +4205,19 @@ print("BrickSync Sandbox Run")
                         } catch (e) { }
                     }, item.delay);
                 });
+
+                // 모든 미션 동작이 100% 완전히 끝난 후에만 Golden Coin (CAT_FEED_REWARD) 발동!
+                setTimeout(() => {
+                    if (window.bleEngineRunCounter !== currentRunId) return;
+                    try {
+                        console.log("🪙 [Golden Coin] 모든 미션 동작 100% 완료! Golden Coin 발동!");
+                        if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
+                            window.parent.sendWebSocketAction({ action: "CAT_FEED_REWARD" });
+                        } else if (typeof sendWebSocketAction === 'function') {
+                            sendWebSocketAction({ action: "CAT_FEED_REWARD" });
+                        }
+                    } catch(e) {}
+                }, cumulativeDelayMs + 500);
             }
 
             const activeConnType = (window.parent && window.parent.connectionType) || window.connectionType;
