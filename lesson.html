@@ -4074,7 +4074,7 @@ except:
                                     }
                                 } else if (cmd.action === 'MONSTER_ALERT') {
                                     try { window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
-                                                                                                } else if (cmd.action === 'matrix' || cmd.action === 'matrix_pixel_red' || cmd.action === 'MONSTER_ALERT') {
+                                                                                                                                } else if (cmd.action === 'matrix' || cmd.action === 'matrix_pixel_red' || cmd.action === 'MONSTER_ALERT') {
                                     try { triggerSystemLog('HUB', '⚡ 레고 허브 & 포트나이트 라이트 켜기 (ACTION_LIGHT / [ 키)'); } catch(e) {}
                                     try { if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
                                     if (isMissionActive && (unit === '3' || unit === '8') && window.bleEngineRunCounter === currentRunId) {
@@ -4082,7 +4082,7 @@ except:
                                     }
                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
-                                    // 사용자가 요청한 3x3 판 조명 커스텀 Mode 0 패킷 송출 (Port 0..5)
+                                    // 조명이 꽂힌 포트 번호를 직접 지정 (예: A포트 = 0)
                                     for (let LIGHT_PORT = 0; LIGHT_PORT < 6; LIGHT_PORT++) {
                                         const brightness = 10;
                                         const pixels = new Array(9).fill(brightness);
