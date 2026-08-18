@@ -4088,15 +4088,16 @@ except:
                                      // 💡 Guaranteed External LED (0x0008) + 3x3 Matrix (0x0040) + Hub LED (0x0017) Dispatch
                                      // 💡 Clean Targeted Port 0 (3x3 Light Matrix) Mode 2 (Red) Dispatch
                                      // 💡 Direct 0x81 Output Port 0 (3x3 Light Matrix) Mode 2 (Red) Dispatch
+                                     // 💡 Direct 0x81 Output Port 0 (3x3 Light Matrix) Mode 2 (Red 0x9A = Color 9 + Brightness 10)
                                      window.isLightSequenceRunning = true;
                                      const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
-                                     // Port 0 (Port A) Mode 2: 9-byte Color Palette (Red = 9) (16 bytes exact matching node-poweredup)
+                                     // Port 0 (Port A) Mode 2: 9-byte Nibble-Packed Color & Brightness (Red 9 << 4 | 10 = 0x9A = 154)
                                      const matrixMode2 = new Uint8Array([
                                          16, 0x00, 0x81, 0x00, 0x11, 0x51, 0x02,
-                                         9, 9, 9, 9, 9, 9, 9, 9, 9
+                                         0x9A, 0x9A, 0x9A, 0x9A, 0x9A, 0x9A, 0x9A, 0x9A, 0x9A
                                      ]);
-                                     console.log('[LWP3 Direct Send] 3x3 Matrix Port 0 Mode 2 (Red):', matrixMode2);
+                                     console.log('[LWP3 Direct Send] 3x3 Matrix Port 0 Mode 2 (Red 0x9A):', matrixMode2);
                                      await sendFn(matrixMode2).catch(() => {});
 
                                      // ⏱️ 정확히 5초 후 자동 끄기 패킷 송출
