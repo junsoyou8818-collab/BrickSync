@@ -4008,8 +4008,7 @@ except:
                     });
 
                     if (unit === '5') {
-                        // Clear the light matrix 2 seconds after the last command's scheduled time (perfect display duration)
-                        bleQueue.push({ action: 'matrix_clear', delay: currentBleDelay + 2000 });
+                        // Stage 5 manages light duration via executeBleQueue internal timer to prevent collision
                     }
 
                     if (currentBleDelay > maxGlobalDelay) {
