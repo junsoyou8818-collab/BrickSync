@@ -887,6 +887,7 @@ function handleBLEData(event) {
                 if (eventType === 0x01) {
                     const ioType = value.getUint16(5, true);
                     window.hubDevices[portID] = ioType;
+                    console.log(`[LWP3 Attached I/O] Port: ${portID} (0x${portID.toString(16).toUpperCase()}), IO Type: ${ioType} (${ioType === 64 ? '3x3 Light Matrix' : ioType === 23 ? 'RGB Light' : 'Device'})`);
 
                     if (ioType === 57 || ioType === 59 || ioType === 61) {
                         const subscribeMsg = new Uint8Array([10, 0, 0x41, portID, 0, 1, 0, 0, 0, 1]);
