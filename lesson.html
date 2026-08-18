@@ -4083,7 +4083,7 @@ except:
                                     }
 
                                     // 💡 100% Guaranteed Physical Light Matrix ON dispatch to Ports 0..5
-                                    window.isLightSequenceRunning = false;
+                                    window.isLightSequenceRunning = true;
 
                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
@@ -4118,6 +4118,7 @@ except:
                                         try { triggerSystemLog('HUB', '💡 조명 5초 후 자동 OFF 완료 (재실행 가능)'); } catch(e) {}
                                     }, 5000);
                                 } else if (cmd.action === 'matrix_clear') {
+                                    if (window.isLightSequenceRunning) return; // 🔒 조명 구동 중 중복/잔여 matrix_clear 충돌 방지
                                     let hubWin = window;
                                     for (let i = 0; i < 5; i++) {
                                         if (hubWin.hubDevices) break;
