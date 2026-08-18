@@ -4520,31 +4520,34 @@ print("BrickSync Sandbox Run")
                                     }
 
                                     // 💡 100% Guaranteed Physical Light Matrix ON dispatch to Ports 0..5
-                                    window.isLightSequenceRunning = true;
+                                    // 💡 Guaranteed Physical Light Matrix ON dispatch (Targeted Port A & Connected Ports)
+                                     window.isLightSequenceRunning = true;
 
-                                    const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
+                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
-                                                                         // 💡 Official LEGO LWP v3 Spec: Port Setup 0x41 + Mode 2 (Red Color 9) + Mode 0 (100% Full Brightness = 100)
-                                     for (let LIGHT_PORT = 0; LIGHT_PORT < 6; LIGHT_PORT++) {
-                                         // 1. Port Setup Command (0x41) to enable Port A light mode
-                                         const setupPacket = new Uint8Array([10, 0x00, 0x41, LIGHT_PORT, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01]);
-                                         await sendFn(setupPacket).catch(() => {});
+                                     // 1. Port A (0x00) 최우선 전송: 0x41 모드2 설정 -> 0x81 모드2 레드(9) 점등
+                                     const setupPortA = new Uint8Array([10, 0x00, 0x41, 0x00, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01]);
+                                     await sendFn(setupPortA).catch(() => {});
+                                     await new Promise(r => setTimeout(r, 50));
+
+                                     const payloadOnMode2PortA = new Uint8Array([
+                                         16, 0x00, 0x81, 0x00, 0x10, 0x51, 0x02,
+                                         9, 9, 9, 9, 9, 9, 9, 9, 9
+                                     ]);
+                                     await sendFn(payloadOnMode2PortA).catch(() => {});
+                                     await new Promise(r => setTimeout(r, 50));
+
+                                     // 2. 다른 포트(B~F: 1~5)에도 연결된 경우 순차 지원
+                                     for (let p = 1; p < 6; p++) {
+                                         const setupP = new Uint8Array([10, 0x00, 0x41, p, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01]);
+                                         await sendFn(setupP).catch(() => {});
                                          await new Promise(r => setTimeout(r, 20));
 
-                                         // 2. Mode 2 (Color Palette Mode Red 0x09) with 0x10 flag
-                                         const payloadOnMode2 = new Uint8Array([
-                                             16, 0x00, 0x81, LIGHT_PORT, 0x10, 0x51, 0x02,
+                                         const payloadOnP = new Uint8Array([
+                                             16, 0x00, 0x81, p, 0x10, 0x51, 0x02,
                                              9, 9, 9, 9, 9, 9, 9, 9, 9
                                          ]);
-                                         await sendFn(payloadOnMode2).catch((e) => console.error('Mode2 켜기 실패:', e));
-                                         await new Promise(r => setTimeout(r, 30));
-
-                                         // 3. Mode 0 (Level Mode 100% Full Brightness = 100) with 0x10 flag
-                                         const payloadOnMode0 = new Uint8Array([
-                                             16, 0x00, 0x81, LIGHT_PORT, 0x10, 0x51, 0x00,
-                                             100, 100, 100, 100, 100, 100, 100, 100, 100
-                                         ]);
-                                         await sendFn(payloadOnMode0).catch(() => {});
+                                         await sendFn(payloadOnP).catch(() => {});
                                          await new Promise(r => setTimeout(r, 20));
                                      }
 
@@ -4555,19 +4558,19 @@ print("BrickSync Sandbox Run")
                                      await new Promise(r => setTimeout(r, 30));
                                      await sendFn(new Uint8Array([8, 0, 0x81, 0x3C, 0x10, 0x51, 0x02, 0x09])).catch(() => {});
 
-                                    // ⏱️ 2. 정확히 5초 후 끄기 패킷 송출 및 잠금 해제 타이머 예약
-                                    setTimeout(async () => {
-                                        for (let LIGHT_PORT = 0; LIGHT_PORT < 6; LIGHT_PORT++) {
-                                            const payloadOff = new Uint8Array([
-                                                16, 0x00, 0x81, LIGHT_PORT, 0x11, 0x51, 0x00,
-                                                0, 0, 0, 0, 0, 0, 0, 0, 0
-                                            ]);
-                                            await sendFn(payloadOff).catch((e) => console.error('끄기 실패:', e));
-                                            await new Promise(r => setTimeout(r, 20));
-                                        }
-                                        window.isLightSequenceRunning = false;
-                                        try { triggerSystemLog('HUB', '💡 조명 5초 후 자동 OFF 완료 (재실행 가능)'); } catch(e) {}
-                                    }, 5000);
+                                     // ⏱️ 2. 정확히 5초 후 끄기 패킷 송출 및 잠금 해제 타이머 예약
+                                     setTimeout(async () => {
+                                         for (let LIGHT_PORT = 0; LIGHT_PORT < 6; LIGHT_PORT++) {
+                                             const payloadOff = new Uint8Array([
+                                                 16, 0x00, 0x81, LIGHT_PORT, 0x10, 0x51, 0x02,
+                                                 0, 0, 0, 0, 0, 0, 0, 0, 0
+                                             ]);
+                                             await sendFn(payloadOff).catch(() => {});
+                                             await new Promise(r => setTimeout(r, 20));
+                                         }
+                                         window.isLightSequenceRunning = false;
+                                         try { triggerSystemLog('HUB', '💡 조명 5초 후 자동 OFF 완료 (재실행 가능)'); } catch(e) {}
+                                     }, 5000);
                                 } else if (cmd.action === 'matrix_clear') {
                                     if (window.isLightSequenceRunning) return; // 🔒 조명 구동 중 중복/잔여 matrix_clear 충돌 방지
                                     let hubWin = window;
