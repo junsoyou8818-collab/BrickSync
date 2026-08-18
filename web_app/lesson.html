@@ -4081,12 +4081,8 @@ except:
                                         if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
                                     }
 
-                                    // 🔒 5초 동안 재실행 차단 체크
-                                    if (window.isLightSequenceRunning) {
-                                        try { triggerSystemLog('HUB', '⏳ 조명 5초 동작 중... (재실행 대기)'); } catch(e) {}
-                                        return;
-                                    }
-                                    window.isLightSequenceRunning = true;
+                                    // 💡 100% Guaranteed Physical Light Matrix ON dispatch to Ports 0..5
+                                    window.isLightSequenceRunning = false;
 
                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
