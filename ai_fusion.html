@@ -4522,6 +4522,7 @@ print("BrickSync Sandbox Run")
                                     // 💡 100% Guaranteed Physical Light Matrix ON dispatch to Ports 0..5
                                     // 💡 Guaranteed Physical Light Matrix ON dispatch (Targeted Port A & Connected Ports)
                                      // 💡 LWP 3.0.00 Exact Spec Light Matrix (64) & Hub RGB LED (23) Dispatch
+                                     // 💡 LWP 3.0.00 Exact Spec Light Matrix (64) & Hub RGB LED (23) Dispatch
                                      window.isLightSequenceRunning = true;
                                      const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
                                      const hubDevs = (window.parent && window.parent.hubDevices) ? window.parent.hubDevices : (window.hubDevices || {});
@@ -4536,13 +4537,16 @@ print("BrickSync Sandbox Run")
                                          if (ioT === 23) rgbLedPorts.push(pNum);
                                      }
 
-                                     // Fallbacks if discovery is still pending
-                                     if (matrixPorts.length === 0) matrixPorts = [0]; // Port A default
+                                     // Ensure Port A (0) and external ports (0..3) are covered
+                                     if (!matrixPorts.includes(0)) matrixPorts.unshift(0);
+                                     for (let p = 1; p < 4; p++) {
+                                         if (!matrixPorts.includes(p)) matrixPorts.push(p);
+                                     }
                                      if (rgbLedPorts.length === 0) rgbLedPorts = [0x3C, 0x3F]; // SPIKE Essential (60) & Prime (63)
 
                                      console.log('[LWP3 Dispatch] Target Matrix Ports:', matrixPorts, 'Target Hub RGB LED Ports:', rgbLedPorts);
 
-                                     // 2. Control 3x3 Light Matrix (IO Type 64): Setup 0x41 -> Mode 2 (Red 9) -> Mode 0 (100%)
+                                     // 2. Control 3x3 Light Matrix (IO Type 64): Pure Mode 2 (Red 9) Standalone (No Mode 0 collision)
                                      for (const mPort of matrixPorts) {
                                          // 0x41 Setup Command (10 bytes)
                                          const setupPacket = new Uint8Array([10, 0x00, 0x41, mPort, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01]);
@@ -4557,14 +4561,6 @@ print("BrickSync Sandbox Run")
                                          console.log(`[LWP3 Send] 3x3 Matrix Port ${mPort} Mode 2 (Red):`, payloadMode2);
                                          await sendFn(payloadMode2).catch(() => {});
                                          await new Promise(r => setTimeout(r, 40));
-
-                                         // Mode 0: 9-byte 100% Brightness Level (16 bytes)
-                                         const payloadMode0 = new Uint8Array([
-                                             16, 0x00, 0x81, mPort, 0x11, 0x51, 0x00,
-                                             100, 100, 100, 100, 100, 100, 100, 100, 100
-                                         ]);
-                                         await sendFn(payloadMode0).catch(() => {});
-                                         await new Promise(r => setTimeout(r, 30));
                                      }
 
                                      // 3. Control Hub Built-in RGB Light (IO Type 23): Mode 0 (Color 9) & Mode 1 (RGB 255,0,0)
