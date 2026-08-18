@@ -4087,7 +4087,7 @@ except:
 
                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
-                                                                         // 💡 Port A Setup (0x41) + 0x10 Flag Mode 2 (0x02) & Mode 0 (0x00) Light Combo
+                                                                         // 💡 Official LEGO LWP v3 Spec: Port Setup 0x41 + Mode 2 (Red Color 9) + Mode 0 (100% Full Brightness = 100)
                                      for (let LIGHT_PORT = 0; LIGHT_PORT < 6; LIGHT_PORT++) {
                                          // 1. Port Setup Command (0x41) to enable Port A light mode
                                          const setupPacket = new Uint8Array([10, 0x00, 0x41, LIGHT_PORT, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01]);
@@ -4102,10 +4102,10 @@ except:
                                          await sendFn(payloadOnMode2).catch((e) => console.error('Mode2 켜기 실패:', e));
                                          await new Promise(r => setTimeout(r, 30));
 
-                                         // 3. Mode 0 (Level Mode Brightness 100%) with 0x10 flag
+                                         // 3. Mode 0 (Level Mode 100% Full Brightness = 100) with 0x10 flag
                                          const payloadOnMode0 = new Uint8Array([
                                              16, 0x00, 0x81, LIGHT_PORT, 0x10, 0x51, 0x00,
-                                             10, 10, 10, 10, 10, 10, 10, 10, 10
+                                             100, 100, 100, 100, 100, 100, 100, 100, 100
                                          ]);
                                          await sendFn(payloadOnMode0).catch(() => {});
                                          await new Promise(r => setTimeout(r, 20));
