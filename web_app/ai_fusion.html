@@ -4384,6 +4384,7 @@ print("BrickSync Sandbox Run")
                                 break;
                             case 'matrix_image':
                             case 'matrix_pixel':
+                            case 'matrix_pixel_red':
                                 let freshMatEl = block.querySelector('.param-unified') || block.querySelector('.block-param:not(.param-time)');
                                 let matrixArrBLE = freshMatEl ? (freshMatEl.getAttribute('data-matrix') || JSON.stringify([0, 6, 0, 0, 0, 0, 6, 0, 6])) : JSON.stringify([0, 6, 0, 0, 0, 0, 6, 0, 6]);
                                 let mBleTime = freshMatEl ? (parseFloat(freshMatEl.getAttribute('data-val')) || 2) : 2;
