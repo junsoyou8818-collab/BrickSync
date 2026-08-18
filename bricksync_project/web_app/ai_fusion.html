@@ -4525,23 +4525,19 @@ print("BrickSync Sandbox Run")
                                      // 💡 LWP 3.0.00 Exact Spec Light Matrix (64) & Hub RGB LED (23) Dispatch
                                      // 💡 Guaranteed External LED (0x0008) + 3x3 Matrix (0x0040) + Hub LED (0x0017) Dispatch
                                      // 💡 Clean Targeted Port 0 (3x3 Light Matrix) Mode 2 (Red) Dispatch
+                                     // 💡 Direct 0x81 Output Port 0 (3x3 Light Matrix) Mode 2 (Red) Dispatch
                                      window.isLightSequenceRunning = true;
                                      const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
-                                     // 1. Port 0 (Port A) Setup Command (10 bytes, Mode 2)
-                                     const setupPacket = new Uint8Array([10, 0x00, 0x41, 0x00, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01]);
-                                     await sendFn(setupPacket).catch(() => {});
-                                     await new Promise(r => setTimeout(r, 40));
-
-                                     // 2. Port 0 (Port A) Mode 2: 9-byte Color Palette (Red = 9) (16 bytes exact)
+                                     // Port 0 (Port A) Mode 2: 9-byte Color Palette (Red = 9) (16 bytes exact matching node-poweredup)
                                      const matrixMode2 = new Uint8Array([
                                          16, 0x00, 0x81, 0x00, 0x11, 0x51, 0x02,
                                          9, 9, 9, 9, 9, 9, 9, 9, 9
                                      ]);
-                                     console.log('[LWP3 Send] 3x3 Matrix Port 0 Mode 2 (Red):', matrixMode2);
+                                     console.log('[LWP3 Direct Send] 3x3 Matrix Port 0 Mode 2 (Red):', matrixMode2);
                                      await sendFn(matrixMode2).catch(() => {});
 
-                                     // ⏱️ 3. 정확히 5초 후 자동 끄기 패킷 송출
+                                     // ⏱️ 정확히 5초 후 자동 끄기 패킷 송출
                                      setTimeout(async () => {
                                          const offMatrix = new Uint8Array([
                                              16, 0x00, 0x81, 0x00, 0x11, 0x51, 0x02,
