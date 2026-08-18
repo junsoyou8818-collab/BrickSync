@@ -4087,18 +4087,25 @@ except:
 
                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
-                                                                         // 💡 0x10 (Execute immediately NO feedback) node-poweredup Mode 2 (0x02) & Mode 0 (0x00) 40ms GATT Pace
+                                                                         // 💡 Port A Setup (0x41) + 0x10 Flag Mode 2 (0x02) & Mode 0 (0x00) Light Combo
                                      for (let LIGHT_PORT = 0; LIGHT_PORT < 6; LIGHT_PORT++) {
+                                         // 1. Port Setup Command (0x41) to enable Port A light mode
+                                         const setupPacket = new Uint8Array([10, 0x00, 0x41, LIGHT_PORT, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01]);
+                                         await sendFn(setupPacket).catch(() => {});
+                                         await new Promise(r => setTimeout(r, 20));
+
+                                         // 2. Mode 2 (Color Palette Mode Red 0x09) with 0x10 flag
                                          const payloadOnMode2 = new Uint8Array([
                                              16, 0x00, 0x81, LIGHT_PORT, 0x10, 0x51, 0x02,
                                              9, 9, 9, 9, 9, 9, 9, 9, 9
                                          ]);
                                          await sendFn(payloadOnMode2).catch((e) => console.error('Mode2 켜기 실패:', e));
-                                         await new Promise(r => setTimeout(r, 40));
+                                         await new Promise(r => setTimeout(r, 30));
 
+                                         // 3. Mode 0 (Level Mode Brightness 100%) with 0x10 flag
                                          const payloadOnMode0 = new Uint8Array([
                                              16, 0x00, 0x81, LIGHT_PORT, 0x10, 0x51, 0x00,
-                                             9, 9, 9, 9, 9, 9, 9, 9, 9
+                                             10, 10, 10, 10, 10, 10, 10, 10, 10
                                          ]);
                                          await sendFn(payloadOnMode0).catch(() => {});
                                          await new Promise(r => setTimeout(r, 20));
@@ -4106,9 +4113,9 @@ except:
 
                                      // Hub Center LED 0x10 Red Payloads (Spike Prime 0x3F & Spike Essential 0x3C Red 0x09)
                                      await sendFn(new Uint8Array([8, 0, 0x81, 0x3F, 0x10, 0x51, 0x02, 0x09])).catch(() => {});
-                                     await new Promise(r => setTimeout(r, 40));
+                                     await new Promise(r => setTimeout(r, 30));
                                      await sendFn(new Uint8Array([7, 0, 0x81, 0x3F, 0x10, 0x07, 0x09])).catch(() => {});
-                                     await new Promise(r => setTimeout(r, 40));
+                                     await new Promise(r => setTimeout(r, 30));
                                      await sendFn(new Uint8Array([8, 0, 0x81, 0x3C, 0x10, 0x51, 0x02, 0x09])).catch(() => {});
 
                                     // ⏱️ 2. 정확히 5초 후 끄기 패킷 송출 및 잠금 해제 타이머 예약
