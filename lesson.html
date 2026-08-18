@@ -4085,75 +4085,74 @@ except:
                                     // 💡 Guaranteed Physical Light Matrix ON dispatch (Targeted Port A & Connected Ports)
                                      // 💡 LWP 3.0.00 Exact Spec Light Matrix (64) & Hub RGB LED (23) Dispatch
                                      // 💡 LWP 3.0.00 Exact Spec Light Matrix (64) & Hub RGB LED (23) Dispatch
+                                     // 💡 Guaranteed External LED (0x0008) + 3x3 Matrix (0x0040) + Hub LED (0x0017) Dispatch
                                      window.isLightSequenceRunning = true;
                                      const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
                                      const hubDevs = (window.parent && window.parent.hubDevices) ? window.parent.hubDevices : (window.hubDevices || {});
 
-                                     // 1. Dynamic Port Resolution
-                                     let matrixPorts = [];
+                                     // External ports to target (Port A=0 is default primary, plus 1..3)
+                                     let extPorts = [0, 1, 2, 3];
                                      let rgbLedPorts = [];
 
                                      for (const [pStr, ioT] of Object.entries(hubDevs)) {
                                          const pNum = parseInt(pStr);
-                                         if (ioT === 64) matrixPorts.push(pNum);
+                                         if (pNum < 6 && !extPorts.includes(pNum)) extPorts.push(pNum);
                                          if (ioT === 23) rgbLedPorts.push(pNum);
                                      }
+                                     if (rgbLedPorts.length === 0) rgbLedPorts = [0x3C, 0x3F];
 
-                                     // Ensure Port A (0) and external ports (0..3) are covered
-                                     if (!matrixPorts.includes(0)) matrixPorts.unshift(0);
-                                     for (let p = 1; p < 4; p++) {
-                                         if (!matrixPorts.includes(p)) matrixPorts.push(p);
-                                     }
-                                     if (rgbLedPorts.length === 0) rgbLedPorts = [0x3C, 0x3F]; // SPIKE Essential (60) & Prime (63)
+                                     console.log('[LWP3 Light Dispatch] Target External Ports:', extPorts, 'Target Hub LED Ports:', rgbLedPorts);
 
-                                     console.log('[LWP3 Dispatch] Target Matrix Ports:', matrixPorts, 'Target Hub RGB LED Ports:', rgbLedPorts);
+                                     // 1. Control External Ports (0x0008 LED Light Power 100 & 0x0040 3x3 Matrix Mode 2)
+                                     for (const p of extPorts) {
+                                         const devType = hubDevs[p];
 
-                                     // 2. Control 3x3 Light Matrix (IO Type 64): Pure Mode 2 (Red 9) Standalone (No Mode 0 collision)
-                                     for (const mPort of matrixPorts) {
-                                         // 0x41 Setup Command (10 bytes)
-                                         const setupPacket = new Uint8Array([10, 0x00, 0x41, mPort, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01]);
-                                         await sendFn(setupPacket).catch(() => {});
-                                         await new Promise(r => setTimeout(r, 40));
+                                         // A. 0x0008 LED Light (WriteDirect 0x50 Power 100 & WriteDirectModeData 0x51 Mode 0 Power 100)
+                                         const led0x08WriteDirect = new Uint8Array([8, 0x00, 0x81, p, 0x11, 0x50, 100]);
+                                         await sendFn(led0x08WriteDirect).catch(() => {});
+                                         await new Promise(r => setTimeout(r, 25));
 
-                                         // Mode 2: 9-byte Color Palette Mode (Red = 9) (16 bytes)
-                                         const payloadMode2 = new Uint8Array([
-                                             16, 0x00, 0x81, mPort, 0x11, 0x51, 0x02,
-                                             9, 9, 9, 9, 9, 9, 9, 9, 9
-                                         ]);
-                                         console.log(`[LWP3 Send] 3x3 Matrix Port ${mPort} Mode 2 (Red):`, payloadMode2);
-                                         await sendFn(payloadMode2).catch(() => {});
-                                         await new Promise(r => setTimeout(r, 40));
-                                     }
+                                         const led0x08Mode0 = new Uint8Array([8, 0x00, 0x81, p, 0x11, 0x51, 0x00, 100]);
+                                         await sendFn(led0x08Mode0).catch(() => {});
+                                         await new Promise(r => setTimeout(r, 25));
 
-                                     // 3. Control Hub Built-in RGB Light (IO Type 23): Mode 0 (Color 9) & Mode 1 (RGB 255,0,0)
-                                     for (const ledPort of rgbLedPorts) {
-                                         // Mode 0: 1-byte Color Index (Red = 9) (8 bytes exact)
-                                         const ledMode0 = new Uint8Array([8, 0x00, 0x81, ledPort, 0x11, 0x51, 0x00, 9]);
-                                         console.log(`[LWP3 Send] Hub RGB LED Port ${ledPort} Mode 0 (Color Index 9):`, ledMode0);
-                                         await sendFn(ledMode0).catch(() => {});
-                                         await new Promise(r => setTimeout(r, 30));
+                                         // B. 0x0040 3x3 Color Light Matrix (Setup 0x41 -> Mode 2 Red 9)
+                                         if (devType === 64 || devType === undefined) {
+                                             const setupPacket = new Uint8Array([10, 0x00, 0x41, p, 0x02, 0x01, 0x00, 0x00, 0x00, 0x01]);
+                                             await sendFn(setupPacket).catch(() => {});
+                                             await new Promise(r => setTimeout(r, 25));
 
-                                         // Mode 1: 3-byte Direct RGB (R:255, G:0, B:0) (10 bytes exact)
-                                         const ledMode1 = new Uint8Array([10, 0x00, 0x81, ledPort, 0x11, 0x51, 0x01, 255, 0, 0]);
-                                         console.log(`[LWP3 Send] Hub RGB LED Port ${ledPort} Mode 1 (RGB [255,0,0]):`, ledMode1);
-                                         await sendFn(ledMode1).catch(() => {});
-                                         await new Promise(r => setTimeout(r, 30));
-                                     }
-
-                                     // ⏱️ 4. 정확히 5초 후 자동 끄기 패킷 송출
-                                     setTimeout(async () => {
-                                         for (const mPort of matrixPorts) {
-                                             const offMatrix = new Uint8Array([
-                                                 16, 0x00, 0x81, mPort, 0x11, 0x51, 0x02,
-                                                 0, 0, 0, 0, 0, 0, 0, 0, 0
+                                             const matrixMode2 = new Uint8Array([
+                                                 16, 0x00, 0x81, p, 0x11, 0x51, 0x02,
+                                                 9, 9, 9, 9, 9, 9, 9, 9, 9
                                              ]);
-                                             await sendFn(offMatrix).catch(() => {});
-                                             await new Promise(r => setTimeout(r, 20));
+                                             await sendFn(matrixMode2).catch(() => {});
+                                             await new Promise(r => setTimeout(r, 25));
+                                         }
+                                     }
+
+                                     // 2. Control Hub Built-in RGB Light (IO Type 23)
+                                     for (const ledPort of rgbLedPorts) {
+                                         const ledMode0 = new Uint8Array([8, 0x00, 0x81, ledPort, 0x11, 0x51, 0x00, 9]);
+                                         await sendFn(ledMode0).catch(() => {});
+                                         await new Promise(r => setTimeout(r, 20));
+
+                                         const ledMode1 = new Uint8Array([10, 0x00, 0x81, ledPort, 0x11, 0x51, 0x01, 255, 0, 0]);
+                                         await sendFn(ledMode1).catch(() => {});
+                                         await new Promise(r => setTimeout(r, 20));
+                                     }
+
+                                     // ⏱️ 3. 정확히 5초 후 자동 끄기 패킷 송출
+                                     setTimeout(async () => {
+                                         for (const p of extPorts) {
+                                             // 0x0008 OFF (Power 0)
+                                             await sendFn(new Uint8Array([8, 0x00, 0x81, p, 0x11, 0x50, 0])).catch(() => {});
+                                             await sendFn(new Uint8Array([8, 0x00, 0x81, p, 0x11, 0x51, 0x00, 0])).catch(() => {});
+                                             // 0x0040 OFF
+                                             await sendFn(new Uint8Array([16, 0x00, 0x81, p, 0x11, 0x51, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0])).catch(() => {});
                                          }
                                          for (const ledPort of rgbLedPorts) {
-                                             const offLed = new Uint8Array([8, 0x00, 0x81, ledPort, 0x11, 0x51, 0x00, 0]);
-                                             await sendFn(offLed).catch(() => {});
-                                             await new Promise(r => setTimeout(r, 20));
+                                             await sendFn(new Uint8Array([8, 0x00, 0x81, ledPort, 0x11, 0x51, 0x00, 0])).catch(() => {});
                                          }
                                          window.isLightSequenceRunning = false;
                                          try { triggerSystemLog('HUB', '💡 조명 5초 후 자동 OFF 완료 (재실행 가능)'); } catch(e) {}
