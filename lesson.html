@@ -3467,6 +3467,13 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 return rectA.left - rectB.left;
             });
 
+            console.log('🔍 [스택 실측 덤프] 총 개수:', validStacks.length);
+            validStacks.forEach((stack, idx) => {
+                const blocks = Array.from(stack.querySelectorAll('.workspace-item, .spike-block'));
+                const actions = blocks.map(b => b.getAttribute('data-action'));
+                console.log(`   👉 스택 [${idx + 1}] (${blocks.length}개 블록):`, actions);
+            });
+
             let rootBlocks = [];
             // We only grab top-level workspace items per valid stack
             validStacks.forEach(stack => {
