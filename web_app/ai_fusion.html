@@ -3728,7 +3728,26 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         // 5. USB/BLE 허브 통신 및 코딩 실행 영역 (SPA 프록시 지원)
         // SPA 아키텍처이므로 통신 주도권은 'app.html'(부모 프록시)이 영원히 가집니다.
         // ==========================================
-        async function writeToHub(data) {
+                // 💡 [클로드 제안 아키텍처] 8단원 AI 몬스터 인식 전용 다이렉트 라이트 점등 함수
+        async function sendMatrixRed() {
+            try {
+                const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
+                const matrixMode2 = new Uint8Array([
+                    16, 0x00, 0x81, 0x00, 0x11, 0x51, 0x02,
+                    0xA9, 0xA9, 0xA9, 0xA9, 0xA9, 0xA9, 0xA9, 0xA9, 0xA9
+                ]);
+                console.log('[LWP3 Direct Send] Red 0xA9:', matrixMode2);
+                await sendFn(matrixMode2).catch((e) => console.error('[라이트 전송 실패]', e));
+                setTimeout(async () => {
+                    const off = new Uint8Array([16, 0x00, 0x81, 0x00, 0x11, 0x51, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+                    await sendFn(off).catch(() => { });
+                }, 5000);
+            } catch (e) {
+                console.error('[sendMatrixRed 예외 방어]', e);
+            }
+        }
+
+async function writeToHub(data) {
             return await window.parent.writeToHub(data);
         }
 
@@ -6620,6 +6639,9 @@ print("BrickSync Sandbox Run")
                             if (consecutiveAiFrames >= 3 && lastTriggeredAiGesture !== detectedGesture && !isBgGesture) {
                                 lastTriggeredAiGesture = detectedGesture;
                                 console.log("🚀 [AI Trigger] Confirmed Stable Gesture:", detectedGesture);
+                                if (!isTrainingActive && ((unit === '3' || unit === '8')) && detectedGesture === 0) {
+                                    sendMatrixRed(); // 👈 큐/타이머와 완전 독립된 다이렉트 실물 라이트 점등
+                                }
                                 if (typeof addSystemLog === 'function') triggerSystemLog('AI', `👾 AI 이미지 인식 성공: ${labels[detectedGesture]} (신뢰도: ${Math.round(result.confidences[result.label]*100)}%)`);
                                 if (window.isBlockExecutionRunning) {
                                     await tf.nextFrame();
