@@ -3453,12 +3453,18 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         }
         async function runBlocks(triggerAction = 'gui') {
             window.isBlockExecutionRunning = true;
-            // 실행 가능한 스택 찾기 (시작 블록 또는 수신된 메시지 블록, 음량 블록 등으로 시작하는 스택들만 조건부 실행)
-            let validStacks = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).filter(stack => {
+            // 실행 가능한 스택 찾기 (동작 블록이 연결된 정상 스택 우선 필터링, 빈 시작 블록 조기종료 방어)
+            let allCandidateStacks = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).filter(stack => {
                 const firstBlock = stack.querySelector('.workspace-item');
                 const action = (firstBlock && firstBlock.getAttribute('data-action')) || '';
                 return action === 'start' || action.startsWith('event_');
             });
+            let validStacks = allCandidateStacks.filter(stack => {
+                const blocks = Array.from(stack.querySelectorAll('.workspace-item, .spike-block'));
+                const firstAction = blocks[0] ? (blocks[0].getAttribute('data-action') || '') : '';
+                return blocks.length > 1 || firstAction.startsWith('event_');
+            });
+            if (validStacks.length === 0) validStacks = allCandidateStacks;
 
             // 스택들을 왼쪽에서 오른쪽으로 나타나는 순서 (X 좌표)대로 정렬
             validStacks.sort((a, b) => {
@@ -3651,19 +3657,19 @@ print("BrickSync Sandbox Run")
                             break;
                         }
                         case 'motor_cw':
-                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1150)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1000)) \n${indent}sm() \n`;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_RIGHT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 1150;
+                                cumulativeDelayMs += 1000;
                             }
                             localActionsQueue.push({ action: 'STOP_MWHEEL_RIGHT', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800; // 관성 및 반대 회전 충돌 방지용 브레이크 휴식 800ms
                             break;
                         case 'motor_ccw':
-                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1150)) \n${indent}sm() \n`;
+                            pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1000)) \n${indent}sm() \n`;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_LEFT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 1150;
+                                cumulativeDelayMs += 1000;
                             }
                             localActionsQueue.push({ action: 'STOP_MWHEEL_LEFT', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800; // 관성 및 반대 회전 충돌 방지용 브레이크 휴식 800ms
