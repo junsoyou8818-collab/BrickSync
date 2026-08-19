@@ -3471,7 +3471,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             validStacks.forEach((stack, idx) => {
                 const blocks = Array.from(stack.querySelectorAll('.workspace-item, .spike-block'));
                 const actions = blocks.map(b => b.getAttribute('data-action'));
-                console.log(`   👉 스택 [${idx + 1}] (${blocks.length}개 블록):`, actions);
+                console.log(`   👉 스택 [${idx + 1}] (${blocks.length}개 블록):`, JSON.stringify(actions));
             });
 
             let rootBlocks = [];
