@@ -202,7 +202,11 @@ async def handle_websocket(request):
                         print("▶ 관람차 (단일모터) 우회전 발송 (J키 한번 탁 쳐서 가동)")
                         threading.Thread(target=lambda: safe_press('j'), daemon=True).start()
                     elif action in ["STOP_MWHEEL_LEFT", "STOP_MWHEEL_RIGHT"]:
-                        print("▶ 관람차 (단일모터) 정지 스위치 수신 (동작 완료 자동 제어로 키 전송 제외)")
+                        print("▶ 관람차 (단일모터) 정지 스위치 수신 (포트나이트 K/\\ 정지 브레이크 키 전송)")
+                        def press_stop_wheel():
+                            safe_press('k')
+                            safe_press('\\')
+                        threading.Thread(target=press_stop_wheel, daemon=True).start()
 
                     elif action in ["SPEED_1", "SPEED_2", "SPEED_3", "SPEED_4"]:
                         speed_durations = {
