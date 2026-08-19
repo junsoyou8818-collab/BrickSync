@@ -4228,7 +4228,7 @@ except:
                             // ?�벤???�들?? ??�?무조�??��? 차�?�??�행?�고, ?�난 ???�시 감시??
                             while (window.bleEngineRunCounter === currentRunId) {
                                 await executeBleQueue();
-                        if (triggerAction === 'gui') {
+                        if (triggerAction === 'gui' && unit === '7') {
                             try {
                                 if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
                                     window.parent.sendWebSocketAction({ action: "SWING_CONTROL", dir: "FORWARD", val: 2 });
@@ -4240,7 +4240,7 @@ except:
                         })();
                     } else {
                         executeBleQueue();
-                        if (triggerAction === 'gui') {
+                        if (triggerAction === 'gui' && unit === '7') {
                             try {
                                 if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
                                     window.parent.sendWebSocketAction({ action: "SWING_CONTROL", dir: "FORWARD", val: 2 });
