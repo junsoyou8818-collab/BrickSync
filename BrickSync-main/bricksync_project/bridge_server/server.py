@@ -185,16 +185,16 @@ async def handle_websocket(request):
                     
                     elif action == "STOP_UP":
                         steering_state["UP"] = False
-                        release_all_steering_keys()
+                        safe_key_up('y')
                     elif action == "STOP_DOWN":
                         steering_state["DOWN"] = False
-                        release_all_steering_keys()
+                        safe_key_up('l')
                     elif action == "STOP_LEFT":
                         steering_state["LEFT"] = False
-                        release_all_steering_keys()
+                        safe_key_up('u')
                     elif action == "STOP_RIGHT":
                         steering_state["RIGHT"] = False
-                        release_all_steering_keys()
+                        safe_key_up('o')
 
                     elif action == "MWHEEL_LEFT":
                         print("▶ 관람차 (단일모터) 좌회전 발송 (H키 한번 탁 쳐서 가동)")
