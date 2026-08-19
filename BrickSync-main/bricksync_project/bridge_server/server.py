@@ -70,6 +70,7 @@ pydirectinput_lock = threading.Lock()
 def safe_press(key):
     with pydirectinput_lock:
         try:
+            print(f"🔑 [실제 키 입력] '{key}' 눌림 - {time.strftime('%H:%M:%S')}.{int(time.time()*1000)%1000:03d}")
             pydirectinput.keyDown(key)
             time.sleep(0.05)
             pydirectinput.keyUp(key)
