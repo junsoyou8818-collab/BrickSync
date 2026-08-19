@@ -3645,7 +3645,7 @@ print("BrickSync Sandbox Run")
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_left' ? 'LEFT' : 'RIGHT';
-                            let singleStepMs = 500;
+                            let singleStepMs = 1000;
                             for (let step = 0; step < timeVal; step++) {
                                 localActionsQueue.push({ action: 'STOP_UP', delay: cumulativeDelayMs });
                                 localActionsQueue.push({ action: 'STOP_DOWN', delay: cumulativeDelayMs });
