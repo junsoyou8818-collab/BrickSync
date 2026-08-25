@@ -3219,8 +3219,21 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     // 근처에 스택이 없어서 모눈종이 직속(자유배치)된 경우 새 스택 컨테이너화
                     const newStack = document.createElement('div');
                     newStack.className = 'block-stack';
-                    newStack.style.left = placeholder.style.left;
-                    newStack.style.top = placeholder.style.top;
+                    
+                    // 워크스페이스에 첫 블록(시작 블록)을 놓을 때 상단에 치우치지 않고 화면 세로 중앙(약 42% 높이)에 보기 좋게 안착하도록 보정
+                    const existingStacks = workspaceArea.querySelectorAll('.block-stack');
+                    if (existingStacks.length === 0) {
+                        const wsParent = workspaceArea.parentElement;
+                        const wsRect = workspaceArea.getBoundingClientRect();
+                        const parentRect = wsParent.getBoundingClientRect();
+                        const centerY = (parentRect.top + parentRect.height * 0.42 - wsRect.top) / currentZoom - 35;
+                        newStack.style.left = placeholder.style.left;
+                        newStack.style.top = `${centerY}px`;
+                    } else {
+                        newStack.style.left = placeholder.style.left;
+                        newStack.style.top = placeholder.style.top;
+                    }
+
                     workspaceArea.appendChild(newStack);
                     newStack.appendChild(finalBlock);
                     draggedSiblings.forEach(sib => {
