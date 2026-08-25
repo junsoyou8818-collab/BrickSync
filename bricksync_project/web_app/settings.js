@@ -81,7 +81,7 @@
             lbl_guide_banner_subtitle: "BrickSync가 처음이신가요? 연결 방법과 활용 방법을 확인하세요",
             lbl_map_play_now: "지금 플레이하세요!",
             banner_intro_text: "레고 포트나이트 앱 소개<br>및 학습 관련 가이드 내용",
-            btn_try_mission: "미션하러가기 🚀",
+            btn_try_mission: "미션 도전하기",
             lbl_stamp_complete: "완 료",
             lbl_reward_slot_coin: "코인",
             lbl_hub_not_connected: "허브 연결 안 됨",
@@ -240,7 +240,7 @@
 
             // Modal & Workspace UI
             lbl_required_tasks: "📋 미션 달성 과제",
-            btn_try_mission: "미션 도전하기 🚀",
+            btn_try_mission: "미션 도전하기",
             btn_check_tasks: "미션 과제 체크",
             hint_drag_blocks: "하단에서 아이콘 블록을 끌어와 조립해보세요!",
             hint_drag_assemble: "하단에서 아이콘 블록을 끌어와 조립해보세요!",
@@ -322,7 +322,7 @@
             lbl_guide_banner_subtitle: "New to BrickSync? Learn how to connect and use it.",
             lbl_map_play_now: "PLAY NOW!",
             banner_intro_text: "Lego Fortnite App Overview<br>& Learning Guide Content",
-            btn_try_mission: "Try Mission 🚀",
+            btn_try_mission: "Try Mission",
             lbl_stamp_complete: "COMPLETE",
             lbl_reward_slot_coin: "Coin",
             lbl_hub_not_connected: "Hub Not Connected",
@@ -481,7 +481,7 @@
 
             // Modal & Workspace UI
             lbl_required_tasks: "📋 Required Tasks",
-            btn_try_mission: "Try Mission 🚀",
+            btn_try_mission: "Try Mission",
             btn_check_tasks: "Check Tasks",
             hint_drag_blocks: "Drag icon blocks from below to assemble your code!",
             hint_drag_assemble: "Drag icon blocks from below to assemble your code!"
