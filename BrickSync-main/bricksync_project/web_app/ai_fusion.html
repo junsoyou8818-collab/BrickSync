@@ -965,7 +965,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             <div
                 style="padding: 15px 20px; background: #f8fafc; border-bottom: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                 <div style="font-weight: 800; color: #1e293b; font-size: 1.1rem;">
-                    <span id="ai-panel-title-text" data-i18n="lbl_ai_voice_title"><i class="fas fa-microphone" style="color: #8b5cf6;"></i> AI Voice Recognition</span>
+                    <span id="ai-panel-title-text" data-i18n="lbl_ai_vision_title"><i class="fas fa-camera" style="color: #8b5cf6;"></i> AI Gesture Recognition</span>
                 </div>
             </div>
 
@@ -5016,8 +5016,8 @@ print("BrickSync Sandbox Run")
                 if (titleEl) {
                     titleEl.setAttribute('data-i18n', 'lbl_ai_vision_title');
                     titleEl.innerHTML = isEn
-                        ? '<i class="fas fa-camera" style="color: #8b5cf6;"></i> AI Vision Gesture Recognition'
-                        : '<i class="fas fa-camera" style="color: #8b5cf6;"></i> AI 비전 제스처 인식';
+                        ? '<i class="fas fa-camera" style="color: #8b5cf6;"></i> AI Gesture Recognition'
+                        : '<i class="fas fa-camera" style="color: #8b5cf6;"></i> AI 제스처 인식';
                 }
                 if (panelContent) {
                     panelContent.innerHTML = `
