@@ -2770,11 +2770,21 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         }, { passive: false });
 
         // 작업공간을 광활하게 설정한 뒤 카메라 위치를 중앙(2500px 인근)으로 강제 이동
-        // calc()를 사용하면 첫 parseFloat 시 NaN을 파싱하여 뷰어 이동 버그가 발생하므로 JS로 직접 px 단위 설정
-        const initWsLeft = (window.innerWidth / 2) - 2500;
-        const initWsTop = (workspaceArea.parentElement.clientHeight / 2) - 2500;
-        workspaceArea.style.left = `${initWsLeft}px`;
-        workspaceArea.style.top = `${initWsTop}px`;
+        function centerWorkspaceCamera() {
+            const parent = workspaceArea.parentElement;
+            const parentW = (parent && parent.clientWidth) || window.innerWidth;
+            const parentH = (parent && parent.clientHeight) || (window.innerHeight - 170);
+            const initWsLeft = (parentW / 2) - (2500 * currentZoom);
+            const initWsTop = (parentH / 2) - (2500 * currentZoom);
+            workspaceArea.style.transform = `scale(${currentZoom})`;
+            workspaceArea.style.left = `${initWsLeft}px`;
+            workspaceArea.style.top = `${initWsTop}px`;
+        }
+        centerWorkspaceCamera();
+        window.addEventListener('load', centerWorkspaceCamera);
+        window.addEventListener('resize', centerWorkspaceCamera);
+        setTimeout(centerWorkspaceCamera, 50);
+        setTimeout(centerWorkspaceCamera, 200);
 
         // 워크스페이스 배경 드래그(Pan) 및 다중 선택(Shift+Drag) 기능 구현
         let isPanning = false;
@@ -3219,16 +3229,11 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     const newStack = document.createElement('div');
                     newStack.className = 'block-stack';
                     
-                    // 워크스페이스에 첫 블록(시작 블록)을 놓을 때 화면 정중앙(50%, 50%)에 완벽하게 안착하도록 정밀 보정
+                    // 워크스페이스에 첫 블록(시작 블록)을 놓을 때 화면 정중앙(2500px 인근)에 완벽하게 안착하도록 정밀 보정
                     const existingStacks = workspaceArea.querySelectorAll('.block-stack');
                     if (existingStacks.length === 0) {
-                        const wsParent = workspaceArea.parentElement;
-                        const wsRect = workspaceArea.getBoundingClientRect();
-                        const parentRect = wsParent.getBoundingClientRect();
-                        const centerX = (parentRect.left + (parentRect.width / 2) - wsRect.left) / currentZoom - 40;
-                        const centerY = (parentRect.top + (parentRect.height / 2) - wsRect.top) / currentZoom - 40;
-                        newStack.style.left = `${centerX}px`;
-                        newStack.style.top = `${centerY}px`;
+                        newStack.style.left = '2460px';
+                        newStack.style.top = '2460px';
                     } else {
                         newStack.style.left = placeholder.style.left;
                         newStack.style.top = placeholder.style.top;
