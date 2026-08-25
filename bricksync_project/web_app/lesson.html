@@ -3108,20 +3108,18 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         document.addEventListener('drop', (e) => {
             if (dragSourceNode && dragSourceNode.classList.contains('workspace-item')) {
                 if (!e.target.closest('#workspaceArea') && !e.target.closest('#palette') && !e.target.closest('#trashArea')) {
-                    if (dragSourceNode.getAttribute('data-action') !== 'start') {
-                        if (selectedStacks.length > 0) {
-                            selectedStacks.forEach(stack => {
-                                const firstBlock = stack.querySelector('.workspace-item');
-                                if (firstBlock && firstBlock.getAttribute('data-action') !== 'start') {
-                                    deleteBlockAndChildren(firstBlock);
-                                }
-                            });
-                            clearMultiSelection();
-                        } else {
-                            deleteBlockAndChildren(dragSourceNode);
-                        }
-                        if (placeholder) placeholder.remove();
+                    if (selectedStacks.length > 0) {
+                        selectedStacks.forEach(stack => {
+                            const firstBlock = stack.querySelector('.workspace-item');
+                            if (firstBlock) {
+                                deleteBlockAndChildren(firstBlock);
+                            }
+                        });
+                        clearMultiSelection();
+                    } else {
+                        deleteBlockAndChildren(dragSourceNode);
                     }
+                    if (placeholder) placeholder.remove();
                 }
             }
         });
@@ -3263,21 +3261,15 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     if (selectedStacks.length > 0) {
                         selectedStacks.forEach(stack => {
                             const firstBlock = stack.querySelector('.workspace-item');
-                            if (firstBlock && firstBlock.getAttribute('data-action') !== 'start') {
+                            if (firstBlock) {
                                 deleteBlockAndChildren(firstBlock);
                             }
                         });
                         clearMultiSelection();
                         if (placeholder) placeholder.remove();
                     } else if (dragSourceNode.classList.contains('workspace-item') || dragSourceNode.parentElement === workspaceArea) {
-                        if (dragSourceNode.getAttribute('data-action') !== 'start') {
-                            deleteBlockAndChildren(dragSourceNode);
-                            if (placeholder) placeholder.remove(); // 허공에 남은 틀 제거
-                        } else {
-                            alert("시작 블럭은 지울 수 없습니다!");
-                            if (placeholder) workspaceArea.insertBefore(dragSourceNode, placeholder);
-                            dragSourceNode.style.display = 'inline-flex';
-                        }
+                        deleteBlockAndChildren(dragSourceNode);
+                        if (placeholder) placeholder.remove(); // 허공에 남은 틀 제거
                     }
                 }
             });
