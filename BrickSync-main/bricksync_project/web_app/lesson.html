@@ -4538,21 +4538,6 @@ except:
                     stacks.forEach(s => s.remove());
                     const hint = workspaceArea.querySelector('.hint-text');
                     if (hint) hint.remove();
-
-                    if (targetUnit !== '1') {
-                        const newStack = document.createElement('div');
-                        newStack.className = 'block-stack';
-                        newStack.style.left = '150px';
-                        newStack.style.top = '150px';
-                        workspaceArea.appendChild(newStack);
-
-                        const template = document.querySelector(`#palette [data-action="start"]`);
-                        if (template) {
-                            const block = template.cloneNode(true);
-                            block.classList.add('workspace-item');
-                            newStack.appendChild(block);
-                        }
-                    }
                 }
             }
 
@@ -4803,9 +4788,9 @@ except:
                 document.getElementById('missionStatusBar').style.display = 'flex';
                 updateStatusBarText();
 
-                // Show/hide status elements (in free coding mode before clicking Try Mission, hide progress container for unit 1)
-                document.getElementById('m-progress-container').style.display = (unit === '1' ? 'none' : 'flex');
-                document.getElementById('btn-check-tasks').style.display = (unit === '1' ? 'none' : 'inline-flex');
+                // Show/hide status elements (in free coding mode before clicking Try Mission, hide progress container for units 1~5)
+                document.getElementById('m-progress-container').style.display = 'none';
+                document.getElementById('btn-check-tasks').style.display = 'none';
                 document.getElementById('btn-go-mission').style.display = 'inline-flex';
 
                 // 퍼센티지 재계산 및 과제 리스트 렌더링용
@@ -4966,7 +4951,8 @@ except:
                     const activeMissionPct = (typeof getMissionData === 'function' ? getMissionData()[unit] : null) || currentMission;
                     let percent = Math.min(100, Math.round((completedTasks / (activeMissionPct.tasks ? activeMissionPct.tasks.length : 1)) * 100));
 
-                    if (unit === '1' && !presentActions.includes('start')) {
+                    // [UI 표시 조건] 1~5단원 플레이 블록(start) 미등록 시 0%로 초기화 표시
+                    if (!presentActions.includes('start')) {
                         percent = 0;
                     }
 

@@ -4842,8 +4842,13 @@ print("BrickSync Sandbox Run")
             const checkTasksBtn = document.getElementById('btn-check-tasks');
             const goMissionBtn = document.getElementById('btn-go-mission');
 
-            if (progressContainer) progressContainer.style.display = 'flex';
-            if (checkTasksBtn) checkTasksBtn.style.display = 'inline-flex';
+            if (isMissionActive) {
+                if (progressContainer) progressContainer.style.display = 'flex';
+                if (checkTasksBtn) checkTasksBtn.style.display = 'inline-flex';
+            } else {
+                if (progressContainer) progressContainer.style.display = 'none';
+                if (checkTasksBtn) checkTasksBtn.style.display = 'none';
+            }
             if (goMissionBtn) goMissionBtn.style.display = 'inline-flex';
         }
 
@@ -5308,19 +5313,6 @@ print("BrickSync Sandbox Run")
                         stacks.forEach(s => s.remove());
                         const hint = workspaceArea.querySelector('.hint-text');
                         if (hint) hint.remove();
-
-                        const newStack = document.createElement('div');
-                        newStack.className = 'block-stack';
-                        newStack.style.left = '150px';
-                        newStack.style.top = '150px';
-                        workspaceArea.appendChild(newStack);
-
-                        const template = document.querySelector(`#palette [data-action="event_ai_gesture"]`);
-                        if (template) {
-                            const block = template.cloneNode(true);
-                            block.classList.add('workspace-item');
-                            newStack.appendChild(block);
-                        }
                     }
                 }
 
@@ -5447,10 +5439,16 @@ print("BrickSync Sandbox Run")
                         });
 
                         const currentLangPct = localStorage.getItem('bricksync_lang') || 'ko';
-                    const activeMissionPct = (missionData[currentLangPct] || missionData['ko'])[unit] || currentMission;
-                    let percent = Math.min(100, Math.round((completedTasks / (activeMissionPct.tasks ? activeMissionPct.tasks.length : 1)) * 100));
+                        const activeMissionPct = (missionData[currentLangPct] || missionData['ko'])[unit] || currentMission;
+                        let percent = Math.min(100, Math.round((completedTasks / (activeMissionPct.tasks ? activeMissionPct.tasks.length : 1)) * 100));
                         if (unit === '6' && !isSequenceValid) {
                             percent = Math.min(80, percent); // 올바른 순서 결합 전까지 100% 제한
+                        }
+
+                        // [UI 표시 조건] 6~8단원 AI 시작 블록 미등록 시 0%로 초기화 표시
+                        const hasAiStartBlock = presentActions.some(a => a.startsWith('event_ai_') || a === 'start') || eventStackActions.some(a => a.startsWith('event_ai_') || a === 'start');
+                        if (!hasAiStartBlock) {
+                            percent = 0;
                         }
 
                         const progressEl = document.getElementById('m-progress');
