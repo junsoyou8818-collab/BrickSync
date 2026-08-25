@@ -978,25 +978,17 @@
             });
         }
 
-        // 2. 앱 전역 설정값 초기 적용 (언어, 줌 배율)
+        // 2. 앱 전역 설정값 초기 적용 (언어)
         const savedLang = localStorage.getItem('bricksync_lang');
         if (savedLang) {
             // 언어 자동 번역 1차 적용
             setTimeout(() => changeSettingsLanguage(savedLang), 100);
         }
 
-        const savedScale = localStorage.getItem('bricksync_scale');
-        if (savedScale) {
-            const scale = parseFloat(savedScale);
-            // 배율 자동 적용
-            setTimeout(() => {
-                const codingArea = document.querySelector('.coding-area') || document.getElementById('block-workspace');
-                if (codingArea) {
-                    codingArea.style.transform = `scale(${scale})`;
-                    codingArea.style.transformOrigin = "0 0";
-                }
-            }, 300);
-        }
+        // 이전 구버전 배율 캐시 완전 정리
+        try {
+            localStorage.removeItem('bricksync_scale');
+        } catch (e) {}
     });
 
 })();
