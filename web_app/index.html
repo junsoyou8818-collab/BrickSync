@@ -10,13 +10,13 @@
     <script src="firebase_config.js"></script>
     <script src="auth.js"></script>
     <script>
-        // 로그인 세션 체킹 (세션이 없는 경우 로그인 화면으로 이동)
+        // 로그인 세션 체킹 (세션이 없는 경우 인트로 화면으로 이동)
         (async function () {
             try {
                 const user = await BrickSyncAuth.getCurrentUser();
                 const session = localStorage.getItem('bricksync_user_session') || localStorage.getItem('bricksync_student_session');
                 if (!user && !session) {
-                    window.location.href = 'login.html';
+                    window.location.href = 'intro.html';
                 }
             } catch (e) {
                 console.warn('[Index] 세션 체크 경고:', e);
