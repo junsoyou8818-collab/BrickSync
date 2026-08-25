@@ -4547,17 +4547,19 @@ except:
                     const hint = workspaceArea.querySelector('.hint-text');
                     if (hint) hint.remove();
 
-                    const newStack = document.createElement('div');
-                    newStack.className = 'block-stack';
-                    newStack.style.left = '150px';
-                    newStack.style.top = '150px';
-                    workspaceArea.appendChild(newStack);
+                    if (targetUnit !== '1') {
+                        const newStack = document.createElement('div');
+                        newStack.className = 'block-stack';
+                        newStack.style.left = '150px';
+                        newStack.style.top = '150px';
+                        workspaceArea.appendChild(newStack);
 
-                    const template = document.querySelector(`#palette [data-action="start"]`);
-                    if (template) {
-                        const block = template.cloneNode(true);
-                        block.classList.add('workspace-item');
-                        newStack.appendChild(block);
+                        const template = document.querySelector(`#palette [data-action="start"]`);
+                        if (template) {
+                            const block = template.cloneNode(true);
+                            block.classList.add('workspace-item');
+                            newStack.appendChild(block);
+                        }
                     }
                 }
             }
@@ -4809,9 +4811,9 @@ except:
                 document.getElementById('missionStatusBar').style.display = 'flex';
                 updateStatusBarText();
 
-                // Show/hide status elements (always show progress, check tasks, and try mission buttons)
-                document.getElementById('m-progress-container').style.display = 'flex';
-                document.getElementById('btn-check-tasks').style.display = 'inline-flex';
+                // Show/hide status elements (in free coding mode before clicking Try Mission, hide progress container for unit 1)
+                document.getElementById('m-progress-container').style.display = (unit === '1' ? 'none' : 'flex');
+                document.getElementById('btn-check-tasks').style.display = (unit === '1' ? 'none' : 'inline-flex');
                 document.getElementById('btn-go-mission').style.display = 'inline-flex';
 
                 // 퍼센티지 재계산 및 과제 리스트 렌더링용
@@ -4969,9 +4971,12 @@ except:
                             li.innerHTML = `<i class="far fa-circle" style="color: #cbd5e1; width:20px; font-size:1.1rem; text-align:center;"></i> ${task.text}`;
                         }
                     });
-
                     const activeMissionPct = (typeof getMissionData === 'function' ? getMissionData()[unit] : null) || currentMission;
-                    const percent = Math.min(100, Math.round((completedTasks / (activeMissionPct.tasks ? activeMissionPct.tasks.length : 1)) * 100));
+                    let percent = Math.min(100, Math.round((completedTasks / (activeMissionPct.tasks ? activeMissionPct.tasks.length : 1)) * 100));
+
+                    if (unit === '1' && !presentActions.includes('start')) {
+                        percent = 0;
+                    }
 
                     document.getElementById('m-progress').style.width = percent + '%';
                     document.getElementById('m-percent').textContent = percent + '%';
