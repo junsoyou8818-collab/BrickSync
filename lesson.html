@@ -294,9 +294,9 @@ function triggerSystemLog(category, msg) {
         }
 
         .hint-text {
-            position: fixed;
+            position: absolute;
             left: 50%;
-            top: calc(50% + 50px);
+            top: 50%;
             transform: translate(-50%, -50%);
             color: #94a3b8;
             font-size: 1.5rem;
@@ -307,7 +307,7 @@ function triggerSystemLog(category, msg) {
             align-items: center;
             gap: 15px;
             animation: pulse 2s infinite;
-            z-index: 0;
+            z-index: 10;
         }
 
         @keyframes pulse {
@@ -884,11 +884,10 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
 
     <!-- Main Workspace Area -->
     <div class="main-layout">
-        <div class="coding-area" id="workspaceArea">
-            <div class="hint-text">
-                <i class="fas fa-hand-pointer" style="font-size: 48px;"></i>
-                <span data-i18n="hint_drag_assemble">하단에서 아이콘 블럭을 끌어와 조립해보세요!</span>
-            </div>
+        <div class="coding-area" id="workspaceArea"></div>
+        <div class="hint-text">
+            <i class="fas fa-hand-pointer" style="font-size: 48px;"></i>
+            <span data-i18n="hint_drag_assemble">하단에서 아이콘 블럭을 끌어와 조립해보세요!</span>
         </div>
 
         <div class="trash-area" id="trashArea">
@@ -3146,7 +3145,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
 
             if (dragSourceNode && placeholder) {
                 // 팝업 숨기기 위함
-                const hint = workspaceArea.querySelector('.hint-text');
+                const hint = document.querySelector('.hint-text');
                 if (hint) hint.style.display = 'none';
 
                 let targetStack = null;
@@ -3220,14 +3219,15 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     const newStack = document.createElement('div');
                     newStack.className = 'block-stack';
                     
-                    // 워크스페이스에 첫 블록(시작 블록)을 놓을 때 상단에 치우치지 않고 화면 세로 중앙(약 42% 높이)에 보기 좋게 안착하도록 보정
+                    // 워크스페이스에 첫 블록(시작 블록)을 놓을 때 화면 정중앙(50%, 50%)에 완벽하게 안착하도록 정밀 보정
                     const existingStacks = workspaceArea.querySelectorAll('.block-stack');
                     if (existingStacks.length === 0) {
                         const wsParent = workspaceArea.parentElement;
                         const wsRect = workspaceArea.getBoundingClientRect();
                         const parentRect = wsParent.getBoundingClientRect();
-                        const centerY = (parentRect.top + parentRect.height * 0.42 - wsRect.top) / currentZoom - 35;
-                        newStack.style.left = placeholder.style.left;
+                        const centerX = (parentRect.left + (parentRect.width / 2) - wsRect.left) / currentZoom - 40;
+                        const centerY = (parentRect.top + (parentRect.height / 2) - wsRect.top) / currentZoom - 40;
+                        newStack.style.left = `${centerX}px`;
                         newStack.style.top = `${centerY}px`;
                     } else {
                         newStack.style.left = placeholder.style.left;
@@ -4549,7 +4549,7 @@ except:
                 if (existingUserBlocks.length === 0) {
                     const stacks = workspaceArea.querySelectorAll('.block-stack');
                     stacks.forEach(s => s.remove());
-                    const hint = workspaceArea.querySelector('.hint-text');
+                    const hint = document.querySelector('.hint-text');
                     if (hint) hint.remove();
                 }
             }
@@ -5601,7 +5601,7 @@ except:
 
             const stacks = workspaceArea.querySelectorAll('.block-stack');
             stacks.forEach(s => s.remove());
-            const hint = workspaceArea.querySelector('.hint-text');
+            const hint = document.querySelector('.hint-text');
             if (hint) hint.remove();
 
             try {
