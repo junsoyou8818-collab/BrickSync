@@ -22,7 +22,6 @@
             logout_btn: "로그아웃",
             sec_lang: "🌐 언어 설정 (Language)",
             sec_volume: "🔊 효과음 볼륨 (Volume)",
-            sec_zoom: "🔍 워크스페이스 배율 (Zoom)",
             sec_backup: "💾 프로젝트 로컬 백업 & 복구",
             backup_export: "📤 내 컴퓨터로 백업하기",
             backup_import: "📥 컴퓨터에서 복원하기",
@@ -263,7 +262,6 @@
             logout_btn: "Logout",
             sec_lang: "🌐 Language Settings",
             sec_volume: "🔊 SFX Volume",
-            sec_zoom: "🔍 Workspace Scale",
             sec_backup: "💾 Local Backup & Restore",
             backup_export: "Export to PC",
             backup_import: "Import from PC",
@@ -703,17 +701,7 @@
                     </div>
                 </div>
                 
-                <!-- 4. Workspace Scale Section -->
-                <div class="bs-settings-section">
-                    <div class="bs-settings-sec-title" data-settings-i18n="sec_zoom">🔍 워크스페이스 배율 (Zoom)</div>
-                    <div class="bs-btn-group three-cols">
-                        <button class="bs-btn-option" id="btn-scale-80" onclick="changeSettingsScale(0.8)">80%</button>
-                        <button class="bs-btn-option" id="btn-scale-100" onclick="changeSettingsScale(1.0)">100%</button>
-                        <button class="bs-btn-option" id="btn-scale-120" onclick="changeSettingsScale(1.2)">120%</button>
-                    </div>
-                </div>
-                
-                <!-- 5. Backup Section -->
+                <!-- 4. Backup Section -->
                 <div class="bs-settings-section">
                     <div class="bs-settings-sec-title" data-settings-i18n="sec_backup">💾 프로젝트 로컬 백업 & 복구</div>
                     <div class="bs-backup-group">
@@ -763,7 +751,6 @@
         // 2. 로컬 스토리지에 저장된 설정값 불러와 UI 동기화
         const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
         const currentVolume = parseFloat(localStorage.getItem('bricksync_volume') || '1.0');
-        const currentScale = parseFloat(localStorage.getItem('bricksync_scale') || '1.0');
 
         // 언어 버튼 활성화
         document.querySelectorAll('#bs-settings-modal .bs-btn-option').forEach(btn => btn.classList.remove('active'));
@@ -777,12 +764,7 @@
             slider.value = Math.round(currentVolume * 100);
             display.textContent = Math.round(currentVolume * 100) + '%';
         }
-
-        // 워크스페이스 배율 활성화
-        const scaleVal = Math.round(currentScale * 100);
-        const activeScaleBtn = document.getElementById(`btn-scale-${scaleVal}`);
-        if (activeScaleBtn) activeScaleBtn.classList.add('active');
-
+        
         // 3. 통신 자가진단 기본값 렌더링
         const statusText = document.getElementById('bs-settings-diag-status');
         if (statusText) {
@@ -884,25 +866,7 @@
         // 오디오 볼륨값 적용을 위해 오디오 재생 시 AudioContext gain 노드와 매핑하도록 권장
     };
 
-    // 5.3 워크스페이스 코딩 화면 배율 변경 (Change Scale)
-    window.changeSettingsScale = function (scale) {
-        localStorage.setItem('bricksync_scale', scale.toFixed(1));
-
-        // 배율 칩 액티브 변경
-        document.querySelectorAll('#bs-settings-modal .bs-btn-option[id^="btn-scale-"]').forEach(btn => btn.classList.remove('active'));
-        const scaleVal = Math.round(scale * 100);
-        const activeBtn = document.getElementById(`btn-scale-${scaleVal}`);
-        if (activeBtn) activeBtn.classList.add('active');
-
-        // 코딩 화면 배율 즉시 실시간 변환
-        const codingArea = document.querySelector('.coding-area') || document.getElementById('block-workspace');
-        if (codingArea) {
-            codingArea.style.transform = `scale(${scale})`;
-            codingArea.style.transformOrigin = "0 0";
-        }
-    };
-
-    // 5.4 내 프로젝트 내보내기 백업 (Export Backup JSON)
+    // 5.3 내 프로젝트 내보내기 백업 (Export Backup JSON)
     window.exportSettingsProjects = function () {
         let studentName = "Guest_익명";
         try {
