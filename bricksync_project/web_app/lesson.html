@@ -951,6 +951,8 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
     <!-- Bottom Toolbox (28 Blocks utilizing FontAwesome Solid to match Spike EXACTLY) -->
     <div class="toolbox" id="palette">
 
+        <!-- ================= 1. 노란색 그룹 (이벤트 & 제어) ================= -->
+
         <!-- 1. 제어(노랑) 시작/조건 블럭 -->
         <div class="spike-block bg-yellow" draggable="true" data-action="start">
             <i class="fas fa-play block-icon"></i>
@@ -1067,50 +1069,6 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             </div>
             <div class="block-param" data-val="left"><i class="fas fa-arrow-left"></i></div>
         </div>
-        <!-- NEW 음량 블록 (Sound Level) -->
-        <div class="spike-block bg-purple" draggable="true" data-action="event_sound_level">
-            <div class="block-icon"
-                style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
-                <div style="color: #22c55e; font-size: 16px; position:absolute; top:-10px;">
-                    <i class="fas fa-wifi" style="transform: rotate(-45deg);"></i>
-                </div>
-                <div style="color: white; font-size: 18px; z-index: 2; margin-top: 5px;">
-                    <i class="fas fa-microphone"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- 보라색 AI 손 제스처 인식 이벤트 블록 -->
-        <div class="spike-block bg-purple" draggable="true" data-action="event_ai_gesture">
-            <div class="block-icon"
-                style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
-                <div style="color: #22c55e; font-size: 16px; position:absolute; top:-10px;">
-                    <i class="fas fa-wifi" style="transform: rotate(-45deg);"></i>
-                </div>
-                <div style="color: white; font-size: 18px; z-index: 2; margin-top: 5px;">
-                    <i class="fas fa-hand-sparkles"></i>
-                </div>
-            </div>
-            <div class="block-param" data-val="1">
-                <i class="fas fa-hand-paper" style="color:#64748b;"></i>
-            </div>
-        </div>
-
-        <!-- 보라색 AI 사물/몬스터 이미지 인식 이벤트 블록 -->
-        <div class="spike-block bg-purple" draggable="true" data-action="event_ai_vision">
-            <div class="block-icon"
-                style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
-                <div style="color: #22c55e; font-size: 16px; position:absolute; top:-10px;">
-                    <i class="fas fa-wifi" style="transform: rotate(-45deg);"></i>
-                </div>
-                <div style="color: white; font-size: 18px; z-index: 2; margin-top: 5px;">
-                    <i class="fas fa-dragon"></i>
-                </div>
-            </div>
-            <div class="block-param" data-val="0">
-                <i class="fas fa-dragon" style="color:#64748b;"></i>
-            </div>
-        </div>
 
         <!-- NEW 수신된 메시지 블록 -->
         <div class="spike-block bg-yellow" draggable="true" data-action="event_message_received">
@@ -1164,54 +1122,34 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             </div>
         </div>
 
-        <div class="category-divider"></div>
+        <!-- NEW 반복 루프 블록 -->
+        <div class="spike-block bg-orange" draggable="true" data-action="control_repeat">
+            <div class="block-icon" style="display:flex; align-items:center; justify-content:center;">
+                <!-- 루프 화살표 아이콘 -->
+                <i class="fas fa-undo" style="color: white; font-size: 32px; transform: scaleX(-1) rotate(-30deg);"></i>
+            </div>
+            <div class="block-param" style="border-radius:16px; min-width:32px; padding:2px 8px;">4</div>
+        </div>
 
-        <!-- NEW 모터 속도 설정 블록 -->
-        <div class="spike-block bg-blue" draggable="true" data-action="motor_speed_set" style="background: #0284c7;">
-            <div class="block-icon"
-                style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <!-- 흰색 모터/톱니바퀴 아이콘 -->
-                <div
-                    style="position:relative; width: 26px; height: 26px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: scale(0.9);">
-                    <div
-                        style="position:absolute; width: 6px; height: 6px; background: #0284c7; border-radius: 50%; top: 3px; left: 10px;">
-                    </div>
-                    <div
-                        style="position:absolute; width: 6px; height: 6px; background: #0284c7; border-radius: 50%; bottom: 3px; left: 10px;">
-                    </div>
-                    <div
-                        style="position:absolute; width: 6px; height: 6px; background: #0284c7; border-radius: 50%; left: 3px; top: 10px;">
-                    </div>
-                    <div
-                        style="position:absolute; width: 6px; height: 6px; background: #0284c7; border-radius: 50%; right: 3px; top: 10px;">
-                    </div>
-                    <i class="fas fa-plus" style="color: #0284c7; font-size: 10px; font-weight: 900;"></i>
-                </div>
-                <!-- 하단 속도계 초록색 막대 (작게) -->
-                <div style="display:flex; align-items:flex-end; gap:1px; height: 8px; margin-top: 2px;">
-                    <div style="width:4px; height:3px; background:#22c55e;"></div>
-                    <div style="width:4px; height:5px; background:#22c55e;"></div>
-                    <div
-                        style="width:4px; height:7px; background:white; border: 1px solid #22c55e; box-sizing:border-box;">
-                    </div>
-                    <div
-                        style="width:4px; height:8px; background:white; border: 1px solid #22c55e; box-sizing:border-box;">
-                    </div>
+        <!-- NEW 무한 루프 블록 -->
+        <div class="spike-block bg-orange loop-block" draggable="true" data-action="control_forever">
+            <div class="loop-block-head">
+                <i class="fas fa-sync-alt" style="color: white; font-size: 32px;"></i>
+            </div>
+            <div class="loop-block-bottom"></div>
+            <div class="loop-block-tail">
+                <div style="position:absolute; right:8px; bottom:25px; color:rgba(255,255,255,0.7); font-size:14px;">
+                    <i class="fas fa-sync-alt"></i>
                 </div>
             </div>
-            <div class="block-param" data-val="40"><i class="fas fa-chevron-down"></i></div>
-            <style>
-                .bg-blue::after {
-                    background: #0284c7;
-                }
-            
-        @keyframes tiltShakeAnim {
-            0% { transform: perspective(600px) rotateZ(-20deg) translateX(-8px); }
-            100% { transform: perspective(600px) rotateZ(20deg) translateX(8px); }
-        }
-
-    </style>
+            <div class="block-stack loop-inner-stack"></div>
         </div>
+
+
+        <div class="category-divider"></div>
+
+
+        <!-- ================= 2. 분홍색 그룹 (자동차 주행) ================= -->
 
         <!-- NEW 자동차 이동 속도 설정 블록 -->
         <div class="spike-block bg-pink" draggable="true" data-action="car_speed_set" style="background: #f472b6;">
@@ -1307,6 +1245,59 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             <div class="block-param param-time" style="border-radius:16px; min-width:32px; padding:2px 8px;">1</div>
         </div>
 
+
+        <div class="category-divider"></div>
+
+
+        <!-- ================= 3. 파란색 그룹 (단일 모터 제어) ================= -->
+
+        <!-- NEW 모터 속도 설정 블록 -->
+        <div class="spike-block bg-blue" draggable="true" data-action="motor_speed_set" style="background: #0284c7;">
+            <div class="block-icon"
+                style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <!-- 흰색 모터/톱니바퀴 아이콘 -->
+                <div
+                    style="position:relative; width: 26px; height: 26px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: scale(0.9);">
+                    <div
+                        style="position:absolute; width: 6px; height: 6px; background: #0284c7; border-radius: 50%; top: 3px; left: 10px;">
+                    </div>
+                    <div
+                        style="position:absolute; width: 6px; height: 6px; background: #0284c7; border-radius: 50%; bottom: 3px; left: 10px;">
+                    </div>
+                    <div
+                        style="position:absolute; width: 6px; height: 6px; background: #0284c7; border-radius: 50%; left: 3px; top: 10px;">
+                    </div>
+                    <div
+                        style="position:absolute; width: 6px; height: 6px; background: #0284c7; border-radius: 50%; right: 3px; top: 10px;">
+                    </div>
+                    <i class="fas fa-plus" style="color: #0284c7; font-size: 10px; font-weight: 900;"></i>
+                </div>
+                <!-- 하단 속도계 초록색 막대 (작게) -->
+                <div style="display:flex; align-items:flex-end; gap:1px; height: 8px; margin-top: 2px;">
+                    <div style="width:4px; height:3px; background:#22c55e;"></div>
+                    <div style="width:4px; height:5px; background:#22c55e;"></div>
+                    <div
+                        style="width:4px; height:7px; background:white; border: 1px solid #22c55e; box-sizing:border-box;">
+                    </div>
+                    <div
+                        style="width:4px; height:8px; background:white; border: 1px solid #22c55e; box-sizing:border-box;">
+                    </div>
+                </div>
+            </div>
+            <div class="block-param" data-val="40"><i class="fas fa-chevron-down"></i></div>
+            <style>
+                .bg-blue::after {
+                    background: #0284c7;
+                }
+            
+        @keyframes tiltShakeAnim {
+            0% { transform: perspective(600px) rotateZ(-20deg) translateX(-8px); }
+            100% { transform: perspective(600px) rotateZ(20deg) translateX(8px); }
+        }
+
+    </style>
+        </div>
+
         <!-- NEW 모터 시계방향 작동 블록 -->
         <div class="spike-block bg-blue" draggable="true" data-action="motor_cw" style="background: #0284c7;">
             <div class="block-icon" style="display:flex; align-items:center; justify-content:center;">
@@ -1396,6 +1387,57 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             </div>
         </div>
 
+
+        <div class="category-divider"></div>
+
+
+        <!-- ================= 4. 보라색 그룹 (출력 & AI/사운드 센서) ================= -->
+
+        <!-- NEW 음량 블록 (Sound Level) -->
+        <div class="spike-block bg-purple" draggable="true" data-action="event_sound_level">
+            <div class="block-icon"
+                style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
+                <div style="color: #22c55e; font-size: 16px; position:absolute; top:-10px;">
+                    <i class="fas fa-wifi" style="transform: rotate(-45deg);"></i>
+                </div>
+                <div style="color: white; font-size: 18px; z-index: 2; margin-top: 5px;">
+                    <i class="fas fa-microphone"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 보라색 AI 손 제스처 인식 이벤트 블록 -->
+        <div class="spike-block bg-purple" draggable="true" data-action="event_ai_gesture">
+            <div class="block-icon"
+                style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
+                <div style="color: #22c55e; font-size: 16px; position:absolute; top:-10px;">
+                    <i class="fas fa-wifi" style="transform: rotate(-45deg);"></i>
+                </div>
+                <div style="color: white; font-size: 18px; z-index: 2; margin-top: 5px;">
+                    <i class="fas fa-hand-sparkles"></i>
+                </div>
+            </div>
+            <div class="block-param" data-val="1">
+                <i class="fas fa-hand-paper" style="color:#64748b;"></i>
+            </div>
+        </div>
+
+        <!-- 보라색 AI 사물/몬스터 이미지 인식 이벤트 블록 -->
+        <div class="spike-block bg-purple" draggable="true" data-action="event_ai_vision">
+            <div class="block-icon"
+                style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
+                <div style="color: #22c55e; font-size: 16px; position:absolute; top:-10px;">
+                    <i class="fas fa-wifi" style="transform: rotate(-45deg);"></i>
+                </div>
+                <div style="color: white; font-size: 18px; z-index: 2; margin-top: 5px;">
+                    <i class="fas fa-dragon"></i>
+                </div>
+            </div>
+            <div class="block-param" data-val="0">
+                <i class="fas fa-dragon" style="color:#64748b;"></i>
+            </div>
+        </div>
+
         <!-- 3. 진보라(라이트 매트릭스) 추가 -->
         <div class="spike-block bg-purple" draggable="true" data-action="matrix_pixel">
             <div
@@ -1420,8 +1462,6 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             </div>
         </div>
 
-        <div class="category-divider"></div>
-
         <!-- NEW 음악 (사운드 플레이) 블록 -->
         <div class="spike-block bg-purple" draggable="true" data-action="sound_play">
             <div class="block-icon"
@@ -1434,33 +1474,6 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             </div>
             <div class="block-param" style="border-radius:16px; min-width:32px; padding:2px 8px;">1</div>
         </div>
-
-        <div class="category-divider"></div>
-
-        <!-- NEW 반복 루프 블록 -->
-        <div class="spike-block bg-orange" draggable="true" data-action="control_repeat">
-            <div class="block-icon" style="display:flex; align-items:center; justify-content:center;">
-                <!-- 루프 화살표 아이콘 -->
-                <i class="fas fa-undo" style="color: white; font-size: 32px; transform: scaleX(-1) rotate(-30deg);"></i>
-            </div>
-            <div class="block-param" style="border-radius:16px; min-width:32px; padding:2px 8px;">4</div>
-        </div>
-
-        <!-- NEW 무한 루프 블록 -->
-        <div class="spike-block bg-orange loop-block" draggable="true" data-action="control_forever">
-            <div class="loop-block-head">
-                <i class="fas fa-sync-alt" style="color: white; font-size: 32px;"></i>
-            </div>
-            <div class="loop-block-bottom"></div>
-            <div class="loop-block-tail">
-                <div style="position:absolute; right:8px; bottom:25px; color:rgba(255,255,255,0.7); font-size:14px;">
-                    <i class="fas fa-sync-alt"></i>
-                </div>
-            </div>
-            <div class="block-stack loop-inner-stack"></div>
-        </div>
-
-        <div class="category-divider"></div>
 
     </div>
 
