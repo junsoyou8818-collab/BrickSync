@@ -6099,7 +6099,9 @@ print("BrickSync Sandbox Run")
         });
 
         // 다국어 변경 수신 리스너 (설정 변경 시 실시간 반영)
-        window.addEventListener('bricksync-language-changed', () => {
+        window.addEventListener('bricksync-language-changed', (e) => {
+            const lang = e.detail ? e.detail.lang : (localStorage.getItem('bricksync_lang') || 'ko');
+            if (typeof window.applyBrickSyncLanguage === 'function') window.applyBrickSyncLanguage(lang);
             updateStatusBarText();
             if (typeof updateProgress === 'function') updateProgress();
             const isBoarded = window.parent ? !!window.parent.isVehicleBoarded : !!window.isVehicleBoarded;

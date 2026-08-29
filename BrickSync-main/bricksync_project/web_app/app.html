@@ -870,6 +870,25 @@ window.addSystemLog = addSystemLog;
             if (ws && ws.readyState === WebSocket.OPEN) {
                 updateWsUI(ws.readyState === WebSocket.OPEN);
             }
+            // [i18n] iframe 로드 시 현재 언어(한/영) 100% 강제 즉시 동기화
+            try {
+                const win = this.contentWindow;
+                const lang = localStorage.getItem('bricksync_lang') || 'ko';
+                if (win) {
+                    if (typeof win.applyBrickSyncLanguage === 'function') {
+                        win.applyBrickSyncLanguage(lang);
+                    }
+                    if (typeof win.updateStatusBarText === 'function') {
+                        win.updateStatusBarText();
+                    }
+                    if (typeof win.renderBriefing === 'function') {
+                        win.renderBriefing();
+                    }
+                    if (typeof win.updateVehicleMountUI === 'function') {
+                        win.updateVehicleMountUI();
+                    }
+                }
+            } catch (e) { }
             /*
             try {
                 this.contentWindow.document.body.addEventListener('pointerdown', silentReconnectAttempt, { capture: true });
