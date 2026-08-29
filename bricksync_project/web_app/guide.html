@@ -125,7 +125,7 @@
         /* ── 2컬럼 레이아웃 ── */
         .two-col {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.4fr 1fr;
             gap: 32px;
             /* 양 컬럼 높이를 동일하게 → 밑변 정렬 */
             align-items: stretch;
@@ -150,14 +150,16 @@
             background: rgba(167,139,250,0.25);
         }
 
-        /* ── 왼쪽: 환경설정 카드 ── */
+                        /* ── 왼쪽: 환경설정 및 9단계 비주얼 카드 ── */
         .setup-card {
             background: rgba(139,92,246,0.1);
             border: 1px solid rgba(139,92,246,0.3);
             border-radius: 24px;
-            padding: 32px 36px;
+            padding: 24px 26px;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
         .setup-card::before {
             content: '';
@@ -169,28 +171,147 @@
         }
         .setup-tag {
             font-size: 0.8rem; font-weight: 700;
-            letter-spacing: 2px; color: rgba(255,255,255,0.35);
-            text-transform: uppercase; margin-bottom: 10px;
+            letter-spacing: 2px; color: rgba(255,255,255,0.45);
+            text-transform: uppercase; margin-bottom: 6px;
         }
         .setup-title {
-            font-size: 1.55rem; font-weight: 900;
-            margin-bottom: 22px; letter-spacing: -0.3px;
+            font-size: 1.45rem; font-weight: 900;
+            margin-bottom: 16px; letter-spacing: -0.3px;
+            color: #fff;
         }
-        .setup-steps { display: flex; flex-direction: column; gap: 14px; }
-        .setup-step {
-            display: flex; align-items: flex-start;
-            gap: 12px; font-size: 1.05rem;
-            color: rgba(255,255,255,0.82); line-height: 1.6;
+        .setup-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            max-height: 680px;
+            overflow-y: auto;
+            padding-right: 10px;
         }
-        .setup-step-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 2px; }
-        .setup-step strong { color: #fff; font-weight: 700; }
+        .setup-steps::-webkit-scrollbar {
+            width: 6px;
+        }
+        .setup-steps::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+        .setup-steps::-webkit-scrollbar-thumb {
+            background: rgba(167, 139, 250, 0.4);
+            border-radius: 4px;
+        }
+        .setup-steps::-webkit-scrollbar-thumb:hover {
+            background: rgba(167, 139, 250, 0.7);
+        }
+        .setup-step-rich {
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+        .setup-step-rich:hover {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: rgba(167, 139, 250, 0.45);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+        }
+        .step-header-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .step-num-badge {
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 3px 9px;
+            border-radius: 8px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .step-rich-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #facc15;
+            letter-spacing: -0.2px;
+        }
+        .step-img-wrap {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            overflow: hidden;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 0;
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+        .step-img-wrap:hover {
+            transform: scale(1.015);
+            filter: brightness(1.08);
+        }
+        .step-img-wrap img {
+            width: 100%;
+            max-height: 420px;
+            object-fit: contain;
+            border-radius: 10px;
+            display: block;
+        }
+        .step-bullets {
+            margin: 0;
+            padding-left: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .step-bullets li {
+            font-size: 0.88rem;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.5;
+        }
+        .step-bullets strong {
+            color: #ffffff;
+            font-weight: 700;
+        }
+        
+        .guide-url-link {
+            color: #38bdf8;
+            text-decoration: underline;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            transition: color 0.15s ease;
+        }
+        .guide-url-link:hover {
+            color: #7dd3fc;
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+        }
+        
+        .step-bullets code {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 1px 5px;
+            border-radius: 4px;
+            color: #38bdf8;
+            font-family: monospace;
+            font-size: 0.84rem;
+        }
         .setup-badge {
-            display: inline-block; margin-top: 20px;
-            font-size: 0.9rem; font-weight: 600;
-            padding: 7px 18px; border-radius: 20px;
+            display: inline-block;
+            margin-top: 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 20px;
             background: rgba(139,92,246,0.15);
-            color: rgba(255,255,255,0.6);
+            color: rgba(255,255,255,0.7);
             border: 1px solid rgba(139,92,246,0.3);
+            align-self: flex-start;
         }
 
         /* ── 오른쪽 메뉴 컬럼 ── */
@@ -500,31 +621,157 @@
     <!-- 2컬럼 본문 -->
     <div class="two-col">
 
-        <!-- 왼쪽: 환경설정 -->
+                        <!-- 왼쪽: 환경설정 및 9단계 비주얼 퀵스타트 가이드 -->
         <div>
-            <div class="section-label" data-i18n="lbl_guide_setup_header">⚙️ BrickSync 기초 환경설정</div>
+            <div class="section-label" data-i18n="lbl_guide_setup_header">⚙️ BrickSync 시작 가이드 (Quick Start)</div>
             <div class="setup-card">
-                <div class="setup-tag">Setup Guide</div>
-                <div class="setup-title" data-i18n="lbl_guide_setup_title">BrickSync.exe 실행 및 기본 설정</div>
-                <div class="setup-steps">
-                    <div class="setup-step">
-                        <span class="setup-step-icon">🖱️</span>
-                        <span data-i18n="lbl_guide_step1"><strong>실행</strong>: BrickSync.exe 더블클릭 → 로컬 서버 자동 시작 → 브라우저 자동 오픈</span>
+                <div class="setup-tag" data-i18n="lbl_guide_setup_tag">Visual Step-by-Step Guide</div>
+                <div class="setup-title" data-i18n="lbl_guide_setup_title">BrickSync 시작하기 & 연동 가이드</div>
+                
+                <div class="setup-steps" id="guide-setup-steps">
+                    
+                    <!-- Step 1 -->
+                    <div class="setup-step-rich">
+                        <div class="step-header-row">
+                            <span class="step-num-badge">Step 1</span>
+                            <span class="step-rich-title" data-i18n="lbl_guide_step1_title">BrickSync.exe 다운로드 & 실행</span>
+                        </div>
+                        <div class="step-img-wrap" onclick="openImageModal('./assets/guide_step1_exe.png')">
+                            <img src="./assets/guide_step1_exe.png" alt="Step 1 Download and Run BrickSync.exe" style="width: 50%; max-width: 260px; margin: 0 auto;">
+                        </div>
+                        <ul class="step-bullets">
+                            <li data-i18n="lbl_guide_step1_b1"><a href="https://legofortnite.bricksync.org" target="_blank" rel="noopener noreferrer" class="guide-url-link"><code>legofortnite.bricksync.org ↗</code></a> 공식 웹사이트에서 <code>BrickSync.exe</code> 파일을 다운로드하여 실행합니다.</li>
+                            <li data-i18n="lbl_guide_step1_b2">웹사이트의 'Quick Start' 안내 가이드를 확인하며 손쉽게 시작할 수 있습니다.</li>
+                            <li data-i18n="lbl_guide_step1_b3"><code>BrickSync.exe</code> 실행 시 로컬 브릿지 서버가 자동으로 시작되며 브라우저가 열립니다.</li>
+                        </ul>
                     </div>
-                    <div class="setup-step">
-                        <span class="setup-step-icon">🌐</span>
-                        <span data-i18n="lbl_guide_step2"><strong>브라우저</strong>: Web Bluetooth 지원 <strong>Chrome 또는 Edge</strong> 필요 (Firefox · Safari 미지원)</span>
+
+                    <!-- Step 2 -->
+                    <div class="setup-step-rich">
+                        <div class="step-header-row">
+                            <span class="step-num-badge">Step 2</span>
+                            <span class="step-rich-title" data-i18n="lbl_guide_step2_title">회원가입 및 로그인</span>
+                        </div>
+                        <div class="step-img-wrap" onclick="openImageModal('./assets/guide_step2_login.png')">
+                            <img src="./assets/guide_step2_login.png" alt="Step 2 Sign-up and Login">
+                        </div>
+                        <ul class="step-bullets">
+                            <li data-i18n="lbl_guide_step2_b1"><strong>계정 유형 지원</strong>: 학생(Student), 교사(Teacher), 학부모(Parent) 계정을 지원합니다.</li>
+                            <li data-i18n="lbl_guide_step2_b2">학생과 학부모는 담임 선생님이 제공한 클래스 코드 / 학부모 연동 코드로 가입합니다.</li>
+                            <li data-i18n="lbl_guide_step2_b3">교사와 학부모는 학생 소속 및 실시간 학습 활동 데이터를 모니터링할 수 있습니다.</li>
+                            <li data-i18n="lbl_guide_step2_b4">가입 없이 빠른 체험을 위한 <strong>게스트(Guest) 로그인</strong>을 지원합니다.</li>
+                        </ul>
                     </div>
-                    <div class="setup-step">
-                        <span class="setup-step-icon">🔵</span>
-                        <span data-i18n="lbl_guide_step3"><strong>허브 연결</strong>: <strong>시스템 연결</strong> 메뉴에서 레고 허브를 블루투스로 연결</span>
+
+                    <!-- Step 3 -->
+                    <div class="setup-step-rich">
+                        <div class="step-header-row">
+                            <span class="step-num-badge">Step 3</span>
+                            <span class="step-rich-title" data-i18n="lbl_guide_step3_title">레고 모델 조립</span>
+                        </div>
+                        <div class="step-img-wrap" onclick="openImageModal('./assets/guide_step3_lego.png')">
+                            <img src="./assets/guide_step3_lego.png" alt="Step 3 Assembling the LEGO Model">
+                        </div>
+                        <ul class="step-bullets">
+                            <li data-i18n="lbl_guide_step3_b1">레고 브릭을 조립하고 허브(블루투스 장치)에 모터, 컬러 센서, 라이트 등 상호작용 부품을 연결합니다.</li>
+                            <li data-i18n="lbl_guide_step3_b2">허브는 블루투스 무선 연결을 통해 각 전자 부품의 회전 및 점등을 정밀하게 제어합니다.</li>
+                        </ul>
                     </div>
-                    <div class="setup-step">
-                        <span class="setup-step-icon">👤</span>
-                        <span data-i18n="lbl_guide_step4"><strong>계정 로그인</strong>: 학생 · 교사 · 학부모 계정으로 로그인 후 역할별 기능 활성화</span>
+
+                    <!-- Step 4 -->
+                    <div class="setup-step-rich">
+                        <div class="step-header-row">
+                            <span class="step-num-badge">Step 4</span>
+                            <span class="step-rich-title" data-i18n="lbl_guide_step4_title">학습단원 & AI 단원 선택</span>
+                        </div>
+                        <div class="step-img-wrap" onclick="openImageModal('./assets/guide_step4_lessons.png')">
+                            <img src="./assets/guide_step4_lessons.png" alt="Step 4 Try Lessons and AI Lessons">
+                        </div>
+                        <ul class="step-bullets">
+                            <li data-i18n="lbl_guide_step4_b1"><strong>일반 단원 (1~5단원)</strong>: 보트, 잠수함, 관람차, 자동차, 사이렌 등 기초 블록 코딩 미션</li>
+                            <li data-i18n="lbl_guide_step4_b2"><strong>AI 학습단원 (6~8단원)</strong>: 가위바위보 지붕, 음성 마이크 그네, 몬스터 경보 등 AI 심화 미션</li>
+                        </ul>
                     </div>
+
+                    <!-- Step 5 -->
+                    <div class="setup-step-rich">
+                        <div class="step-header-row">
+                            <span class="step-num-badge">Step 5</span>
+                            <span class="step-rich-title" data-i18n="lbl_guide_step5_title">레고 허브 연결 (블루투스 / USB)</span>
+                        </div>
+                        <div class="step-img-wrap" onclick="openImageModal('./assets/guide_step5_hub.png')">
+                            <img src="./assets/guide_step5_hub.png" alt="Step 5 Connect with LEGO Hub">
+                        </div>
+                        <ul class="step-bullets">
+                            <li data-i18n="lbl_guide_step5_b1">상단 <strong>[허브 연결 🔗]</strong> 버튼을 누르고 레고 허브 전원 버튼을 눌러 블루투스로 페어링합니다.</li>
+                            <li data-i18n="lbl_guide_step5_b2">한 번 연결된 블루투스 세션은 단원을 이동하더라도 자동으로 안정적으로 유지됩니다.</li>
+                            <li data-i18n="lbl_guide_step5_b3">블루투스 외에 <strong>USB 유선 케이블 연결</strong>도 완벽하게 지원합니다.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 6 -->
+                    <div class="setup-step-rich">
+                        <div class="step-header-row">
+                            <span class="step-num-badge">Step 6</span>
+                            <span class="step-rich-title" data-i18n="lbl_guide_step6_title">아이콘 블록 코딩</span>
+                        </div>
+                        <div class="step-img-wrap" onclick="openImageModal('./assets/guide_step6_coding.png')">
+                            <img src="./assets/guide_step6_coding.png" alt="Step 6 Block Coding">
+                        </div>
+                        <ul class="step-bullets">
+                            <li data-i18n="lbl_guide_step6_b1"><strong>[과제 확인 / Try Mission]</strong> 버튼을 클릭하여 레고 포트나이트 미션 과제를 확인합니다.</li>
+                            <li data-i18n="lbl_guide_step6_b2">하단 트레이에서 아이콘 블록들을 조립하여 레고 허브와 포트나이트를 제어하는 코드를 완성합니다.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 7 -->
+                    <div class="setup-step-rich">
+                        <div class="step-header-row">
+                            <span class="step-num-badge">Step 7</span>
+                            <span class="step-rich-title" data-i18n="lbl_guide_step7_title">AI 학습단원 머신러닝 학습 (6~8단원)</span>
+                        </div>
+                        <div class="step-img-wrap" onclick="openImageModal('./assets/guide_step7_ai.png')">
+                            <img src="./assets/guide_step7_ai.png" alt="Step 7 AI Lesson Machine Learning">
+                        </div>
+                        <ul class="step-bullets">
+                            <li data-i18n="lbl_guide_step7_b1">웹캠과 마이크를 통해 <strong>손 제스처(가위/바위/보), 음성 명령, 사물(몬스터 브릭)</strong> 인식 모델을 직접 학습시킵니다.</li>
+                            <li data-i18n="lbl_guide_step7_b2">브릭싱크 웹 내에서 머신러닝 모델의 실시간 예측과 판정을 즉각 체험할 수 있습니다.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 8 -->
+                    <div class="setup-step-rich">
+                        <div class="step-header-row">
+                            <span class="step-num-badge">Step 8</span>
+                            <span class="step-rich-title" data-i18n="lbl_guide_step8_title">포트나이트 'The Brick Island' 맵 접속</span>
+                        </div>
+                        <div class="step-img-wrap" onclick="openImageModal('./assets/guide_step8_fortnite.png')">
+                            <img src="./assets/guide_step8_fortnite.png" alt="Step 8 Access LEGO Fortnite Map">
+                        </div>
+                        <ul class="step-bullets">
+                            <li data-i18n="lbl_guide_step8_b1">브릭싱크 웹의 중앙 버튼을 클릭하여 에픽게임즈 런처 및 포트나이트를 실행합니다.</li>
+                            <li data-i18n="lbl_guide_step8_b2">포트나이트 검색(디스커버)에서 <strong>'The Brick Island'</strong> 또는 맵 코드 <code>7603-2493-0825</code>를 입력하여 입장합니다.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 9 -->
+                    <div class="setup-step-rich">
+                        <div class="step-header-row">
+                            <span class="step-num-badge">Step 9</span>
+                            <span class="step-rich-title" data-i18n="lbl_guide_step9_title">실물 허브 & 포트나이트 실시간 동시 연동</span>
+                        </div>
+                        <div class="step-img-wrap" onclick="openImageModal('./assets/guide_step9_sync.png')">
+                            <img src="./assets/guide_step9_sync.png" alt="Step 9 Real-time Dual Synchronization Diagram">
+                        </div>
+                        <ul class="step-bullets">
+                            <li data-i18n="lbl_guide_step9_b1">블록 코딩 명령을 실행하여 <strong>레고 스파이크 키트와 포트나이트 3D 에셋을 실시간 동시 제어</strong>합니다.</li>
+                            <li data-i18n="lbl_guide_step9_b2"><strong>1~5단원</strong>: <code>Run ▶</code> 버튼을 눌러 레고 허브와 포트나이트에 조종 신호를 전송합니다.</li>
+                            <li data-i18n="lbl_guide_step9_b3"><strong>AI 6~8단원</strong>: <code>Run</code> 버튼 없이도 <strong>비전(제스처/사물) 및 자연어 음성/텍스트 프롬프팅</strong>으로 자동 명령이 발동됩니다.</li>
+                        </ul>
+                    </div>
+
                 </div>
-                <span class="setup-badge" data-i18n="lbl_guide_setup_badge">별도 설치 불필요 · 원클릭 실행</span>
+                <span class="setup-badge" data-i18n="lbl_guide_setup_badge">9단계 비주얼 퀵스타트 가이드</span>
             </div>
         </div>
 

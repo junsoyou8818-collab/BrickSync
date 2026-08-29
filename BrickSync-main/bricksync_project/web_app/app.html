@@ -420,11 +420,19 @@ window.addSystemLog = addSystemLog;
     <script>
         // === [글로벌 SPA 상태 및 코어 통신 엔진] ===
         window.connectionType = null;
+                window.isBluetoothMode = false;
         window.rxCharacteristic = null;
         window.txCharacteristic = null;
         window.port = null;
         window.writer = null;
         window.activeStates = { LEFT: false, RIGHT: false, UP: false, DOWN: false };
+                window.getHubTiltState = function () {
+            if (window.lastStableXState === 'TILT_LEFT') return 'left';
+            if (window.lastStableXState === 'TILT_RIGHT') return 'right';
+            if (window.lastStableYState === 'TILT_UP') return 'up';
+            if (window.lastStableYState === 'TILT_DOWN') return 'down';
+            return 'flat';
+        };
         window.initialX = null;
         window.initialY = null;
         window.candidateXState = "CENTER_X";
@@ -475,12 +483,22 @@ window.addSystemLog = addSystemLog;
         // iframe 내에서 웹소켓에 직접 접근할 수 있도록 노출
                 window.sendWebSocketAction = function (actionObj) {
             if (ws && ws.readyState === WebSocket.OPEN) {
+                // 🛑 하차 상태일 때는 모든 주행(STEER_) 가상 키 전송을 100% 원천 차단
+                if (actionObj && typeof actionObj.action === 'string' && actionObj.action.startsWith('STEER_') && !window.isVehicleBoarded) {
+                    console.log(`🛑 [차단됨] ${actionObj.action} 전송 취소 (현재 하차 상태)`);
+                    return;
+                }
                 ws.send(JSON.stringify(actionObj));
             }
         };
 
         function sendCommand(actionName) {
             if (ws && ws.readyState === WebSocket.OPEN) {
+                // 🛑 하차 상태일 때는 모든 주행(STEER_) 가상 키 전송을 100% 원천 차단
+                if (typeof actionName === 'string' && actionName.startsWith('STEER_') && !window.isVehicleBoarded) {
+                    console.log(`🛑 [차단됨] ${actionName} 전송 취소 (현재 하차 상태)`);
+                    return;
+                }
                 ws.send(JSON.stringify({ action: actionName }));
             }
         }
@@ -631,6 +649,7 @@ window.addSystemLog = addSystemLog;
                     );
                 }
                 window.connectionType = null;
+                window.isBluetoothMode = false;
                 return false;
             }
 
@@ -679,6 +698,7 @@ window.addSystemLog = addSystemLog;
                     console.error('Bluetooth 오류:', error);
                 }
                 window.connectionType = null;
+                window.isBluetoothMode = false;
                 throw error;
             }
         };
@@ -693,6 +713,7 @@ window.addSystemLog = addSystemLog;
             if (!device.hasDisconnectListener) {
                 device.addEventListener('gattserverdisconnected', () => {
                     window.connectionType = null;
+                window.isBluetoothMode = false;
                     updateUI('DISCONNECT');
                     setTimeout(() => startBackgroundReconnect(device), 3000);
                 });
@@ -737,6 +758,7 @@ window.addSystemLog = addSystemLog;
             }
 
             window.connectionType = 'BLE';
+                window.isBluetoothMode = true;
             updateUI('BLE');
 
             try {
@@ -896,59 +918,93 @@ function handleBLEData(event) {
                 } else if (eventType === 0x00) {
                     delete window.hubDevices[portID];
                 }
+            } else if (msgType === 0x05) {
+                // ⚠️ Generic Error Message from Hub
+                const cmdType = value.byteLength > 3 ? value.getUint8(3) : 0;
+                const errCode = value.byteLength > 4 ? value.getUint8(4) : 0;
+                const errNames = { 1:'ACK', 2:'MACK', 3:'BUFFER_OVERFLOW', 4:'TIMEOUT', 5:'COMMAND_NOT_RECOGNIZED', 6:'INVALID_USE', 7:'OVERCURRENT', 8:'INTERNAL_ERROR' };
+                console.error(`[LWP3 Generic Error] MsgType: 0x05, Failed Cmd: 0x${cmdType.toString(16)}, Error: ${errNames[errCode] || errCode} (0x0${errCode})`);
+            } else if (msgType === 0x82) {
+                // ℹ️ Port Output Command Feedback
+                const portID = value.byteLength > 3 ? value.getUint8(3) : 0;
+                const feedback = value.byteLength > 4 ? value.getUint8(4) : 0;
+                console.log(`[LWP3 Port Feedback] Port: ${portID}, Status: 0x${feedback.toString(16).padStart(2,'0')} (Bit0:InProgress=${(feedback&1)!==0}, Bit1:Completed=${(feedback&2)!==0}, Bit3:Idle=${(feedback&8)!==0}, Bit4:Busy=${(feedback&16)!==0})`);
             } else if (msgType === 0x45) {
                 const portID = value.getUint8(3);
                 if (!window.sensorData) window.sensorData = {};
 
-                // 허브 내장 자이로/가속도 센서 (Port 99)
-                if (portID === 99 && value.byteLength >= 8) {
+                // 허브 내장 자이로/가속도 센서 (Port 97: Accelerometer, Port 99: Orientation)
+                if ((portID === 97 || portID === 99) && value.byteLength >= 8) {
                     const rawX = value.getInt16(4, true);
                     const rawY = value.getInt16(6, true);
-                    const threshold = (Math.abs(rawX) > 100 || Math.abs(rawY) > 100) ? 250 : 25;
 
-                    if (window.initialX === null || window.initialY === null) {
+                    console.log('[RAW ACCEL]', 'port:', portID, 'rawX:', rawX, 'rawY:', rawY);
+                    // ✅ 아케이드 최적 데드존 임계치 (±15°~20° 의도적 조작 시에만 반응)
+                    const thresholdX = 160;
+                    const thresholdY = 160;
+
+                    if (window.initialX == null || window.initialY == null) {
                         window.initialX = rawX;
                         window.initialY = rawY;
                         return;
                     }
 
-                    // 자이로 기울기 센서(Port 99) -> 오직 1단원, 2단원에서만 키보드 가상 입력 활성화
                     const currentUnit = getCurrentUnit();
-                    if (currentUnit === '1' || currentUnit === '2') {
-                        const adjX = rawX - window.initialX;
-                        const adjY = rawY - window.initialY;
+                    const adjX = rawX - window.initialX;
+                    const adjY = rawY - window.initialY;
 
-                        let x_state = "CENTER_X", y_state = "CENTER_Y";
-                        if (adjY > threshold) y_state = "TILT_UP"; else if (adjY < -threshold) y_state = "TILT_DOWN";
-                        if (adjX > threshold) x_state = "TILT_RIGHT"; else if (adjX < -threshold) x_state = "TILT_LEFT";
+                    let x_state = "CENTER_X", y_state = "CENTER_Y";
+                    if (adjY > thresholdY) y_state = "TILT_UP"; 
+                    else if (adjY < -thresholdY) y_state = "TILT_DOWN";
 
-                        // --- 🔒 시소 이펙트 철통 방어 (연속 3프레임 이상 안정성 검증) 🔒 ---
-                        // 흔들림 및 조작 혼선 시 1~2프레임 단위로 상태가 널뛰며 발생하는 키 씹힘 및 Stuck 현상 원천 예방
-                        if (window.candidateXState === x_state) {
-                            window.consecutiveXFrames++;
-                            if (window.consecutiveXFrames >= 3 && window.lastStableXState !== x_state) {
-                                window.lastStableXState = x_state;
+                    if (adjX > thresholdX) x_state = "TILT_RIGHT"; 
+                    else if (adjX < -thresholdX) x_state = "TILT_LEFT";
+
+                    console.log("[TILT DEBUG]", "adjX:", adjX, "adjY:", adjY, "x_state:", x_state, "y_state:", y_state);
+
+                    // 🎯 3대 필수 조건 검사:
+                    // 1. 워크스페이스에 기울기 센서(event_tilt_sensor) 블록이 있는가?
+                    // 2. 실행(Play) 버튼이 눌려 실행 중인가?
+                    // 3. 포트나이트 탈것에 탑승(isVehicleBoarded) 중인가?
+                    const hasTiltBlock = hasTiltSensorBlockOnWorkspace();
+                    const isRunning = isBlockExecutionRunningActive();
+                    const isBoarded = !!window.isVehicleBoarded;
+                    const canDriveFortnite = hasTiltBlock && isRunning && isBoarded;
+
+                    // X축 3프레임 스무딩 댐핑
+                    if (window.candidateXState === x_state) {
+                        window.consecutiveXFrames++;
+                        if (window.consecutiveXFrames >= 3 && window.lastStableXState !== x_state) {
+                            window.lastStableXState = x_state;
+                            if (canDriveFortnite) {
                                 updateState("LEFT", x_state === "TILT_LEFT", "STEER_LEFT", "STOP_LEFT");
                                 updateState("RIGHT", x_state === "TILT_RIGHT", "STEER_RIGHT", "STOP_RIGHT");
+                            } else {
+                                if (window.activeStates["LEFT"]) updateState("LEFT", false, "STEER_LEFT", "STOP_LEFT");
+                                if (window.activeStates["RIGHT"]) updateState("RIGHT", false, "STEER_RIGHT", "STOP_RIGHT");
                             }
-                        } else {
-                            window.candidateXState = x_state;
-                            window.consecutiveXFrames = 1;
-                        }
-
-                        if (window.candidateYState === y_state) {
-                            window.consecutiveYFrames++;
-                            if (window.consecutiveYFrames >= 3 && window.lastStableYState !== y_state) {
-                                window.lastStableYState = y_state;
-                                updateState("UP", y_state === "TILT_UP", "STEER_UP", "STOP_UP");
-                                updateState("DOWN", y_state === "TILT_DOWN", "STEER_DOWN", "STOP_DOWN");
-                            }
-                        } else {
-                            window.candidateYState = y_state;
-                            window.consecutiveYFrames = 1;
                         }
                     } else {
-                        // 타 단원에서는 불필요한 키 해제 신호가 반복 전송되지 않도록 아무것도 하지 않음 (서버 과부하 방지)
+                        window.candidateXState = x_state;
+                        window.consecutiveXFrames = 1;
+                    }
+
+                    // Y축 3프레임 스무딩 댐핑
+                    if (window.candidateYState === y_state) {
+                        window.consecutiveYFrames++;
+                        if (window.consecutiveYFrames >= 3 && window.lastStableYState !== y_state) {
+                            window.lastStableYState = y_state;
+                            if (canDriveFortnite) {
+                                updateState("UP", y_state === "TILT_UP", "STEER_UP", "STOP_UP");
+                                updateState("DOWN", y_state === "TILT_DOWN", "STEER_DOWN", "STOP_DOWN");
+                            } else {
+                                if (window.activeStates["UP"]) updateState("UP", false, "STEER_UP", "STOP_UP");
+                                if (window.activeStates["DOWN"]) updateState("DOWN", false, "STEER_DOWN", "STOP_DOWN");
+                            }
+                        }
+                    } else {
+                        window.candidateYState = y_state;
+                        window.consecutiveYFrames = 1;
                     }
                 }
                 // 외부 센서: 컬러 센서(61) 등
@@ -959,7 +1015,74 @@ function handleBLEData(event) {
             }
         }
 
+        
+        // 🚗 포트나이트 탈것(자동차/보트/잠수함) 탑승 상태 관리 (기본: 하차 상태)
+        window.isVehicleBoarded = false;
+        function hasTiltSensorBlockOnWorkspace() {
+            try {
+                const iframe = document.getElementById('main-frame');
+                const doc = iframe ? (iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document)) : document;
+                if (doc) {
+                    const tiltBlocks = doc.querySelectorAll('#workspaceArea [data-action="event_tilt_sensor"]');
+                    return tiltBlocks.length > 0;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        function isBlockExecutionRunningActive() {
+            try {
+                const iframe = document.getElementById('main-frame');
+                const win = iframe ? iframe.contentWindow : window;
+                if (win && win.isBlockExecutionRunning) return true;
+                if (window.isBlockExecutionRunning) return true;
+            } catch (e) {}
+            return false;
+        }
+
+
+        window.toggleVehicleMount = function(forcedState) {
+            window.isVehicleBoarded = (forcedState !== undefined) ? !!forcedState : !window.isVehicleBoarded;
+            console.log(`🎮 [포트나이트] 탈것 탑승 상태 변경: ${window.isVehicleBoarded ? '🟢 탑승 중 (자이로 ON)' : '🔴 하차 상태 (자이로 OFF)'}`);
+
+            // 하차 시 즉시 모든 가상 키 강제 해제
+            if (!window.isVehicleBoarded) {
+                if (window.activeStates) {
+                    for (let d of ["UP", "DOWN", "LEFT", "RIGHT"]) {
+                        if (window.activeStates[d]) {
+                            updateState(d, false, "STEER_" + d, "STOP_" + d);
+                        }
+                    }
+                }
+                try { window.sendWebSocketAction({ action: "CLEANUP_KEYS" }); } catch(e) {}
+            }
+
+            // iframe UI 동기화
+            try {
+                const iframe = document.getElementById('main-frame');
+                if (iframe && iframe.contentWindow && typeof iframe.contentWindow.updateVehicleMountUI === 'function') {
+                    iframe.contentWindow.updateVehicleMountUI(window.isVehicleBoarded);
+                }
+            } catch(e) {}
+
+            if (typeof addSystemLog === 'function') {
+                addSystemLog('FORTNITE', window.isVehicleBoarded ? '🚗 탈것 탑승 감지: 자이로 조종 활성화' : '🚶 탈것 하차 감지: 자이로 조종 차단');
+            }
+        };
+
+        // E 키 전역 감지 (상호작용 키 토글)
+        window.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && !e.target.matches('input, textarea, select')) {
+                // E키를 눌러 탑승/하차 토글
+                window.toggleVehicleMount();
+            }
+        });
+        
         function updateState(direction, isPressed, activateCmd, deactivateCmd) {
+            // 🛑 하차 상태일 때는 STEER_ 명령 활성화 방지
+            if (activateCmd && activateCmd.startsWith('STEER_') && !window.isVehicleBoarded) {
+                isPressed = false;
+            }
             if (isPressed && !window.activeStates[direction]) {
                 sendCommand(activateCmd);
                 window.activeStates[direction] = true;
@@ -1016,10 +1139,12 @@ function handleBLEData(event) {
                 if (line.includes("|")) {
                     const parts = line.split("|");
                     const x_state = parts[0] || "", y_state = parts[1] || "";
-                    updateState("LEFT", x_state.includes("TILT_LEFT"), "STEER_LEFT", "STOP_LEFT");
-                    updateState("RIGHT", x_state.includes("TILT_RIGHT"), "STEER_RIGHT", "STOP_RIGHT");
-                    updateState("UP", y_state.includes("TILT_UP"), "STEER_UP", "STOP_UP");
-                    updateState("DOWN", y_state.includes("TILT_DOWN"), "STEER_DOWN", "STOP_DOWN");
+                    if (window.isVehicleBoarded) {
+                        updateState("LEFT", x_state.includes("TILT_LEFT"), "STEER_LEFT", "STOP_LEFT");
+                        updateState("RIGHT", x_state.includes("TILT_RIGHT"), "STEER_RIGHT", "STOP_RIGHT");
+                        updateState("UP", y_state.includes("TILT_UP"), "STEER_UP", "STOP_UP");
+                        updateState("DOWN", y_state.includes("TILT_DOWN"), "STEER_DOWN", "STOP_DOWN");
+                    }
                 }
             }
         }

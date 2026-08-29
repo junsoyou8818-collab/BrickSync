@@ -126,6 +126,7 @@ def release_all_steering_keys():
     safe_key_up('u')
     safe_key_up('o')
 
+
 async def handle_websocket(request):
     # ─────────────────────────────────────────────────────────────────────
     # Chrome Private Network Access (PNA) Preflight 처리
@@ -149,6 +150,7 @@ async def handle_websocket(request):
         )
 
     ws = web.WebSocketResponse()
+    
     await ws.prepare(request)
     print("웹브라우저(브릭싱크)가 연결되었습니다!")
     

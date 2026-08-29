@@ -289,7 +289,7 @@ function triggerSystemLog(category, msg) {
         .block-stack {
             position: absolute;
             display: inline-flex;
-            align-items: center;
+            align-items: flex-start;
             white-space: nowrap;
         }
 
@@ -596,11 +596,13 @@ function triggerSystemLog(category, msg) {
             min-width: 140px;
             height: 90px;
             border-radius: 16px;
-            padding: 0 35px 20px 70px;
+            padding: 0 40px 20px 70px;
             display: inline-flex;
             align-items: flex-start;
             background: transparent !important;
             box-shadow: none !important;
+            margin-right: -8px;
+            position: relative;
         }
 
         .spike-block.loop-block::after,
@@ -615,7 +617,7 @@ function triggerSystemLog(category, msg) {
             width: 70px;
             height: 70px;
             background: #fbbf24;
-            border-radius: 16px;
+            border-radius: 16px 0 0 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -642,9 +644,9 @@ function triggerSystemLog(category, msg) {
 
         .loop-block-bottom {
             position: absolute;
-            left: 20px;
+            left: 0;
             bottom: 0;
-            right: 20px;
+            right: 0;
             height: 20px;
             background: #fbbf24;
             border-radius: 0 0 16px 16px;
@@ -657,25 +659,12 @@ function triggerSystemLog(category, msg) {
             position: absolute;
             right: 0;
             top: 0;
-            width: 35px;
+            width: 40px;
             height: 90px;
             background: #fbbf24;
             border-radius: 0 16px 16px 0;
             box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
             z-index: 5;
-        }
-
-        .loop-block-tail::before {
-            content: '';
-            position: absolute;
-            left: -2px;
-            top: 22px;
-            width: 16px;
-            height: 26px;
-            border-radius: 0 12px 12px 0;
-            background: #f1f5f9;
-            z-index: 6;
-            box-shadow: inset 4px 0px 4px rgba(0, 0, 0, 0.02);
         }
 
         .loop-block-tail::after {
@@ -693,12 +682,17 @@ function triggerSystemLog(category, msg) {
 
         .loop-inner-stack {
             display: inline-flex;
-            min-width: 40px;
+            align-items: flex-start;
+            min-width: 30px;
             height: 70px;
-            align-items: center;
             position: relative;
             z-index: 10;
-            margin-right: -8px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .loop-inner-stack > .spike-block:first-child {
+            margin-left: -8px;
         }
 
         .bg-teal {
@@ -774,7 +768,13 @@ body[data-unit="2"] .spike-block[data-action="event_ai_gesture"] .block-param,
 body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
     display: none !important;
 }
-</style>
+
+        @keyframes tiltShakeAnim {
+            0% { transform: perspective(600px) rotateZ(-20deg) translateX(-8px); }
+            100% { transform: perspective(600px) rotateZ(20deg) translateX(8px); }
+        }
+
+    </style>
 <script>
     (function() {
         try {
@@ -793,6 +793,54 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         } catch(e) {}
     })();
 </script>
+<script>
+        // 🚗 포트나이트 탈것 탑승 HUD UI 동기화
+        function updateVehicleMountUI(isBoarded) {
+            const btn = document.getElementById('vehicle-mount-btn');
+            const dot = document.getElementById('vehicleMountDot');
+            const txt = document.getElementById('vehicleMountText');
+            if (!btn || !dot || !txt) return;
+
+            let isEn = false;
+            try {
+                const lang = localStorage.getItem('bricksync_lang') || 'ko';
+                isEn = (lang === 'en');
+            } catch(e) {}
+
+            if (isBoarded) {
+                btn.style.background = '#ecfdf5';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = '#065f46';
+                btn.style.boxShadow = '0 0 12px rgba(16, 185, 129, 0.3)';
+                dot.style.background = '#10b981';
+                dot.style.boxShadow = '0 0 8px #10b981';
+                txt.innerText = isEn ? '🚗 Boarded (Gyro ON)' : '🚗 탑승 중 (자이로 ON)';
+            } else {
+                btn.style.background = '#f1f5f9';
+                btn.style.borderColor = '#cbd5e1';
+                btn.style.color = '#64748b';
+                btn.style.boxShadow = 'none';
+                dot.style.background = '#94a3b8';
+                dot.style.boxShadow = 'none';
+                txt.innerText = isEn ? '🚶 Disembarked (Gyro OFF)' : '🚶 하차 상태 (자이로 OFF)';
+            }
+        }
+
+        function toggleLocalVehicleMount() {
+            if (window.parent && typeof window.parent.toggleVehicleMount === 'function') {
+                window.parent.toggleVehicleMount();
+            } else if (typeof window.toggleVehicleMount === 'function') {
+                window.toggleVehicleMount();
+            }
+        }
+
+        // iframe 내 E키 감지
+        window.addEventListener('keydown', (e) => {
+            if ((e.key === 'e' || e.key === 'E') && !e.target.matches('input, textarea, select')) {
+                toggleLocalVehicleMount();
+            }
+        });
+        </script>
 </head>
 
 <body>
@@ -810,6 +858,10 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 <div id="hubStatusDot" style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);"></div>
                 <span id="hubStatusText" data-i18n="lbl_hub_not_connected">허브 연결 안 됨</span>
             </div>
+                        <button class="action-btn" id="vehicle-mount-btn" onclick="toggleLocalVehicleMount()" style="display: none; align-items: center; gap: 8px; font-weight: 700; color: #64748b; padding: 8px 16px; background: #f1f5f9; border-radius: 8px; border: 1.5px solid #cbd5e1; cursor: pointer; transition: all 0.2s;">
+                <div id="vehicleMountDot" style="width: 10px; height: 10px; border-radius: 50%; background: #94a3b8;"></div>
+                <span id="vehicleMountText">🚶 하차 상태 (자이로 OFF)</span>
+            </button>
             <button class="action-btn" onclick="openConnectModal()" id="connBtn">
                 <i class="fas fa-link" style="color:#64748b;"></i> <span data-i18n="lbl_connect_hub">허브 연결</span>
             </button>
@@ -989,7 +1041,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     <i class="fas fa-wifi" style="transform: rotate(180deg);"></i>
                 </div>
             </div>
-            <div class="block-param" style="border-radius: 10px; width:40px;">20</div>
+            <div class="block-param" data-val="20" style="border-radius: 10px; min-width: 44px; padding: 2px 6px;">20 cm</div>
         </div>
 
         <!-- NEW 기울기 센서 이벤트 블록 -->
@@ -1013,10 +1065,10 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     <i class="fas fa-undo" style="transform: scaleX(-1) rotate(20deg);"></i>
                 </div>
             </div>
-            <div class="block-param" data-val="left"><i class="fas fa-chevron-down"></i></div>
+            <div class="block-param" data-val="left"><i class="fas fa-arrow-left"></i></div>
         </div>
         <!-- NEW 음량 블록 (Sound Level) -->
-        <div class="spike-block bg-yellow" draggable="true" data-action="event_sound_level">
+        <div class="spike-block bg-purple" draggable="true" data-action="event_sound_level">
             <div class="block-icon"
                 style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
                 <div style="color: #22c55e; font-size: 16px; position:absolute; top:-10px;">
@@ -1026,7 +1078,38 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     <i class="fas fa-microphone"></i>
                 </div>
             </div>
-            <div class="block-param" style="border-radius:12px; width:44px; padding:2px 0;">20</div>
+        </div>
+
+        <!-- 보라색 AI 손 제스처 인식 이벤트 블록 -->
+        <div class="spike-block bg-purple" draggable="true" data-action="event_ai_gesture">
+            <div class="block-icon"
+                style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
+                <div style="color: #22c55e; font-size: 16px; position:absolute; top:-10px;">
+                    <i class="fas fa-wifi" style="transform: rotate(-45deg);"></i>
+                </div>
+                <div style="color: white; font-size: 18px; z-index: 2; margin-top: 5px;">
+                    <i class="fas fa-hand-sparkles"></i>
+                </div>
+            </div>
+            <div class="block-param" data-val="1">
+                <i class="fas fa-hand-paper" style="color:#64748b;"></i>
+            </div>
+        </div>
+
+        <!-- 보라색 AI 사물/몬스터 이미지 인식 이벤트 블록 -->
+        <div class="spike-block bg-purple" draggable="true" data-action="event_ai_vision">
+            <div class="block-icon"
+                style="display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative;">
+                <div style="color: #22c55e; font-size: 16px; position:absolute; top:-10px;">
+                    <i class="fas fa-wifi" style="transform: rotate(-45deg);"></i>
+                </div>
+                <div style="color: white; font-size: 18px; z-index: 2; margin-top: 5px;">
+                    <i class="fas fa-dragon"></i>
+                </div>
+            </div>
+            <div class="block-param" data-val="0">
+                <i class="fas fa-dragon" style="color:#64748b;"></i>
+            </div>
         </div>
 
         <!-- NEW 수신된 메시지 블록 -->
@@ -1121,7 +1204,13 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 .bg-blue::after {
                     background: #0284c7;
                 }
-            </style>
+            
+        @keyframes tiltShakeAnim {
+            0% { transform: perspective(600px) rotateZ(-20deg) translateX(-8px); }
+            100% { transform: perspective(600px) rotateZ(20deg) translateX(8px); }
+        }
+
+    </style>
         </div>
 
         <!-- NEW 자동차 이동 속도 설정 블록 -->
@@ -1995,15 +2084,85 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             modalOverlay.style.display = 'flex';
         }
 
-        // 새로 추가된 거리 센서 (Distance Sensor) 슬라이더 모달
+                // 새로 추가된 거리 센서 (Distance Sensor) 슬라이더 모달
+                // 새로 추가된 AI 제스처 및 비전 모달
+        function showAiGestureModal(paramEl) {
+            modalBox.innerHTML = '';
+            modalBox.style.cssText = 'background: #a855f7; display: flex; gap: 10px; padding: 10px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #9333ea;';
+            const options = [
+                { type: 'rock', val: 0, icon: '<i class="fas fa-hand-rock"></i>' },
+                { type: 'paper', val: 1, icon: '<i class="fas fa-hand-paper"></i>' },
+                { type: 'scissors', val: 2, icon: '<i class="fas fa-hand-scissors"></i>' }
+            ];
+            const currentVal = parseInt(paramEl.getAttribute('data-val') || 1);
+            options.forEach(opt => {
+                const btn = document.createElement('div');
+                const isSelected = currentVal === opt.val;
+                btn.style.cssText = `
+                    width: 50px; height: 50px; border-radius: 6px;
+                    display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; font-size: 24px;
+                    background: ${isSelected ? 'rgba(0,0,0,0.2)' : 'transparent'};
+                    border: 1px solid ${isSelected ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'};
+                    transition: 0.2s;
+                `;
+                btn.innerHTML = opt.icon;
+                btn.onmouseover = () => { if (!isSelected) btn.style.background = 'rgba(0,0,0,0.1)'; };
+                btn.onmouseout = () => { if (!isSelected) btn.style.background = 'transparent'; };
+                btn.onclick = () => {
+                    paramEl.setAttribute('data-val', opt.val);
+                    paramEl.innerHTML = `<i class="${opt.type === 'rock' ? 'fas fa-hand-rock' : (opt.type === 'paper' ? 'fas fa-hand-paper' : 'fas fa-hand-scissors')}" style="color:#64748b;"></i>`;
+                    modalOverlay.style.display = 'none';
+                };
+                modalBox.appendChild(btn);
+            });
+            positionModalUnder(paramEl, '#a855f7');
+            modalOverlay.style.display = 'flex';
+        }
+
+        function showAiVisionModal(paramEl) {
+            modalBox.innerHTML = '';
+            modalBox.style.cssText = 'background: #a855f7; display: flex; gap: 10px; padding: 10px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #9333ea;';
+            const options = [
+                { type: 'dragon', val: 0, icon: '<i class="fas fa-dragon"></i>' }
+            ];
+            const currentVal = parseInt(paramEl.getAttribute('data-val') || 0);
+            options.forEach(opt => {
+                const btn = document.createElement('div');
+                const isSelected = currentVal === opt.val;
+                btn.style.cssText = `
+                    width: 50px; height: 50px; border-radius: 6px;
+                    display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; font-size: 24px;
+                    background: ${isSelected ? 'rgba(0,0,0,0.2)' : 'transparent'};
+                    border: 1px solid ${isSelected ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'};
+                    transition: 0.2s;
+                `;
+                btn.innerHTML = opt.icon;
+                btn.onclick = () => {
+                    paramEl.setAttribute('data-val', opt.val);
+                    paramEl.innerHTML = '<i class="fas fa-dragon" style="color:#64748b;"></i>';
+                    modalOverlay.style.display = 'none';
+                };
+                modalBox.appendChild(btn);
+            });
+            positionModalUnder(paramEl, '#a855f7');
+            modalOverlay.style.display = 'flex';
+        }
+
         function showDistanceSensorModal(paramEl) {
             modalBox.innerHTML = '';
-            modalBox.style.cssText = 'background: #facc15; display: flex; align-items: center; padding: 20px 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #eab308; min-width: 250px;';
+            modalBox.style.cssText = 'background: #facc15; display: flex; flex-direction: column; align-items: center; padding: 16px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #eab308; min-width: 260px; gap: 12px; user-select: none;';
 
-            const currentVal = parseInt(paramEl.textContent || '20');
+            let rawVal = paramEl.getAttribute('data-val') || paramEl.textContent || '20';
+            let currentVal = parseInt(rawVal);
+            if (isNaN(currentVal) || currentVal < 0) currentVal = 20;
+
+            // 상단 실시간 cm 뱃지
+            const valBadge = document.createElement('div');
+            valBadge.style.cssText = 'font-size: 1.15rem; color: #78350f; font-weight: 800; background: rgba(255,255,255,0.9); padding: 4px 16px; border-radius: 20px; border: 1.5px solid #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.05);';
+            valBadge.textContent = `${currentVal} cm`;
 
             const sliderWrapper = document.createElement('div');
-            sliderWrapper.style.cssText = 'width: 100%; position: relative; display: flex; align-items: center; justify-content:center;';
+            sliderWrapper.style.cssText = 'width: 100%; display: flex; align-items: center; justify-content: center;';
 
             const slider = document.createElement('input');
             slider.type = 'range';
@@ -2011,26 +2170,20 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             slider.max = '200';
             slider.value = currentVal;
             slider.className = 'lego-slider';
-
-            // 값을 슬라이더 왼쪽에 표시하는 라벨
-            const valLabel = document.createElement('div');
-            valLabel.style.cssText = 'position: absolute; left: -20px; font-size: 14px; color: white; font-weight: bold; pointer-events:none; text-shadow: 1px 1px 0 rgba(0,0,0,0.2);';
-            valLabel.textContent = currentVal;
+            slider.style.cssText = 'width: 100%; cursor: pointer;';
 
             slider.oninput = (e) => {
                 const mapVal = e.target.value;
-                valLabel.textContent = mapVal;
-                // 슬라이더 좌측 노랑색 채워지는 효과
+                valBadge.textContent = `${mapVal} cm`;
                 const percent = (mapVal / 200) * 100;
                 slider.style.background = `linear-gradient(to right, #ffffff ${percent}%, transparent ${percent}%)`;
-                // 슬라이더 조작 시 모달이 닫히지 않고 바로 블록의 텍스트만 업데이트
-                paramEl.textContent = mapVal;
+                paramEl.textContent = `${mapVal} cm`;
+                paramEl.setAttribute('data-val', mapVal);
             };
 
-            // 초기 배경색 적용
             slider.oninput({ target: slider });
 
-            sliderWrapper.appendChild(valLabel);
+            modalBox.appendChild(valBadge);
             sliderWrapper.appendChild(slider);
             modalBox.appendChild(sliderWrapper);
 
@@ -2039,17 +2192,29 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         }
 
         // 새로 추가된 기울기 센서 (Tilt Sensor) 모달
-        function showTiltSensorModal(paramEl) {
+                function getTiltParamIcon(type) {
+            switch (type) {
+                case 'left': return '<i class="fas fa-arrow-left"></i>';
+                case 'right': return '<i class="fas fa-arrow-right"></i>';
+                case 'up': return '<i class="fas fa-arrow-up"></i>';
+                case 'down': return '<i class="fas fa-arrow-down"></i>';
+                case 'flat': return '<div style="width:14px;height:9px;background:white;border-radius:2px;border:1.5px solid #b45309;position:relative;display:inline-block;"><div style="position:absolute;bottom:-4px;left:1px;width:9px;height:1.5px;background:white;"></div></div>';
+                case 'shake': return '<i class="fas fa-arrows-alt" style="font-size:12px;"></i>';
+                default: return '<i class="fas fa-arrow-left"></i>';
+            }
+        }
+
+                function showTiltSensorModal(paramEl) {
             modalBox.innerHTML = '';
-            modalBox.style.cssText = 'background: #facc15; position: relative; width: 280px; height: 280px; padding: 0; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #eab308;';
+            modalBox.style.cssText = 'background: #facc15; position: relative; width: 280px; height: 280px; padding: 0; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #eab308; perspective: 700px;';
 
             const currentVal = paramEl.getAttribute('data-val') || 'left';
 
-            // 중앙의 실시간 회전 애니메이션 허브 그래픽
+            // 중앙의 실시간 3D 원근 틸팅 허브 그래픽
             const centerGraphic = document.createElement('div');
-            centerGraphic.style.cssText = 'position: absolute; top: 60px; left: 60px; width: 160px; height: 160px; display: flex; justify-content: center; align-items: center; pointer-events: none; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);';
+            centerGraphic.style.cssText = 'position: absolute; top: 60px; left: 60px; width: 160px; height: 160px; display: flex; justify-content: center; align-items: center; pointer-events: none; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d;';
             centerGraphic.innerHTML = `
-                <div style="width: 110px; height: 70px; background: #fbbf24; border-radius: 8px; border: 4px solid #d97706; position: relative; box-shadow: inset 0 -6px 0 rgba(0,0,0,0.1);">
+                <div style="width: 110px; height: 70px; background: #fbbf24; border-radius: 8px; border: 4px solid #d97706; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.18), inset 0 -6px 0 rgba(0,0,0,0.1); transform-style: preserve-3d;">
                     <div style="position:absolute; top:0; left:0; width:100%; height:16px; background:white; border-bottom:3px solid #d97706; border-radius: 4px 4px 0 0; display:flex; justify-content:center;">
                         <div style="width:12px; height:5px; background:#38bdf8; margin-top:5px; border-radius: 2px;"></div>
                     </div>
@@ -2060,19 +2225,33 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             `;
             modalBox.appendChild(centerGraphic);
 
-            // 옵션별 회전 각도 매핑 함수
+            // 옵션별 3D 입체 원근 틸팅 매핑 함수
             function updateCenter(val) {
-                let rot = 0;
+                let transformStr = 'perspective(600px) ';
                 let opacityLine = 0;
-                if (val === 'left') rot = -35;
-                if (val === 'right') rot = 35;
-                if (val === 'up') rot = -90;
-                if (val === 'down') rot = 90;
-                if (val === 'flat') { rot = 0; opacityLine = 1; }
-                if (val === 'shake') rot = 0; // 흔들기 애니메이션은 생략하거나 나중에 추가
+                centerGraphic.style.animation = 'none';
 
-                centerGraphic.style.transform = `rotate(${rot}deg)`;
-                centerGraphic.querySelector('#tilt-flat-line').style.opacity = opacityLine;
+                if (val === 'left') {
+                    transformStr += 'rotateZ(-32deg) rotateY(-8deg)';
+                } else if (val === 'right') {
+                    transformStr += 'rotateZ(32deg) rotateY(8deg)';
+                } else if (val === 'up') {
+                    // ⬆️ 뒤로 기울이기 / 앞들기 (Pitch Up): 상단이 뒤로 넘어가며 3D 입체로 누움
+                    transformStr += 'rotateX(-46deg) translateY(-10px) scale(0.96)';
+                } else if (val === 'down') {
+                    // ⬇️ 앞으로 기울이기 / 숙이기 (Pitch Down): 상단이 앞으로 쏟아지며 3D 입체로 숙여짐
+                    transformStr += 'rotateX(48deg) translateY(12px) scale(1.05)';
+                } else if (val === 'flat') {
+                    transformStr += 'rotateX(0deg) rotateZ(0deg)';
+                    opacityLine = 1;
+                } else if (val === 'shake') {
+                    transformStr += 'rotateZ(0deg)';
+                    centerGraphic.style.animation = 'tiltShakeAnim 0.35s ease infinite alternate';
+                }
+
+                centerGraphic.style.transform = transformStr;
+                const flatLine = centerGraphic.querySelector('#tilt-flat-line');
+                if (flatLine) flatLine.style.opacity = opacityLine;
             }
             updateCenter(currentVal);
 
@@ -2108,6 +2287,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
 
                 btn.onclick = () => {
                     paramEl.setAttribute('data-val', opt.type);
+                    paramEl.innerHTML = getTiltParamIcon(opt.type);
                     // Update visual state of all buttons without closing
                     Array.from(modalBox.children).forEach(child => {
                         if (child.style.width === '40px') {
@@ -2121,7 +2301,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     btn.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.2)';
                 };
 
-                // 마우스를 올릴 때마다 허브 그래픽이 즉시 반응하여 기울어짐!
+                // 마우스를 올릴 때마다 허브 그래픽이 즉시 반응하여 3D로 기울어짐!
                 btn.addEventListener('mouseenter', () => updateCenter(opt.type));
                 btn.addEventListener('mouseleave', () => updateCenter(paramEl.getAttribute('data-val') || 'left'));
 
@@ -2250,6 +2430,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 slider.style.background = `linear-gradient(to right, #ffffff ${mapVal}%, rgba(0,0,0,0.1) ${mapVal}%)`;
                 // 파라미터 텍스트 실시간 업데이트
                 paramEl.textContent = mapVal;
+                paramEl.setAttribute('data-val', mapVal);
             };
 
             // 초기 배경색 적용
@@ -2263,51 +2444,57 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             modalOverlay.style.display = 'flex';
         }
 
-        // 새로 추가된 모터 속도 설정 모달 (4단계 바 그래프)
+                                // 새로 추가된 모터 속도 설정 모달 (4단계 바 그래프)
         function showMotorSpeedModal(paramEl) {
             modalBox.innerHTML = '';
-            modalBox.style.cssText = 'background: #0284c7; display: flex; gap: 6px; padding: 12px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #0369a1;';
+            modalBox.style.cssText = 'background: #0284c7; display: flex; gap: 8px; padding: 12px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #0369a1; user-select:none;';
 
-            const currentVal = parseInt(paramEl.getAttribute('data-val') || '35');
+            const currentVal = parseInt(paramEl.getAttribute('data-val') || '40');
 
             const speeds = [
-                { val: 10, bars: 1 },
-                { val: 35, bars: 2 },
-                { val: 65, bars: 3 },
-                { val: 100, bars: 4 }
+                { val: 20, bars: 1, label: '1단' },
+                { val: 40, bars: 2, label: '2단' },
+                { val: 70, bars: 3, label: '3단' },
+                { val: 100, bars: 4, label: '4단' }
             ];
 
             speeds.forEach(speed => {
                 const btn = document.createElement('div');
-                const isSelected = currentVal === speed.val;
+                const isSelected = (currentVal === speed.val) || (currentVal <= 25 && speed.val === 20) || (currentVal > 25 && currentVal <= 50 && speed.val === 40) || (currentVal > 50 && currentVal <= 80 && speed.val === 70) || (currentVal > 80 && speed.val === 100);
 
                 btn.style.cssText = `
-                    width: 50px; height: 50px; border-radius: 4px; border: 1px solid #0369a1;
-                    display: flex; align-items: flex-end; justify-content: center; cursor: pointer; padding-bottom: 12px;
+                    width: 52px; height: 56px; border-radius: 8px; border: 1.5px solid ${isSelected ? '#38bdf8' : '#0369a1'};
+                    display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; padding-bottom: 6px; gap: 4px;
                     background: ${isSelected ? '#0369a1' : '#0ea5e9'};
-                    transition: 0.2s; box-shadow: ${isSelected ? 'inset 0 3px 6px rgba(0,0,0,0.4)' : 'none'};
+                    transition: 0.2s; box-shadow: ${isSelected ? 'inset 0 3px 6px rgba(0,0,0,0.4), 0 0 8px rgba(56,189,248,0.5)' : 'none'};
                 `;
 
                 // 막대 그래프 생성
                 const barContainer = document.createElement('div');
-                barContainer.style.cssText = 'display:flex; align-items:flex-end; gap:2px; height: 20px;';
+                barContainer.style.cssText = 'display:flex; align-items:flex-end; gap:2px; height: 22px;';
 
                 for (let i = 1; i <= 4; i++) {
                     const bar = document.createElement('div');
-                    const height = [6, 10, 15, 20][i - 1]; // 막대 높이 설정
+                    const height = [5, 10, 15, 20][i - 1]; // 막대 높이 설정
                     const isActive = i <= speed.bars;
                     bar.style.cssText = `
                         width: 6px; height: ${height}px; 
-                        background: ${isActive ? '#22c55e' : 'transparent'}; 
-                        border: 1px solid ${isActive ? '#16a34a' : '#0ea5e9'};
+                        background: ${isActive ? '#22c55e' : 'rgba(255,255,255,0.2)'}; 
+                        border: 1px solid ${isActive ? '#16a34a' : 'transparent'};
+                        border-radius: 1px;
                         box-sizing: border-box;
                     `;
                     barContainer.appendChild(bar);
                 }
 
-                btn.appendChild(barContainer);
+                const lbl = document.createElement('div');
+                lbl.style.cssText = 'font-size: 11px; font-weight: 800; color: white;';
+                lbl.textContent = speed.label;
 
-                btn.onmouseover = () => { if (!isSelected) btn.style.background = '#0369a1'; };
+                btn.appendChild(barContainer);
+                btn.appendChild(lbl);
+
+                btn.onmouseover = () => { if (!isSelected) btn.style.background = '#0284c7'; };
                 btn.onmouseout = () => { if (!isSelected) btn.style.background = '#0ea5e9'; };
 
                 btn.onclick = () => {
@@ -2641,10 +2828,14 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     } else if (action === 'event_force_sensor') {
                         showForceSensorModal(param);
                     } else if (action === 'event_distance_sensor') {
-                        showDistanceModal(param);
+                        showDistanceSensorModal(param);
                     } else if (action === 'event_tilt_sensor') {
                         showTiltSensorModal(param);
-                    } else if (action === 'event_sound_level') {
+                    } else if (action === 'event_ai_gesture') {
+                showAiGestureModal(param);
+            } else if (action === 'event_ai_vision') {
+                showAiVisionModal(param);
+            } else if (action === 'event_sound_level') {
                         showSoundLevelModal(param);
                     } else if (action === 'motor_speed_set' || action === 'car_speed_set') {
                         showMotorSpeedModal(param);
@@ -3438,6 +3629,8 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         };
 
         async function haltExecution() {
+            window.isBlockExecutionRunning = false;
+            if (window.parent) window.parent.isBlockExecutionRunning = false;
             window.bleEngineRunCounter = (window.bleEngineRunCounter || 0) + 1;
             try { window.parent.sendWebSocketAction({ action: 'CLEANUP_KEYS' }); } catch (e) { }
             if (window.parent && window.parent.connectionType === 'BLE') {
@@ -3461,8 +3654,54 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 try { await window.parent.writeToHub(pyStop); } catch (e) { }
             }
         }
-        async function runBlocks(triggerAction = 'gui') {
+                // 🔁 스파이크 에센셜 선형 반복 블록(control_repeat) 전개 엔진
+        function unrollStackBlocks(blockArray) {
+            const result = [];
+            let i = 0;
+            while (i < blockArray.length) {
+                const block = blockArray[i];
+                const action = block.getAttribute('data-action');
+                
+                if (action === 'control_repeat') {
+                    let paramVal = 4;
+                    const paramEl = block.querySelector('.block-param') || block.querySelector('[data-val]');
+                    if (paramEl) {
+                        if (paramEl.hasAttribute('data-val')) paramVal = parseFloat(paramEl.getAttribute('data-val'));
+                        else {
+                            const textVal = paramEl.innerText.trim();
+                            if (!isNaN(textVal) && textVal !== "") paramVal = parseFloat(textVal);
+                        }
+                    }
+                    if (isNaN(paramVal) || paramVal <= 0) paramVal = 1;
+                    paramVal = Math.round(paramVal);
+
+                    const loopSubBlocks = [];
+                    let j = i + 1;
+                    while (j < blockArray.length) {
+                        const nextAction = blockArray[j].getAttribute('data-action');
+                        if (nextAction === 'control_repeat') {
+                            break;
+                        }
+                        loopSubBlocks.push(blockArray[j]);
+                        j++;
+                    }
+
+                    for (let r = 0; r < paramVal; r++) {
+                        loopSubBlocks.forEach(b => result.push(b));
+                    }
+
+                    i = j;
+                } else {
+                    result.push(block);
+                    i++;
+                }
+            }
+            return result;
+        }
+
+                async function runBlocks(triggerAction = 'gui') {
             window.isBlockExecutionRunning = true;
+            if (window.parent) window.parent.isBlockExecutionRunning = true;
             // 실행 가능한 스택 찾기 (동작 블록이 연결된 정상 스택 우선 필터링, 빈 시작 블록 조기종료 방어)
             let allCandidateStacks = Array.from(document.querySelectorAll('#workspaceArea .block-stack')).filter(stack => {
                 const firstBlock = stack.querySelector('.workspace-item');
@@ -3491,12 +3730,10 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             });
 
             let rootBlocks = [];
-            // We only grab top-level workspace items per valid stack
             validStacks.forEach(stack => {
                 rootBlocks = rootBlocks.concat(Array.from(stack.children).filter(b => b.classList.contains('workspace-item') && !b.classList.contains('placeholder')));
             });
 
-            // Flatten blocks array for block count and legacy uses if needed
             let blocks = [];
             function flatten(container) {
                 Array.from(container.children).forEach(child => {
@@ -3509,14 +3746,12 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             }
             validStacks.forEach(stack => flatten(stack));
 
-            // SPIKE 2.x 와 3.x 펌웨어를 모두 완벽 지원하며 허브의 6개(A~F) 모든 포트를 커버하는 초강력 모터 래퍼
             let pyCode = `import hub, utime, math
 global_motor_speed = 40
 
 def rm(v):
   try:
     import motor
-    # 파란색 모터 블록은 오직 A(0)번 포트만 제어합니다.
     try: motor.set_duty_cycle(0, int(v * 100))
     except:
       try: motor.run(0, int(v * 100))
@@ -3541,7 +3776,6 @@ def sm():
       except: pass
 
 def dm(v0, v1):
-  # A(0)번 포트와 B(1)번 포트 모터 동작 (스파이크 구형/신형 펌웨어 호환)
   try:
     import motor
     try: motor.set_duty_cycle(0, int(v0 * 100))
@@ -3566,9 +3800,8 @@ print("BrickSync Sandbox Run")
 `;
 
             let blockCount = 0;
-            // 브라우저 로컬 사운드 동기화 큐 (명령 시간 지연 연산)
             const localSoundsQueue = [];
-            const localActionsQueue = []; // 포트나이트 웹소켓 연동 큐
+            const localActionsQueue = [];
             let cumulativeDelayMs = 0;
 
             function buildPyCode(blockArray, indent) {
@@ -3614,7 +3847,6 @@ print("BrickSync Sandbox Run")
 
                     switch (action) {
                         case 'start': break;
-
                         case 'motor_speed_set':
                         case 'car_speed_set':
                             pyCode += `${indent}global_motor_speed = ${pythonVal} \n${indent}print("Global Motor Speed Set:", global_motor_speed, "%") \n`;
@@ -3624,9 +3856,6 @@ print("BrickSync Sandbox Run")
                             else if (paramVal <= 70) speedLevelUSB = 3;
                             else speedLevelUSB = 4;
                             localActionsQueue.push({ action: 'SPEED_' + speedLevelUSB, delay: cumulativeDelayMs });
-                            break;
-                        case 'motor_speed':
-                            pyCode += `${indent}print("Motor Speed Block Triggered") \n`;
                             break;
                         case 'car_forward':
                         case 'car_backward': {
@@ -3673,7 +3902,7 @@ print("BrickSync Sandbox Run")
                                 cumulativeDelayMs += 1000;
                             }
                             localActionsQueue.push({ action: 'STOP_MWHEEL_RIGHT', delay: cumulativeDelayMs });
-                            cumulativeDelayMs += 800; // 관성 및 반대 회전 충돌 방지용 브레이크 휴식 800ms
+                            cumulativeDelayMs += 800;
                             break;
                         case 'motor_ccw':
                             pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1000)) \n${indent}sm() \n`;
@@ -3682,7 +3911,7 @@ print("BrickSync Sandbox Run")
                                 cumulativeDelayMs += 1000;
                             }
                             localActionsQueue.push({ action: 'STOP_MWHEEL_LEFT', delay: cumulativeDelayMs });
-                            cumulativeDelayMs += 800; // 관성 및 반대 회전 충돌 방지용 브레이크 휴식 800ms
+                            cumulativeDelayMs += 800;
                             break;
                         case 'motor_stop':
                             pyCode += `${indent}sm() \n`;
@@ -3693,213 +3922,87 @@ print("BrickSync Sandbox Run")
                             localActionsQueue.push({ action: 'STOP_LEFT', delay: cumulativeDelayMs });
                             localActionsQueue.push({ action: 'STOP_RIGHT', delay: cumulativeDelayMs });
                             break;
-
-                                                case 'matrix_image':
+                        case 'matrix_image':
                         case 'matrix_pixel':
                         case 'matrix_pixel_red':
                             const matEl = block.querySelector(':scope > .param-unified') || block.querySelector(':scope > .block-param:not(.param-time)') || paramEl;
                             let matrixArr = matEl ? (matEl.getAttribute('data-matrix') || JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0])) : JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0]);
                             let lightDuration = matEl ? (parseFloat(matEl.getAttribute('data-val')) || 2) : 2;
-
-                            let redColors = [0, 9, 0, 0, 9, 0, 0, 9, 0];
-                            try {
-                                if (matrixArr) redColors = JSON.parse(matrixArr);
-                            } catch(e) {}
-
-                            localActionsQueue.push({ action: 'matrix', colors: redColors, delay: cumulativeDelayMs });
-                            localActionsQueue.push({ action: 'ACTION_LIGHT', delay: cumulativeDelayMs });
-
-                            if ((String(unit) === '3' || String(unit) === '8') && isMissionActive) {
-                                pyCode += `${indent}print("Mission Complete!")\n`;
-                            }
-
-                            if (matrixArr) {
-                                try {
-                                    const arr = JSON.parse(matrixArr);
-                                    pyCode += `${indent}try:\n`;
-                                    const nextIndent = indent + "  ";
-                                    pyCode += `${nextIndent}m = ${JSON.stringify(arr)}\n`;
-                                    pyCode += `${nextIndent}try:\n${nextIndent}  import color_matrix\n${nextIndent}  cm_data = [(c, 100) if c>0 else (0,0) for c in m]\n${nextIndent}  for p in range(6):\n${nextIndent}    try: color_matrix.show(p, cm_data)\n${nextIndent}    except:\n${nextIndent}      try:\n${nextIndent}        for y in range(3):\n${nextIndent}          for x in range(3):\n${nextIndent}            color_matrix.set_pixel(p, x, y, cm_data[y*3+x])\n${nextIndent}      except: pass\n${nextIndent}except: pass\n`;
-                                    pyCode += `${nextIndent}try:\n${nextIndent}  import device\n${nextIndent}  dm_data = [(c + 160) if c>0 else 0 for c in m]\n${nextIndent}  for p in range(6):\n${nextIndent}    try: device.write(p, 2, dm_data)\n${nextIndent}    except: pass\n${nextIndent}except: pass\n`;
-                                    pyCode += `${nextIndent}try:\n${nextIndent}  for y in range(3):\n${nextIndent}    for x in range(3):\n${nextIndent}      try: hub.display.pixel(x+1, y+1, 9 if m[y*3+x]>0 else 0)\n${nextIndent}      except: pass\n${nextIndent}      try: hub.light_matrix.set_pixel(x+1, y+1, 100 if m[y*3+x]>0 else 0)\n${nextIndent}      except: pass\n${nextIndent}except: pass\n`;
-                                    pyCode += `${indent}except:\n${indent}  pass\n`;
-                                } catch (e) { }
-                            }
-
-                            pyCode += `${indent}utime.sleep_ms(int(${lightDuration} * 1000)) \n`;
+                            localActionsQueue.push({ action: 'LIGHT_ON', delay: cumulativeDelayMs });
                             cumulativeDelayMs += (lightDuration * 1000);
+                            localActionsQueue.push({ action: 'LIGHT_OFF', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += 300;
                             break;
-
                         case 'matrix_clear':
-                            pyCode += `${indent}try:\n${indent}  import color_matrix\n${indent}  for p in range(6):\n${indent}    try: color_matrix.clear(p)\n${indent}    except: pass\n${indent}except: pass\n`;
-                            pyCode += `${indent}try:\n${indent}  import device\n${indent}  for p in range(6):\n${indent}    try: device.write(p, 2, [0]*9)\n${indent}    except: pass\n${indent}except: pass\n`;
-                            pyCode += `${indent}try:\n${indent}  hub.led(0)\n${indent}  import light_matrix; light_matrix.clear()\n${indent}except:\n${indent}  try: hub.display.clear()\n${indent}  except: pass\n`;
+                            localActionsQueue.push({ action: 'LIGHT_OFF', delay: cumulativeDelayMs });
+                            cumulativeDelayMs += 300;
                             break;
-
                         case 'flow_wait':
                             pyCode += `${indent}utime.sleep_ms(int(${pythonVal} * 1000)) \n`;
                             cumulativeDelayMs += (paramVal * 1000);
                             break;
-
-                        case 'control_repeat':
-                        case 'control_forever':
-                            let maxIter = (action === 'control_forever') ? 'True' : `range(int(${pythonVal}))`;
-                            let loopStmt = (action === 'control_forever') ? 'while' : 'for i in';
-                            pyCode += `${indent}${loopStmt} ${maxIter}: \n`;
-
-                            const innerStack = block.querySelector(':scope > .loop-inner-stack');
-                            if (innerStack) {
-                                const innerBlocks = Array.from(innerStack.children).filter(b => b.classList.contains('workspace-item') && !b.classList.contains('placeholder'));
-                                if (innerBlocks.length > 0) {
-                                    buildPyCode(innerBlocks, indent + "  ");
-                                } else {
-                                    pyCode += `${indent}  pass\n`;
-                                }
-                            } else {
-                                pyCode += `${indent}  pass\n`;
+                        case 'control_repeat': {
+                            const loopCount = paramVal;
+                            pyCode += `${indent}for _ in range(${loopCount}):\n`;
+                            const innerStack = block.querySelector('.loop-inner-stack');
+                            const innerBlocks = innerStack ? Array.from(innerStack.querySelectorAll('.workspace-item')) : [];
+                            const unrolledInnerBlocks = typeof unrollStackBlocks === 'function' ? unrollStackBlocks(innerBlocks) : innerBlocks;
+                            for (let r = 0; r < loopCount; r++) {
+                                buildPyCode(unrolledInnerBlocks, indent + "  ");
                             }
                             break;
-
-                        case 'event_color_sensor':
-                            pyCode += `${indent}print("Waiting for color", ${pythonVal}) \n${indent}wait_sensor = True\n${indent}while wait_sensor:\n${indent}  try:\n${indent}    import color_sensor\n${indent}    for p in range(6):\n${indent}      try:\n${indent}        if color_sensor.color(p) == ${pythonVal}:\n${indent}          wait_sensor = False\n${indent}          break\n${indent}      except: pass\n${indent}  except: pass\n${indent}  utime.sleep_ms(50)\n`;
+                        }
+                        case 'control_forever': {
+                            pyCode += `${indent}while True:\n`;
+                            const innerStack = block.querySelector('.loop-inner-stack');
+                            const innerBlocks = innerStack ? Array.from(innerStack.querySelectorAll('.workspace-item')) : [];
+                            const unrolledInnerBlocks = typeof unrollStackBlocks === 'function' ? unrollStackBlocks(innerBlocks) : innerBlocks;
+                            buildPyCode(unrolledInnerBlocks, indent + "  ");
                             break;
-
-                        case 'sound_note':
-                        case 'sound_animal':
-                        case 'sound_play':
-                            const soundTrack = paramVal === -1 ? Math.floor(Math.random() * 8) + 1 : paramVal;
-                            localSoundsQueue.push({ track: soundTrack, delay: cumulativeDelayMs });
-                            pyCode += `${indent}utime.sleep_ms(5000) \n`;
-                            cumulativeDelayMs += 5000;
-                            break;
-
-                        default:
-                            pyCode += `${indent}print("Action: ${action}, Param: ${pythonVal}") \n`;
+                        }
                     }
                 });
             }
 
-            buildPyCode(rootBlocks, "");
-
-            if (unit === '5') {
-                pyCode += `utime.sleep_ms(2000)
-try:
-  import color_matrix
-  for p in range(6):
-    try: color_matrix.clear(p)
-    except: pass
-except: pass
-try:
-  import device
-  for p in range(6):
-    try: device.write(p, 2, [0]*9)
-    except: pass
-except: pass
-try:
-  hub.led(0)
-  import light_matrix; light_matrix.clear()
-except:
-  try: hub.display.clear()
-  except: pass
-`;
-            }
-
-            // 스크립트가 순식간에 0.1초만에 종료되어버리면, 허브 본체가 프로그램 종료로 간주하고 조명/모터를 바로 꺼버리는 것을 방지!
-            pyCode += 'utime.sleep_ms(2000)\n';
-            if (isMissionActive) {
-                pyCode += 'print("Mission Complete!")\n';
-            }
-
-            if (blockCount > 1) {
-                // [보상 시스템] 블록 조립 코드를 성공적으로 완성하고 런(Run) 버튼을 누르면
-                // 포트나이트 캣 아일랜드로 '상호작용(E) 또는 던지기' 키를 전송하여 고양이에게 먹이를 줍니다!
-                try { window.parent.sendWebSocketAction({ action: "CAT_FEED_REWARD" }); console.log("포트나이트 연동 신호(CAT_FEED_REWARD) 전송 완료!"); } catch (e) { }
-            }
-
-            window.bleEngineRunCounter = (window.bleEngineRunCounter || 0) + 1;
-            const currentRunId = window.bleEngineRunCounter;
-
-            // 사운드 블럭이 포함되어 있다면 앞선 블록들의 실행 시간에 맞춰 정확한 순서 릴레이 재생!
-            if (localSoundsQueue.length > 0) {
-                localSoundsQueue.forEach(item => {
-                    setTimeout(() => {
-                        if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return;
-                        playBrowserBeep(item.track);
-                    }, item.delay);
-                });
-            }
-
-            // 포트나이트 연동 액션(localActionsQueue)은 허브 연결 여부와 상관없이 작동하도록 변경 (시뮬레이션 모드 지원)
-            if (localActionsQueue.length > 0) {
-                localActionsQueue.forEach(item => {
-                    setTimeout(() => {
-                        if (window.bleEngineRunCounter !== currentRunId) return;
-                        try {
-                            if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
-                                window.parent.sendWebSocketAction({ action: item.action });
-                            } else if (typeof sendWebSocketAction === 'function') {
-                                sendWebSocketAction({ action: item.action });
-                            }
-                            if (typeof addSystemLog === 'function') addSystemLog('FORTNITE', '🎮 포트나이트 액션 연동 송출: ' + item.action);
-                        } catch (e) { }
-                    }, item.delay);
-                });
-
-                // 모든 미션 동작이 100% 완전히 끝난 후에만 Golden Coin (CAT_FEED_REWARD) 발동!
-                setTimeout(() => {
-                    if (window.bleEngineRunCounter !== currentRunId) return;
-                    try {
-                        console.log("🪙 [Golden Coin] 모든 미션 동작 100% 완료! Golden Coin 발동!");
-                        if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
-                            window.parent.sendWebSocketAction({ action: "CAT_FEED_REWARD" });
-                        } else if (typeof sendWebSocketAction === 'function') {
-                            sendWebSocketAction({ action: "CAT_FEED_REWARD" });
-                        }
-                    } catch(e) {}
-                }, cumulativeDelayMs + 500);
-            }
-
-            const activeConnType = (window.parent && window.parent.connectionType) || window.connectionType;
-            const hasBluetooth = (window.parent && window.parent.txCharacteristic) || window.txCharacteristic;
-            if (!activeConnType && !hasBluetooth) {
-                if (typeof addSystemLog === 'function') {
-                    triggerSystemLog('HUB', '⚠️ 레고 허브가 연결되어 있지 않습니다. 상단의 [블루투스/USB 연결] 버튼을 눌러 레고 허브를 연결해주세요!');
+            let isBle = false;
+            let hubDetectWin = window;
+            for (let i = 0; i < 5; i++) {
+                if (hubDetectWin.connectionType === 'BLE' || hubDetectWin.isBluetoothMode || hubDetectWin.txCharacteristic) {
+                    isBle = true;
+                    break;
                 }
-                console.log("[BrickSync] 하드웨어 미연결 상태: 시뮬레이션 모드 진행");
-            } else {
-                if (typeof addSystemLog === 'function') {
-                    triggerSystemLog('HUB', `🟢 레고 허브 연결 확인됨 (${activeConnType || 'BLE'}). 모터 패킷 전송을 시작합니다.`);
-                }
+                if (hubDetectWin.parent && hubDetectWin.parent !== hubDetectWin) hubDetectWin = hubDetectWin.parent;
+                else break;
             }
 
-            if (activeConnType === 'BLE' || activeConnType === 'USB' || hasBluetooth) {
-                // BLE 무선 ?�시�?블록 ?�진 (버츄??머신)
-                // LWP3 공식 ?�로?�콜???�용??바이?�리 모터 ?�킷 ?�송
-                // ?�진 ?�행 ?�별??(중복 ?�행 방�? �??�전 루프 취소??
-
-
-                console.log(`?? [BLE_ENGINE] Starting ${validStacks.length} concurrent block stacks (RunID: ${currentRunId})`);
-
+            if (isBle || window.isBluetoothMode || (window.parent && (window.parent.connectionType === 'BLE' || window.parent.txCharacteristic))) {
+                if (typeof window.bleEngineRunCounter === 'undefined') window.bleEngineRunCounter = 0;
+                const currentRunId = ++window.bleEngineRunCounter;
                 let maxGlobalDelay = 0;
                 let anySequenceFound = false;
 
                 validStacks.forEach((stack) => {
-                    const stackBlocks = Array.from(stack.querySelectorAll('.workspace-item'));
-                    if (stackBlocks.length === 0) return;
+                    const firstBlock = stack.querySelector('.workspace-item');
+                    if (!firstBlock) return;
+                    const trigger = firstBlock.getAttribute('data-action');
+                    const isEventLoop = trigger && trigger.startsWith('event_');
+
+                    if (triggerAction === 'gui') {
+                        if (trigger !== 'start' && !isEventLoop) return;
+                    } else if (triggerAction.startsWith('event_')) {
+                        if (trigger !== triggerAction) return;
+                    }
 
                     anySequenceFound = true;
-                    // ?블록???벤??블록??(Start가 ?닌지) ?인
-                    const firstAction = stackBlocks[0].getAttribute('data-action');
-                    const isEventLoop = firstAction !== 'start';
+                    const rawBlocks = Array.from(stack.querySelectorAll('.workspace-item'));
+                    const unrolledBlocks = typeof unrollStackBlocks === 'function' ? unrollStackBlocks(rawBlocks) : rawBlocks;
 
+                    const bleQueue = [];
                     let currentBleDelay = 0;
                     let bleGlobalMotorSpeed = 40;
-                    const bleQueue = [];
 
-                    stackBlocks.forEach((block) => {
+                    unrolledBlocks.forEach((block) => {
                         const action = block.getAttribute('data-action');
-                        blockCount++; // ?�기???�적?�도 ?�전
-
                         let paramVal = 1;
                         let timeVal = 1;
                         let paramEl = null;
@@ -3947,40 +4050,64 @@ except:
                                 else speedLevelBLE = 4;
                                 bleQueue.push({ action: 'motor_speed_set', speedLevel: speedLevelBLE, delay: currentBleDelay });
                                 break;
-                            case 'car_forward':
+                                                                                    case 'car_forward':
                             case 'car_backward': {
-                                bleQueue.push({ action: action, speed: bleGlobalMotorSpeed, delay: currentBleDelay });
-                                currentBleDelay += Math.round(timeVal * 1600);
+                                const currentSpeed = Math.abs(bleGlobalMotorSpeed) || 40;
+                                let oneStepMs = 1280;
+                                if (currentSpeed <= 25) oneStepMs = 3200;
+                                else if (currentSpeed <= 50) oneStepMs = 1280;
+                                else if (currentSpeed <= 80) oneStepMs = 640;
+                                else oneStepMs = 305;
+                                const moveDuration = Math.round(timeVal * oneStepMs);
+                                bleQueue.push({ action: action, speed: currentSpeed, delay: currentBleDelay });
+                                currentBleDelay += moveDuration;
                                 bleQueue.push({ action: 'car_stop', speed: 0, dir: action, delay: currentBleDelay });
                                 currentBleDelay += 500;
                                 break;
                             }
                             case 'car_left':
                             case 'car_right': {
-                                bleQueue.push({ action: action, speed: bleGlobalMotorSpeed, delay: currentBleDelay });
-                                currentBleDelay += Math.round(timeVal * 835);
+                                const currentSpeed = Math.abs(bleGlobalMotorSpeed) || 40;
+                                let oneTurnMs = 665;
+                                if (currentSpeed <= 25) oneTurnMs = 1660;
+                                else if (currentSpeed <= 50) oneTurnMs = 665;
+                                else if (currentSpeed <= 80) oneTurnMs = 330;
+                                else oneTurnMs = 160;
+                                const turnDuration = Math.round(timeVal * oneTurnMs);
+                                bleQueue.push({ action: action, speed: currentSpeed, delay: currentBleDelay });
+                                currentBleDelay += turnDuration;
                                 bleQueue.push({ action: 'car_stop', speed: 0, dir: action, delay: currentBleDelay });
                                 currentBleDelay += 500;
                                 break;
                             }
-                            case 'motor_cw':
-                                // 1회전당 1400ms 기준 (실측 3바퀴 1080도 정적중)
-                                for (let i = 0; i < timeVal; i++) {
-                                    bleQueue.push({ action: 'motor_cw', speed: bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 1400;
-                                }
+                                                                                                                                                                        case 'motor_cw': {
+                                const currentSpeed = Math.abs(bleGlobalMotorSpeed) || 40;
+                                let oneTurnMs = 1400;
+                                if (currentSpeed <= 25) oneTurnMs = 3730;
+                                else if (currentSpeed <= 50) oneTurnMs = 1400;
+                                else if (currentSpeed <= 80) oneTurnMs = 600;
+                                else oneTurnMs = 300;
+                                const rotationDuration = Math.round(timeVal * oneTurnMs);
+                                bleQueue.push({ action: 'motor_cw', speed: currentSpeed, delay: currentBleDelay });
+                                currentBleDelay += rotationDuration;
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 600;
                                 break;
-                            case 'motor_ccw':
-                                // 1회전당 1400ms 기준 (시계방향과 동일 360도 정밀 회전 보정)
-                                for (let i = 0; i < timeVal; i++) {
-                                    bleQueue.push({ action: 'motor_ccw', speed: -bleGlobalMotorSpeed, delay: currentBleDelay });
-                                    currentBleDelay += 1400;
-                                }
+                            }
+                            case 'motor_ccw': {
+                                const currentSpeed = Math.abs(bleGlobalMotorSpeed) || 40;
+                                let oneTurnMs = 1400;
+                                if (currentSpeed <= 25) oneTurnMs = 3730;
+                                else if (currentSpeed <= 50) oneTurnMs = 1400;
+                                else if (currentSpeed <= 80) oneTurnMs = 600;
+                                else oneTurnMs = 300;
+                                const rotationDuration = Math.round(timeVal * oneTurnMs);
+                                bleQueue.push({ action: 'motor_ccw', speed: -currentSpeed, delay: currentBleDelay });
+                                currentBleDelay += rotationDuration;
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 600;
                                 break;
+                            }
                             case 'motor_stop':
                                 bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
                                 currentBleDelay += 800;
@@ -3990,6 +4117,25 @@ except:
                             case 'sound_play':
                                 currentBleDelay += 5000;
                                 break;
+                            case 'event_force_sensor': {
+                                const fEl = block.querySelector('.block-param') || block.querySelector('[data-val]');
+                                let fVal = 1;
+                                if (fEl) {
+                                    if (fEl.hasAttribute('data-val')) fVal = parseFloat(fEl.getAttribute('data-val'));
+                                    else {
+                                        const tVal = fEl.innerText.trim();
+                                        if (!isNaN(tVal) && tVal !== "") fVal = parseFloat(tVal);
+                                    }
+                                }
+                                bleQueue.push({ action: 'wait_force', targetForce: fVal, delay: currentBleDelay });
+                                break;
+                            }
+                            case 'event_tilt_sensor': {
+                                const tiltEl = block.querySelector('.block-param');
+                                const tiltVal = (tiltEl && tiltEl.getAttribute('data-val')) || 'left';
+                                bleQueue.push({ action: 'wait_tilt', targetTilt: tiltVal, delay: currentBleDelay });
+                                break;
+                            }
                             case 'event_color_sensor':
                                 bleQueue.push({ action: 'wait_color', targetColor: paramVal, delay: currentBleDelay });
                                 break;
@@ -4000,16 +4146,133 @@ except:
                                 currentBleDelay += (paramVal * 1000);
                                 break;
                             case 'control_repeat':
-                            case 'control_forever':
                                 break;
+                            case 'control_forever': {
+                                const innerStack = block.querySelector('.loop-inner-stack');
+                                const innerRawBlocks = innerStack ? Array.from(innerStack.querySelectorAll('.workspace-item')) : [];
+                                const innerUnrolled = typeof unrollStackBlocks === 'function' ? unrollStackBlocks(innerRawBlocks) : innerRawBlocks;
+                                
+                                const innerBleQueue = [];
+                                let innerBleDelay = 0;
+                                
+                                innerUnrolled.forEach(inBlock => {
+                                    const inAction = inBlock.getAttribute('data-action');
+                                    let inParamVal = 1, inTimeVal = 1;
+                                    
+                                    if (inAction === 'motor_cw' || inAction === 'motor_ccw' || inAction.startsWith('car_') && inAction !== 'car_speed_set') {
+                                        const timeEl = inBlock.querySelector('.block-param');
+                                        if (timeEl) {
+                                            if (timeEl.hasAttribute('data-val')) inTimeVal = parseFloat(timeEl.getAttribute('data-val'));
+                                            else {
+                                                const textVal = timeEl.innerText.trim();
+                                                if (!isNaN(textVal) && textVal !== "") inTimeVal = parseFloat(textVal);
+                                            }
+                                        }
+                                    } else {
+                                        const pEl = inBlock.querySelector('.block-param:not(.param-time)');
+                                        if (pEl) {
+                                            if (pEl.hasAttribute('data-val')) inParamVal = parseFloat(pEl.getAttribute('data-val'));
+                                            else {
+                                                const textVal = pEl.innerText.trim();
+                                                if (!isNaN(textVal) && textVal !== "") inParamVal = parseFloat(textVal);
+                                            }
+                                        }
+                                        const tEl = inBlock.querySelector('.param-time');
+                                        if (tEl) {
+                                            if (tEl.hasAttribute('data-val')) inTimeVal = parseFloat(tEl.getAttribute('data-val'));
+                                            else {
+                                                const textVal = tEl.innerText.trim();
+                                                if (!isNaN(textVal) && textVal !== "") inTimeVal = parseFloat(textVal);
+                                            }
+                                        }
+                                    }
+                                    if (inParamVal === -1) inParamVal = Math.floor(Math.random() * 3) + 1;
+                                    if (inTimeVal === -1) inTimeVal = Math.floor(Math.random() * 3) + 1;
+
+                                    switch (inAction) {
+                                                                                                                        case 'car_forward':
+                                        case 'car_backward': {
+                                            const currentSpeed = Math.abs(bleGlobalMotorSpeed) || 40;
+                                            let oneStepMs = 1280;
+                                            if (currentSpeed <= 25) oneStepMs = 3200;
+                                            else if (currentSpeed <= 50) oneStepMs = 1280;
+                                            else if (currentSpeed <= 80) oneStepMs = 640;
+                                            else oneStepMs = 305;
+                                            const moveDuration = Math.round(inTimeVal * oneStepMs);
+                                            innerBleQueue.push({ action: inAction, speed: currentSpeed, delay: innerBleDelay });
+                                            innerBleDelay += moveDuration;
+                                            innerBleQueue.push({ action: 'car_stop', speed: 0, dir: inAction, delay: innerBleDelay });
+                                            innerBleDelay += 500;
+                                            break;
+                                        }
+                                        case 'car_left':
+                                        case 'car_right': {
+                                            const currentSpeed = Math.abs(bleGlobalMotorSpeed) || 40;
+                                            let oneTurnMs = 665;
+                                            if (currentSpeed <= 25) oneTurnMs = 1660;
+                                            else if (currentSpeed <= 50) oneTurnMs = 665;
+                                            else if (currentSpeed <= 80) oneTurnMs = 330;
+                                            else oneTurnMs = 160;
+                                            const turnDuration = Math.round(inTimeVal * oneTurnMs);
+                                            innerBleQueue.push({ action: inAction, speed: currentSpeed, delay: innerBleDelay });
+                                            innerBleDelay += turnDuration;
+                                            innerBleQueue.push({ action: 'car_stop', speed: 0, dir: inAction, delay: innerBleDelay });
+                                            innerBleDelay += 500;
+                                            break;
+                                        }
+                                                                                                                                                                                                                                                case 'motor_cw': {
+                                            const currentSpeed = Math.abs(bleGlobalMotorSpeed) || 40;
+                                            let oneTurnMs = 1400;
+                                            if (currentSpeed <= 25) oneTurnMs = 3730;
+                                            else if (currentSpeed <= 50) oneTurnMs = 1400;
+                                            else if (currentSpeed <= 80) oneTurnMs = 600;
+                                            else oneTurnMs = 300;
+                                            const rotationDuration = Math.round(inTimeVal * oneTurnMs);
+                                            innerBleQueue.push({ action: 'motor_cw', speed: currentSpeed, delay: innerBleDelay });
+                                            innerBleDelay += rotationDuration;
+                                            innerBleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: innerBleDelay });
+                                            innerBleDelay += 600;
+                                            break;
+                                        }
+                                        case 'motor_ccw': {
+                                            const currentSpeed = Math.abs(bleGlobalMotorSpeed) || 40;
+                                            let oneTurnMs = 1400;
+                                            if (currentSpeed <= 25) oneTurnMs = 3730;
+                                            else if (currentSpeed <= 50) oneTurnMs = 1400;
+                                            else if (currentSpeed <= 80) oneTurnMs = 600;
+                                            else oneTurnMs = 300;
+                                            const rotationDuration = Math.round(inTimeVal * oneTurnMs);
+                                            innerBleQueue.push({ action: 'motor_ccw', speed: -currentSpeed, delay: innerBleDelay });
+                                            innerBleDelay += rotationDuration;
+                                            innerBleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: innerBleDelay });
+                                            innerBleDelay += 600;
+                                            break;
+                                        }
+                                        case 'flow_wait':
+                                            innerBleDelay += (inParamVal * 1000);
+                                            break;
+                                        case 'matrix_image':
+                                        case 'matrix_pixel':
+                                        case 'matrix_pixel_red':
+                                            const freshMatEl = inBlock.querySelector(':scope > .param-unified') || inBlock.querySelector(':scope > .block-param:not(.param-time)');
+                                            let matrixArrBLE = freshMatEl ? (freshMatEl.getAttribute('data-matrix') || JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0])) : JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0]);
+                                            let mBleTime = freshMatEl ? (parseFloat(freshMatEl.getAttribute('data-val')) || 2) : 2;
+                                            innerBleQueue.push({ action: 'matrix', colors: JSON.parse(matrixArrBLE), delay: innerBleDelay });
+                                            innerBleDelay += (mBleTime * 1000);
+                                            innerBleQueue.push({ action: 'matrix_clear', delay: innerBleDelay });
+                                            innerBleDelay += 300;
+                                            break;
+                                    }
+                                });
+                                bleQueue.push({ action: 'control_forever', innerQueue: innerBleQueue, delay: currentBleDelay });
+                                break;
+                            }
                             case 'matrix_image':
                             case 'matrix_pixel':
                             case 'matrix_pixel_red':
-                                let freshMatEl = block.querySelector('.param-unified') || block.querySelector('.block-param:not(.param-time)');
-                                let matrixArrBLE = freshMatEl ? (freshMatEl.getAttribute('data-matrix') || JSON.stringify([0, 6, 0, 0, 0, 0, 6, 0, 6])) : JSON.stringify([0, 6, 0, 0, 0, 0, 6, 0, 6]);
-
+                                const freshMatEl = block.querySelector(':scope > .param-unified') || block.querySelector(':scope > .block-param:not(.param-time)') || paramEl;
+                                let matrixArrBLE = freshMatEl ? (freshMatEl.getAttribute('data-matrix') || JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0])) : JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0]);
                                 if (unit === '5') {
-                                    // For Stage 5, light matrix stays on until overridden or cleared at the end
                                     bleQueue.push({ action: 'matrix', colors: JSON.parse(matrixArrBLE), delay: currentBleDelay });
                                 } else {
                                     let mBleTime = freshMatEl ? (parseFloat(freshMatEl.getAttribute('data-val')) || 2) : 2;
@@ -4030,62 +4293,107 @@ except:
                         }
                     });
 
-                    if (unit === '5') {
-                        // Stage 5 manages light duration via executeBleQueue internal timer to prevent collision
-                    }
-
                     if (currentBleDelay > maxGlobalDelay) {
                         maxGlobalDelay = currentBleDelay;
                     }
 
                     const executeBleQueue = async () => {
-                        let lastExecutionTime = 0;
-                        for (const cmd of bleQueue) {
-                            if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return; // ?�전 ?�행 루프 취소
+                        const executeSingleCmd = async (cmd) => {
+                            if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return;
                             try {
-                                const waitTime = cmd.delay - lastExecutionTime;
-
-                                if (waitTime > 0 && cmd.action !== 'wait_color' && cmd.action !== 'wait_distance') {
-                                    console.log(`?�️ [BLE_ENGINE] Executing cmd: ${cmd.action} (waitTime: ${waitTime}ms)`);
-                                    await new Promise(r => setTimeout(r, waitTime));
-                                    lastExecutionTime = cmd.delay;
-                                }
-
-                                if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return;
-
-                                
-                                if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
+                                                                if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
                                     try {
-                                        const hubLogMsg = `⚡ 레고 허브 신호 송출: ${cmd.action} (속도: ${cmd.speed || 0})`;
+                                        const hubLogMsg = `⚡ 레고 허브 모터: ${cmd.action} (속도: ${cmd.speed || 0})`;
                                         if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
                                         if (window.parent && window.parent.sendWebSocketAction) {
                                             window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }
                                     } catch(e) {}
-                                    let speedInt = Math.round(cmd.speed);
-                                    let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
-                                    for (let p = 0; p < 2; p++) {
-                                        const dev = window.parent.hubDevices ? window.parent.hubDevices[p] : undefined;
-                                        if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
-                                        await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(e => { });
-                                        await new Promise(r => setTimeout(r, 60));
-                                        break; // 전문가 패치: 파란색(단일 모터) 블록은 가장 먼저 인식된 모터 1개만 돌리고 루프 탈출
+
+                                    // ✅ 기존 매트릭스/자이로 코드와 동일한 부모창 탐색 패턴 적용
+                                    let hubWin = window;
+                                    for (let i = 0; i < 5; i++) {
+                                        if (hubWin.hubDevices && hubWin.writeToHub) break;
+                                        if (hubWin.parent && hubWin.parent !== hubWin) hubWin = hubWin.parent;
+                                        else break;
+                                    }
+                                    const attached = hubWin.hubDevices || {};
+                                    const sendFn = hubWin.writeToHub;
+
+                                    if (typeof sendFn !== 'function') {
+                                        console.error('[MOTOR ERROR] writeToHub 함수를 찾지 못했습니다. hubWin:', hubWin);
+                                    } else {
+                                        let speedInt = Math.round(cmd.speed);
+                                        let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
+
+                                        for (let p = 0; p < 2; p++) {
+                                            const dev = attached[p];
+                                            console.log(`[MOTOR DEBUG] port ${p} device type:`, dev); // 🔍 실제 device type 확인용
+                                            if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue; // 센서/라이트매트릭스 제외
+                                            try {
+                                                await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex]));
+                                            } catch (e) {
+                                                console.error(`[MOTOR ERROR] port ${p} 전송 실패:`, e);
+                                            }
+                                            await new Promise(r => setTimeout(r, 60));
+                                            break; // 단일 모터는 1개 포트만 회전
+                                        }
                                     }
                                 } else if (cmd.action === 'motor_speed_set') {
-                                    // BLE 하드웨어 전용
+                                    try {
+                                        const hubLogMsg = `⚡ 모터 속도 설정: ${cmd.speedLevel || 2}단 (${cmd.speed || 40}%)`;
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
+                                        if (window.parent && window.parent.sendWebSocketAction) {
+                                            window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
+                                        }
+                                    } catch(e) {}
                                 } else if (cmd.action.startsWith('car_') && cmd.action !== 'car_speed_set' && cmd.action !== 'car_stop') {
-                                    for (let p = 0; p < 2; p++) {
-                                        const dev = window.parent.hubDevices ? window.parent.hubDevices[p] : undefined;
-                                        if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
+                                    let hubWin = window;
+                                    for (let i = 0; i < 5; i++) {
+                                        if (hubWin.hubDevices && hubWin.writeToHub) break;
+                                        if (hubWin.parent && hubWin.parent !== hubWin) hubWin = hubWin.parent;
+                                        else break;
+                                    }
+                                    const attached = hubWin.hubDevices || {};
+                                    const sendFn = hubWin.writeToHub;
 
-                                        let p0_s = (cmd.action === 'car_forward' || cmd.action === 'car_right') ? -1 : 1;
-                                        let p1_s = (cmd.action === 'car_forward' || cmd.action === 'car_left') ? 1 : -1;
-
-                                        let spd = p === 0 ? (cmd.speed * p0_s) : (cmd.speed * p1_s);
-                                        let speedInt = Math.round(spd);
-                                        let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
-                                        await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex])).catch(e => { });
-                                        await new Promise(r => setTimeout(r, 60));
+                                    if (typeof sendFn === 'function') {
+                                        for (let p = 0; p < 2; p++) {
+                                            const dev = attached[p];
+                                            if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
+                                            let p0_s = (cmd.action === 'car_forward' || cmd.action === 'car_right') ? -1 : 1;
+                                            let p1_s = (cmd.action === 'car_forward' || cmd.action === 'car_left') ? 1 : -1;
+                                            let spd = p === 0 ? (cmd.speed * p0_s) : (cmd.speed * p1_s);
+                                            let speedInt = Math.round(spd);
+                                            let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
+                                            try {
+                                                await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex]));
+                                            } catch (e) {
+                                                console.error(`[CAR ERROR] port ${p} 전송 실패:`, e);
+                                            }
+                                            await new Promise(r => setTimeout(r, 60));
+                                        }
+                                    } else {
+                                        console.error('[CAR ERROR] writeToHub 함수를 찾지 못했습니다.');
+                                    }
+                                } else if (cmd.action === 'car_stop') {
+                                    let hubWin = window;
+                                    for (let i = 0; i < 5; i++) {
+                                        if (hubWin.hubDevices && hubWin.writeToHub) break;
+                                        if (hubWin.parent && hubWin.parent !== hubWin) hubWin = hubWin.parent;
+                                        else break;
+                                    }
+                                    const attached = hubWin.hubDevices || {};
+                                    const sendFn = hubWin.writeToHub;
+                                    if (typeof sendFn === 'function') {
+                                        for (let p = 0; p < 2; p++) {
+                                            const dev = attached[p];
+                                            if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
+                                            try {
+                                                await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, 0]));
+                                            } catch (e) {}
+                                            await new Promise(r => setTimeout(r, 60));
+                                        }
                                     }
                                 } else if (cmd.action === 'car_stop') {
                                     for (let p = 0; p < 2; p++) {
@@ -4095,135 +4403,171 @@ except:
                                         await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, 0])).catch(e => { });
                                         await new Promise(r => setTimeout(r, 60));
                                     }
-                                } else if (cmd.action === 'MONSTER_ALERT') {
-                                    try { window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
-                                                                                                                                                                                                                                                                } else if (cmd.action === 'matrix' || cmd.action === 'matrix_pixel_red' || cmd.action === 'MONSTER_ALERT') {
-                                    try { triggerSystemLog('HUB', '⚡ 레고 허브 & 포트나이트 라이트 켜기 (ACTION_LIGHT / [ 키)'); } catch(e) {}
+                                } else if (cmd.action === 'matrix' || cmd.action === 'matrix_pixel_red' || cmd.action === 'MONSTER_ALERT') {
+                                    try { triggerSystemLog('HUB', '⚡ 레고 허브 라이트 켜기'); } catch(e) {}
                                     try { if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
-                                    if (isMissionActive && (unit === '3' || unit === '8') && window.bleEngineRunCounter === currentRunId) {
-                                        if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
-                                    }
+                                    window.isLightSequenceRunning = true;
+                                    const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
 
-                                    // 💡 100% Guaranteed Physical Light Matrix ON dispatch to Ports 0..5
-                                    // 💡 Guaranteed Physical Light Matrix ON dispatch (Targeted Port A & Connected Ports)
-                                     // 💡 LWP 3.0.00 Exact Spec Light Matrix (64) & Hub RGB LED (23) Dispatch
-                                     // 💡 LWP 3.0.00 Exact Spec Light Matrix (64) & Hub RGB LED (23) Dispatch
-                                     // 💡 Guaranteed External LED (0x0008) + 3x3 Matrix (0x0040) + Hub LED (0x0017) Dispatch
-                                     // 💡 Clean Targeted Port 0 (3x3 Light Matrix) Mode 2 (Red) Dispatch
-                                     // 💡 Direct 0x81 Output Port 0 (3x3 Light Matrix) Mode 2 (Red) Dispatch
-                                     // 💡 Direct 0x81 Output Port 0 (3x3 Light Matrix) Mode 2 (Red 0x9A = Color 9 + Brightness 10)
-                                     // 💡 Direct 0x81 Output Port 0 (3x3 Light Matrix) Mode 2 (Red 0xA9 = Brightness 10 + Color 9 Red)
-                                     window.isLightSequenceRunning = true;
-                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
+                                    const rawColors = (Array.isArray(cmd.colors) && cmd.colors.length === 9)
+                                        ? cmd.colors
+                                        : [9, 9, 9, 9, 9, 9, 9, 9, 9];
 
-                                     // Port 0 (Port A) Mode 2: 9-byte Nibble-Packed Brightness & Color (Brightness 10 << 4 | Red 9 = 0xA9 = 169)
-                                     const matrixMode2 = new Uint8Array([
-                                         16, 0x00, 0x81, 0x00, 0x11, 0x51, 0x02,
-                                         0xA9, 0xA9, 0xA9, 0xA9, 0xA9, 0xA9, 0xA9, 0xA9, 0xA9
-                                     ]);
-                                     console.log('[LWP3 Direct Send] 3x3 Matrix Port 0 Mode 2 (Red 0xA9):', matrixMode2);
-                                     await sendFn(matrixMode2).catch(() => {});
+                                    const pixelPayload = rawColors.map(c => {
+                                        const colorVal = parseInt(c, 10) || 0;
+                                        if (colorVal === 0) return 0x00;
+                                        const safeColor = Math.min(10, Math.max(1, colorVal));
+                                        return (10 << 4) | (safeColor & 0x0F);
+                                    });
 
-                                     // ⏱️ 정확히 5초 후 자동 끄기 패킷 송출
-                                     setTimeout(async () => {
-                                         const offMatrix = new Uint8Array([
-                                             16, 0x00, 0x81, 0x00, 0x11, 0x51, 0x02,
-                                             0, 0, 0, 0, 0, 0, 0, 0, 0
-                                         ]);
-                                         await sendFn(offMatrix).catch(() => {});
-                                         window.isLightSequenceRunning = false;
-                                         try { triggerSystemLog('HUB', '💡 조명 5초 후 자동 OFF 완료 (재실행 가능)'); } catch(e) {}
-                                     }, 5000);
-                                } else if (cmd.action === 'matrix_clear') {
-                                    if (window.isLightSequenceRunning) return; // 🔒 조명 구동 중 중복/잔여 matrix_clear 충돌 방지
                                     let hubWin = window;
                                     for (let i = 0; i < 5; i++) {
                                         if (hubWin.hubDevices) break;
-                                        if (hubWin.parent && hubWin.parent !== hubWin) {
-                                            hubWin = hubWin.parent;
-                                        } else {
-                                            break;
-                                        }
+                                        if (hubWin.parent && hubWin.parent !== hubWin) hubWin = hubWin.parent;
+                                        else break;
                                     }
-                                    let targetPorts = [];
-                                    for (let p = 0; p < 6; p++) {
-                                        if (hubWin.hubDevices && hubWin.hubDevices[p] === 64) {
-                                            targetPorts.push(p);
-                                        }
+                                    const attached = hubWin.hubDevices || {};
+                                    const targetPorts = [];
+                                    for (let p in attached) {
+                                        const devType = Number(attached[p]);
+                                        if (devType === 64) targetPorts.push(Number(p));
                                     }
                                     if (targetPorts.length === 0) {
-                                        targetPorts = [0, 1];
+                                        targetPorts.push(0, 1);
                                     }
-                                    try {
-                                        const hubLogMsg = `⚡ 레고 허브 신호 송출: Red Light Matrix ON (Port A, B)`;
-                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
-                                        if (window.parent && window.parent.sendWebSocketAction) {
-                                            window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
-                                        }
-                                    } catch(e) {}
-                                    let writeWin = window;
-                                    for (let i = 0; i < 5; i++) {
-                                        if (writeWin.writeToHub) break;
-                                        if (writeWin.parent && writeWin.parent !== writeWin) {
-                                            writeWin = writeWin.parent;
-                                        } else {
-                                            break;
-                                        }
-                                    }
-                                    for (const port of targetPorts) {
-                                        let payload = [16, 0, 0x81, port, 0x10, 0x51, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-                                        await writeWin.writeToHub(new Uint8Array(payload)).catch(e => { });
-                                        if (targetPorts.length > 1) {
-                                            await new Promise(r => setTimeout(r, 80));
-                                        }
-                                    }
-                                    await new Promise(r => setTimeout(r, 40));
-                                } else if (cmd.action === 'wait_color') {
-                                    console.log(`?�️ [BLE_ENGINE] Waiting for Color Sensor to detect color ID: ${cmd.targetColor}`);
-                                    let matched = false;
-                                    while (!matched && window.bleEngineRunCounter === currentRunId) {
-                                        if (window.parent.sensorData) {
-                                            for (let p = 0; p < 6; p++) {
-                                                if (window.parent.hubDevices && window.parent.hubDevices[p] === 61) {
-                                                    if (window.parent.sensorData[p] === cmd.targetColor) {
-                                                        matched = true;
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        if (!matched) await new Promise(r => setTimeout(r, 100)); // ?�링 주기 100ms
-                                    }
-                                    if (!matched) return; // ?��? 취소
-                                    console.log(`??[BLE_ENGINE] Target Color ${cmd.targetColor} Detected! Continuing sequence...`);
 
-                                    // ?�?�라???�기??- ?�벤??조건 만족 ?��????�레?��? ?�용?�게 ??
-                                    lastExecutionTime = cmd.delay;
-                                } else if (cmd.action === 'wait_distance') {
-                                    console.log("📡 [BLE_ENGINE] Waiting for Distance Sensor to detect obstacles");
-                                    let matched = false;
-                                    while (!matched && window.bleEngineRunCounter === currentRunId) {
-                                        if (window.parent.sensorData) {
-                                            for (let p = 0; p < 6; p++) {
-                                                if (window.parent.hubDevices && window.parent.hubDevices[p] === 62) {
-                                                    let distVal = window.parent.sensorData[p];
-                                                    if (distVal !== undefined && distVal < 10) {
-                                                        matched = true;
-                                                        break;
-                                                    }
+                                    for (const p of targetPorts) {
+                                        const modeSetupPacket = new Uint8Array([
+                                            10, 0x00, 0x41, p, 0x02,
+                                            0x01, 0x00, 0x00, 0x00,
+                                            0x01
+                                        ]);
+                                        await sendFn(modeSetupPacket).catch(e => {});
+                                        await new Promise(r => setTimeout(r, 40));
+
+                                        const matrixPacket = new Uint8Array([
+                                            16, 0x00, 0x81, p, 0x11, 0x51, 0x02,
+                                            ...pixelPayload
+                                        ]);
+                                        await sendFn(matrixPacket).catch(e => {});
+                                        await new Promise(r => setTimeout(r, 40));
+                                    }
+                                    window.isLightSequenceRunning = false;
+                                } else if (cmd.action === 'matrix_clear') {
+                                    const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
+                                    let hubWin = window;
+                                    for (let i = 0; i < 5; i++) {
+                                        if (hubWin.hubDevices) break;
+                                        if (hubWin.parent && hubWin.parent !== hubWin) hubWin = hubWin.parent;
+                                        else break;
+                                    }
+                                    const attached = hubWin.hubDevices || {};
+                                    const targetPorts = [];
+                                    for (let p in attached) {
+                                        if (Number(attached[p]) === 64) targetPorts.push(Number(p));
+                                    }
+                                    if (targetPorts.length === 0) targetPorts.push(0, 1);
+
+                                    const clearPayload = new Array(9).fill(0x00);
+                                    for (const p of targetPorts) {
+                                        const modeSetupPacket = new Uint8Array([
+                                            10, 0x00, 0x41, p, 0x02,
+                                            0x01, 0x00, 0x00, 0x00,
+                                            0x01
+                                        ]);
+                                        await sendFn(modeSetupPacket).catch(e => {});
+                                        await new Promise(r => setTimeout(r, 40));
+
+                                        const matrixPacket = new Uint8Array([
+                                            16, 0x00, 0x81, p, 0x11, 0x51, 0x02,
+                                            ...clearPayload
+                                        ]);
+                                        await sendFn(matrixPacket).catch(e => {});
+                                        await new Promise(r => setTimeout(r, 40));
+                                    }
+                                } else if (cmd.action === 'wait_force') {
+                                    const targetForce = cmd.targetForce !== undefined ? cmd.targetForce : 1;
+                                    while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
+                                        const hubWin = window.parent && window.parent.hubDevices ? window.parent : window;
+                                        const devs = hubWin.hubDevices || {};
+                                        let foundForceVal = null;
+                                        for (let p = 0; p < 6; p++) {
+                                            if (devs[p] === 63) {
+                                                if (hubWin.forceSensorValues && hubWin.forceSensorValues[p] !== undefined) {
+                                                    foundForceVal = hubWin.forceSensorValues[p];
                                                 }
+                                                break;
                                             }
                                         }
-                                        if (!matched) await new Promise(r => setTimeout(r, 100));
+                                        if (foundForceVal !== null) {
+                                            if (targetForce === 1 && foundForceVal > 0) break;
+                                            if (targetForce === 0 && foundForceVal === 0) break;
+                                        }
+                                        await new Promise(r => setTimeout(r, 60));
                                     }
-                                    if (!matched) return;
-                                    console.log("🚨 [BLE_ENGINE] Obstacle Detected! Continuing sequence...");
-                                    lastExecutionTime = cmd.delay;
+                                } else if (cmd.action === 'wait_distance') {
+                                    const thresholdDist = cmd.targetDistance || 20;
+                                    while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
+                                        const hubWin = window.parent && window.parent.hubDevices ? window.parent : window;
+                                        const dist = hubWin.latestDistanceValue !== undefined ? hubWin.latestDistanceValue : 100;
+                                        if (dist <= thresholdDist) break;
+                                        await new Promise(r => setTimeout(r, 60));
+                                    }
+                                } else if (cmd.action === 'wait_color') {
+                                    while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
+                                        const hubWin = window.parent && window.parent.hubDevices ? window.parent : window;
+                                        const col = hubWin.latestColorValue;
+                                        if (col === cmd.targetColor) break;
+                                        await new Promise(r => setTimeout(r, 60));
+                                    }
+                                } else if (cmd.action === 'wait_tilt') {
+                                    while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
+                                        const hubWin = window.parent && window.parent.hubDevices ? window.parent : window;
+                                        if (hubWin.latestTiltState === cmd.targetTilt) break;
+                                        await new Promise(r => setTimeout(r, 60));
+                                    }
+                                } else if (cmd.action === 'send_message') {
+                                    if (typeof broadcastMessage === 'function') broadcastMessage('msg_broadcast');
                                 }
                             } catch (e) {
-                                console.error("⚠️ [BLE_ENGINE] Command Error:", e);
+                                console.error('BLE Single Command Error:', e);
                             }
+                        };
+
+                        let lastExecutionTime = 0;
+                        for (let i = 0; i < bleQueue.length; i++) {
+                            if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) break;
+                            const cmd = bleQueue[i];
+
+                            if (cmd.action === 'control_forever') {
+                                console.log('🔁 [BLE_ENGINE] 무한 반복 루프 시작 (control_forever)...');
+                                while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
+                                    let innerLastTime = 0;
+                                    for (const inCmd of (cmd.innerQueue || [])) {
+                                        if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) break;
+                                        const inWait = inCmd.delay - innerLastTime;
+                                        if (inWait > 0 && inCmd.action !== 'wait_color' && inCmd.action !== 'wait_distance' && inCmd.action !== 'wait_tilt' && inCmd.action !== 'wait_force') {
+                                            await new Promise(r => setTimeout(r, inWait));
+                                            innerLastTime = inCmd.delay;
+                                        }
+                                        if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) break;
+                                        await executeSingleCmd(inCmd);
+                                    }
+                                    await new Promise(r => setTimeout(r, 60));
+                                }
+                                console.log('⏹ [BLE_ENGINE] 무한 반복 루프 정상 종료');
+                                return;
+                            }
+
+                            const waitTime = cmd.delay - lastExecutionTime;
+                            if (waitTime > 0 && cmd.action !== 'wait_color' && cmd.action !== 'wait_distance' && cmd.action !== 'wait_tilt' && cmd.action !== 'wait_force') {
+                                await new Promise(r => setTimeout(r, waitTime));
+                                lastExecutionTime = cmd.delay;
+                            }
+                            if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) return;
+                            await executeSingleCmd(cmd);
                         }
+
                         if (isMissionActive && blockCount > 1 && anySequenceFound && window.bleEngineRunCounter === currentRunId) {
                             if (unit !== '7' && unit !== '2') {
                                 console.log('🎉 [BLE_ENGINE] Sequence 100% finished! Popping up Mission Modal.');
@@ -4235,57 +4579,25 @@ except:
 
                     if (isEventLoop) {
                         (async () => {
-                            // ?�벤???�들?? ??�?무조�??��? 차�?�??�행?�고, ?�난 ???�시 감시??
-                            while (window.bleEngineRunCounter === currentRunId) {
+                            while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
                                 await executeBleQueue();
-                        if (triggerAction === 'gui' && unit === '7') {
-                            try {
-                                if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
-                                    window.parent.sendWebSocketAction({ action: "SWING_CONTROL", dir: "FORWARD", val: 2 });
-                                }
-                            } catch(e) {}
-                        }
-                                await new Promise(r => setTimeout(r, 500)); // 중복 ??�� 방�? 쿨다??
+                                await new Promise(r => setTimeout(r, 500));
                             }
                         })();
                     } else {
                         executeBleQueue();
-                        if (triggerAction === 'gui' && unit === '7') {
-                            try {
-                                if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
-                                    window.parent.sendWebSocketAction({ action: "SWING_CONTROL", dir: "FORWARD", val: 2 });
-                                }
-                            } catch(e) {}
-                        }
                     }
                 });
 
-                // 게임 보상 로직?� 블록 ?�행 ?�로 ?��?
                 setTimeout(() => {
                     if (blockCount > 1 && anySequenceFound && window.bleEngineRunCounter === currentRunId) {
-                        // 오직 미션 달성도 100% 완료 상태일 때만 보상 연동 및 팝업 작동
                         const isMissionComplete = document.getElementById('m-progress') && document.getElementById('m-progress').dataset.completed === 'true';
                         if (isMissionComplete) {
                             triggerSuccessConfetti();
                             try { window.parent.sendWebSocketAction({ action: "CAT_FEED_REWARD" }); } catch (e) { }
-                            
                             let finalPin = '0000';
                             if (typeof currentMission !== 'undefined' && currentMission.pinCode) {
                                 finalPin = currentMission.pinCode;
-                            }
-                            let presentActions = [];
-                            validStacks.forEach(stack => {
-                                const stackBlocks = Array.from(stack.querySelectorAll('.workspace-item'));
-                                stackBlocks.forEach(b => {
-                                    const act = b.getAttribute('data-action');
-                                    if (act) presentActions.push(act);
-                                });
-                            });
-                            const lastMotorAction = presentActions.slice().reverse().find(a => a === 'motor_cw' || a === 'motor_ccw');
-                            if (lastMotorAction === 'motor_cw') {
-                                finalPin = '7241';
-                            } else if (lastMotorAction === 'motor_ccw') {
-                                finalPin = '9988';
                             }
                             showPinCodeModal(finalPin);
                         }
@@ -4627,6 +4939,16 @@ except:
         const urlParams = new URLSearchParams(window.location.search);
         const unit = urlParams.get('unit');
 
+        // 🚗 탈것 관련 단원(1단원: 보트, 2단원: 잠수함, 4단원: 자동차)에서만 탑승 버튼 노출
+        const mountBtn = document.getElementById('vehicle-mount-btn');
+        if (mountBtn) {
+            if (unit === '1' || unit === '2' || unit === '4') {
+                mountBtn.style.display = 'inline-flex';
+            } else {
+                mountBtn.style.display = 'none';
+            }
+        }
+
         const themeDescriptions = {
             '1': '5초 대기 후 앞으로 3번 이동하고, 좌회전 1번 후 뒤로 2번 이동하세요.',
             '2': '5초 대기 후 시계방향 3번, 반시계방향 3번 작동하세요.',
@@ -4823,8 +5145,9 @@ except:
                 });
 
                 function getExecutionSequence(blocksList) {
+                    const unrolledBlocks = typeof unrollStackBlocks === 'function' ? unrollStackBlocks(blocksList) : blocksList;
                     let seq = [];
-                    blocksList.forEach(block => {
+                    unrolledBlocks.forEach(block => {
                         const action = block.getAttribute('data-action') || '';
                         
                         let paramVal = 1;
@@ -4883,17 +5206,17 @@ except:
                         let isCompleted = false;
                         const task_id = task.id;
                         
-                        if (unit === '1') {
+                                                if (unit === '1') {
                             if (task_id === 'start') {
                                 isCompleted = presentActions.includes('start');
                             } else if (task_id === 'flow_wait_5' || task_id === 'flow_wait') {
                                 isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && (cmd.val === 5 || cmd.val === '5' || parseInt(cmd.val) === 5));
                             } else if (task_id === 'car_forward_3') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'car_forward' && cmd.val === 3);
+                                isCompleted = executionChain.some(cmd => cmd.action === 'car_forward' && (cmd.val === 3 || cmd.val === '3' || parseInt(cmd.val) === 3));
                             } else if (task_id === 'car_left_1') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'car_left' && cmd.val === 1);
+                                isCompleted = executionChain.some(cmd => cmd.action === 'car_left' && (cmd.val === 1 || cmd.val === '1' || parseInt(cmd.val) === 1));
                             } else if (task_id === 'car_backward_2') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'car_backward' && cmd.val === 2);
+                                isCompleted = executionChain.some(cmd => cmd.action === 'car_backward' && (cmd.val === 2 || cmd.val === '2' || parseInt(cmd.val) === 2));
                             }
                         } else if (unit === '2') {
                             if (task_id === 'start') {
@@ -4901,9 +5224,9 @@ except:
                             } else if (task_id === 'flow_wait_5' || task_id === 'flow_wait') {
                                 isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && (cmd.val === 5 || cmd.val === '5' || parseInt(cmd.val) === 5));
                             } else if (task_id === 'motor_cw_3' || task_id === 'motor_cw') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && (cmd.val === 3 || cmd.val === '3'));
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && (cmd.val === 3 || cmd.val === '3' || parseInt(cmd.val) === 3));
                             } else if (task_id === 'motor_ccw_3' || task_id === 'motor_ccw') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && (cmd.val === 3 || cmd.val === '3'));
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && (cmd.val === 3 || cmd.val === '3' || parseInt(cmd.val) === 3));
                             }
                         } else if (unit === '3') {
                             if (task_id === 'start') {
@@ -4911,21 +5234,21 @@ except:
                             } else if (task_id === 'flow_wait_5' || task_id === 'flow_wait') {
                                 isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && (cmd.val === 5 || cmd.val === '5' || parseInt(cmd.val) === 5));
                             } else if (task_id === 'motor_cw_3' || task_id === 'motor_cw') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && (cmd.val === 3 || cmd.val === '3'));
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_cw' && (cmd.val === 3 || cmd.val === '3' || parseInt(cmd.val) === 3));
                             } else if (task_id === 'motor_ccw_2' || task_id === 'motor_ccw') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && (cmd.val === 2 || cmd.val === '2'));
+                                isCompleted = executionChain.some(cmd => cmd.action === 'motor_ccw' && (cmd.val === 2 || cmd.val === '2' || parseInt(cmd.val) === 2));
                             }
                         } else if (unit === '4') {
                             if (task_id === 'start') {
                                 isCompleted = presentActions.includes('start');
-                            } else if (task_id === 'flow_wait') {
+                            } else if (task_id === 'flow_wait_5' || task_id === 'flow_wait') {
                                 isCompleted = executionChain.some(cmd => cmd.action === 'flow_wait' && (cmd.val === 5 || cmd.val === '5' || parseInt(cmd.val) === 5));
                             } else if (task_id === 'car_forward_4') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'car_forward' && cmd.val === 4);
+                                isCompleted = executionChain.some(cmd => cmd.action === 'car_forward' && (cmd.val === 4 || cmd.val === '4' || parseInt(cmd.val) === 4));
                             } else if (task_id === 'car_right_1') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'car_right' && cmd.val === 1);
+                                isCompleted = executionChain.some(cmd => cmd.action === 'car_right' && (cmd.val === 1 || cmd.val === '1' || parseInt(cmd.val) === 1));
                             } else if (task_id === 'car_forward_2') {
-                                isCompleted = executionChain.some(cmd => cmd.action === 'car_forward' && cmd.val === 2);
+                                isCompleted = executionChain.some(cmd => cmd.action === 'car_forward' && (cmd.val === 2 || cmd.val === '2' || parseInt(cmd.val) === 2));
                             }
                         } else {
                             if (Array.isArray(task_id)) {
@@ -5127,7 +5450,13 @@ except:
             .reward-slot.active .slot-label {
                 color: #ea580c;
             }
-        </style>
+        
+        @keyframes tiltShakeAnim {
+            0% { transform: perspective(600px) rotateZ(-20deg) translateX(-8px); }
+            100% { transform: perspective(600px) rotateZ(20deg) translateX(8px); }
+        }
+
+    </style>
 
         <div
             style="position: relative; z-index: 3002; background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(243, 244, 246, 0.98) 100%); padding: 50px 30px; border-radius: 28px; width: 460px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.7); animation: modalFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; overflow: hidden;">
@@ -5760,6 +6089,8 @@ except:
         window.addEventListener('bricksync-language-changed', () => {
             updateStatusBarText();
             if (typeof updateProgress === 'function') updateProgress();
+            const isBoarded = window.parent ? !!window.parent.isVehicleBoarded : !!window.isVehicleBoarded;
+            if (typeof updateVehicleMountUI === 'function') updateVehicleMountUI(isBoarded);
         });
     </script>
     <script src="settings.js">
