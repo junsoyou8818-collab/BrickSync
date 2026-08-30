@@ -35,4 +35,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['C:/Users/PC/Documents/GitHub/BrickSync/BrickSync-main/bricksync_launcher/bricksync.ico'],
 )
