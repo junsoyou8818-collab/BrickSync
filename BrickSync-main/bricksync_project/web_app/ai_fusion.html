@@ -10,7 +10,7 @@
         (function() {
             let standaloneWs = null;
             function connectStandaloneWs() {
-                if (window.parent && window.parent !== window && typeof window.parent.sendWebSocketAction === 'function') {
+                if (window.parent && window.parent !== window && typeof window.sendWebSocketAction === 'function') {
                     return; // 부모 창(app.html)이 통신을 전담 관리하므로 직통 연결 대기
                 }
                 let wsUrl = "ws://127.0.0.1:8000/ws";
@@ -28,8 +28,8 @@
             connectStandaloneWs();
 
             window.sendWebSocketAction = function(actionObj) {
-                if (window.parent && window.parent !== window && typeof window.parent.sendWebSocketAction === 'function') {
-                    window.parent.sendWebSocketAction(actionObj);
+                if (window.parent && window.parent !== window && typeof window.sendWebSocketAction === 'function') {
+                    window.sendWebSocketAction(actionObj);
                 } else if (standaloneWs && standaloneWs.readyState === WebSocket.OPEN) {
                     standaloneWs.send(typeof actionObj === 'string' ? actionObj : JSON.stringify(actionObj));
                 }
@@ -3997,7 +3997,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 const targetPorts = [];
                 for (let p in attached) {
                     const devType = Number(attached[p]);
-                    if (devType === 64 || devType === 23 || devType === 61) {
+                    if (devType === 64) {
                         targetPorts.push(Number(p));
                     }
                 }
@@ -4065,7 +4065,7 @@ async function writeToHub(data) {
             readyState: 1, // WebSocket.OPEN
             send: function (msg) {
                 try {
-                    window.parent.sendWebSocketAction(JSON.parse(msg));
+                    window.sendWebSocketAction(JSON.parse(msg));
                 } catch (e) { }
             }
         };
@@ -4592,12 +4592,12 @@ ${indent}  utime.sleep_ms(50)
                 if (String(unit) === '3' || String(unit) === '8') {
                     // 3단원: 몬스터 경보 및 보상 신호 송출 (MONSTER_ALERT는 매트릭스 블록 실행 시 지연 송출되므로 여기서는 제거)
                     try {
-                        window.parent.sendWebSocketAction({ action: "ITEM_GRANT_REWARD" });
+                        window.sendWebSocketAction({ action: "ITEM_GRANT_REWARD" });
                         console.log("포트나이트 연동 신호(ITEM_GRANT_REWARD) 전송 완료 [AI 3단원 성공]");
                     } catch (e) { }
                 } else {
                     // 기본 (고양이 먹이 주기)
-                    try { window.parent.sendWebSocketAction({ action: "CAT_FEED_REWARD" }); console.log("포트나이트 연동 신호(CAT_FEED_REWARD) 전송 완료!"); } catch (e) { }
+                    try { window.sendWebSocketAction({ action: "CAT_FEED_REWARD" }); console.log("포트나이트 연동 신호(CAT_FEED_REWARD) 전송 완료!"); } catch (e) { }
                 }
             }
 
@@ -4620,8 +4620,10 @@ ${indent}  utime.sleep_ms(50)
                     setTimeout(() => {
                         if (window.bleEngineRunCounter !== currentRunId) return;
                         try {
-                            if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
+                                                        if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
                                 window.parent.sendWebSocketAction(item);
+                            } else if (typeof window.sendWebSocketAction === 'function') {
+                                window.sendWebSocketAction(item);
                             } else if (typeof sendWebSocketAction === 'function') {
                                 sendWebSocketAction(item);
                             }
@@ -4640,8 +4642,8 @@ ${indent}  utime.sleep_ms(50)
                     if (window.bleEngineRunCounter !== currentRunId) return;
                     try {
                         console.log("🪙 [Golden Coin] 모든 미션 동작 100% 완료! Golden Coin 발동!");
-                        if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
-                            window.parent.sendWebSocketAction({ action: "CAT_FEED_REWARD" });
+                        if (window.parent && typeof window.sendWebSocketAction === 'function') {
+                            window.sendWebSocketAction({ action: "CAT_FEED_REWARD" });
                         } else if (typeof sendWebSocketAction === 'function') {
                             sendWebSocketAction({ action: "CAT_FEED_REWARD" });
                         }
@@ -5087,8 +5089,8 @@ ${indent}  utime.sleep_ms(50)
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 모터: ${cmd.action} (속도: ${cmd.speed || 0})`;
                                         if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
-                                        if (window.parent && window.parent.sendWebSocketAction) {
-                                            window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
+                                        if (window.parent && window.sendWebSocketAction) {
+                                            window.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }
                                     } catch(e) {}
 
@@ -5125,8 +5127,8 @@ ${indent}  utime.sleep_ms(50)
                                     try {
                                         const hubLogMsg = `⚡ 모터 속도 설정: ${cmd.speedLevel || 2}단 (${cmd.speed || 40}%)`;
                                         if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
-                                        if (window.parent && window.parent.sendWebSocketAction) {
-                                            window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
+                                        if (window.parent && window.sendWebSocketAction) {
+                                            window.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }
                                     } catch(e) {}
                                 } else if (cmd.action.startsWith('car_') && cmd.action !== 'car_speed_set' && cmd.action !== 'car_stop') {
@@ -5186,7 +5188,7 @@ ${indent}  utime.sleep_ms(50)
                                         await new Promise(r => setTimeout(r, 60));
                                     }
                                 } else if (cmd.action === 'MONSTER_ALERT') {
-                                    try { window.parent.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
+                                    try { window.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
                                 } else if (cmd.action === 'matrix' || cmd.action === 'matrix_pixel_red' || cmd.action === 'MONSTER_ALERT') {
                                     try { triggerSystemLog('HUB', '⚡ 레고 허브 & 포트나이트 라이트 켜기 (ACTION_LIGHT / [ 키)'); } catch(e) {}
                                     try { if (typeof window.sendWebSocketAction === "function") window.sendWebSocketAction({ action: 'ACTION_LIGHT' }); } catch (e) { }
@@ -5276,8 +5278,8 @@ ${indent}  utime.sleep_ms(50)
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 신호 송출: Red Light Matrix ON (Port A, B)`;
                                         if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
-                                        if (window.parent && window.parent.sendWebSocketAction) {
-                                            window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
+                                        if (window.parent && window.sendWebSocketAction) {
+                                            window.sendWebSocketAction({ action: 'HUB_LOG', msg: hubLogMsg });
                                         }
                                     } catch(e) {}
 
@@ -5458,7 +5460,7 @@ ${indent}  utime.sleep_ms(50)
                             if (unit !== '7' && unit !== '2') {
                                 console.log('🎉 [BLE_ENGINE] Sequence 100% finished! Popping up Mission Modal.');
                                 if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
-                                try { window.parent.sendWebSocketAction({ action: "CAT_FEED_REWARD" }); } catch (e) { }
+                                try { window.sendWebSocketAction({ action: "CAT_FEED_REWARD" }); } catch (e) { }
                             }
                         }
                     };
@@ -5480,7 +5482,7 @@ ${indent}  utime.sleep_ms(50)
                     if (isMissionActive && blockCount > 1 && anySequenceFound && window.bleEngineRunCounter === currentRunId) {
                         if (unit !== '7' && unit !== '2') {
                             if (typeof window.onUsbMissionComplete === 'function') { window.onUsbMissionComplete(); } else { triggerSuccessConfetti(); }
-                            try { window.parent.sendWebSocketAction({ action: "CAT_FEED_REWARD" }); } catch (e) { }
+                            try { window.sendWebSocketAction({ action: "CAT_FEED_REWARD" }); } catch (e) { }
                         }
                     }
                 }, maxGlobalDelay + 150);
@@ -7394,11 +7396,7 @@ ${indent}  utime.sleep_ms(50)
                                 if (typeof addSystemLog === 'function') triggerSystemLog('AI', `👾 AI 이미지 인식 성공: ${labels[detectedGesture]} (신뢰도: ${Math.round(result.confidences[result.label]*100)}%)`);
                                 runBlocks('event_ai_gesture', detectedGesture);
 
-                                if (!isTrainingActive && ((unit === '3' || unit === '8')) && detectedGesture === 0) {
-                                    try {
-                                        if (typeof window.sendWebSocketAction === "function") window.sendWebSocketAction({ action: "MONSTER_ALERT" });
-                                    } catch (e) { }
-                                }
+                                
                             }
                         } else {
                             candidateAiGesture = detectedGesture;
