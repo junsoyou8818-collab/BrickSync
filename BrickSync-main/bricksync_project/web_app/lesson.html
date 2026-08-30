@@ -3924,24 +3924,28 @@ print("BrickSync Sandbox Run")
                             cumulativeDelayMs += 100;
                             break;
                         }
-                        case 'motor_cw':
+                        case 'motor_cw': {
                             pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1000)) \n${indent}sm() \n`;
+                            const oneTurnDurationMs = 1400;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_RIGHT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 1000;
+                                cumulativeDelayMs += oneTurnDurationMs;
                             }
                             localActionsQueue.push({ action: 'STOP_MWHEEL_RIGHT', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800;
                             break;
-                        case 'motor_ccw':
+                        }
+                        case 'motor_ccw': {
                             pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1000)) \n${indent}sm() \n`;
+                            const oneTurnDurationMs = 1400;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_LEFT', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 1000;
+                                cumulativeDelayMs += oneTurnDurationMs;
                             }
                             localActionsQueue.push({ action: 'STOP_MWHEEL_LEFT', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800;
                             break;
+                        }
                         case 'motor_stop':
                             pyCode += `${indent}sm() \n`;
                             localActionsQueue.push({ action: 'STOP_MWHEEL_LEFT', delay: cumulativeDelayMs });
