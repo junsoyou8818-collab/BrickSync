@@ -4,7 +4,7 @@
 a = Analysis(
     ['launcher.py'],
     pathex=[],
-    binaries=[('dist\\server.exe', '.')],
+    binaries=[('server.exe', '.')],
     datas=[],
     hiddenimports=[],
     hookspath=[],
@@ -29,11 +29,10 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['bricksync.ico'],
 )
