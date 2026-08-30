@@ -4399,9 +4399,9 @@ ${indent}sm()
 `;
                                 for (let i = 0; i < timeVal; i++) {
                                     localActionsQueue.push({ action: 'motor_cw', delay: cumulativeDelayMs });
-                                    cumulativeDelayMs += 1000;
+                                    cumulativeDelayMs += 1400;
                                 }
-                                cumulativeDelayMs += 200;
+                                cumulativeDelayMs += 600;
                             }
                             break;
                         }
@@ -4418,9 +4418,9 @@ ${indent}sm()
 `;
                                 for (let i = 0; i < timeVal; i++) {
                                     localActionsQueue.push({ action: 'motor_ccw', delay: cumulativeDelayMs });
-                                    cumulativeDelayMs += 1000;
+                                    cumulativeDelayMs += 1400;
                                 }
-                                cumulativeDelayMs += 200;
+                                cumulativeDelayMs += 600;
                             }
                             break;
                         }
@@ -4615,7 +4615,7 @@ ${indent}  utime.sleep_ms(50)
 
             // 전역 시퀀스 해제 타이머를 무조건 실행하여 허브/시뮬레이션 상관없이 100% 락 해제 보장
             if (window.blockExecutionTimer) clearTimeout(window.blockExecutionTimer);
-            const safeTotalSeqTime = Math.max(cumulativeDelayMs, 1000) + 1000;
+            const safeTotalSeqTime = Math.max(cumulativeDelayMs, 1000) + 2000;
             window.blockExecutionTimer = setTimeout(() => {
                 window.isBlockExecutionRunning = false;
                 window.isLightSequenceRunning = false;
