@@ -7099,45 +7099,53 @@ ${indent}  utime.sleep_ms(50)
 
                         function parseVoiceCommand(text) {
             speechCooldown = false;
-            window.isBlockExecutionRunning = false; window.isLightSequenceRunning = false; window.isLightSequenceRunning = false;
+            window.isBlockExecutionRunning = false; window.isLightSequenceRunning = false;
             try {
-                triggerSystemLog('AI', `🗣️ 음성 명령어 수신: "${text}"`);
+                triggerSystemLog('AI', `🗣️ 음성/텍스트 명령어 수신: "${text}"`);
             } catch(e) {}
 
-            const lowerText = String(text || '').toLowerCase().trim();
-            console.log("🎤 음성 명령 인식: ", text);
+            const rawText = String(text || '');
+            const lowerText = rawText.toLowerCase().replace(/[-_]/g, ' ').replace(/\s+/g, ' ').trim();
+            console.log("🎤 음성/텍스트 명령 파싱: ", rawText);
 
-            // 1. Direction extraction (Forward/0 vs Backward/1)
+            // 1. 방향 추출 (Forward/0 vs Backward/1)
             let directionVal = 0; // default Forward
             let directionLabel = "앞으로";
-
-            if (
-                lowerText.includes("뒤") ||
-                lowerText.includes("후진") ||
-                lowerText.includes("반시계") ||
-                lowerText.includes("backward") ||
-                lowerText.includes("back") ||
-                lowerText.includes("counterclockwise") ||
-                lowerText.includes("reverse")
-            ) {
+            const backwardPatterns = [
+                '뒤', '후진', '반시계', '거꾸로', '역방향',
+                'backward', 'backwards', 'back', 'counter clockwise', 'counterclockwise', 'reverse', 'ccw', 'left'
+            ];
+            if (backwardPatterns.some(p => lowerText.includes(p))) {
                 directionVal = 1;
                 directionLabel = "뒤로";
             }
 
-            // 2. Turns extraction
+            // 2. 회전 수(Turns) 추출: 한글 고유어 수사, 영어 수사, 아라비아 숫자 완벽 지원
             let turns = 1;
-            if (lowerText.includes("twice") || lowerText.includes("2 times") || lowerText.includes("2바퀴") || lowerText.includes("2 바퀴") || lowerText.includes("두바퀴") || lowerText.includes("두 바퀴") || lowerText.includes("두 번") || lowerText.includes("두번") || lowerText.includes("2회") || lowerText.includes("2 회")) {
-                turns = 2;
-            } else if (lowerText.includes("thrice") || lowerText.includes("3 times") || lowerText.includes("3바퀴") || lowerText.includes("3 바퀴") || lowerText.includes("세바퀴") || lowerText.includes("세 바퀴") || lowerText.includes("세 번") || lowerText.includes("세번")) {
+            if (/\b(triple|thrice)\b/.test(lowerText) || lowerText.includes('세 배') || lowerText.includes('3배')) {
                 turns = 3;
-            } else if (lowerText.includes("once") || lowerText.includes("1 time") || lowerText.includes("1바퀴") || lowerText.includes("1 바퀴") || lowerText.includes("한바퀴") || lowerText.includes("한 바퀴") || lowerText.includes("한 번") || lowerText.includes("한번")) {
+            } else if (/\b(twice|double)\b/.test(lowerText) || lowerText.includes('두 배') || lowerText.includes('2배')) {
+                turns = 2;
+            } else if (/\b(once|single)\b/.test(lowerText) || lowerText.includes('한 배') || lowerText.includes('1배')) {
+                turns = 1;
+            } else if (/다섯\s*(바퀴|번|회)?|5\s*(바퀴|번|회)|오\s*(회|바퀴)/.test(lowerText) || /\b(five|5th)\b/.test(lowerText) || lowerText.includes('5 times') || lowerText.includes('5 turns')) {
+                turns = 5;
+            } else if (/네\s*(바퀴|번|회)?|넷\s*(바퀴|번|회)?|4\s*(바퀴|번|회)|사\s*(회|바퀴)/.test(lowerText) || /\b(four|4th)\b/.test(lowerText) || lowerText.includes('4 times') || lowerText.includes('4 turns')) {
+                turns = 4;
+            } else if (/세\s*(바퀴|번|회)?|셋\s*(바퀴|번|회)?|3\s*(바퀴|번|회)|삼\s*(회|바퀴)/.test(lowerText) || /\b(three|3rd)\b/.test(lowerText) || lowerText.includes('3 times') || lowerText.includes('3 turns')) {
+                turns = 3;
+            } else if (/두\s*(바퀴|번|회)?|둘\s*(바퀴|번|회)?|2\s*(바퀴|번|회)|이\s*(회|바퀴)/.test(lowerText) || /\b(two|2nd)\b/.test(lowerText) || lowerText.includes('2 times') || lowerText.includes('2 turns')) {
+                turns = 2;
+            } else if (/한\s*(바퀴|번|회)?|하나\s*(바퀴|번|회)?|1\s*(바퀴|번|회)|일\s*(회|바퀴)/.test(lowerText) || /\b(one|1st)\b/.test(lowerText) || lowerText.includes('1 time') || lowerText.includes('1 turn')) {
                 turns = 1;
             } else {
                 const numberMatch = lowerText.match(/\d+/);
                 if (numberMatch) {
-                    turns = parseInt(numberMatch[0]);
+                    turns = parseInt(numberMatch[0], 10);
                 }
             }
+            if (isNaN(turns) || turns < 1) turns = 1;
+            if (turns > 10) turns = 10;
 
             // 3. 🎮 Fortnite WebSocket Action: 캔버스 블록 엔진(runBlocks)의 5초 대기 타이머와 완벽 동기화되어 순차 발동됨 (조기 중복 송출 방어)
 
