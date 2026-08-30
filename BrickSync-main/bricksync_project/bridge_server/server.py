@@ -16,13 +16,24 @@ def get_active_window_title():
     except Exception:
         return ""
 
+import sys
+if sys.stdout and hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+if sys.stderr and hasattr(sys.stderr, 'reconfigure'):
+    try:
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
+
 try:
     import pydirectinput
+    pydirectinput.FAILSAFE = False
 except ImportError:
     print("pydirectinput is not installed. Run: pip install pydirectinput")
     pass
-
-import sys
 
 # PyInstaller exe 여부에 따라 web_app 경로 결정
 if getattr(sys, 'frozen', False):
@@ -278,31 +289,11 @@ async def handle_websocket(request):
                         
                     elif action == "motor_cw":
                         print("▶ 오두막 지붕 열기 / 모터 시계방향 수신 (H키 정밀 탭 전송)")
-                        def press_motor_cw():
-                            with pydirectinput_lock:
-                                try:
-                                    pydirectinput.keyUp('h')
-                                    time.sleep(0.05)
-                                    pydirectinput.keyDown('h')
-                                    time.sleep(0.15)
-                                    pydirectinput.keyUp('h')
-                                except Exception as e:
-                                    print(f"⚠ H키 전송 오류: {e}")
-                        threading.Thread(target=press_motor_cw, daemon=True).start()
+                        threading.Thread(target=lambda: safe_press('h'), daemon=True).start()
                         
                     elif action == "motor_ccw":
                         print("▶ 오두막 지붕 닫기 / 모터 반시계방향 수신 (J키 정밀 탭 전송)")
-                        def press_motor_ccw():
-                            with pydirectinput_lock:
-                                try:
-                                    pydirectinput.keyUp('j')
-                                    time.sleep(0.05)
-                                    pydirectinput.keyDown('j')
-                                    time.sleep(0.15)
-                                    pydirectinput.keyUp('j')
-                                except Exception as e:
-                                    print(f"⚠ J키 전송 오류: {e}")
-                        threading.Thread(target=press_motor_ccw, daemon=True).start()
+                        threading.Thread(target=lambda: safe_press('j'), daemon=True).start()
 
                     elif action in ["motor_stop", "motor_stop_cw", "motor_stop_ccw", "motor_stop_generic"]:
                         print("▶ 쓰레기 괴물 동작 정지 수신 (K키 전송 제외 처리됨)")
