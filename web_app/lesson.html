@@ -4,6 +4,38 @@
 <head>
     <!-- 최상위 윈도우 자동 래핑 리다이렉트 스크립트 -->
     <script>
+        // ==========================================
+        // 🌐 유니버설 웹소켓 브릿지 (Standalone & Parent Dual Support)
+        // ==========================================
+        (function() {
+            let standaloneWs = null;
+            function connectStandaloneWs() {
+                if (window.parent && window.parent !== window && typeof window.parent.sendWebSocketAction === 'function') {
+                    return; // 부모 창(app.html)이 통신을 전담 관리하므로 직통 연결 대기
+                }
+                let wsUrl = "ws://127.0.0.1:8000/ws";
+                try {
+                    standaloneWs = new WebSocket(wsUrl);
+                    standaloneWs.onopen = () => {
+                        console.log("🟢 [Direct WebSocket] 로컬 포트나이트 브릿지 서버(8000) 직통 연결 성공!");
+                    };
+                    standaloneWs.onclose = () => {
+                        setTimeout(connectStandaloneWs, 3000);
+                    };
+                    standaloneWs.onerror = () => {};
+                } catch(e) {}
+            }
+            connectStandaloneWs();
+
+            window.sendWebSocketAction = function(actionObj) {
+                if (window.parent && window.parent !== window && typeof window.parent.sendWebSocketAction === 'function') {
+                    window.parent.sendWebSocketAction(actionObj);
+                } else if (standaloneWs && standaloneWs.readyState === WebSocket.OPEN) {
+                    standaloneWs.send(typeof actionObj === 'string' ? actionObj : JSON.stringify(actionObj));
+                }
+            };
+        })();
+
 function triggerSystemLog(category, msg) {
     try {
         if (typeof addSystemLog === 'function') addSystemLog(category, msg);
