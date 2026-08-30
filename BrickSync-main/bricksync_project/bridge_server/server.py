@@ -261,8 +261,8 @@ async def handle_websocket(request):
                     elif action == "SWING_CONTROL":
                         direction = data.get("dir")
                         turns = data.get("val", 1)
-                        # 방향 오작동 해결을 위해 키 매핑 반전 (FORWARD -> h, BACKWARD -> j)
-                        key = 'h' if direction == "FORWARD" else 'j'
+                        # 그네 정방향 회전 (FORWARD -> j키, BACKWARD -> h키)
+                        key = 'j' if direction == "FORWARD" else 'h'
                         print(f"▶ [SWING_CONTROL] {direction} {turns}바퀴 수신 ({key}키 {turns}회 반복 연사)")
                         def press_swing_key(k, count):
                             # 포트나이트 창 포커스 전환 안정화 대기 마진 (첫 키 씹힘 방지용 1초 대기)

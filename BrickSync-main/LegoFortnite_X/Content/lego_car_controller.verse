@@ -17,11 +17,11 @@ lego_car_controller := class(creative_device):
     @editable TriggerRight : input_trigger_device = input_trigger_device{}
 
     @editable MoveDistance : float = 512.0
-    @editable MoveTime : float = 0.9
+    @editable MoveTime : float = 0.45
     @editable ForwardMultiplier : float = 1.0
     
     @editable RotateAngle : float = 45.0
-    @editable RotateTime : float = 0.5
+    @editable RotateTime : float = 0.3
 
     @editable ForwardAxisX : float = 0.0
     @editable ForwardAxisY : float = 0.0

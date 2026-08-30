@@ -481,29 +481,18 @@ window.addSystemLog = addSystemLog;
         connectWebSocket();
 
         // iframe 내에서 웹소켓에 직접 접근할 수 있도록 노출
-                window.sendWebSocketAction = function (actionObj) {
+        window.sendWebSocketAction = function (actionObj) {
             if (ws && ws.readyState === WebSocket.OPEN) {
-                // 🛑 하차 상태일 때는 모든 주행(STEER_) 가상 키 전송을 100% 원천 차단
-                if (actionObj && typeof actionObj.action === 'string' && actionObj.action.startsWith('STEER_') && !window.isVehicleBoarded) {
-                    console.log(`🛑 [차단됨] ${actionObj.action} 전송 취소 (현재 하차 상태)`);
-                    return;
-                }
                 ws.send(JSON.stringify(actionObj));
             }
         };
 
         function sendCommand(actionName) {
             if (ws && ws.readyState === WebSocket.OPEN) {
-                // 🛑 하차 상태일 때는 모든 주행(STEER_) 가상 키 전송을 100% 원천 차단
-                if (typeof actionName === 'string' && actionName.startsWith('STEER_') && !window.isVehicleBoarded) {
-                    console.log(`🛑 [차단됨] ${actionName} 전송 취소 (현재 하차 상태)`);
-                    return;
-                }
                 ws.send(JSON.stringify({ action: actionName }));
             }
         }
 
-        // UI 상태 업데이트를 Iframe 내부 요소로 전달
         function updateUI(status) {
             const iframe = document.getElementById("main-frame").contentWindow;
             if (!iframe) return;

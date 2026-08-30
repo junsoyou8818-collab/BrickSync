@@ -559,11 +559,11 @@ function triggerSystemLog(category, msg) {
         }
 
         .bg-purple {
-            background: #c084fc;
+            background: #a855f7;
         }
 
         .bg-purple::after {
-            background: #c084fc;
+            background: #a855f7;
         }
 
         .bg-dark-purple {
@@ -2537,12 +2537,28 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             modalOverlay.style.display = 'flex';
         }
 
-        // 새로 추가된 모터 회전(다이얼) 설정 모달
-        function showMotorRotationModal(paramEl) {
+        // 새로 추가된 모터 회전 / 시간 대기 / 주행 (다이얼) 설정 모달
+        function showMotorRotationModal(paramEl, blockAction) {
             modalBox.innerHTML = '';
-            modalBox.style.cssText = 'background: #0284c7; display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #0369a1; width: 150px; user-select: none;';
+            
+            let mainColor = '#0284c7';
+            let borderColor = '#0369a1';
+            
+            if (blockAction === 'flow_wait') {
+                mainColor = '#eab308';
+                borderColor = '#ca8a04';
+            } else if (blockAction && blockAction.startsWith('car_')) {
+                mainColor = '#f472b6';
+                borderColor = '#ec4899';
+            } else if (blockAction === 'sound_play' || blockAction === 'sound_note' || blockAction === 'sound_animal') {
+                mainColor = '#a855f7';
+                borderColor = '#9333ea';
+            }
+
+            modalBox.style.cssText = `background: ${mainColor}; display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid ${borderColor}; width: 150px; user-select: none;`;
 
             let currentVal = parseFloat(paramEl.textContent || '1');
+            if (isNaN(currentVal)) currentVal = 1;
 
             const topButtons = document.createElement('div');
             topButtons.style.cssText = 'display: flex; gap: 20px; margin-bottom: 24px;';
@@ -2577,7 +2593,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
 
             // White center text circle
             const centerText = document.createElement('div');
-            centerText.style.cssText = 'position: absolute; width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #0284c7; font-weight: bold; font-size: 16px; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
+            centerText.style.cssText = `position: absolute; width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: ${mainColor}; font-weight: bold; font-size: 16px; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.2);`;
 
             // Connection line and Knob
             const dialRotator = document.createElement('div');
@@ -2852,8 +2868,8 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                         showSoundLevelModal(param);
                     } else if (action === 'motor_speed_set' || action === 'car_speed_set') {
                         showMotorSpeedModal(param);
-                    } else if (action === 'motor_cw' || action === 'motor_ccw') {
-                        showMotorRotationModal(param);
+                    } else if (action === 'motor_cw' || action === 'motor_ccw' || action === 'car_forward' || action === 'car_backward' || action === 'car_left' || action === 'car_right' || action === 'flow_wait') {
+                        showMotorRotationModal(param, action);
                     } else if (action === 'motor_speed' || action === 'move_speed') {
                         showOptionsModal(optionSets.speeds, param);
                     } else if (action === 'sound_animal' || action === 'sound_note' || action === 'sound_play') {
@@ -3878,15 +3894,15 @@ print("BrickSync Sandbox Run")
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_forward' ? 'UP' : 'DOWN';
-                            let singleStepMs = 1000;
+                            let singleStepMs = 500;
                             for (let step = 0; step < timeVal; step++) {
                                 localActionsQueue.push({ action: 'STOP_LEFT', delay: cumulativeDelayMs });
                                 localActionsQueue.push({ action: 'STOP_RIGHT', delay: cumulativeDelayMs });
                                 localActionsQueue.push({ action: 'STEER_' + fws, delay: cumulativeDelayMs });
                                 localActionsQueue.push({ action: 'STOP_' + fws, delay: cumulativeDelayMs + singleStepMs });
-                                cumulativeDelayMs += singleStepMs + 300;
+                                cumulativeDelayMs += singleStepMs + 100;
                             }
-                            cumulativeDelayMs += 200;
+                            cumulativeDelayMs += 100;
                             break;
                         }
                         case 'car_left':
@@ -3897,15 +3913,15 @@ print("BrickSync Sandbox Run")
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_left' ? 'LEFT' : 'RIGHT';
-                            let singleStepMs = 1000;
+                            let singleStepMs = 500;
                             for (let step = 0; step < timeVal; step++) {
                                 localActionsQueue.push({ action: 'STOP_UP', delay: cumulativeDelayMs });
                                 localActionsQueue.push({ action: 'STOP_DOWN', delay: cumulativeDelayMs });
                                 localActionsQueue.push({ action: 'STEER_' + fws, delay: cumulativeDelayMs });
                                 localActionsQueue.push({ action: 'STOP_' + fws, delay: cumulativeDelayMs + singleStepMs });
-                                cumulativeDelayMs += singleStepMs + 300;
+                                cumulativeDelayMs += singleStepMs + 100;
                             }
-                            cumulativeDelayMs += 200;
+                            cumulativeDelayMs += 100;
                             break;
                         }
                         case 'motor_cw':
@@ -3977,6 +3993,28 @@ print("BrickSync Sandbox Run")
                 });
             }
 
+            buildPyCode(rootBlocks, "");
+
+            if (typeof window.bleEngineRunCounter === 'undefined') window.bleEngineRunCounter = 0;
+            const currentRunId = ++window.bleEngineRunCounter;
+
+            // 🎮 포트나이트 연동 액션(localActionsQueue) 타이밍 송출
+            if (localActionsQueue.length > 0) {
+                localActionsQueue.forEach(item => {
+                    setTimeout(() => {
+                        if (window.bleEngineRunCounter !== currentRunId) return;
+                        try {
+                            if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
+                                window.parent.sendWebSocketAction(item);
+                            } else if (typeof sendWebSocketAction === 'function') {
+                                sendWebSocketAction(item);
+                            }
+                            if (typeof addSystemLog === 'function') addSystemLog('FORTNITE', '🎮 포트나이트 액션 연동 송출: ' + item.action);
+                        } catch (e) { }
+                    }, item.delay);
+                });
+            }
+
             let isBle = false;
             let hubDetectWin = window;
             for (let i = 0; i < 5; i++) {
@@ -3989,8 +4027,6 @@ print("BrickSync Sandbox Run")
             }
 
             if (isBle || window.isBluetoothMode || (window.parent && (window.parent.connectionType === 'BLE' || window.parent.txCharacteristic))) {
-                if (typeof window.bleEngineRunCounter === 'undefined') window.bleEngineRunCounter = 0;
-                const currentRunId = ++window.bleEngineRunCounter;
                 let maxGlobalDelay = 0;
                 let anySequenceFound = false;
 
@@ -4285,15 +4321,11 @@ print("BrickSync Sandbox Run")
                             case 'matrix_pixel_red':
                                 const freshMatEl = block.querySelector(':scope > .param-unified') || block.querySelector(':scope > .block-param:not(.param-time)') || paramEl;
                                 let matrixArrBLE = freshMatEl ? (freshMatEl.getAttribute('data-matrix') || JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0])) : JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0]);
-                                if (unit === '5') {
-                                    bleQueue.push({ action: 'matrix', colors: JSON.parse(matrixArrBLE), delay: currentBleDelay });
-                                } else {
-                                    let mBleTime = freshMatEl ? (parseFloat(freshMatEl.getAttribute('data-val')) || 2) : 2;
-                                    bleQueue.push({ action: 'matrix', colors: JSON.parse(matrixArrBLE), delay: currentBleDelay });
-                                    currentBleDelay += (mBleTime * 1000);
-                                    bleQueue.push({ action: 'matrix_clear', delay: currentBleDelay });
-                                    currentBleDelay += 300;
-                                }
+                                let mBleTime = (String(unit) === '5' || String(unit) === '8') ? 5 : (freshMatEl ? (parseFloat(freshMatEl.getAttribute('data-val')) || 2) : 2);
+                                bleQueue.push({ action: 'matrix', colors: JSON.parse(matrixArrBLE), delay: currentBleDelay, duration: mBleTime });
+                                currentBleDelay += (mBleTime * 1000);
+                                bleQueue.push({ action: 'matrix_clear', delay: currentBleDelay });
+                                currentBleDelay += 300;
                                 break;
                             case 'matrix_clear':
                                 bleQueue.push({ action: 'matrix_clear', delay: currentBleDelay });
@@ -4465,7 +4497,17 @@ print("BrickSync Sandbox Run")
                                         await sendFn(matrixPacket).catch(e => {});
                                         await new Promise(r => setTimeout(r, 40));
                                     }
-                                    window.isLightSequenceRunning = false;
+                                    setTimeout(async () => {
+                                        for (const p of targetPorts) {
+                                            const offMatrix = new Uint8Array([
+                                                16, 0x00, 0x81, p, 0x11, 0x51, 0x02,
+                                                0, 0, 0, 0, 0, 0, 0, 0, 0
+                                            ]);
+                                            await sendFn(offMatrix).catch(() => {});
+                                            await new Promise(r => setTimeout(r, 40));
+                                        }
+                                        window.isLightSequenceRunning = false;
+                                    }, (cmd.duration ? cmd.duration * 1000 : 5000));
                                 } else if (cmd.action === 'matrix_clear') {
                                     const sendFn = (window.parent && window.parent.writeToHub) ? window.parent.writeToHub : (window.writeToHub || (async () => { }));
                                     let hubWin = window;
@@ -5479,10 +5521,10 @@ print("BrickSync Sandbox Run")
 
             <!-- 미션 완료 도장 그래픽 -->
             <div style="position: relative; height: 150px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center;">
-                <div style="width: 140px; height: 140px; border: 5px double #ef4444; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #ef4444; font-family: 'Noto Sans KR', sans-serif; font-weight: 900; transform: rotate(-12deg); box-shadow: 0 6px 15px rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); animation: stampImpact 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;">
-                    <div style="font-size: 14px; letter-spacing: 2px; opacity: 0.9; margin-bottom: -4px;">COIN MISSION</div>
-                    <div style="font-size: 32px; font-weight: 950; letter-spacing: 1px; border-top: 2.5px solid #ef4444; border-bottom: 2.5px solid #ef4444; padding: 2px 12px; margin: 5px 0;" data-i18n="lbl_stamp_complete">완 료</div>
-                    <div style="font-size: 12px; opacity: 0.8; font-weight: bold; margin-top: -1px;">★ SUCCESS ★</div>
+                <div style="width: 146px; height: 146px; border: 5px double #ef4444; border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #ef4444; font-family: 'Noto Sans KR', sans-serif; font-weight: 900; transform: rotate(-12deg); box-shadow: 0 6px 15px rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); animation: stampImpact 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;">
+                    <div style="font-size: 13px; letter-spacing: 1.5px; opacity: 0.9; margin-bottom: -2px; white-space: nowrap;">COIN MISSION</div>
+                    <div style="font-size: 21px; font-weight: 950; letter-spacing: 0.5px; border-top: 2.5px solid #ef4444; border-bottom: 2.5px solid #ef4444; padding: 2px 10px; margin: 4px 0; white-space: nowrap; display: inline-block;" data-i18n="lbl_stamp_complete">미션 완료</div>
+                    <div style="font-size: 11px; opacity: 0.8; font-weight: bold; margin-top: -1px; white-space: nowrap;">★ SUCCESS ★</div>
                 </div>
             </div>
 
