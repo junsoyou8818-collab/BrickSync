@@ -4141,8 +4141,9 @@ async function writeToHub(data) {
                         if (action === 'event_ai_gesture' && triggerAction === 'event_ai_gesture') {
                             const normUnit = typeof getNormUnit === 'function' ? getNormUnit(unit) : String(unit);
                             if (normUnit === '6') {
-                                // 6단원: 배경(3)이 아닌 가위/바위/보(0, 1, 2) 제스처는 100% 즉시 실행 보장
+                                // 6단원: 배경(3)이 아닌 주먹/보/가위(0, 1, 2) 제스처는 100% 즉시 실행 보장
                                 if (triggerVal === 3) return false;
+                                return true;
                             } else {
                                 const paramEl = firstBlock.querySelector('.block-param');
                                 let blockVal = 1;
@@ -6685,7 +6686,7 @@ ${indent}  utime.sleep_ms(50)
         let webcamElement = null;
         let net;
         let aiLoopRunning = false;
-        let aiConfidenceThreshold = 0.60; // 신뢰도 85% 이상만 캡처
+        let aiConfidenceThreshold = 0.45; // 신뢰도 85% 이상만 캡처
 
         let lastTriggeredAiGesture = -1; // 댐 스위치 상태락다운 변수
         let candidateAiGesture = -1; // 현재 프레임의 연속 후보
@@ -7373,6 +7374,7 @@ ${indent}  utime.sleep_ms(50)
                         consecutiveAiFrames = 0;
                         if (!window.isBlockExecutionRunning) {
                             lastTriggeredAiGesture = -1;
+                            candidateAiGesture = -1;
                         }
                     }
                 }
