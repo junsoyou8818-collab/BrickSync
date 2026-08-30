@@ -358,7 +358,7 @@
 
                 // 미션 시작 버튼의 href에 파라미터 전달
                 const isAiUnit = String(unit) >= '6';
-                document.getElementById('m-start-btn').href = isAiUnit ? `ai_fusion.html?unit=${unit}` : `lesson.html?unit=${unit}`;
+                document.getElementById('m-start-btn').href = isAiUnit ? `ai_fusion.html?unit=${unit}&v=${Date.now()}` : `lesson.html?unit=${unit}&v=${Date.now()}`;
             }
 
             // Static UI elements translations
