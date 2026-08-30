@@ -26,5 +26,5 @@ jobs:
         working-directory: BrickSync-main/bricksync_project/web_app
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: "6512cc54d8d751cc55098483f415cb72"
+          CLOUDFLARE_ACCOUNT_ID: "5398ab212f6eec94f174c02004ecec9f"
         run: wrangler deploy --log-level debug
