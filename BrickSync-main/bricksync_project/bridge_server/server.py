@@ -421,6 +421,7 @@ def free_port(port=8000):
 
 if __name__ == "__main__":
     free_port(8000)
-    threading.Thread(target=open_browser, daemon=True).start()
+    # Browser is opened by launcher
+    pass
     app = init_app()
-    web.run_app(app, host="0.0.0.0", port=8000)
+    web.run_app(app, host="127.0.0.1", port=8000)
