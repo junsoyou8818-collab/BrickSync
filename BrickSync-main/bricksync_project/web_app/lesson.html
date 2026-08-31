@@ -3926,13 +3926,9 @@ print("BrickSync Sandbox Run")
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_forward' ? 'UP' : 'DOWN';
-                            let singleStepMs = 500;
                             for (let step = 0; step < timeVal; step++) {
-                                localActionsQueue.push({ action: 'STOP_LEFT', delay: cumulativeDelayMs });
-                                localActionsQueue.push({ action: 'STOP_RIGHT', delay: cumulativeDelayMs });
-                                localActionsQueue.push({ action: 'STEER_' + fws, delay: cumulativeDelayMs });
-                                localActionsQueue.push({ action: 'STOP_' + fws, delay: cumulativeDelayMs + singleStepMs });
-                                cumulativeDelayMs += singleStepMs + 100;
+                                localActionsQueue.push({ action: 'STEER_' + fws + '_TAP', delay: cumulativeDelayMs });
+                                cumulativeDelayMs += 750;
                             }
                             cumulativeDelayMs += 100;
                             break;
@@ -3945,13 +3941,9 @@ print("BrickSync Sandbox Run")
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_left' ? 'LEFT' : 'RIGHT';
-                            let singleStepMs = 500;
                             for (let step = 0; step < timeVal; step++) {
-                                localActionsQueue.push({ action: 'STOP_UP', delay: cumulativeDelayMs });
-                                localActionsQueue.push({ action: 'STOP_DOWN', delay: cumulativeDelayMs });
-                                localActionsQueue.push({ action: 'STEER_' + fws, delay: cumulativeDelayMs });
-                                localActionsQueue.push({ action: 'STOP_' + fws, delay: cumulativeDelayMs + singleStepMs });
-                                cumulativeDelayMs += singleStepMs + 100;
+                                localActionsQueue.push({ action: 'STEER_' + fws + '_TAP', delay: cumulativeDelayMs });
+                                cumulativeDelayMs += 600;
                             }
                             cumulativeDelayMs += 100;
                             break;

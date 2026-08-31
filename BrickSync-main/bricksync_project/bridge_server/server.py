@@ -172,7 +172,7 @@ async def handle_websocket(request):
                     data = json.loads(msg.data)
                     action = data.get("action")
                     
-                    if action and action in ["STEER_UP", "STEER_DOWN", "STEER_LEFT", "STEER_RIGHT", "MWHEEL_LEFT", "MWHEEL_RIGHT", "SWING_CONTROL", "motor_cw", "motor_ccw", "CAT_FEED_REWARD", "MONSTER_ALERT", "ACTION_LIGHT", "HUB_LOG"]:
+                    if action and action in ["STEER_UP", "STEER_DOWN", "STEER_LEFT", "STEER_RIGHT", "STEER_UP_TAP", "STEER_DOWN_TAP", "STEER_LEFT_TAP", "STEER_RIGHT_TAP", "MWHEEL_LEFT", "MWHEEL_RIGHT", "SWING_CONTROL", "motor_cw", "motor_ccw", "CAT_FEED_REWARD", "MONSTER_ALERT", "ACTION_LIGHT", "HUB_LOG"]:
                         focus_fortnite()
                     
                     if action == "STEER_UP":
@@ -180,21 +180,33 @@ async def handle_websocket(request):
                             steering_state["UP"] = True
                             active_threads["UP"] = True
                             threading.Thread(target=click_loop_worker, args=("UP", 'y'), daemon=True).start()
+                    elif action == "STEER_UP_TAP":
+                        print("▶ [STEP TAP] UP (y키 1회 단독 전송)")
+                        threading.Thread(target=lambda: safe_press('y'), daemon=True).start()
                     elif action == "STEER_DOWN":
                         if not steering_state["DOWN"] and not active_threads["DOWN"]:
                             steering_state["DOWN"] = True
                             active_threads["DOWN"] = True
                             threading.Thread(target=click_loop_worker, args=("DOWN", 'l'), daemon=True).start()
+                    elif action == "STEER_DOWN_TAP":
+                        print("▶ [STEP TAP] DOWN (l키 1회 단독 전송)")
+                        threading.Thread(target=lambda: safe_press('l'), daemon=True).start()
                     elif action == "STEER_LEFT":
                         if not steering_state["LEFT"] and not active_threads["LEFT"]:
                             steering_state["LEFT"] = True
                             active_threads["LEFT"] = True
                             threading.Thread(target=click_loop_worker, args=("LEFT", 'u'), daemon=True).start()
+                    elif action == "STEER_LEFT_TAP":
+                        print("▶ [STEP TAP] LEFT (u키 1회 단독 전송)")
+                        threading.Thread(target=lambda: safe_press('u'), daemon=True).start()
                     elif action == "STEER_RIGHT":
                         if not steering_state["RIGHT"] and not active_threads["RIGHT"]:
                             steering_state["RIGHT"] = True
                             active_threads["RIGHT"] = True
                             threading.Thread(target=click_loop_worker, args=("RIGHT", 'o'), daemon=True).start()
+                    elif action == "STEER_RIGHT_TAP":
+                        print("▶ [STEP TAP] RIGHT (o키 1회 단독 전송)")
+                        threading.Thread(target=lambda: safe_press('o'), daemon=True).start()
                     
                     elif action == "STOP_UP":
                         steering_state["UP"] = False
