@@ -3928,7 +3928,7 @@ print("BrickSync Sandbox Run")
                             let fws = action === 'car_forward' ? 'UP' : 'DOWN';
                             for (let step = 0; step < timeVal; step++) {
                                 localActionsQueue.push({ action: 'STEER_' + fws + '_TAP', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 750;
+                                cumulativeDelayMs += 850;
                             }
                             cumulativeDelayMs += 100;
                             break;
@@ -3943,7 +3943,7 @@ print("BrickSync Sandbox Run")
                             let fws = action === 'car_left' ? 'LEFT' : 'RIGHT';
                             for (let step = 0; step < timeVal; step++) {
                                 localActionsQueue.push({ action: 'STEER_' + fws + '_TAP', delay: cumulativeDelayMs });
-                                cumulativeDelayMs += 600;
+                                cumulativeDelayMs += 650;
                             }
                             cumulativeDelayMs += 100;
                             break;
