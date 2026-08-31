@@ -408,6 +408,50 @@ def open_browser():
     except Exception:
         pass
 
+
+# ── 자동 브라우저 오프너 (단독 실행 시 크롬 자동 실행) ──────────────────────────
+def is_port_open(port=8000):
+    try:
+        import socket
+        with socket.create_connection(("127.0.0.1", port), timeout=1):
+            return True
+    except OSError:
+        return False
+
+def open_browser_when_ready():
+    BRICKSYNC_URL = "https://www.bricksync.org/intro.html"
+    chrome_paths = [
+        r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+        r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+        os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe"),
+        os.path.expanduser(r"~\AppData\Local\Google\Chrome\Application\chrome.exe")
+    ]
+    
+    # 8000번 포트가 뜰 때까지 대기 (최대 10초)
+    for _ in range(20):
+        if is_port_open():
+            break
+        time.sleep(0.5)
+
+    chrome_bin = None
+    for p in chrome_paths:
+        if os.path.exists(p):
+            chrome_bin = p
+            break
+
+    if chrome_bin:
+        try:
+            subprocess.Popen([chrome_bin, BRICKSYNC_URL], stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return
+        except Exception:
+            pass
+
+    try:
+        import webbrowser
+        webbrowser.open(BRICKSYNC_URL)
+    except Exception:
+        pass
+
 def free_port(port=8000):
     try:
         import subprocess
@@ -424,7 +468,14 @@ def free_port(port=8000):
 
 if __name__ == "__main__":
     free_port(8000)
-    # Browser is opened by launcher
-    pass
+    
+    print("=" * 60)
+    print(" 🎮 BrickSync - 포트나이트 & 레고 브릿지 서버 가동 중")
+    print(" 🌐 포트: http://127.0.0.1:8000 (ws://127.0.0.1:8000/ws)")
+    print(" 🚀 브라우저를 열고 브릭싱크(https://www.bricksync.org)에 연결합니다...")
+    print("=" * 60)
+    
+    threading.Thread(target=open_browser_when_ready, daemon=True).start()
+    
     app = init_app()
     web.run_app(app, host="127.0.0.1", port=8000)
