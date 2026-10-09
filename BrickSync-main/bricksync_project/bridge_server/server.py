@@ -557,12 +557,6 @@ def is_port_open(port=8000):
 
 def open_browser_when_ready():
     BRICKSYNC_URL = "https://www.bricksync.org/intro.html"
-    try:
-        # 이 PC에 웹앱 폴더가 있으면(개발 PC) 로컬 인트로로, 없으면 실제 사이트의 인트로로 연다
-        if os.path.isfile(os.path.join(web_app_dir, "intro.html")):
-            BRICKSYNC_URL = "http://127.0.0.1:8000/intro.html"
-    except Exception:
-        pass
     chrome_paths = [
         r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
