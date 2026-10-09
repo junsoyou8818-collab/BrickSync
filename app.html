@@ -106,7 +106,10 @@ window.addSystemLog = addSystemLog;
             window.addEventListener('storage', (e) => {
                 if (e.key === 'bricksync_student_session' && !e.newValue) {
                     if (typeof firebaseAuth === 'undefined' || !firebaseAuth?.currentUser) {
-                        window.location.href = 'login.html';
+                        // 지웠다가 곧바로 다시 쓰는 경우(게스트 입장 등)는 로그아웃이 아니다 → 잠깐 기다렸다가 확인
+                        setTimeout(() => {
+                            if (!localStorage.getItem('bricksync_student_session')) window.location.href = 'login.html';
+                        }, 600);
                     }
                 }
             });
@@ -163,6 +166,13 @@ window.addSystemLog = addSystemLog;
             display: block;
         }
     </style>
+<style id="bs-page-transition">
+/* 페이지가 바뀔 때 번쩍이지 않고 부드럽게 겹쳐 바뀌게 한다 (크롬/엣지 126 이상, 그 외는 예전처럼 넘어감) */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.35s; }
+/* 페이지가 아직 그려지기 전에도 흰색이 비치지 않게 같은 파스텔 바탕색 */
+html, body { background: #cfd8ee; }
+</style>
 </head>
 
 <body>
@@ -391,7 +401,8 @@ window.addSystemLog = addSystemLog;
     <script>
         // SPA 내부 페이지 상태 유지 (새로고침 시 마지막 화면 복원)
         (function () {
-            let lastPage = sessionStorage.getItem('brickSyncLastPage') || 'login.html';
+            // 마지막 화면 기록이 없는 새 탭이어도, 여기까지 왔다면 로그인 정보가 유효하다는 뜻이므로 메인 메뉴로 보낸다
+            let lastPage = sessionStorage.getItem('brickSyncLastPage') || 'index.html';
             // 쿼리 파라미터가 이미 있는지 확인하여 캐시 무력화 구문 추가
             const sep = lastPage.includes('?') ? '&' : '?';
             document.getElementById('main-frame').src = lastPage + sep + 'v=' + new Date().getTime();
@@ -444,8 +455,28 @@ window.addSystemLog = addSystemLog;
 
         let ws;
 
+        // 서버(터미널)에 찍힌 내용을 지금 열려 있는 학습 화면의 "통신 로그"에도 똑같이 보여 준다
+        function addServerLog(text) {
+            try {
+                const frame = document.getElementById('main-frame');
+                const doc = frame && frame.contentWindow && frame.contentWindow.document;
+                const list = doc && doc.getElementById('liveConsoleLogList');
+                if (!list) return;
+                const now = new Date();
+                const timeStr = now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0');
+                const safe = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                const entry = doc.createElement('div');
+                entry.style.cssText = 'border-left: 3px solid #94a3b8; padding-left: 8px; word-break: break-all; margin-bottom: 4px;';
+                entry.innerHTML = '<span style="color: #64748b;">[' + timeStr + ']</span> <strong style="color: #94a3b8;">🖥️ [SERVER]</strong> ' + safe;
+                list.appendChild(entry);
+                while (list.children.length > 400) list.removeChild(list.firstChild);
+                list.scrollTop = list.scrollHeight;
+            } catch (e) { }
+        }
+
         // --- 1. 파이썬 로컬 서버 통신 (자동 재연결 적용) ---
         function connectWebSocket() {
+            if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) return;      // 이미 연결 중이면 또 만들지 않는다
             let wsUrl = "ws://127.0.0.1:8000/ws";
             // 로컬 환경(localhost/127.0.0.1)에서 직접 접속한 경우 현재 호스트 사용
             if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
@@ -458,6 +489,12 @@ window.addSystemLog = addSystemLog;
                 updateWsUI(true);
             };
             ws.onerror = () => { };
+            ws.onmessage = (ev) => {
+                try {
+                    const d = JSON.parse(ev.data);
+                    if (d && d.type === 'SERVER_LOG') addServerLog(d.msg);
+                } catch (e) { }
+            };
             ws.onclose = () => {
                 updateWsUI(false);
                 setTimeout(connectWebSocket, 3000);
@@ -465,6 +502,7 @@ window.addSystemLog = addSystemLog;
         }
 
         function updateWsUI(isConnected) {
+            try { window.dispatchEvent(new CustomEvent('bs-bridge-status', { detail: !!isConnected })); } catch (e) { }
             const iframe = document.getElementById("main-frame").contentWindow;
             if (iframe && iframe.document.getElementById('status')) {
                 const statusEl = iframe.document.getElementById('status');
@@ -479,6 +517,31 @@ window.addSystemLog = addSystemLog;
         }
 
         connectWebSocket();
+
+        // 설정창의 "서버 연결" 구역이 쓰는 도우미: 지금 연결 상태 / 바로 다시 연결
+        window.getBridgeStatus = function () { return !!(ws && ws.readyState === WebSocket.OPEN); };
+        window.reconnectBridge = function () {
+            try { if (ws && ws.readyState === WebSocket.OPEN) return true; } catch (e) { }
+            connectWebSocket();
+            return false;
+        };
+
+        // 실행이 시작되면(아이콘/워드 어느 화면이든 isBlockExecutionRunning 이 true 가 되면) 포트나이트 창을 미리 앞으로 가져온다.
+        // 첫 회전/조명 신호가 창 전환 중에 사라지는 것을 막기 위해, 실제 첫 신호보다 먼저 전환해 둔다.
+        (function () {
+            let running = false, timer = null;
+            Object.defineProperty(window, 'isBlockExecutionRunning', {
+                configurable: true, enumerable: true,
+                get() { return running; },
+                set(v) {
+                    running = v;
+                    if (v) {
+                        clearTimeout(timer);
+                        timer = setTimeout(() => { try { sendCommand('FOCUS_FORTNITE'); } catch (e) { } }, 600);
+                    }
+                }
+            });
+        })();
 
         // iframe 내에서 웹소켓에 직접 접근할 수 있도록 노출
         window.sendWebSocketAction = function (actionObj) {
@@ -613,29 +676,213 @@ window.addSystemLog = addSystemLog;
             }
         };
 
+        /* ---------- 허브 연결 창 (브라우저 기본 알림창 대신) ---------- */
+        // 처음 연결하는 허브의 목록(페어링 창)은 브라우저가 보안상 직접 띄우는 창이라 바꿀 수 없다.
+        // 대신 ① 이미 연결해 본 허브는 목록 없이 바로(또는 우리 목록에서) 연결하고,
+        //      ② 처음 연결할 때만 브라우저 목록을 열며, ③ 설명/결과/오류는 모두 이 창에서 보여 준다.
+        const BSHub = (function () {
+            let ov = null, card = null, guideResolve = null, chooseResolve = null, pickerResolve = null;
+            const en = () => (localStorage.getItem('bricksync_lang') === 'en');
+            const T = (ko, e) => (en() ? e : ko);
+            const IMG_E = 'assets/spike_essential_hub.png', IMG_P = 'assets/spike_prime_hub.png';
+            const GUIDE_E = 'assets/hub_guide_essential.png', GUIDE_P = 'assets/hub_guide_prime.png';
+            // 허브에 심어 둔 이름으로 종류를 알아낸다: BS_EH숫자 = Essential, BS_PH숫자 = Prime
+            function kindOf(name) { return /^BS_EH\d+/i.test(name || '') ? 'E' : (/^BS_PH\d+/i.test(name || '') ? 'P' : '?'); }
+            function esc(s) { return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+            function ensure() {
+                if (ov) return;
+                const st = document.createElement('style');
+                st.textContent = [
+                    '.bsh-ov{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);font-family:"Noto Sans KR","Outfit",sans-serif;animation:bshFade .15s ease}',
+                    '.bsh-card{width:min(460px,94vw);max-height:94vh;overflow:auto;border-radius:26px;background:#fff;color:#1e293b;padding:22px 24px 20px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.4);animation:bshPop .18s cubic-bezier(.2,1.3,.4,1)}',
+                    '.bsh-hubs{display:flex;align-items:flex-end;justify-content:center;gap:64px;margin:0 0 8px}',
+                    '.bsh-hub{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}',
+                    '.bsh-hub img{display:block;height:auto;filter:drop-shadow(0 6px 8px rgba(15,23,42,.15))}',
+                    '.bsh-hub span{font-size:.82rem;font-weight:800;color:#64748b;text-align:center}',
+                    '.bsh-one{display:flex;justify-content:center;margin:2px 0 8px}',
+                    '.bsh-one img{height:150px;max-width:70%;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(15,23,42,.18))}',
+                    '.bsh-t{font-size:1.25rem;font-weight:900;margin:4px 0 12px}',
+                    '.bsh-steps{list-style:none;padding:0;margin:0 0 16px;text-align:left;display:flex;flex-direction:column;gap:9px}',
+                    '.bsh-steps li{display:flex;gap:10px;align-items:flex-start;font-size:.95rem;font-weight:700;line-height:1.45;background:#f1f5f9;border-radius:14px;padding:9px 12px}',
+                    '.bsh-n{flex:0 0 24px;height:24px;border-radius:50%;background:#0ea5e9;color:#fff;font-size:.8rem;font-weight:900;display:flex;align-items:center;justify-content:center;margin-top:1px}',
+                    '.bsh-m{font-size:.95rem;font-weight:700;color:#475569;line-height:1.6;margin-bottom:14px;word-break:keep-all}',
+                    '.bsh-chip{display:inline-block;border-radius:999px;padding:4px 16px;font-size:1.05rem;font-weight:900;margin:2px 0 4px;background:#e0f2fe;color:#075985}',
+                    '.bsh-chip.p{background:#ede9fe;color:#5b21b6}',
+                    '.bsh-sub{font-size:.9rem;font-weight:700;color:#64748b;margin-bottom:14px}',
+                    '.bsh-list{display:flex;flex-direction:column;gap:8px;margin:0 0 14px;text-align:left}',
+                    '.bsh-item{display:flex;align-items:center;gap:12px;border:2px solid #e2e8f0;background:#fff;border-radius:16px;padding:8px 12px;font-family:inherit;font-size:1rem;font-weight:800;cursor:pointer;color:#1e293b}',
+                    '.bsh-item:hover{border-color:#0ea5e9;background:#f0f9ff}',
+                    '.bsh-item img{height:44px;width:60px;object-fit:contain}',
+                    '.bsh-item small{display:block;font-size:.78rem;font-weight:700;color:#64748b}',
+                    '.bsh-row{display:flex;gap:10px;justify-content:center}',
+                    '.bsh-b{flex:1;max-width:170px;border:none;cursor:pointer;border-radius:14px;padding:12px 10px;font-family:inherit;font-size:1rem;font-weight:800}',
+                    '.bsh-b:active{transform:translateY(2px)}',
+                    '.bsh-no{background:#e2e8f0;color:#334155}',
+                    '.bsh-go{background:#0ea5e9;color:#fff;box-shadow:0 4px 0 #0284c7}',
+                    '.bsh-spin{width:34px;height:34px;margin:6px auto 10px;border-radius:50%;border:4px solid #e2e8f0;border-top-color:#0ea5e9;animation:bshSpin 1s linear infinite}',
+                    '.bsh-ok{width:46px;height:46px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:900;margin:0 auto 6px}',
+                    '.bsh-big{font-size:2.2rem;margin:2px 0 4px}',
+                    '@keyframes bshFade{from{opacity:0}to{opacity:1}}@keyframes bshPop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}@keyframes bshSpin{to{transform:rotate(360deg)}}'
+                ].join('');
+                document.head.appendChild(st);
+                ov = document.createElement('div'); ov.className = 'bsh-ov';
+                card = document.createElement('div'); card.className = 'bsh-card'; card.setAttribute('role', 'dialog');
+                ov.appendChild(card); document.body.appendChild(ov);
+            }
+            function h(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+            function btn(label, cls, fn) { const b = h('button', 'bsh-b ' + cls, label); b.type = 'button'; b.onclick = fn; return b; }
+            // 에센셜 · 프라임을 반반으로
+            function bothHubs() {
+                const w = h('div', 'bsh-hubs');
+                // 허브연결.png 에서 나눈 두 장 (전원 버튼 위치에 파란 고리가 그려져 있다). 두 허브의 실제 크기 비율을 맞춘다
+                [[GUIDE_E, 'SPIKE Essential', 118], [GUIDE_P, 'SPIKE Prime', 156]].forEach(x => {
+                    const c = h('div', 'bsh-hub'); const i = h('img'); i.src = x[0]; i.alt = x[1]; i.style.width = x[2] + 'px'; c.appendChild(i); c.appendChild(h('span', '', x[1])); w.appendChild(c);
+                });
+                return w;
+            }
+            function oneHub(kind) {
+                if (kind === 'E' || kind === 'P') { const w = h('div', 'bsh-one'); const i = h('img'); i.src = kind === 'E' ? IMG_E : IMG_P; i.alt = kind === 'E' ? 'SPIKE Essential' : 'SPIKE Prime'; w.appendChild(i); return w; }
+                return bothHubs();
+            }
+            function resolveAll(v) {
+                if (guideResolve) { const r = guideResolve; guideResolve = null; r(false); }
+                if (chooseResolve) { const r = chooseResolve; chooseResolve = null; r(null); }
+                if (pickerResolve) { const r = pickerResolve; pickerResolve = null; r(false); }
+            }
+            function close() { if (ov) { ov.remove(); ov = null; card = null; } resolveAll(); }
+            function show(nodes) { ensure(); card.innerHTML = ''; nodes.forEach(n => card.appendChild(n)); }
+            return {
+                kindOf,
+                // 에센셜/프라임 사진 + 연결 방법. '연결하기'를 누르면 true, 취소면 false
+                guide() {
+                    return new Promise(resolve => {
+                        guideResolve = resolve;
+                        const steps = h('ol', 'bsh-steps');
+                        [T('허브의 연결 버튼을 눌러 전원을 켜요.', 'Press the connect button on the hub to turn it on.'),
+                         T('불빛이 <b style="color:#0ea5e9">파랗게 깜빡이면</b> 준비 완료!', 'When the light <b style="color:#0ea5e9">blinks blue</b>, it is ready!'),
+                         T('아래 <b>연결하기</b>를 눌러요. 처음 연결하는 허브는 열리는 목록에서 골라 <b>페어링</b>을 눌러요.', 'Press <b>Connect</b>. For a new hub, pick it in the list and press <b>Pair</b>.')
+                        ].forEach((s, i) => steps.appendChild(h('li', '', '<span class="bsh-n">' + (i + 1) + '</span><span>' + s + '</span>')));
+                        const row = h('div', 'bsh-row');
+                        row.appendChild(btn(T('취소', 'Cancel'), 'bsh-no', () => close()));
+                        row.appendChild(btn(T('연결하기', 'Connect'), 'bsh-go', () => { const r = guideResolve; guideResolve = null; this.searching(); r && r(true); }));
+                        show([bothHubs(), h('div', 'bsh-t', T('허브를 연결해요', 'Connect your hub')), steps, row]);
+                    });
+                },
+                searching(name, noMemory) {
+                    const row = h('div', 'bsh-row');
+                    row.appendChild(btn(T('닫기', 'Close'), 'bsh-no', close));
+                    const msg = name
+                        ? T('<b>' + esc(name) + '</b>에 연결하고 있어요.', 'Connecting to <b>' + esc(name) + '</b>.')
+                        : T('브라우저에 열린 <b>목록에서 내 허브</b>를 고르고 <b>페어링</b>을 눌러 주세요.', 'Pick <b>your hub</b> in the browser list and press <b>Pair</b>.');
+                    const note = noMemory ? h('div', 'bsh-m', T('<small>이 브라우저는 연결한 허브를 기억하지 않아 목록이 열려요.<br>주소창에 <b>chrome://flags/#enable-web-bluetooth-new-permissions-backend</b> 를 입력해 <b>Enabled</b>로 바꾸고 크롬을 다시 시작하면, 다음부터는 이 창의 목록만 나와요.</small>', '<small>This browser does not remember hubs, so its list opens.<br>Open <b>chrome://flags/#enable-web-bluetooth-new-permissions-backend</b>, set it to <b>Enabled</b> and restart Chrome.</small>')) : null;
+                    show([name ? oneHub(kindOf(name)) : bothHubs(), h('div', 'bsh-t', T('허브를 찾고 있어요', 'Looking for your hub')), h('div', 'bsh-spin'), h('div', 'bsh-m', msg)].concat(note ? [note] : [], [row]));
+                },
+                // 전에 연결해 본 허브가 여러 개일 때: 우리 목록에서 고른다. 허브 / 'new'(새 허브 찾기) / null(취소)
+                choose(devs) {
+                    return new Promise(resolve => {
+                        chooseResolve = resolve;
+                        const list = h('div', 'bsh-list');
+                        devs.forEach(d => {
+                            const k = kindOf(d.name);
+                            const it = h('button', 'bsh-item', '<img src="' + (k === 'P' ? IMG_P : IMG_E) + '" alt=""><span>' + esc(d.name || '허브') + '<small>' + (k === 'P' ? 'SPIKE Prime' : (k === 'E' ? 'SPIKE Essential' : 'LEGO Hub')) + '</small></span>');
+                            it.type = 'button';
+                            it.onclick = () => { const r = chooseResolve; chooseResolve = null; r && r(d); };
+                            list.appendChild(it);
+                        });
+                        const row = h('div', 'bsh-row');
+                        row.appendChild(btn(T('취소', 'Cancel'), 'bsh-no', () => close()));
+                        row.appendChild(btn(T('새 허브 추가', 'Add a new hub'), 'bsh-go', () => { const r = chooseResolve; chooseResolve = null; r && r('new'); }));
+                        show([bothHubs(), h('div', 'bsh-t', T('연결할 수 있는 허브', 'Available hubs')), list, row]);
+                    });
+                },
+                // 저장된 허브에 연결하지 못했을 때: 새 허브 찾기(브라우저 목록)를 누르게 한다 (눌러야 브라우저 목록을 열 수 있다)
+                askPicker(why) {
+                    return new Promise(resolve => {
+                        pickerResolve = resolve;
+                        const row = h('div', 'bsh-row');
+                        row.appendChild(btn(T('취소', 'Cancel'), 'bsh-no', () => close()));
+                        row.appendChild(btn(T('허브 목록 열기', 'Open hub list'), 'bsh-go', () => { const r = pickerResolve; pickerResolve = null; this.searching(); r && r(true); }));
+                        show([bothHubs(), h('div', 'bsh-t', T('새 허브를 찾아요', 'Find a hub')), h('div', 'bsh-m', why), row]);
+                    });
+                },
+                // 연결 완료: 허브에 심어 둔 이름(BS_EH숫자 / BS_PH숫자)에 맞는 사진을 보여 준다
+                success(name) {
+                    const k = kindOf(name);
+                    const row = h('div', 'bsh-row');
+                    row.appendChild(btn(T('시작하기', 'Start'), 'bsh-go', close));
+                    show([h('div', 'bsh-ok', '✓'), h('div', 'bsh-t', T('허브가 연결되었습니다', 'Hub connected')), oneHub(k),
+                        h('div', 'bsh-chip' + (k === 'P' ? ' p' : ''), esc(name || '')),
+                        h('div', 'bsh-sub', k === 'P' ? 'SPIKE Prime' : (k === 'E' ? 'SPIKE Essential' : 'LEGO Hub')), row]);
+                },
+                error(title, lines, retry) {
+                    const row = h('div', 'bsh-row');
+                    row.appendChild(btn(T('닫기', 'Close'), 'bsh-no', close));
+                    if (retry) row.appendChild(btn(T('다시 연결', 'Try again'), 'bsh-go', () => { close(); retry(); }));
+                    show([bothHubs(), h('div', 'bsh-big', '⚠️'), h('div', 'bsh-t', title), h('div', 'bsh-m', lines.map(l => '• ' + l).join('<br>')), row]);
+                },
+                close
+            };
+        })();
+
+        const T2 = (ko, e) => (localStorage.getItem('bricksync_lang') === 'en' ? e : ko);
+
+        // 크롬이 기억만 하고 있던 허브는, 광고(주변에서 보이는 신호)를 한 번 받아야 바로 연결할 수 있다.
+        // 새로고침 직후 첫 연결이 실패하던 문제: 먼저 허브 신호를 기다린 뒤 연결하고, 그래도 안 되면 한 번 더 시도한다.
+        // 연결되면 허브 가운데 불빛을 파란색으로 (연결됨 표시). 허브가 알려 준 RGB 불빛(유형 23) 포트를 쓰고, 없으면 0x32 → 0x31
+        async function paintHubBlue() {
+            try {
+                await new Promise(r => setTimeout(r, 800));                 // 허브가 연결된 장치 목록을 보내 줄 때까지
+                const dev = window.hubDevices || {};
+                let ports = Object.keys(dev).filter(k => Number(dev[k]) === 23).map(Number);
+                if (!ports.length) ports = [0x32, 0x31];
+                for (const p of ports) {
+                    await window.writeToHub(new Uint8Array([10, 0x00, 0x41, p, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00]));      // 색 번호 모드
+                    await new Promise(r => setTimeout(r, 40));
+                    await window.writeToHub(new Uint8Array([8, 0x00, 0x81, p, 0x11, 0x51, 0x00, 0x03]));                     // 3 = 파랑
+                    await new Promise(r => setTimeout(r, 40));
+                }
+            } catch (e) { console.warn('허브 파란불 설정 실패', e); }
+        }
+        async function waitHubSeen(device, ms) {
+            if (!device || typeof device.watchAdvertisements !== 'function') return;
+            const ac = new AbortController();
+            await new Promise(resolve => {
+                let done = false;
+                const fin = () => { if (done) return; done = true; device.removeEventListener('advertisementreceived', fin); resolve(); };
+                device.addEventListener('advertisementreceived', fin);
+                try { device.watchAdvertisements({ signal: ac.signal }).catch(fin); } catch (e) { fin(); }
+                setTimeout(fin, ms);
+            });
+            try { ac.abort(); } catch (e) { }
+        }
+        async function connectKnownHub(device) {
+            await waitHubSeen(device, 3500);
+            try { await connectBluetoothDevice(device); }
+            catch (e) {
+                console.warn('첫 연결 시도 실패, 한 번 더 시도', e);
+                await new Promise(r => setTimeout(r, 900));
+                await waitHubSeen(device, 1500);
+                await connectBluetoothDevice(device);
+            }
+        }
         window.connectBluetooth = async function () {
             // ── navigator.bluetooth 가용성 확인 ──
             if (!navigator.bluetooth) {
                 // Chrome / Edge 권한 차단 vs 미지원 구분
                 const isChromium = /chrome/i.test(navigator.userAgent) || /edg/i.test(navigator.userAgent);
                 if (isChromium) {
-                    alert(
-                        '🔒 브라우저가 Bluetooth 접근을 차단하고 있습니다.\n\n' +
-                        '해결 방법:\n' +
-                        '① 주소창 왼쪽 자물쇠(🔒) 클릭\n' +
-                        '② "Bluetooth" → "허용" 으로 변경\n' +
-                        '③ 페이지 새로고침(F5)\n\n' +
-                        '또는 브라우저 주소창에 아래를 입력하세요:\n' +
-                        'chrome://settings/content/bluetoothDevices\n' +
-                        '(Edge는 edge://settings/content/bluetoothDevices)'
-                    );
+                    BSHub.error('브라우저가 블루투스를 막고 있어요', [
+                        '주소창 왼쪽 자물쇠(🔒)를 눌러요',
+                        '"Bluetooth"를 "허용"으로 바꿔요',
+                        '페이지를 새로고침(F5)해요',
+                        '그래도 안 되면 주소창에 chrome://settings/content/bluetoothDevices (Edge는 edge://…)를 입력해 확인해요'
+                    ]);
                 } else {
-                    alert(
-                        '❌ 블루투스를 사용할 수 없습니다.\n\n' +
-                        '• Chrome 또는 Edge 브라우저를 사용해 주세요 (Firefox · Safari 미지원)\n' +
-                        '• Windows Bluetooth가 켜져 있는지 확인하세요\n' +
-                        '• [설정 → Bluetooth 및 장치]에서 Bluetooth를 켜주세요.'
-                    );
+                    BSHub.error('블루투스를 사용할 수 없어요', [
+                        'Chrome 또는 Edge 브라우저를 사용해 주세요 (Firefox · Safari 미지원)',
+                        'Windows Bluetooth가 켜져 있는지 확인해요',
+                        '[설정 → Bluetooth 및 장치]에서 Bluetooth를 켜 주세요'
+                    ]);
                 }
                 window.connectionType = null;
                 window.isBluetoothMode = false;
@@ -672,19 +919,53 @@ window.addSystemLog = addSystemLog;
                   };
 
             try {
-                const device = await navigator.bluetooth.requestDevice(requestOptions);
+                // 허브 사진과 연결 방법을 보여 주고, '연결하기'를 눌러야 브라우저 목록(페어링 창)을 연다
+                const cancelled = () => { const c = new Error('cancelled'); c.name = 'NotAllowedError'; return c; };
+                if (!(await BSHub.guide())) throw cancelled();
+
+                // ① 전에 연결해 본 허브(BS_EH / BS_PH 이름)는 브라우저 목록 없이 바로 연결한다
+                let device = null, failedKnown = false;
+                if (typeof navigator.bluetooth.getDevices === 'function') {
+                    let known = [];
+                    try { known = (await navigator.bluetooth.getDevices()).filter(d => /^BS_(EH|PH)\d+/i.test(d.name || '')); } catch (e) { known = []; }
+                    let pick = null;
+                    if (known.length >= 1) {
+                        pick = await BSHub.choose(known);
+                        if (pick === null) throw cancelled();
+                        if (pick === 'new') pick = null;
+                    }
+                    if (pick) {
+                        try {
+                            BSHub.searching(pick.name);
+                            await connectKnownHub(pick);
+                            BSHub.success(pick.name); paintHubBlue();
+                            return true;
+                        } catch (e) { failedKnown = true; console.warn('저장된 허브 연결 실패', e); }
+                    }
+                }
+                // ② 처음 연결하는 허브(또는 저장된 허브에 연결 실패): 브라우저 목록을 연다
+                if (failedKnown) {
+                    if (!(await BSHub.askPicker(T2('저장된 허브에 연결하지 못했어요. 허브 전원을 켜고 파랗게 깜빡이는지 확인한 뒤, 아래 버튼을 눌러 새로 찾아요.', 'Could not reach the saved hub. Make sure it blinks blue, then open the list.')))) throw cancelled();
+                }
+                if (typeof navigator.bluetooth.getDevices !== 'function') BSHub.searching(null, true);          // 이 브라우저는 허브를 기억하지 못한다
+                device = await navigator.bluetooth.requestDevice(requestOptions);
+                BSHub.searching(device.name);
                 await connectBluetoothDevice(device);
+                BSHub.success(device.name); paintHubBlue();
                 return true;
             } catch (error) {
+                const again = () => { try { window.connectBluetooth(); } catch (e) { } };
                 if (error.name === 'NotFoundError') {
-                    alert('🔍 LEGO Hub를 찾을 수 없습니다.\n\n• Hub 전원이 켜져 있는지 확인하세요\n• Hub의 버튼을 한 번 눌러 검색 모드로 설정하세요\n• Hub가 다른 기기와 연결되어 있으면 먼저 끊어주세요');
+                    BSHub.error('허브를 찾지 못했어요', ['허브 전원이 켜져 있는지 확인해요', '허브의 연결 버튼을 한 번 눌러 파랗게 깜빡이게 해요', '허브가 다른 기기와 연결되어 있으면 먼저 끊어요'], again);
                 } else if (error.name === 'NetworkError') {
-                    alert('📡 블루투스 접속 오류\n기기가 꺼져있거나 다른 장치와 연결되어 있습니다.');
+                    BSHub.error('허브에 연결하지 못했어요', ['허브가 꺼져 있거나 다른 기기와 연결되어 있어요', '허브를 껐다 켜고 다시 해 봐요'], again);
                 } else if (error.name === 'SecurityError') {
-                    alert('🔒 블루투스 권한이 없습니다.\n앱을 다시 시작하거나 관리자에게 문의하세요.');
+                    BSHub.error('블루투스 권한이 없어요', ['앱을 다시 시작하거나 선생님께 알려 주세요']);
                 } else if (error.name !== 'NotAllowedError') {
-                    alert(`⚠️ 블루투스 오류\n오류 유형: ${error.name}\n${error.message}`);
+                    BSHub.error('블루투스 오류가 났어요', ['오류 종류: ' + error.name, error.message || ''], again);
                     console.error('Bluetooth 오류:', error);
+                } else {
+                    BSHub.close();                  // 목록에서 취소한 경우: 조용히 닫는다
                 }
                 window.connectionType = null;
                 window.isBluetoothMode = false;
@@ -919,7 +1200,7 @@ function handleBLEData(event) {
                     window.hubDevices[portID] = ioType;
                     console.log(`[LWP3 Attached I/O] Port: ${portID} (0x${portID.toString(16).toUpperCase()}), IO Type: ${ioType} (${ioType === 64 ? '3x3 Light Matrix' : ioType === 23 ? 'RGB Light' : 'Device'})`);
 
-                    if (ioType === 57 || ioType === 59 || ioType === 61) {
+                    if (ioType === 57 || ioType === 59 || ioType === 61 || ioType === 62 || ioType === 63) {
                         const subscribeMsg = new Uint8Array([10, 0, 0x41, portID, 0, 1, 0, 0, 0, 1]);
                         if (window.txCharacteristic) window.txCharacteristic.writeValueWithoutResponse(subscribeMsg).catch(e => { });
                     }
@@ -1015,15 +1296,100 @@ function handleBLEData(event) {
                         window.consecutiveYFrames = 1;
                     }
                 }
+                // 프라임 힘 센서(63) / 거리 센서(62): 프라임 장비로는 아직 실측하지 못한 기본 구현이다
+                else if (portID < 6 && (Number((window.hubDevices || {})[portID]) === 63 || Number((window.hubDevices || {})[portID]) === 62)) {
+                    try {
+                        const isForce = Number(window.hubDevices[portID]) === 63;
+                        if (!window.forceValues) window.forceValues = {};
+                        if (!window.distanceMm) window.distanceMm = {};
+                        let raw = -1;
+                        if (isForce) { raw = value.getUint8(4); window.forceValues[portID] = raw; window.sensorData[portID] = raw; }
+                        else {
+                            raw = value.byteLength >= 6 ? value.getUint16(4, true) : value.getUint8(4);
+                            window.distanceMm[portID] = (raw > 0 && raw < 2000) ? raw : -1;      // 0, 2000 이상, 0xFFFF는 '물체 없음'으로 본다
+                            window.latestDistanceValue = window.distanceMm[portID] < 0 ? 200 : window.distanceMm[portID] / 10;
+                        }
+                        // 처음 받은 값과 그 뒤 몇 초마다 원시 바이트를 통신 로그에 남긴다 (프라임이 있는 사람이 확인할 수 있도록)
+                        const nowT = Date.now();
+                        if (!window._fdLog) window._fdLog = {};
+                        if (!window._fdLog[portID] || nowT - window._fdLog[portID] > 4000) {
+                            window._fdLog[portID] = nowT;
+                            const bytes = []; for (let i = 0; i < value.byteLength; i++) bytes.push(value.getUint8(i).toString(16).padStart(2, '0'));
+                            if (typeof window.addSystemLog === 'function') window.addSystemLog('HUB', (isForce ? '🔘 힘 센서' : '📡 거리 센서') + '(포트 ' + 'ABCDEF'.charAt(portID) + ') 값 = ' + raw + (isForce ? '' : ' mm') + '   [원시 ' + bytes.join(' ') + ']');
+                        }
+                    } catch (e) { }
+                }
                 // 외부 센서: 컬러 센서(61) 등
                 else if (portID < 6 && value.byteLength === 5) {
                     const colorVal = value.getInt8(4);
                     window.sensorData[portID] = colorVal; // 스파이크 내부의 색상 코드 번호 (0~10)
+                    // 색 센서를 반사/주변 빛 모드로 읽는 동안에는 빛 값(0~100)을 따로 보관한다
+                    try {
+                        if (Number((window.hubDevices || {})[portID]) === 61 && window.colorSensorMode && Date.now() - (window.colorSensorModeAt || 0) > 200) {
+                            if (window.colorSensorMode === 1) window.latestReflectValue = value.getUint8(4);
+                            else if (window.colorSensorMode === 2) window.latestAmbientValue = value.getUint8(4);
+                        }
+                    } catch (e) { }
                 }
             }
         }
 
         
+        // 색 센서가 지금 보고 있는 색 번호 (허브가 알려 준 값). 센서가 없거나 값이 아직 없으면 undefined
+        window.getColorSensorValue = function () {
+            if (window.colorSensorMode) return undefined;           // 반사/주변 빛으로 읽는 중에는 색 번호가 아니다
+            const dev = window.hubDevices || {}, sd = window.sensorData || {};
+            for (let p = 0; p < 6; p++) {
+                if (Number(dev[p]) === 61 && sd[p] !== undefined) return sd[p];
+            }
+            return undefined;
+        };
+
+        // 프라임 힘 센서가 지금 보고 있는 값: { value, pressed }. 센서가 없거나 값이 아직 없으면 undefined
+        window.getForceState = function () {
+            const dev = window.hubDevices || {}, fv = window.forceValues || {};
+            for (let p = 0; p < 6; p++) {
+                if (Number(dev[p]) === 63 && fv[p] !== undefined) return { value: fv[p], pressed: fv[p] > 0 };
+            }
+            return undefined;
+        };
+        // 프라임 거리 센서가 지금 보고 있는 거리(mm). 물체가 없으면 -1, 센서가 없거나 값이 아직 없으면 undefined
+        window.getDistanceMm = function () {
+            const dev = window.hubDevices || {}, dm = window.distanceMm || {};
+            for (let p = 0; p < 6; p++) {
+                if (Number(dev[p]) === 62 && dm[p] !== undefined) return dm[p];
+            }
+            return undefined;
+        };
+        // 허브 기울기: 'left' | 'right' | 'up' | 'down' | 'flat'. 지금 자세를 기준(평평)으로 다시 잡는다
+        window.resetTiltBaseline = function () {
+            window.initialX = null; window.initialY = null;
+            window.lastStableXState = null; window.lastStableYState = null;
+            window.candidateXState = null; window.candidateYState = null;
+            window.consecutiveXFrames = 0; window.consecutiveYFrames = 0;
+        };
+        window.getTiltName = function () {
+            const x = window.lastStableXState, y = window.lastStableYState;
+            if (x === 'TILT_LEFT') return 'left';
+            if (x === 'TILT_RIGHT') return 'right';
+            if (y === 'TILT_UP') return 'up';
+            if (y === 'TILT_DOWN') return 'down';
+            return 'flat';
+        };
+
+        // 색 센서 모드 바꾸기 (0: 색 번호, 1: 반사 빛, 2: 주변 빛) — 아이콘 모드의 빛 센서 블록이 쓴다
+        window.colorSensorMode = 0;
+        window.setColorSensorMode = function (mode) {
+            window.colorSensorMode = mode; window.colorSensorModeAt = Date.now();
+            if (mode === 1) window.latestReflectValue = undefined; else if (mode === 2) window.latestAmbientValue = undefined;
+            const dev = window.hubDevices || {};
+            Object.keys(dev).forEach(k => {
+                if (Number(dev[k]) === 61 && typeof window.writeToHub === 'function') {
+                    window.writeToHub(new Uint8Array([10, 0, 0x41, Number(k), mode, 1, 0, 0, 0, 1])).catch(() => { });
+                }
+            });
+        };
+
         // 🚗 포트나이트 탈것(자동차/보트/잠수함) 탑승 상태 관리 (기본: 하차 상태)
         window.isVehicleBoarded = false;
         function hasTiltSensorBlockOnWorkspace() {

@@ -11,6 +11,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="firebase_config.js"></script>
+    <script src="auth.js"></script>
+    <script src="bs_dialog.js"></script>
     <style>
         :root {
             --bg-dark: #230844;
@@ -430,7 +432,57 @@
             color: #64748b;
         }
 
+
+        /* ===== 메인 화면 스타일: 파스텔 배경 + 유리 사이드바 + 흰 카드 ===== */
+        html{background-color:#cfd8ee}
+        body{background:transparent!important;background-image:none!important;color:#2b1b4d;position:relative}
+        body::before{content:'';position:fixed;inset:0;background:url('assets/main_bg.jpg') center/cover no-repeat;z-index:-1}
+        
+        :root{--bg-dark:#cfd8ee;--sidebar-bg:rgba(255,255,255,.5);--panel-bg:rgba(255,255,255,.86);--panel-border:rgba(255,255,255,.9);--text-main:#2b1b4d;--text-sub:#6c1f86}
+        .sidebar{backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,.75);box-shadow:0 0 40px rgba(43,27,77,.12)}
+        .brand{color:#2b1b4d}
+        .brand .lego-box{background:#edbd95;color:#2b1b4d}
+        .nav-item{color:#2b1b4d}
+        .nav-item i{color:#7a7396}
+        .nav-item:hover{background:rgba(255,255,255,.78);color:#6c1f86;box-shadow:0 4px 14px rgba(43,27,77,.12)}
+        .nav-item.active{background:#6c1f86;color:#fff;border-left:none;box-shadow:0 6px 18px rgba(108,31,134,.32)}
+        .nav-item.active i{color:#facc15}
+        .page-title{color:#2b1b4d}
+        .page-title span[data-i18n="lbl_select_student"]{color:#3f3a63!important}
+        .student-pill{background:#fff;border:1px solid #cfe9f2;color:#4b4570}
+        .student-pill.active{background:#edbd95;border-color:#edbd95;color:#2b1b4d;box-shadow:none}
+        .panel{box-shadow:0 8px 24px rgba(43,27,77,.12)}
+        .stat-card .title{color:#5b5478}
+        .change.positive{color:#2f7a4d}
+        .change.neutral{color:#7a7396}
+        .progress-label{color:#3f3a63}
+        .progress-bar-bg{background:rgba(43,27,77,.1)}
+        .progress-val{color:#5b5478}
+        .mission-item{color:#3f3a63}
+        .mission-item i.circle{color:rgba(43,27,77,.22)}
+        .reward-badge{background:#f5e8b4;border-color:#e5d28a;color:#8a6d00}
+        .reward-badge.purple{background:#ede9fe;border-color:#c4b5fd;color:#6c1f86}
+        .concept-tag{background:#ede9fe;color:#6c1f86;border-color:#c4b5fd}
+        .concept-tag.highlight{background:#fef3c7;color:#92400e;border-color:#fcd34d}
+        .growth-row{color:#3f3a63}
+        .growth-val{color:#2f7a4d}
+        .log-item{color:#5b5478}
+        .log-item .time{color:rgba(43,27,77,.5)}
+        .log-item .msg{color:#3f3a63}
+        .log-item.highlight .msg{color:#6c1f86}
+        .log-list::-webkit-scrollbar-thumb{background:rgba(43,27,77,.25)}
+        .btn-kakao{background:#a5b1d7;border:none;color:#2b1b4d}
+        .btn-kakao:hover{background:#8f9cc9;color:#2b1b4d}
+            html.bs-gate body{visibility:hidden}
+        html.bs-embed, html.bs-embed body{background:transparent !important;background-image:none !important;min-height:0 !important}
+        html.bs-embed .sidebar, html.bs-embed .header, html.bs-embed .btn-kakao, html.bs-embed .report-header, html.bs-embed .report-card{display:none !important}
+        html.bs-embed .grid-4 > *, html.bs-embed .grid-2 > *, html.bs-embed .grid-3 > *{background:#fff !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
+        html.bs-embed .main-content{padding:0 !important;overflow:visible !important;flex:1 1 auto}
+        .bs-back{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:10px;background:#fff;border:1px solid #cfe9f2;color:#4b4570;font-size:.85rem;font-weight:700;text-decoration:none}
+        .bs-back:hover{border-color:#a5b1d7;color:#2b1b4d}
     </style>
+    <script>document.documentElement.classList.add('bs-gate');
+        try { if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('bs-embed'); } catch (e) {}</script>
 </head>
 <body>
 
@@ -452,6 +504,7 @@
     <div class="main-content">
         <div class="header">
             <div class="page-title" style="display: flex; align-items: center; gap: 15px;">
+                <a class="bs-back" href="teacher_dashboard.html"><i class="fas fa-chevron-left"></i> 교사 대시보드</a>
                 <span data-i18n="dashboard_title">교사/학부모 대시보드</span>
                 <button onclick="resetAllStats()" style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.4); color: #f43f5e; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='rgba(244, 63, 94, 0.2)'" onmouseout="this.style.background='rgba(244, 63, 94, 0.1)'">
                     <i class="fas fa-trash-alt"></i> <span data-i18n="btn_reset_all_data">전체 데이터 초기화</span>
@@ -638,24 +691,24 @@
         function getMissionText(index) {
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const textsKo = [
-                "자동차 앞으로 3초 이동",
-                "컬러 센서로 신호등 제어",
-                "대관람차 5바퀴 회전",
-                "친환경 발전기 에너지 채우기",
-                "재활용 분류 게이트 통과",
-                "가위바위보 오두막 지붕 조작",
-                "목소리로 요술 그네 조종",
-                "몬스터 감지 시 경보등 켜기"
+                "탐험보트를 출발시켜요",
+                "바닷속 잠수함으로 바다를 탐험해요",
+                "대관람차 회전하기",
+                "탐험 자동차를 만들어요",
+                "사이렌을 켜줘",
+                "가위, 바위, 보로 여닫는 오두막 지붕",
+                "마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네",
+                "몬스터를 보여줘! 경보 알림켜기"
             ];
             const textsEn = [
-                "Move car forward for 3 seconds",
-                "Control traffic lights with color sensor",
-                "Rotate Ferris wheel 5 times",
-                "Charge eco-generator energy",
-                "Pass recycling sorting gate",
-                "Control cabin roof with RPS gestures",
-                "Control magic swing with your voice",
-                "Turn on alarm when monster detected"
+                "Launch the Exploration Boat",
+                "Explore the Sea with a Submarine",
+                "Rotate the Ferris Wheel",
+                "Ride a Cave Car and Travel",
+                "Turn on the Siren",
+                "RPS Gesture-Controlled Cabin Roof",
+                "Voice-Controlled Magic Swing",
+                "Animal Alert Ranger (Monster Camera)"
             ];
             return currentLang === 'en' ? (textsEn[index] || "") : (textsKo[index] || "");
         }
@@ -923,12 +976,15 @@
                     let activeStudentName = activePill ? activePill.innerText : '';
                     
                     // 2. 가입/접속된 학생들을 기반으로 선택 칩들을 동적 렌더링 (20~30명 확장 대응)
+                    // 학생이 아직 접속한 적이 없어도, 교사 대시보드에서 고른 학생은 목록에 넣어 보여 준다
+                    if (deepStudent && !deepConsumed && !students[deepStudent]) students[deepStudent] = {};
                     const studentNames = Object.keys(students).sort();
                     const selector = document.querySelector('.student-selector');
                     if (selector) {
                         selector.innerHTML = ''; // 기존 리스트 비우기
                         
                         if (studentNames.length > 0) {
+                            if (deepStudent && !deepConsumed && studentNames.includes(deepStudent)) { activeStudentName = deepStudent; deepConsumed = true; }
                             // 현재 보고있던 활성 학생이 전체 리스트에 없으면 첫 번째 학생으로 보정
                             if (!activeStudentName || !studentNames.includes(activeStudentName)) {
                                 let sessionStudentName = '';
@@ -1022,6 +1078,10 @@
         }
 
         // --- 오프라인 동적 학생 및 초기화 메인 로직 --- //
+        // 교사 대시보드 > 학생 관리에서 이름을 눌러 들어오면 해당 학생을 먼저 보여 준다
+        let deepStudent = '';
+        try { deepStudent = (new URLSearchParams(location.search).get('student') || '').trim(); } catch (e) {}
+        let deepConsumed = false;
         let studentList = [];
         try {
             const savedList = localStorage.getItem('dashboard_students_list');
@@ -1055,6 +1115,13 @@
             
             selector.innerHTML = '';
             
+            if (deepStudent && !deepConsumed) {
+                if (!studentList.includes(deepStudent)) {
+                    studentList.push(deepStudent); studentList.sort();
+                    try { localStorage.setItem('dashboard_students_list', JSON.stringify(studentList)); } catch (e) {}
+                }
+                activeStudentName = deepStudent; deepConsumed = true;
+            }
             if (studentList.length === 0) {
                 const curLang = localStorage.getItem('bricksync_lang') || 'ko';
                 selector.innerHTML = `<span style="color: #94a3b8; font-size: 0.9rem; padding: 8px 10px;">${curLang === 'en' ? 'No connected students' : '접속한 학생 없음'}</span>`;
@@ -1133,8 +1200,8 @@
             });
         }
 
-        function resetAllStats() {
-            if (confirm("모든 학생의 실시간 학습 데이터를 초기화하시겠습니까? (과거 누적된 블록 횟수와 집중 시간 및 로그가 리셋됩니다.)")) {
+        async function resetAllStats() {
+            if (await bsConfirm({ title: "모든 학생의 실시간 학습 데이터를 초기화하시겠습니까?", msg: "과거 누적된 블록 횟수와 집중 시간 및 로그가 리셋됩니다.", yes: "초기화하기", danger: true })) {
                 try {
                     // 1. 모든 학생의 통계 데이터 및 학생 본인 세션 localStorage 삭제
                     for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -1177,7 +1244,7 @@
                     const activeStudentName = activePill ? activePill.innerText : '';
                     loadDashboardData(activeStudentName);
                     
-                    alert("모든 학생의 학습 이력이 성공적으로 초기화되었습니다.");
+                    bsAlert({ kind: "success", title: "모든 학생의 학습 이력이 성공적으로 초기화되었습니다." });
                 } catch(e) {
                     console.error("Reset Error:", e);
                 }
@@ -1210,6 +1277,15 @@
             const activePill = document.querySelector('.student-pill.active');
             const initialStudentName = activePill ? activePill.innerText : '';
             loadDashboardData(initialStudentName);
+
+            // 실시간 서버 응답이 없어 학생 목록이 계속 비어 있으면, 이 기기에 저장된 정보로 대신 보여 준다
+            setTimeout(() => {
+                if (document.querySelector('.student-pill')) return;
+                try { if (typeof isFirebaseOnline !== 'undefined' && isFirebaseOnline) isFirebaseOnline = false; } catch (e) {}
+                rebuildStudentSelectorOffline();
+                const ap = document.querySelector('.student-pill.active');
+                if (ap) loadDashboardData(ap.innerText);
+            }, 4000);
         });
 
         // 다국어 실시간 감지 이벤트 리스너 추가
@@ -1218,6 +1294,23 @@
             const studentName = activePill ? activePill.innerText : '';
             loadDashboardData(studentName);
         });
+        if (document.documentElement.classList.contains('bs-embed') && window.parent !== window) {
+            const sendHeight = () => { try { window.parent.postMessage({ bsEmbedHeight: Math.ceil(document.body.getBoundingClientRect().height) }, location.origin); } catch (e) {} };
+            window.addEventListener('load', sendHeight);
+            try { new ResizeObserver(sendHeight).observe(document.body); } catch (e) {}
+            setInterval(sendHeight, 1500);
+        }
+        (async () => {
+            try {
+                const s = await BrickSyncAuth.requireRole(['teacher', 'parent']);
+                if (s && s.profile.role === 'parent') {
+                    // 학부모는 교사 대시보드 안이 아닌 학부모 화면에 끼워 넣은 자기 자녀의 현황만 볼 수 있다
+                    const own = s.profile.linkedStudentName || '';
+                    if (!document.documentElement.classList.contains('bs-embed') || !own || deepStudent !== own) { BrickSyncAuth.redirectToHome('parent'); return; }
+                }
+                if (s) document.documentElement.classList.remove('bs-gate');
+            } catch (e) { window.location.href = 'login.html'; }
+        })();
     </script>
     <script src="settings.js"></script>
 </body>

@@ -25,11 +25,12 @@
             /* 로딩바를 화면 하단부에 배치 */
             align-items: center;
             /* 전달해주신 레고 포트나이트 이미지를 꽉 차게 배경으로 설정 */
-            background-image: url('./assets/intro.png');
+            background-image: url('./assets/intro_bg.jpg');
             background-size: cover;
-            background-position: center 65%;
+            background-position: center center;
             background-repeat: no-repeat;
-            color: #fff;
+            color: #2b1b4d;
+            background-color: #cfd8ee;
             position: relative;
             overflow: hidden;
             padding-bottom: 80px;
@@ -44,7 +45,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.8) 100%);
+            background: none;
             z-index: 1;
         }
 
@@ -157,9 +158,10 @@
 
         /* 시작 버튼 */
         .start-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(20, 14, 40, 0.38);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
             color: #fff;
             padding: 12px 30px;
             font-size: 1.2rem;
@@ -173,7 +175,7 @@
         }
 
         .start-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(20, 14, 40, 0.5);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
@@ -190,11 +192,11 @@
         .loading-container {
             width: 100%;
             height: 6px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(43, 27, 77, 0.18);
             border-radius: 10px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 2px 10px rgba(43, 27, 77, 0.18);
             /* 등장 애니메이션 */
             opacity: 0;
             animation: fadeIn 1s ease-in forwards;
@@ -207,11 +209,11 @@
             top: 0;
             height: 100%;
             width: 0%;
-            background: #fff;
+            background: #6c1f86;
             z-index: 1;
             transition: width 0.1s linear;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 10px rgba(108, 31, 134, 0.35);
         }
 
         /* 상태 텍스트 (옵션, 로딩바 위에 띄움) */
@@ -219,11 +221,10 @@
             z-index: 10;
             font-size: 0.9rem;
             font-weight: 500;
-            color: rgba(255, 255, 255, 0.8);
+            color: #2b1b4d;
             letter-spacing: 2px;
             margin-bottom: 15px;
             text-align: center;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
         }
 
         /* 하단 저작권 텍스트 */
@@ -231,8 +232,8 @@
             position: absolute;
             bottom: 20px;
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.5);
-            font-weight: 400;
+            color: rgba(43, 27, 77, 0.75);
+            font-weight: 500;
             letter-spacing: 1px;
             z-index: 10;
         }
@@ -259,16 +260,33 @@
             }
         }
     </style>
+<style id="bs-page-transition">
+/* 페이지가 바뀔 때 번쩍이지 않고 부드럽게 겹쳐 바뀌게 한다 (크롬/엣지 126 이상, 그 외는 예전처럼 넘어감) */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.35s; }
+/* 페이지가 아직 그려지기 전에도 흰색이 비치지 않게 같은 파스텔 바탕색 */
+html { background-color: #cfd8ee; }
+</style>
+    <!-- 다음 화면을 미리 받아 둔다 -->
+    <link rel="preload" as="image" href="./assets/login_bg_blur.jpg">
+    <link rel="preload" as="image" href="./assets/bs_logo_vertical.png">
+    <script src="server_boot.js"></script>
+    <script>try { BrickSyncBoot.sync(); } catch (e) {}</script>
+    <link rel="prefetch" href="login.html">
 </head>
 
 <body>
 
     <!-- 둥둥 떠다니는 배경 장식 -->
+    <!-- (새 배경 이미지에서는 쓰지 않음)
     <div class="bg-circle circle-1"></div>
     <div class="bg-circle circle-2"></div>
+    -->
 
     <!-- 반응형 인트로 로고 (양쪽 1cm 여백, 화면 크기 맞춤형) -->
+    <!-- (로고는 배경 이미지 안에 들어 있어 따로 올리지 않음)
     <img class="intro-logo" src="./assets/IntroLogo.webp" alt="LEGO Fortnite">
+    -->
 
     <div class="content-wrapper">
         <!-- 타이틀 영역 -->
@@ -293,7 +311,7 @@
 
     <!-- 하단 저작권 영역 -->
     <div class="copyright">
-        © 2026 BrickSync Platform. All rights reserved.
+        © 2026 BrickSync. All rights reserved.
     </div>
 
     <script>
@@ -338,8 +356,7 @@
                     loadingText.innerText = isEn ? "Entering!" : "진입 중!";
 
                     // index.html 로 부드럽게 넘어가기 위해 전체 화면 페이드아웃 설정
-                    document.body.style.transition = "opacity 0.4s ease-out";
-                    document.body.style.opacity = 0;
+                    // (화면 전체를 투명하게 만들면 바탕이 비쳐 깜빡이므로, 페이지 전환 효과로 부드럽게 넘어간다)
 
                     // 0.4초 뒤에 로그인 페이지(login.html)로 이동
                     setTimeout(() => {

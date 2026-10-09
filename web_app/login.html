@@ -104,18 +104,65 @@ input.error{border-color:#f43f5e}
 
 /* 패널 전환 */
 .panel{display:none}.panel.active{display:block}
+
+/* ===== 밝은 파스텔 로그인: 인트로와 같은 배경을 흐리게 깔고 가운데에 로그인 카드 ===== */
+body{background:transparent;color:#2b1b4d;position:relative;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:url('assets/login_bg_blur.jpg') center/cover no-repeat;z-index:-1}
+.card{max-width:430px;background:rgba(255,255,255,.66);border:1.5px solid #cfe9f2;border-radius:30px;padding:30px 34px 34px;box-shadow:0 24px 60px rgba(43,27,77,.28);backdrop-filter:none;-webkit-backdrop-filter:none}
+.brand{margin-bottom:18px}
+.brand p{color:#5b5478;font-size:.82rem;margin-top:2px}
+.brand-logo{max-width:230px}
+.lang-btn{background:#fff;border:1px solid #cfe9f2;color:#4b4570;box-shadow:none}
+.lang-btn.active,.lang-btn:hover{background:#edbd95;border-color:#edbd95;color:#2b1b4d;box-shadow:none}
+.role-tabs{background:none;padding:0;gap:8px;margin-bottom:16px}
+.role-tab{background:#fff;border:1.5px solid #cfe9f2;color:#4b4570;border-radius:12px;padding:11px 5px}
+.role-tab i,.input-wrap i,.btn-submit i,.guest-btn i,.info-box i{display:none}
+.role-tab.active{background:#edbd95;border-color:#edbd95;color:#2b1b4d;box-shadow:none}
+.mode-toggle{border:none;border-bottom:2px solid #d6edf5;border-radius:0;margin-bottom:16px}
+.mode-btn{color:#7a7396;border-radius:0}
+.mode-btn.active{background:transparent;color:#6c1f86;border-bottom:3px solid #6c1f86;margin-bottom:-2px}
+label{color:#2b1b4d}
+input[type=text],input[type=email],input[type=password]{padding:13px 16px;background:#f6fbfe;border:1.5px solid #cfe9f2;color:#2b1b4d}
+input::placeholder{color:#8a84a6}
+input:focus{border-color:#a5b1d7;box-shadow:0 0 0 3px rgba(165,177,215,.35)}
+input.error{border-color:#e11d48}
+.info-box{background:#e2f5f9;border:1px solid #cfe9f2;color:#3f3a63}
+.btn-submit{background:#6c1f86;color:#fff;border-radius:14px;box-shadow:0 6px 0 #4a1360}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 0 #4a1360}
+.btn-submit:active{transform:translateY(3px);box-shadow:0 3px 0 #4a1360}
+.btn-submit:disabled{box-shadow:0 6px 0 #4a1360}
+.divider{color:#7a7396}
+.divider::before,.divider::after{background:#d6edf5}
+.guest-btn{background:#fff;border:1.5px solid #cfe9f2;color:#4b4570}
+.guest-btn:hover{border-color:#a5b1d7;color:#2b1b4d}
+.toast{background:#fff;border:1.5px solid #cfe9f2;color:#2b1b4d;box-shadow:0 10px 30px rgba(43,27,77,.2)}
+.toast.success{border-color:#a0c9c3;color:#2f6f66}
+.toast.error{border-color:#f9c4cf;color:#e11d48}
 </style>
+<style id="bs-page-transition">
+/* 페이지가 바뀔 때 번쩍이지 않고 부드럽게 겹쳐 바뀌게 한다 (크롬/엣지 126 이상, 그 외는 예전처럼 넘어감) */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.35s; }
+/* 페이지가 아직 그려지기 전에도 흰색이 비치지 않게 같은 파스텔 바탕색 */
+html { background-color: #cfd8ee; }
+</style>
+<link rel="preload" as="image" href="assets/main_bg.jpg">
+<link rel="prefetch" href="app.html">
+<link rel="preload" as="image" href="assets/login_bg_blur.jpg">
+<link rel="preload" as="image" href="assets/bs_logo_vertical.png">
+<style>html.bs-pre body{opacity:0}body{transition:opacity .25s ease}</style>
+<script>document.documentElement.classList.add("bs-pre");window.bsRevealLogin=function(){document.documentElement.classList.remove("bs-pre")};setTimeout(window.bsRevealLogin,2000);</script>
 </head>
 <body>
 
 <div class="card">
   <div class="lang-selector-bar">
-    <button class="lang-btn" id="lang-btn-ko" onclick="setLoginLanguage('ko')">🌐 한국어</button>
-    <button class="lang-btn" id="lang-btn-en" onclick="setLoginLanguage('en')">🌐 English</button>
+    <button class="lang-btn" id="lang-btn-ko" onclick="setLoginLanguage('ko')">한국어</button>
+    <button class="lang-btn" id="lang-btn-en" onclick="setLoginLanguage('en')">English</button>
   </div>
 
   <div class="brand">
-    <img src="./assets/bslogo.png" alt="BrickSync" class="brand-logo">
+    <img src="./assets/bs_logo_vertical.png" alt="BrickSync" class="brand-logo">
     <p data-i18n="login_slogan">AI 코딩 및 포트나이트 통합 플랫폼</p>
   </div>
 
@@ -245,6 +292,7 @@ input.error{border-color:#f43f5e}
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script src="firebase_config.js?v=9.9"></script>
+<script src="server_boot.js"></script>
 <script src="auth.js?v=9.9"></script>
 <script src="settings.js?v=9.9"></script>
 
@@ -424,6 +472,8 @@ async function doSignup() {
       msg = isEn ? 'This email is already registered. Please log in instead.' : '이미 가입된 이메일 계정입니다. 기존 계정으로 로그인해 주세요.';
     } else if (e && e.code === 'auth/invalid-email') {
       msg = isEn ? 'Invalid email format.' : '이메일 형식이 올바르지 않습니다.';
+    } else if (e && typeof e.code === 'string' && e.code.indexOf('bs/') === 0 && e.message) {
+      msg = e.message;
     } else if (e && e.code === 'auth/weak-password') {
       msg = isEn ? 'Password is too weak. Minimum 6 characters required.' : '비밀번호가 취약합니다. 최소 6자 이상 설정해 주세요.';
     }
@@ -436,8 +486,7 @@ async function doSignup() {
 
 // ── 게스트 로그인 ─────────────────────────────────────────────
 function doGuestLogin() {
-  localStorage.removeItem('bricksync_user_session');
-  localStorage.removeItem('bricksync_student_session');
+  // 로그인 정보는 지우지 않고 아래에서 바로 덮어쓴다 (지웠다 쓰면 다른 창이 "로그아웃됨"으로 오해한다)
   localStorage.removeItem('dashboard_stats_Guest');
   localStorage.removeItem('dashboard_stats_Guest_익명');
 
@@ -463,7 +512,8 @@ function doGuestLogin() {
   localStorage.setItem('bricksync_student_session', JSON.stringify(guestSession));
   localStorage.setItem('bricksync_user_session', JSON.stringify(guestSession));
   sessionStorage.setItem('brickSyncLastPage', 'index.html');
-  window.location.href = 'app.html';
+  // 이 로그인 화면이 앱 틀 안(iframe)에 떠 있어도 바깥 틀 전체를 새로 연다 (틀 안에 틀이 겹치지 않게)
+  try { window.top.location.href = 'app.html'; } catch (e) { window.location.href = 'app.html'; }
 }
 
 // ── 엔터키 지원 ───────────────────────────────────────────────
@@ -473,18 +523,28 @@ document.addEventListener('keydown', e => {
   else doSignup();
 });
 
-// ── 이미 로그인 상태면 자동 이동 ─────────────────────────────
+// ── 이미 로그인 상태면 자동 이동 (서버가 계속 켜져 있는 동안 로그인 유지) ──
+let _i18nReady = false, _authChecked = false;
+function _tryReveal() { if (_i18nReady && _authChecked && window.bsRevealLogin) window.bsRevealLogin(); }
 (async () => {
-  if (typeof firebaseAuth !== 'undefined' && firebaseAuth) {
-    firebaseAuth.onAuthStateChanged(async (user) => {
-      if (!user) return;
-      const profile = await BrickSyncAuth.getUserProfile(user.uid);
-      if (profile) BrickSyncAuth.redirectToHome(profile.role);
-    });
-  } else {
-    const legacy = BrickSyncAuth.getLegacySession();
-    if (legacy) { sessionStorage.setItem('brickSyncLastPage', 'index.html'); window.location.href = 'app.html'; }
-  }
+  try { if (window.BrickSyncBoot) await BrickSyncBoot.sync(); } catch (e) {}
+  try {
+    let role = '';
+    const cur = await BrickSyncAuth.getCurrentUser();
+    if (cur && cur.profile && cur.profile.role) role = cur.profile.role;
+    else {
+      const raw = localStorage.getItem('bricksync_student_session');
+      const s = raw ? JSON.parse(raw) : null;
+      if (s && s.name && (!s.expires || Date.now() < s.expires)) role = 'student';
+    }
+    if (role) {
+      if (role === 'teacher' || role === 'parent') { BrickSyncAuth.redirectToHome(role); return; }
+      sessionStorage.setItem('brickSyncLastPage', 'index.html');
+      window.location.href = 'app.html';
+      return;
+    }
+  } catch (e) { console.warn('[Login] 로그인 상태 확인 실패:', e); }
+  _authChecked = true; _tryReveal();
 })();
 
 // ── 다국어 언어 변경 버튼 지원 ─────────────────────────────
@@ -514,6 +574,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof applyBrickSyncLanguage === 'function') {
     applyBrickSyncLanguage(current);
   }
+  const waits = [document.fonts && document.fonts.ready].filter(Boolean);
+  ['assets/login_bg_blur.jpg', 'assets/bs_logo_vertical.png'].forEach(src => waits.push(new Promise(res => { const im = new Image(); im.onload = im.onerror = res; im.src = src; })));
+  Promise.all(waits).then(() => { _i18nReady = true; _tryReveal(); });
 });
 </script>
 </body>

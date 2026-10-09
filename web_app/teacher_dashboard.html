@@ -87,19 +87,109 @@ body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
 .toast{position:fixed;bottom:20px;right:20px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:12px 20px;border-radius:10px;font-size:.85rem;font-weight:700;z-index:9999;transform:translateY(80px);transition:.3s;opacity:0}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{border-color:#10b981;color:#6ee7b7}
+
+/* ===== 메인 화면 스타일: 파스텔 배경 + 유리 사이드바 + 흰 카드 ===== */
+html{background-color:#cfd8ee}
+body{background:transparent;color:#2b1b4d;position:relative}
+body::before{content:'';position:fixed;inset:0;background:url('assets/main_bg.jpg') center/cover no-repeat;z-index:-1}
+.sidebar{background:rgba(255,255,255,.5);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,.75);box-shadow:0 0 40px rgba(43,27,77,.12)}
+.sidebar-subtext{color:#5b5478}
+.nav-item{color:#2b1b4d}
+.nav-item:hover{background:rgba(255,255,255,.78);color:#6c1f86;box-shadow:0 4px 14px rgba(43,27,77,.12)}
+.nav-item.active{background:#6c1f86;color:#fff;box-shadow:0 6px 18px rgba(108,31,134,.32)}
+.nav-item.active i{color:#facc15}
+.teacher-badge{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.85)}
+.teacher-badge .avatar{background:#edbd95;color:#2b1b4d}
+.teacher-badge .role-label{color:#6c1f86}
+.page-title{color:#2b1b4d}
+.page-subtitle{color:#3f3a63;font-weight:600}
+.stat-card,.panel{background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.9);box-shadow:0 8px 24px rgba(43,27,77,.12)}
+.stat-card .label{color:#5b5478}
+.stat-card .value{color:#2b1b4d}
+.stat-card .sub{color:#2f7a4d}
+.panel-title i{color:#6c1f86}
+.code-input{background:#f6fbfe;border:1.5px solid #cfe9f2;color:#2b1b4d}
+.code-input::placeholder{color:#8a84a6}
+.code-input:focus{border-color:#a5b1d7;box-shadow:0 0 0 3px rgba(165,177,215,.35)}
+.btn-issue{background:#6c1f86;box-shadow:0 4px 0 #4a1360}
+.btn-issue:hover{background:#7a2a96}
+.btn-issue:active{transform:translateY(2px);box-shadow:0 2px 0 #4a1360}
+.code-result{background:#e2f5f9;border:1.5px solid #cfe9f2}
+.code-value{color:#6c1f86}
+.btn-copy{background:#a5b1d7;color:#2b1b4d}
+.btn-copy:hover{background:#8f9cc9;color:#2b1b4d}
+.student-item,.class-item{background:#f6fbfe;border:1px solid #d6edf5}
+.student-item .avatar-s{background:#edbd95;color:#2b1b4d}
+.student-item .s-class,.class-info{color:#7a7396}
+.s-status.online{background:#e8f4f2;color:#2f7a4d}
+.s-status.offline{background:#eef0f6;color:#7a7396}
+.btn-parent-code{border:1px solid #cfe9f2;color:#4b4570;background:#fff}
+.btn-parent-code:hover{border-color:#a5b1d7;color:#2b1b4d}
+.class-code-badge,.class-count{color:#6c1f86}
+.empty-state,.loading{color:#7a7396}
+.toast{background:#fff;border:1.5px solid #cfe9f2;color:#2b1b4d;box-shadow:0 10px 30px rgba(43,27,77,.2)}
+.toast.success{border-color:#a0c9c3;color:#2f6f66}
+.toast.error{border-color:#f9c4cf;color:#e11d48}
+.sync-note{font-size:.8rem;color:#7a7396;background:#fff7e6;border:1px solid #f0dcae;border-radius:8px;padding:8px 12px;margin-bottom:10px}
+.s-link{color:#2b1b4d;text-decoration:none;display:block;cursor:pointer}
+.s-link:hover{color:#6c1f86;text-decoration:underline}
+select.code-input{min-width:150px;flex:1;cursor:pointer}
+select.code-input:disabled{opacity:.6;cursor:not-allowed}
+.pc-who{font-weight:800;color:#2b1b4d;margin-right:10px}
+.pc-right{display:flex;align-items:center;gap:8px}
+#allStudents .student-list{max-height:none;overflow:visible}
+.student-block{display:flex;flex-direction:column;gap:8px}
+.student-item.clickable{cursor:pointer;transition:background .15s}
+.student-item.clickable:hover{background:#eef8fc}
+.student-item .s-link{color:#2b1b4d}
+.student-item .chev{margin-left:8px;color:#7a7396;transition:transform .2s}
+.student-block.open .chev{transform:rotate(180deg)}
+.student-block.open > .student-item{background:#e7f4fa;border-color:#a5b1d7}
+.student-detail{padding:6px 4px 14px}
+.detail-frame{width:100%;height:900px;border:0;background:transparent;display:block;margin-bottom:14px}
+.report-panel{padding:20px}
+.rp-hint{font-size:.82rem;color:#7a7396;margin:-6px 0 10px}
+.rp-text{width:100%;min-height:110px;resize:vertical;background:#f6fbfe;border:1.5px solid #cfe9f2;border-radius:10px;padding:12px 14px;color:#2b1b4d;font-family:inherit;font-size:.92rem;line-height:1.6;outline:none}
+.rp-text:focus{border-color:#a5b1d7;box-shadow:0 0 0 3px rgba(165,177,215,.35)}
+.rp-actions{display:flex;justify-content:flex-end;gap:8px;margin:10px 0 16px}
+.rp-summary{font-size:.9rem;color:#2b1b4d;margin-bottom:12px;padding:10px 14px;background:#fff7e6;border:1px solid #f0dcae;border-radius:10px}
+.rp-summary.muted,.rp-fb.muted{color:#7a7396;background:#f6fbfe;border-color:#d6edf5}
+.rp-item{border:1px solid #d6edf5;background:#f6fbfe;border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.rp-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.8rem;color:#7a7396;margin-bottom:8px}
+.rp-tools{display:flex;gap:6px}
+.rp-body{white-space:pre-wrap;word-break:keep-all;color:#2b1b4d;font-size:.92rem;line-height:1.65}
+.rp-fb{margin-top:10px;padding:10px 12px;background:#fff;border:1px solid #cfe9f2;border-radius:10px;font-size:.88rem;color:#2b1b4d}
+.rp-fb .rp-body{margin-top:4px;font-size:.88rem}
+.rp-date{font-size:.75rem;color:#7a7396;margin-left:6px}
+.bs-stars{display:inline-flex;gap:2px;vertical-align:middle}
+.bs-star{fill:#e2dff0;stroke:#cfc9e6;stroke-width:1}
+.bs-star.on{fill:#f6b73c;stroke:#e09a14}
+.bs-rate{display:inline-flex;gap:4px}
+.bs-rate button{background:none;border:none;padding:2px;cursor:pointer;line-height:0}
+.bs-rate button:focus-visible{outline:3px solid #a5b1d7;border-radius:6px}
+.sidebar-bottom{position:fixed;top:14px;right:22px;z-index:60;margin:0;display:flex;align-items:center;gap:8px}
+.teacher-badge,.parent-badge{margin:0 !important;padding:6px 16px 6px 8px !important;border-radius:999px !important;box-shadow:0 4px 14px rgba(43,27,77,.12)}
+.sidebar-bottom .nav-item{width:auto;padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.9);font-size:.85rem;box-shadow:0 4px 14px rgba(43,27,77,.12);white-space:nowrap}
+.main{padding-top:36px}
+@media(max-width:760px){.sidebar-bottom{position:static;padding:8px 12px}}
+.student-block.open{background:#e7f4fa;border:1.5px solid #a5b1d7;border-radius:16px;padding:8px}
+.student-block.open > .student-item{background:transparent;border-color:transparent}
+.student-block.open .student-detail{padding:4px 6px 10px}
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
-    <img src="./assets/bslogo.png" alt="BrickSync" class="sidebar-logo">
+    <img src="./assets/bs_logo_vertical.png" alt="BrickSync" class="sidebar-logo">
     <span class="sidebar-subtext">교사 관리 대시보드</span>
   </div>
   <button class="nav-item active" onclick="showSection('overview')"><i class="fas fa-home"></i> 홈</button>
   <button class="nav-item" onclick="showSection('students')"><i class="fas fa-users"></i> 학생 관리</button>
   <button class="nav-item" onclick="showSection('classcodes')"><i class="fas fa-key"></i> 클래스 코드</button>
   <button class="nav-item" onclick="showSection('parentcodes')"><i class="fas fa-link"></i> 학부모 코드</button>
+</aside>
+
   <div class="sidebar-bottom">
     <div class="teacher-badge">
       <div class="avatar" id="sidebarAvatar">T</div>
@@ -110,7 +200,6 @@ body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
     </div>
     <button class="nav-item" onclick="BrickSyncAuth.signOut()"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
   </div>
-</aside>
 
 <main class="main" id="mainContent">
   <div class="loading"><i class="fas fa-spinner"></i> 로딩 중...</div>
@@ -124,11 +213,20 @@ body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase_config.js"></script>
 <script src="auth.js"></script>
+<script src="bs_dialog.js"></script>
+<script src="reports.js"></script>
 
 <script>
 let teacherProfile = null;
 let teacherUid = null;
 let currentSection = 'overview';
+let pendingParentStudent = null;
+
+const LS_USERS = 'bricksync_local_users';
+const LS_CLASSES = 'bricksync_local_classes';
+const LS_PARENT = 'bricksync_local_parent_codes';
+const CLOUD_TIMEOUT = 6000;
+const CODE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const SECTIONS = {
   overview: renderOverview,
@@ -167,16 +265,102 @@ function showSection(section) {
   SECTIONS[section]?.();
 }
 
+// ── 데이터 불러오기 (클라우드 + 이 기기에 저장된 정보, 무한 로딩 없이) ──
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function readLocal(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) { return {}; }
+}
+function withTimeout(p, ms) {
+  return Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+}
+function fmtDate(iso) {
+  const d = new Date(iso);
+  if (!iso || isNaN(d)) return '';
+  return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
+}
+function offlineNote(failed) {
+  return failed ? '<div class="sync-note">클라우드에 연결하지 못해 이 기기에 저장된 정보만 보여드려요.</div>' : '';
+}
+
+async function loadStudents() {
+  const map = {};
+  let failed = !firestore;
+  if (firestore) {
+    try {
+      const snap = await withTimeout(firestore.collection('users').where('teacherUid','==',teacherUid).where('role','==','student').get(), CLOUD_TIMEOUT);
+      snap.forEach(d => { const s = d.data(); const uid = s.uid || d.id; map[uid] = { ...s, uid }; });
+    } catch (e) { failed = true; console.warn('[Teacher] 학생 목록 클라우드 조회 실패:', e); }
+  }
+  const users = readLocal(LS_USERS);
+  Object.keys(users).forEach(k => {
+    const p = users[k] && users[k].profile ? users[k].profile : users[k];
+    if (p && p.role === 'student' && p.teacherUid === teacherUid && p.uid && !map[p.uid]) map[p.uid] = p;
+  });
+  const list = Object.values(map).sort((a, b) => String(a.displayName || '').localeCompare(String(b.displayName || ''), 'ko'));
+  return { list, failed };
+}
+
+async function loadClasses() {
+  const map = {};
+  let failed = !firestore;
+  if (firestore) {
+    try {
+      const snap = await withTimeout(firestore.collection('classes').where('teacherUid','==',teacherUid).get(), CLOUD_TIMEOUT);
+      snap.forEach(d => { map[d.id] = { code: d.id, ...d.data() }; });
+    } catch (e) { failed = true; console.warn('[Teacher] 클래스 클라우드 조회 실패:', e); }
+  }
+  const local = readLocal(LS_CLASSES);
+  Object.keys(local).forEach(code => {
+    const c = local[code];
+    if (c && c.teacherUid === teacherUid && !map[code]) map[code] = { code, ...c };
+  });
+  const list = Object.values(map).sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  return { list, failed };
+}
+
+async function loadParentCodes() {
+  const map = {};
+  let failed = !firestore;
+  if (firestore) {
+    try {
+      const snap = await withTimeout(firestore.collection('parentCodes').where('teacherUid','==',teacherUid).get(), CLOUD_TIMEOUT);
+      snap.forEach(d => { map[d.id] = { code: d.id, ...d.data() }; });
+    } catch (e) { failed = true; console.warn('[Teacher] 학부모 코드 클라우드 조회 실패:', e); }
+  }
+  const local = readLocal(LS_PARENT);
+  Object.keys(local).forEach(code => {
+    const p = local[code];
+    if (p && p.teacherUid === teacherUid && !map[code]) map[code] = { code, ...p };
+  });
+  const list = Object.values(map).sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+  return { list, failed };
+}
+
+function classNameOf(student, classes) {
+  if (student.className) return student.className;
+  const c = (classes || []).find(x => x.code === student.classCode);
+  return c ? c.className : '';
+}
+function codeState(p) {
+  if (p.usedByUid) return 'used';
+  const t0 = Date.parse(p.createdAt);
+  if (!isNaN(t0) && Date.now() - t0 > CODE_TTL_MS) return 'expired';
+  return 'valid';
+}
+const STATE_LABEL = { used: '사용됨', expired: '만료', valid: '사용 가능' };
+
 // ── 홈 개요 ──────────────────────────────────────────────────
 async function renderOverview() {
   const main = document.getElementById('mainContent');
   main.innerHTML = `
-    <div class="page-title">안녕하세요, ${teacherProfile?.displayName || '선생님'} 👋</div>
+    <div class="page-title">안녕하세요, ${esc(teacherProfile?.displayName || '선생님')}</div>
     <div class="page-subtitle">오늘도 BrickSync와 함께 즐거운 수업을 만들어보세요!</div>
     <div class="stats-grid" id="statsGrid">
       <div class="stat-card"><div class="label">총 학생 수</div><div class="value" id="statStudents">-</div></div>
       <div class="stat-card"><div class="label">클래스 수</div><div class="value" id="statClasses">-</div></div>
-      <div class="stat-card"><div class="label">발급된 학부모 코드</div><div class="value" id="statParentCodes">-</div></div>
+      <div class="stat-card"><div class="label">유효한 학부모 코드</div><div class="value" id="statParentCodes">-</div></div>
     </div>
     <div class="panel-grid">
       <div class="panel">
@@ -191,47 +375,28 @@ async function renderOverview() {
         </div>
       </div>
       <div class="panel">
-        <div class="panel-title"><i class="fas fa-users"></i> 최근 접속 학생</div>
+        <div class="panel-title"><i class="fas fa-users"></i> 최근 등록 학생</div>
         <div id="recentStudents" class="loading"><i class="fas fa-spinner"></i> 로딩 중...</div>
       </div>
     </div>
   `;
-  loadStats();
-  loadRecentStudents();
-}
-
-async function loadStats() {
-  if (!firestore) return;
-  const [classSnap, parentSnap] = await Promise.all([
-    firestore.collection('classes').where('teacherUid','==',teacherUid).get(),
-    firestore.collection('parentCodes').where('teacherUid','==',teacherUid).get()
-  ]);
-  let totalStudents = 0;
-  classSnap.forEach(d => { totalStudents += (d.data().studentUids || []).length; });
-  document.getElementById('statStudents').textContent = totalStudents;
-  document.getElementById('statClasses').textContent = classSnap.size;
-  document.getElementById('statParentCodes').textContent = parentSnap.size;
-}
-
-async function loadRecentStudents() {
-  if (!firestore) { document.getElementById('recentStudents').innerHTML = '<div class="empty-state"><i class="fas fa-wifi-slash"></i>오프라인 모드</div>'; return; }
-  const snap = await firestore.collection('users')
-    .where('teacherUid','==',teacherUid)
-    .where('role','==','student')
-    .limit(5).get();
+  const [st, cl, pc] = await Promise.all([loadStudents(), loadClasses(), loadParentCodes()]);
+  if (currentSection !== 'overview') return;
+  document.getElementById('statStudents').textContent = st.list.length;
+  document.getElementById('statClasses').textContent = cl.list.length;
+  document.getElementById('statParentCodes').textContent = pc.list.filter(p => codeState(p) === 'valid').length;
   const el = document.getElementById('recentStudents');
-  if (snap.empty) { el.innerHTML = '<div class="empty-state"><i class="fas fa-user-plus"></i>아직 등록된 학생이 없습니다</div>'; return; }
-  el.innerHTML = '<div class="student-list">' + snap.docs.map(d => {
-    const s = d.data();
-    return `<div class="student-item">
-      <div class="avatar-s">${(s.displayName||'?')[0]}</div>
-      <div><div class="s-name">${s.displayName}</div><div class="s-class">${s.className||''}</div></div>
-      <span class="s-status offline">오프라인</span>
-    </div>`;
-  }).join('') + '</div>';
+  el.className = '';
+  if (!st.list.length) { el.innerHTML = offlineNote(st.failed) + '<div class="empty-state"><i class="fas fa-user-plus"></i>관리 중인 학생이 없습니다</div>'; return; }
+  const recent = st.list.slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || ''))).slice(0, 5);
+  el.innerHTML = offlineNote(st.failed) + '<div class="student-list">' + recent.map(s => `
+    <div class="student-item">
+      <div class="avatar-s">${esc((s.displayName || '?')[0])}</div>
+      <div><div class="s-name">${esc(s.displayName)}</div><div class="s-class">${esc(classNameOf(s, cl.list))}</div></div>
+    </div>`).join('') + '</div>';
 }
 
-// ── 클래스 코드 발급 ─────────────────────────────────────────
+// ── 클래스 코드 발급 (홈) ────────────────────────────────────
 async function issueClassCode() {
   const name = document.getElementById('newClassName').value.trim();
   if (!name) { showToast('클래스명을 입력해주세요.', 'error'); return; }
@@ -241,6 +406,7 @@ async function issueClassCode() {
     document.getElementById('classCodeResult').classList.add('show');
     document.getElementById('newClassName').value = '';
     showToast(`클래스 코드 발급 완료: ${code}`, 'success');
+    loadClasses().then(cl => { const e = document.getElementById('statClasses'); if (e) e.textContent = cl.list.length; });
   } catch(e) { showToast('오류: ' + e.message, 'error'); }
 }
 
@@ -248,38 +414,173 @@ async function issueClassCode() {
 async function renderStudents() {
   document.getElementById('mainContent').innerHTML = `
     <div class="page-title">학생 관리</div>
-    <div class="page-subtitle">내 클래스에 등록된 학생 목록입니다.</div>
+    <div class="page-subtitle">내 클래스에 연결된 학생 목록입니다. 학생을 누르면 아래로 학습 현황과 리포트가 펼쳐져요.</div>
     <div class="panel">
       <div class="panel-title"><i class="fas fa-users"></i> 전체 학생 목록</div>
       <div id="allStudents" class="loading"><i class="fas fa-spinner"></i> 로딩 중...</div>
     </div>`;
 
-  if (!firestore) return;
-  const snap = await firestore.collection('users').where('teacherUid','==',teacherUid).where('role','==','student').get();
+  const [st, cl] = await Promise.all([loadStudents(), loadClasses()]);
+  if (currentSection !== 'students') return;
   const el = document.getElementById('allStudents');
-  if (snap.empty) { el.innerHTML = '<div class="empty-state"><i class="fas fa-user-plus"></i>등록된 학생이 없습니다.<br>클래스 코드를 발급하여 학생을 초대하세요.</div>'; return; }
-
-  el.innerHTML = '<div class="student-list">' + snap.docs.map(d => {
-    const s = d.data();
-    return `<div class="student-item">
-      <div class="avatar-s">${(s.displayName||'?')[0]}</div>
-      <div><div class="s-name">${s.displayName}</div><div class="s-class">${s.className||''} · ${s.email}</div></div>
-      <button class="btn-parent-code" onclick="issueParentCode('${d.id}','${s.displayName}')">
-        <i class="fas fa-link"></i> 학부모 코드
-      </button>
-    </div>`;
-  }).join('') + '</div>';
+  el.className = '';
+  if (!st.list.length) {
+    el.innerHTML = offlineNote(st.failed) + '<div class="empty-state"><i class="fas fa-user-plus"></i>관리 중인 학생 없음<br>클래스 코드를 발급해 학생을 초대하세요.</div>';
+    return;
+  }
+  studentIndex = {}; openStudentUid = null; editingReport = null;
+  st.list.forEach(s => { studentIndex[s.uid] = s; });
+  el.innerHTML = offlineNote(st.failed) + '<div class="student-list">' + st.list.map(s => `
+    <div class="student-block" id="sb_${esc(s.uid)}">
+      <div class="student-item clickable" onclick="toggleStudent('${esc(s.uid)}')">
+        <div class="avatar-s">${esc((s.displayName || '?')[0])}</div>
+        <div>
+          <div class="s-name s-link">${esc(s.displayName)}</div>
+          <div class="s-class">${esc(classNameOf(s, cl.list))}${s.email ? ' · ' + esc(s.email) : ''}</div>
+        </div>
+        <button class="btn-parent-code" onclick="event.stopPropagation(); openParentCodeFor('${esc(s.uid)}')">학부모 코드</button>
+        <span class="chev"><i class="fas fa-chevron-down"></i></span>
+      </div>
+      <div class="student-detail" id="sd_${esc(s.uid)}" hidden></div>
+    </div>`).join('') + '</div>';
 }
 
-// ── 학부모 연결 코드 발급 모달 ───────────────────────────────
-async function issueParentCode(studentUid, studentName) {
-  if (!confirm(`${studentName} 학생의 학부모 연결 코드를 발급할까요?\n코드는 7일간 유효합니다.`)) return;
+// ── 학생 상세 (이름을 누르면 아래로 펼쳐짐) ─────────────────
+let studentIndex = {};
+let openStudentUid = null;
+let editingReport = null; // { uid, id }
+
+function $id(id) { return document.getElementById(id); }
+
+function toggleStudent(uid) {
+  const prev = openStudentUid;
+  if (prev) closeStudentDetail(prev);
+  if (prev === uid) { openStudentUid = null; return; }
+  openStudentUid = uid;
+  openStudentDetail(uid);
+}
+
+function closeStudentDetail(uid) {
+  const d = $id('sd_' + uid), b = $id('sb_' + uid);
+  if (d) { d.hidden = true; d.innerHTML = ''; }
+  if (b) b.classList.remove('open');
+  if (editingReport && editingReport.uid === uid) editingReport = null;
+}
+
+function openStudentDetail(uid) {
+  const s = studentIndex[uid];
+  const d = $id('sd_' + uid), b = $id('sb_' + uid);
+  if (!s || !d) return;
+  b.classList.add('open');
+  d.hidden = false;
+  d.innerHTML = `
+    <iframe class="detail-frame" id="sf_${esc(uid)}" src="dashboard_v2.html?student=${encodeURIComponent(s.displayName || '')}&embed=1" title="${esc(s.displayName)} 학습 현황"></iframe>
+    <div class="panel report-panel">
+      <div class="panel-title"><i class="fas fa-pen-to-square"></i> 선생님 리포트</div>
+      <div class="rp-hint">${esc(s.displayName)} 학생에 대해 학부모님께 전하고 싶은 내용을 적어 주세요. 저장하면 학부모 화면에서 볼 수 있어요.</div>
+      <textarea class="rp-text" id="rpText_${esc(uid)}" maxlength="2000" placeholder="예: 이번 주에는 반복문 블록을 스스로 활용해 자동차를 움직였어요. 집중력이 좋아졌습니다."></textarea>
+      <div class="rp-actions">
+        <button class="btn-parent-code" id="rpCancel_${esc(uid)}" style="display:none" onclick="cancelEditReport('${esc(uid)}')">수정 취소</button>
+        <button class="btn-issue" id="rpSave_${esc(uid)}" onclick="saveReport('${esc(uid)}')">리포트 저장</button>
+      </div>
+      <div class="rp-list" id="rpList_${esc(uid)}"><div class="loading"><i class="fas fa-spinner"></i> 로딩 중...</div></div>
+    </div>`;
+  loadReportList(uid);
+}
+
+// iframe(학습 현황)이 알려 주는 높이에 맞춰 늘린다
+window.addEventListener('message', (e) => {
+  if (e.origin !== location.origin) return;
+  const h = e.data && e.data.bsEmbedHeight;
+  if (!h || !openStudentUid) return;
+  const f = $id('sf_' + openStudentUid);
+  if (f && e.source === f.contentWindow) f.style.height = Math.ceil(h) + 'px';
+});
+
+async function saveReport(uid) {
+  const s = studentIndex[uid];
+  const ta = $id('rpText_' + uid);
+  const text = ta.value.trim();
+  if (!text) { showToast('리포트 내용을 입력해주세요.', 'error'); return; }
+  const btn = $id('rpSave_' + uid);
+  btn.disabled = true;
   try {
-    const code = await BrickSyncAuth.createParentCode(teacherUid, studentUid, studentName);
-    const msg = `✅ ${studentName} 학부모 연결 코드:\n\n${code}\n\n이 코드를 학부모님께 전달하세요. (7일 유효)`;
-    alert(msg);
-    showToast(`학부모 코드 발급: ${code}`, 'success');
-  } catch(e) { showToast('오류: ' + e.message, 'error'); }
+    let r;
+    if (editingReport && editingReport.uid === uid) {
+      r = await BrickSyncReports.updateReport(editingReport.id, text);
+    } else {
+      r = await BrickSyncReports.addReport({
+        teacherUid, teacherName: teacherProfile?.displayName || '선생님',
+        studentUid: uid, studentName: s.displayName, text
+      });
+    }
+    ta.value = '';
+    cancelEditReport(uid);
+    if (r.cloudOk) showToast('리포트를 저장했어요.', 'success');
+    else showToast('이 기기에만 저장됐어요. 학부모님께 보이려면 인터넷 연결과 Firestore 규칙(teacherReports)을 확인해 주세요.', 'error');
+    loadReportList(uid);
+  } catch (e) { showToast('오류: ' + e.message, 'error'); }
+  btn.disabled = false;
+}
+
+function startEditReport(uid, id, text) {
+  editingReport = { uid, id };
+  const ta = $id('rpText_' + uid);
+  ta.value = text; ta.focus();
+  $id('rpSave_' + uid).textContent = '수정 저장';
+  $id('rpCancel_' + uid).style.display = '';
+}
+
+function cancelEditReport(uid) {
+  if (editingReport && editingReport.uid === uid) { editingReport = null; }
+  const save = $id('rpSave_' + uid), cancel = $id('rpCancel_' + uid);
+  if (save) save.textContent = '리포트 저장';
+  if (cancel) cancel.style.display = 'none';
+  const ta = $id('rpText_' + uid);
+  if (ta && !editingReport) { /* 입력 중이던 내용은 그대로 둔다 */ }
+}
+
+async function removeReport(uid, id) {
+  if (!(await bsConfirm({ title: '이 리포트를 삭제할까요?', msg: '학부모 화면에서도 사라지고 되돌릴 수 없어요.', yes: '삭제', danger: true }))) return;
+  await BrickSyncReports.deleteReport(id);
+  showToast('리포트를 삭제했어요.', 'success');
+  loadReportList(uid);
+}
+
+async function loadReportList(uid) {
+  const [rp, fb] = await Promise.all([BrickSyncReports.listReports(uid), BrickSyncReports.listFeedback(uid)]);
+  const el = $id('rpList_' + uid);
+  if (!el || openStudentUid !== uid) return;
+  const avg = fb.list.length ? fb.list.reduce((a, f) => a + (Number(f.rating) || 0), 0) / fb.list.length : 0;
+  const summary = fb.list.length
+    ? `<div class="rp-summary">학부모 만족도 ${BrickSyncReports.starsText(Math.round(avg), 16)} <b>${avg.toFixed(1)}</b> / 5 · 리뷰 ${fb.list.length}건</div>`
+    : '<div class="rp-summary muted">아직 학부모 리뷰가 없어요.</div>';
+  if (!rp.list.length) {
+    el.innerHTML = offlineNote(rp.failed) + summary + '<div class="empty-state" style="padding:16px"><i class="fas fa-pen-to-square"></i>작성한 리포트가 없어요.</div>';
+    return;
+  }
+  el.innerHTML = offlineNote(rp.failed) + summary + rp.list.map(r => {
+    const fbs = fb.list.filter(f => f.reportId === r.id);
+    const fbHtml = fbs.length ? fbs.map(f => `
+      <div class="rp-fb">
+        <div>${BrickSyncReports.starsText(Number(f.rating) || 0, 15)} <b>${esc(f.parentName || '학부모')}</b> <span class="rp-date">${esc(fmtDate(f.updatedAt))}</span></div>
+        ${f.text ? `<div class="rp-body">${esc(f.text)}</div>` : ''}
+      </div>`).join('') : '<div class="rp-fb muted">이 리포트에 대한 학부모 리뷰는 아직 없어요.</div>';
+    return `<div class="rp-item">
+      <div class="rp-head"><span>${esc(fmtDate(r.createdAt))} · ${esc(r.teacherName || '선생님')}${r.updatedAt && r.updatedAt !== r.createdAt ? ' (수정됨)' : ''}</span>
+        <span class="rp-tools">
+          <button class="btn-parent-code" onclick="startEditReport('${esc(uid)}','${esc(r.id)}', ${esc(JSON.stringify(r.text || ''))})">수정</button>
+          <button class="btn-parent-code" onclick="removeReport('${esc(uid)}','${esc(r.id)}')">삭제</button>
+        </span></div>
+      <div class="rp-body">${esc(r.text)}</div>
+      ${fbHtml}
+    </div>`;
+  }).join('');
+}
+
+function openParentCodeFor(uid) {
+  pendingParentStudent = uid;
+  showSection('parentcodes');
 }
 
 // ── 클래스 코드 목록 ─────────────────────────────────────────
@@ -295,73 +596,168 @@ async function renderClassCodes() {
       </div>
       <div class="code-result" id="classCodeResult2">
         <span class="code-value" id="classCodeValue2">-</span>
-        <button class="btn-copy" onclick="copyText('classCodeValue2','클래스 코드')">📋 복사</button>
+        <button class="btn-copy" onclick="copyText('classCodeValue2','클래스 코드')">복사</button>
       </div>
     </div>
     <div class="panel" style="margin-top:20px">
       <div class="panel-title"><i class="fas fa-list"></i> 발급된 코드 목록</div>
       <div id="classCodeList" class="loading"><i class="fas fa-spinner"></i> 로딩 중...</div>
     </div>`;
+  fillClassCodeList();
+}
 
-  if (!firestore) return;
-  const snap = await firestore.collection('classes').where('teacherUid','==',teacherUid).get();
+async function fillClassCodeList() {
+  const cl = await loadClasses();
   const el = document.getElementById('classCodeList');
-  if (snap.empty) { el.innerHTML = '<div class="empty-state"><i class="fas fa-key"></i>발급된 클래스 코드가 없습니다.</div>'; return; }
-  el.innerHTML = '<div class="class-list">' + snap.docs.map(d => {
-    const c = d.data();
-    return `<div class="class-item">
+  if (!el) return;
+  el.className = '';
+  if (!cl.list.length) { el.innerHTML = offlineNote(cl.failed) + '<div class="empty-state"><i class="fas fa-key"></i>발급된 클래스 코드가 없습니다.</div>'; return; }
+  el.innerHTML = offlineNote(cl.failed) + '<div class="class-list">' + cl.list.map(c => `
+    <div class="class-item">
       <div>
-        <div class="class-code-badge">${d.id}</div>
-        <div class="class-info">${c.className}</div>
+        <div class="class-code-badge">${esc(c.code)}</div>
+        <div class="class-info">${esc(c.className)}</div>
       </div>
-      <div class="class-count">${(c.studentUids||[]).length}명 가입</div>
-    </div>`;
-  }).join('') + '</div>';
+      <div class="class-count">${(c.studentUids || []).length}명 가입</div>
+    </div>`).join('') + '</div>';
 }
 
 async function issueClassCode2() {
   const name = document.getElementById('newClassName2').value.trim();
   if (!name) { showToast('클래스명을 입력해주세요.', 'error'); return; }
-  const code = await BrickSyncAuth.createClassCode(teacherUid, name);
-  document.getElementById('classCodeValue2').textContent = code;
-  document.getElementById('classCodeResult2').classList.add('show');
-  document.getElementById('newClassName2').value = '';
-  showToast('클래스 코드 발급 완료!', 'success');
-  renderClassCodes();
+  try {
+    const code = await BrickSyncAuth.createClassCode(teacherUid, name);
+    document.getElementById('classCodeValue2').textContent = code;
+    document.getElementById('classCodeResult2').classList.add('show');
+    document.getElementById('newClassName2').value = '';
+    showToast('클래스 코드 발급 완료!', 'success');
+    fillClassCodeList();
+  } catch(e) { showToast('오류: ' + e.message, 'error'); }
 }
 
-// ── 학부모 코드 목록 ─────────────────────────────────────────
+// ── 학부모 코드 (클래스 → 학생 선택 → 발급) ──────────────────
+let pcStudents = [], pcClasses = [], pcCodes = [];
+
 async function renderParentCodes() {
   document.getElementById('mainContent').innerHTML = `
     <div class="page-title">학부모 연결 코드</div>
-    <div class="page-subtitle">발급한 학부모 연결 코드 목록입니다. (7일 유효)</div>
+    <div class="page-subtitle">클래스와 학생을 고르면 학부모 연결 코드를 만들어 드려요. 학생 한 명당 유효한 코드는 하나이고, 7일간 쓸 수 있어요.</div>
     <div class="panel">
+      <div class="panel-title"><i class="fas fa-link"></i> 학부모 코드 발급</div>
+      <div class="code-row">
+        <select class="code-input" id="pcClass" onchange="onPcClassChange()"><option value="">클래스 선택</option></select>
+        <select class="code-input" id="pcStudent" disabled><option value="">학생 선택</option></select>
+        <button class="btn-issue" onclick="issueParentCode()">발급</button>
+      </div>
+      <div class="code-result" id="pcResult">
+        <span class="pc-who" id="pcWho"></span>
+        <span class="code-value" id="pcValue">-</span>
+        <button class="btn-copy" onclick="copyText('pcValue','학부모 코드')">복사</button>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:20px">
+      <div class="panel-title"><i class="fas fa-list"></i> 발급된 코드 목록</div>
       <div id="parentCodeList" class="loading"><i class="fas fa-spinner"></i> 로딩 중...</div>
     </div>`;
 
-  if (!firestore) return;
-  const snap = await firestore.collection('parentCodes').where('teacherUid','==',teacherUid).orderBy('createdAt','desc').limit(20).get();
+  const [st, cl, pc] = await Promise.all([loadStudents(), loadClasses(), loadParentCodes()]);
+  if (currentSection !== 'parentcodes') return;
+  pcStudents = st.list; pcClasses = cl.list; pcCodes = pc.list;
+
+  // 클래스 선택지: 등록된 클래스 + 학생들이 속한 클래스 이름
+  const names = [];
+  pcClasses.forEach(c => { if (c.className && names.indexOf(c.className) < 0) names.push(c.className); });
+  pcStudents.forEach(s => { const n = classNameOf(s, pcClasses); if (n && names.indexOf(n) < 0) names.push(n); });
+  document.getElementById('pcClass').innerHTML = '<option value="">클래스 선택</option>' + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+
+  if (pendingParentStudent) {
+    const s = pcStudents.find(x => x.uid === pendingParentStudent);
+    pendingParentStudent = null;
+    if (s) {
+      document.getElementById('pcClass').value = classNameOf(s, pcClasses);
+      onPcClassChange();
+      document.getElementById('pcStudent').value = s.uid;
+    }
+  }
+  drawParentCodeList(st.failed || cl.failed || pc.failed);
+}
+
+function onPcClassChange() {
+  const cls = document.getElementById('pcClass').value;
+  const sel = document.getElementById('pcStudent');
+  const list = cls ? pcStudents.filter(s => classNameOf(s, pcClasses) === cls) : [];
+  sel.disabled = !cls;
+  sel.innerHTML = '<option value="">' + (cls && !list.length ? '이 클래스에 학생이 없어요' : '학생 선택') + '</option>' +
+    list.map(s => `<option value="${esc(s.uid)}">${esc(s.displayName)}</option>`).join('');
+}
+
+function drawParentCodeList(failed) {
   const el = document.getElementById('parentCodeList');
-  if (snap.empty) { el.innerHTML = '<div class="empty-state"><i class="fas fa-link"></i>발급된 학부모 코드가 없습니다.<br>학생 관리 탭에서 학생별로 코드를 발급하세요.</div>'; return; }
-  el.innerHTML = '<div class="class-list">' + snap.docs.map(d => {
-    const p = d.data();
-    const used = !!p.usedByUid;
+  if (!el) return;
+  el.className = '';
+  if (!pcCodes.length) {
+    el.innerHTML = offlineNote(failed) + '<div class="empty-state"><i class="fas fa-link"></i>발급된 학부모 코드가 없습니다.<br>위에서 클래스와 학생을 고른 뒤 발급하세요.</div>';
+    return;
+  }
+  el.innerHTML = offlineNote(failed) + '<div class="class-list">' + pcCodes.map(p => {
+    const stu = pcStudents.find(s => s.uid === p.studentUid);
+    const cname = p.className || (stu ? classNameOf(stu, pcClasses) : '') || '클래스 미지정';
+    const state = codeState(p);
     return `<div class="class-item">
       <div>
-        <div class="class-code-badge">${d.id}</div>
-        <div class="class-info">자녀: ${p.studentName}</div>
+        <div class="class-code-badge">${esc(p.code)}</div>
+        <div class="class-info">${esc(p.studentName || (stu && stu.displayName) || '학생')} · ${esc(cname)}</div>
+        <div class="class-info">${esc(fmtDate(p.createdAt))} 발급</div>
       </div>
-      <div>
-        <span class="s-status ${used ? 'offline' : 'online'}">${used ? '사용됨' : '미사용'}</span>
+      <div class="pc-right">
+        <span class="s-status ${state === 'valid' ? 'online' : 'offline'}">${STATE_LABEL[state]}</span>
+        ${state === 'valid' ? `<button class="btn-parent-code" onclick="copyCode('${esc(p.code)}')">복사</button>` : ''}
       </div>
     </div>`;
   }).join('') + '</div>';
 }
 
+async function issueParentCode() {
+  const uid = document.getElementById('pcStudent').value;
+  const cls = document.getElementById('pcClass').value;
+  if (!cls) { showToast('클래스를 먼저 선택해주세요.', 'error'); return; }
+  if (!uid) { showToast('학생을 선택해주세요.', 'error'); return; }
+  const stu = pcStudents.find(s => s.uid === uid);
+  if (!stu) return;
+  const name = stu.displayName || '학생';
+
+  // 학생 한 명당 유효한 코드는 하나만: 이미 있으면 확인 후 이전 코드를 없앤다
+  pcCodes = (await loadParentCodes()).list;
+  const old = pcCodes.filter(p => p.studentUid === uid && codeState(p) === 'valid');
+  if (old.length) {
+    const ok = await bsConfirm({ title: `${name} 학생에게는 이미 사용 가능한 코드가 있어요`, msg: '새로 발급하면 이전 코드는 더 이상 쓸 수 없게 돼요.', yes: '새로 발급', danger: true });
+    if (!ok) return;
+  } else if (!(await bsConfirm({ title: `${name} 학생의 학부모 연결 코드를 발급할까요?`, msg: '코드는 7일간 유효합니다.', yes: '발급하기' }))) return;
+
+  try {
+    for (const o of old) await BrickSyncAuth.revokeParentCode(o.code);
+    const code = await BrickSyncAuth.createParentCode(teacherUid, uid, name, cls);
+    document.getElementById('pcWho').textContent = `${name} · ${cls}`;
+    document.getElementById('pcValue').textContent = code;
+    document.getElementById('pcResult').classList.add('show');
+    if (BrickSyncAuth.parentCodeCloudFailed()) {
+      await bsAlert({ kind: 'error', title: '코드를 클라우드에 저장하지 못했어요', code: code, msg: '이 기기에만 저장되어, 학부모님이 다른 기기에서 가입하면 코드를 찾지 못해요. 인터넷 연결과 Firestore 규칙(parentCodes)을 확인한 뒤 다시 발급해 주세요.' });
+    } else {
+      await bsAlert({ kind: 'success', title: `${name} · ${cls}`, code: code, msg: '이 코드를 학부모님께 전달하세요. (7일 유효)' });
+    }
+    const pc = await loadParentCodes();
+    pcCodes = pc.list.filter(p => !old.some(o => o.code === p.code));
+    drawParentCodeList(pc.failed);
+  } catch(e) { showToast('오류: ' + e.message, 'error'); }
+}
+
 // ── 유틸 ─────────────────────────────────────────────────────
+function copyCode(code) {
+  navigator.clipboard.writeText(code).then(() => showToast(`학부모 코드 복사 완료: ${code}`, 'success'), () => showToast(code, 'info'));
+}
 function copyText(id, label) {
   const val = document.getElementById(id).textContent;
-  navigator.clipboard.writeText(val).then(() => showToast(`${label} 복사 완료: ${val}`, 'success'));
+  navigator.clipboard.writeText(val).then(() => showToast(`${label} 복사 완료: ${val}`, 'success'), () => showToast(val, 'info'));
 }
 </script>
 <script src="settings.js"></script>

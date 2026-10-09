@@ -26,13 +26,13 @@
    - 레고 물리 모터 제어 큐(`bleQueue`, `directMotorQueue`) 및 Web Bluetooth LWP3 프로토콜
    - 3x3 라이트 매트릭스 제어(0x41/0x51), 자이로 틸트 제어
    - 6, 7, 8단원의 음성 인식(Speech Parser), 비전 AI(Monster Vision), 패럿 서보 모터 로직
-2. **수정 후 필수 3종 무결성 검증 (0 Fail 원칙)**:
-   수정 후 반드시 아래 3개의 검증 스크립트를 터미널에서 실행하여 100% 통과(Pass)를 확인해야 합니다:
+2. **수정 후 필수 2종 무결성 검증 (0 Fail 원칙)**:
+   수정 후 반드시 아래 2개의 검증 스크립트를 터미널에서 실행하여 100% 통과(Pass)를 확인해야 합니다:
    ```bash
-   py verify_ai_calibrations.py   # AI 융합 및 듀얼 큐 타이밍 검증
-   py check_active_syntax.py      # 자바스크립트 구문 오류 및 깨짐 검사
-   py test_all_i18n.py            # 다국어(i18n) 태그 누락 검사
+   py check_active_syntax.py      # 자바스크립트 구문 오류 검사 + 미러 4곳 동일성 검사
+   py test_all_i18n.py            # 다국어(i18n) 태그 누락 검사 (ko/en 사전)
    ```
+   (AI·듀얼 큐 타이밍 검증 스크립트 `verify_ai_calibrations.py`는 저장소에 존재하지 않아 규칙에서 제외했습니다.)
 
 ---
 

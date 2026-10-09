@@ -71,6 +71,7 @@ function triggerSystemLog(category, msg) {
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <!-- firebase-auth-compat disabled for Firestore Cloud Auth Engine -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="firebase_config.js"></script>
     <script src="auth.js"></script>
     <script src="cloud_storage.js"></script>
@@ -183,6 +184,21 @@ function triggerSystemLog(category, msg) {
         .run-btn:hover {
             background: #059669;
         }
+
+        /* 실행 중: 초록 버튼 위로 청록-보라 빛 띠가 흐르고 바깥 테두리가 반짝인다 */
+        .run-btn.is-running,
+        .run-btn.is-running:hover {
+            background: linear-gradient(100deg, #10b981 0%, #10b981 30%, #22d3ee 44%, #6366f1 50%, #a855f7 56%, #10b981 70%, #10b981 100%) !important;
+            background-size: 260% 100% !important;
+            animation: bsRunSweep 1.3s linear infinite, bsRunGlow 1.3s ease-in-out infinite;
+        }
+        .run-btn.is-running .fa-play { animation: bsRunPulse 0.9s ease-in-out infinite; }
+        @keyframes bsRunSweep { from { background-position: 100% 0; } to { background-position: -160% 0; } }
+        @keyframes bsRunGlow {
+            0%, 100% { box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.55), 0 0 10px 1px rgba(99, 102, 241, 0.35); }
+            50% { box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.55), 0 0 18px 3px rgba(34, 211, 238, 0.45); }
+        }
+        @keyframes bsRunPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.35); } }
 
         .stop-btn {
             background: #ef4444;
@@ -402,6 +418,8 @@ function triggerSystemLog(category, msg) {
         .spike-block[data-action="event_color_sensor"],
         .spike-block[data-action="event_force_sensor"],
         .spike-block[data-action="event_distance_sensor"],
+        .spike-block[data-action="event_reflect_sensor"],
+        .spike-block[data-action="event_ambient_sensor"],
         .spike-block[data-action="event_tilt_sensor"],
         .spike-block[data-action="event_message_received"],
         .spike-block[data-action="event_sound_level"] {
@@ -436,7 +454,7 @@ function triggerSystemLog(category, msg) {
         }
 
         /* 왼쪽 파인 부분 (퍼즐 홈, 凹) - 시작 블럭 및 센서류 제외 */
-        .spike-block:not([data-action="start"]):not([data-action="event_color_sensor"]):not([data-action="event_force_sensor"]):not([data-action="event_distance_sensor"]):not([data-action="event_tilt_sensor"]):not([data-action="event_message_received"]):not([data-action="event_sound_level"])::before {
+        .spike-block:not([data-action="start"]):not([data-action="event_color_sensor"]):not([data-action="event_force_sensor"]):not([data-action="event_distance_sensor"]):not([data-action="event_tilt_sensor"]):not([data-action="event_message_received"]):not([data-action="event_sound_level"]):not([data-action="event_reflect_sensor"]):not([data-action="event_ambient_sensor"])::before {
             content: '';
             position: absolute;
             left: -2px;
@@ -450,13 +468,13 @@ function triggerSystemLog(category, msg) {
             /* 이 블럭 안에서는 가장 아래 */
         }
 
-        .toolbox .spike-block:not([data-action="start"]):not([data-action="event_color_sensor"]):not([data-action="event_force_sensor"]):not([data-action="event_distance_sensor"]):not([data-action="event_tilt_sensor"]):not([data-action="event_message_received"]):not([data-action="event_sound_level"])::before {
+        .toolbox .spike-block:not([data-action="start"]):not([data-action="event_color_sensor"]):not([data-action="event_force_sensor"]):not([data-action="event_distance_sensor"]):not([data-action="event_tilt_sensor"]):not([data-action="event_message_received"]):not([data-action="event_sound_level"]):not([data-action="event_reflect_sensor"]):not([data-action="event_ambient_sensor"])::before {
             background: #ffffff;
             /* 툴박스 배경색과 일치시켜 구멍 뚫린 착시 방지 */
             box-shadow: inset 4px 0px 4px rgba(0, 0, 0, 0.02);
         }
 
-        .coding-area .spike-block:not([data-action="start"]):not([data-action="event_color_sensor"]):not([data-action="event_force_sensor"]):not([data-action="event_distance_sensor"]):not([data-action="event_tilt_sensor"]):not([data-action="event_message_received"]):not([data-action="event_sound_level"])::before {
+        .coding-area .spike-block:not([data-action="start"]):not([data-action="event_color_sensor"]):not([data-action="event_force_sensor"]):not([data-action="event_distance_sensor"]):not([data-action="event_tilt_sensor"]):not([data-action="event_message_received"]):not([data-action="event_sound_level"]):not([data-action="event_reflect_sensor"]):not([data-action="event_ambient_sensor"])::before {
             background: #f1f5f9;
             /* 모눈종이 배경색과 일치 */
             box-shadow: inset 4px 0px 4px rgba(0, 0, 0, 0.02);
@@ -475,6 +493,8 @@ function triggerSystemLog(category, msg) {
         .spike-block[data-action="event_color_sensor"] .block-icon,
         .spike-block[data-action="event_force_sensor"] .block-icon,
         .spike-block[data-action="event_distance_sensor"] .block-icon,
+        .spike-block[data-action="event_reflect_sensor"] .block-icon,
+        .spike-block[data-action="event_ambient_sensor"] .block-icon,
         .spike-block[data-action="event_tilt_sensor"] .block-icon,
         .spike-block[data-action="event_message_received"] .block-icon,
         .spike-block[data-action="event_sound_level"] .block-icon {
@@ -806,6 +826,266 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             100% { transform: perspective(600px) rotateZ(20deg) translateX(8px); }
         }
 
+
+        /* ===== BrickSync block theme: studded brick (shape layer) =====
+           기존 퍼즐형 블록 모양을 덮어쓰는 모양 전용 레이어. 이 블록만 지우면 원래 디자인으로 복귀 */
+        .spike-block:not(.loop-block) {
+            border-radius: 10px !important;
+        }
+
+        .spike-block:not(.loop-block)::before,
+        .spike-block:not(.loop-block)::after {
+            content: '' !important;
+            display: block !important;
+            position: absolute !important;
+            top: -8px !important;
+            width: 16px !important;
+            height: 9px !important;
+            border-radius: 4px 4px 0 0 !important;
+            background: inherit !important;
+            box-shadow: none !important;
+            z-index: 0 !important;
+        }
+
+        .spike-block:not(.loop-block)::before {
+            left: 12px !important;
+            right: auto !important;
+        }
+
+        .spike-block:not(.loop-block)::after {
+            right: 12px !important;
+            left: auto !important;
+        }
+
+        .spike-block:not(.loop-block):active {
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .spike-block .block-icon {
+            margin-left: 0 !important;
+        }
+
+        .coding-area .spike-block {
+            margin-right: 2px !important;
+        }
+
+        .loop-inner-stack > .spike-block:first-child {
+            margin-left: 2px !important;
+        }
+
+        .workspace-item.placeholder {
+            margin-right: 2px !important;
+            border-radius: 10px !important;
+        }
+
+        .loop-block-head {
+            border-radius: 10px 0 0 0 !important;
+        }
+
+        .loop-block-tail {
+            border-radius: 0 10px 10px 0 !important;
+        }
+
+        .loop-block-bottom {
+            border-radius: 0 0 10px 10px !important;
+        }
+
+        .loop-block-head::before,
+        .loop-block-head::after,
+        .loop-block-tail::after {
+            content: '' !important;
+            position: absolute !important;
+            top: -8px !important;
+            width: 16px !important;
+            height: 9px !important;
+            border-radius: 4px 4px 0 0 !important;
+            background: inherit !important;
+            box-shadow: none !important;
+        }
+
+        .loop-block-head::before {
+            left: 12px !important;
+            z-index: 6 !important;
+        }
+
+        .loop-block-head::after {
+            right: 12px !important;
+            z-index: 6 !important;
+        }
+
+        .loop-block-tail::after {
+            left: 12px !important;
+            right: auto !important;
+        }
+
+        /* ===== BrickSync block theme: jellybean palette (color layer) =====
+           색 변경은 아래 변수 5개만 수정. 카테고리: 이벤트·대기 / 자동차 이동 / 모터 / AI·소리·조명 / 반복 */
+        :root {
+            --bs-ev: #FFD23F;
+            --bs-ev-ink: #5A4300;
+            --bs-mv: #FF6B6B;
+            --bs-mo: #7ED957;
+            --bs-ai: #5B8DEF;
+            --bs-lp: #FF8A3D;
+        }
+
+        .spike-block[data-action="start"],
+        .spike-block[data-action="flow_wait"],
+        .spike-block[data-action="event_color_sensor"],
+        .spike-block[data-action="event_force_sensor"],
+        .spike-block[data-action="event_distance_sensor"],
+        .spike-block[data-action="event_reflect_sensor"],
+        .spike-block[data-action="event_ambient_sensor"],
+        .spike-block[data-action="event_tilt_sensor"],
+        .spike-block[data-action="event_message_received"],
+        .spike-block[data-action="action_send_message"] {
+            background: var(--bs-ev) !important;
+        }
+
+        .spike-block[data-action="start"] .block-icon,
+        .spike-block[data-action="flow_wait"] .block-icon,
+        .spike-block[data-action="event_color_sensor"] .block-icon,
+        .spike-block[data-action="event_force_sensor"] .block-icon,
+        .spike-block[data-action="event_distance_sensor"] .block-icon,
+        .spike-block[data-action="event_reflect_sensor"] .block-icon,
+        .spike-block[data-action="event_ambient_sensor"] .block-icon,
+        .spike-block[data-action="event_tilt_sensor"] .block-icon,
+        .spike-block[data-action="event_message_received"] .block-icon,
+        .spike-block[data-action="action_send_message"] .block-icon {
+            color: var(--bs-ev-ink) !important;
+        }
+
+        .spike-block[data-action="car_speed_set"],
+        .spike-block[data-action="car_forward"],
+        .spike-block[data-action="car_backward"],
+        .spike-block[data-action="car_left"],
+        .spike-block[data-action="car_right"] {
+            background: var(--bs-mv) !important;
+        }
+
+        .spike-block[data-action="motor_speed_set"],
+        .spike-block[data-action="motor_cw"],
+        .spike-block[data-action="motor_ccw"],
+        .spike-block[data-action="motor_stop"] {
+            background: var(--bs-mo) !important;
+        }
+
+        .spike-block[data-action="event_sound_level"],
+        .spike-block[data-action="event_ai_gesture"],
+        .spike-block[data-action="event_ai_vision"],
+        .spike-block[data-action="matrix_pixel"],
+        .spike-block[data-action="matrix_pixel_red"],
+        .spike-block[data-action="sound_play"] {
+            background: var(--bs-ai) !important;
+        }
+
+        .spike-block[data-action="control_repeat"],
+        .loop-block-head,
+        .loop-block-bottom,
+        .loop-block-tail,
+        .loop-block-tail::after {
+            background: var(--bs-lp) !important;
+        }
+
+
+        /* ===== BrickSync block theme: 작업 공간 바탕 (모눈 노트) ===== */
+        .main-layout {
+            background-color: #FBFAF4 !important;
+        }
+
+        .coding-area {
+            background-color: transparent !important;
+            background-image:
+                linear-gradient(#DDE6F3 1.5px, transparent 1.5px),
+                linear-gradient(90deg, #DDE6F3 1.5px, transparent 1.5px),
+                linear-gradient(#EEF2F8 1px, transparent 1px),
+                linear-gradient(90deg, #EEF2F8 1px, transparent 1px) !important;
+            background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px !important;
+        }
+
+        /* ===== BrickSync block theme: icon set colors (block_icons.js가 data-bs-cat 지정) ===== */
+        .spike-block[data-bs-cat="ev"] { --k: #8A6200; --a1: #FF6B6B; --a2: #5B8DEF; --a3: #3DBE6B; }
+        .spike-block[data-bs-cat="mv"] { --k: #B93030; --a1: #FFD23F; --a2: #4CC9F0; --a3: #7ED957; }
+        .spike-block[data-bs-cat="mo"] { --k: #3A8A22; --a1: #FFD23F; --a2: #FF6B6B; --a3: #5B8DEF; }
+        .spike-block[data-bs-cat="ai"] { --k: #2F55B5; --a1: #FFD23F; --a2: #FF8FB1; --a3: #7EEAB0; }
+        .spike-block[data-bs-cat="lp"] { --k: #B8530F; --a1: #FFD23F; --a2: #4CC9F0; --a3: #FFFFFF; }
+
+        .block-icon svg {
+            display: block;
+        }
+
+        /* 3x3 라이트 매트릭스 블록: JS가 칸 색을 칠하는 구조는 유지하고 바탕만 새 테마(흰 타일)로 */
+        .spike-block[data-action^="matrix_pixel"] div[style*="flex-wrap: wrap"] {
+            display: grid !important;
+            grid-template-columns: repeat(3, 9px) !important;
+            gap: 3px !important;
+            justify-content: center !important;
+            align-content: center !important;
+            background: #fff !important;
+            border-radius: 5px !important;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2) !important;
+            margin-left: 0 !important;
+            width: 40px !important;
+            height: 40px !important;
+            padding: 0 !important;
+        }
+
+        .spike-block[data-action^="matrix_pixel"] div[style*="flex-wrap: wrap"] > div {
+            width: 9px !important;
+            height: 9px !important;
+            border-radius: 2px !important;
+        }
+
+        /* 처음 놓은 매트릭스 블록(아직 색을 칠하지 않은 상태)도 꺼진 LED처럼 회색으로 */
+        .spike-block[data-action="matrix_pixel"] div[style*="flex-wrap: wrap"] > div[style*="#581c87"] {
+            background: #94A3B8 !important;
+        }
+
+        /* 컬러 센서 블록의 하단 화살표 버튼을 다른 블록의 흰 알약 버튼과 동일하게 */
+        .spike-block[data-action="event_color_sensor"] > .block-param {
+            bottom: -15px !important;
+            width: auto !important;
+            min-width: 32px !important;
+            height: 28px !important;
+            border-radius: 16px !important;
+            background: #fff !important;
+            border: 2px solid rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* 컬러 센서 '색 없음' 표시: 빨간 선이 원 밖으로 나오지 않도록 원 안에 가둠 */
+        .spike-block[data-action="event_color_sensor"] .color-brick-icon {
+            box-sizing: border-box !important;
+            width: 20px !important;
+            height: 20px !important;
+            overflow: hidden !important;
+        }
+
+        .spike-block[data-action="event_color_sensor"] .no-color-slash {
+            width: 24px !important;
+            height: 2.5px !important;
+            top: 50% !important;
+            left: 50% !important;
+            margin: -1.25px 0 0 -12px !important;
+            transform: rotate(-45deg) !important;
+        }
+
+        .spike-block[data-action="event_color_sensor"] > .block-param i {
+            color: #64748b !important;
+            font-size: 14px !important;
+            margin-bottom: 0 !important;
+        }
+
+        /* 속도 블록의 막대(기존 JS가 실시간으로 갱신): 새 팔레트에 맞춰 색만 변경 */
+        .spike-block[data-bs-cat] .block-icon > div:nth-child(2) > div[style*="background:#22c55e"] {
+            background: var(--a1) !important;
+            border-color: var(--a1) !important;
+        }
+
+        .spike-block[data-bs-cat] .block-icon > div:nth-child(2) > div[style*="background:white"] {
+            background: transparent !important;
+            border-color: #fff !important;
+        }
     </style>
 <script>
     (function() {
@@ -873,6 +1153,18 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             }
         });
         </script>
+    <style id="bs-mode-bar">
+        /* 상단바 가운데: 브릭싱크 로고 / 미션 줄 가운데: 현재 코딩 모드 (둘 다 화면 정중앙) */
+        .top-bar { position: relative; }
+        .bs-top-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; pointer-events: none; }
+        .bs-top-logo img { height: 34px; width: auto; display: block; }
+        #missionStatusBar { position: relative; }
+        /* 미션 줄을 기준 위치로 삼으면서 빛 장식 위치가 달라지지 않게 맞춘다 (상단바 높이 60px만큼) */
+        #missionStatusBar .glow-blob.blob-yellow { top: -160px !important; }
+        #missionStatusBar .glow-blob.blob-pink { top: -180px !important; }
+        .bs-mode-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; z-index: 3; pointer-events: none; white-space: nowrap; font-size: 1.25rem; font-weight: 800; color: #1e293b; }
+        .bs-mode-label img { display: block; width: auto; }
+    </style>
 </head>
 
 <body>
@@ -881,9 +1173,9 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         <a href="#" onclick="if (window.parent && window.parent.navigateIframe) { window.parent.navigateIframe('index.html'); } else { window.location.href='index.html?v=' + new Date().getTime(); } return false;" class="home-btn">
             <i class="fas fa-home"></i> <span data-i18n="btn_back_home">홈으로 가기</span>
         </a>
-        <div style="font-size: 1.2rem; font-weight: 800; color: #1e293b; display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-cubes" style="color: #c084fc;"></i>
-            <span data-i18n="lbl_workspace_title">BrickSync Essential 아이콘 코딩</span>
+        <div class="bs-top-logo">
+            <img src="assets/bs_logo_vertical.png" alt="BrickSync">
+            <span style="display:none" data-i18n="lbl_workspace_title">BrickSync Essential 아이콘 코딩</span>
         </div>
         <div class="top-actions" style="align-items: center;">
             <div id="hubStatusIndicator" style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #64748b; padding: 8px 16px; background: #f1f5f9; border-radius: 8px; border: 1px solid #e2e8f0;">
@@ -911,6 +1203,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
 
     <!-- 상단 미션 및 진행도 현황창 -->
     <div id="missionStatusBar" style="display: none; justify-content: space-between; align-items: center; background: #fff; padding: 10px 24px; border-bottom: 2px solid #e2e8f0; z-index: 9; white-space: nowrap; overflow: hidden; gap: 15px;">
+        <div class="bs-mode-label"><img src="assets/mode_icon_blocks.png" style="height:26px" alt=""><span data-i18n="lbl_mode_icon">아이콘 블록 코딩</span></div>
         <!-- 뒷배경 유려한 네온 빛 망울 장식 -->
         <div class="glow-blob blob-yellow" style="position: absolute; width: 250px; height: 250px; border-radius: 50%; filter: blur(80px); z-index: 1; opacity: 0.5; pointer-events: none; background: rgba(250, 204, 21, 0.3); top: -100px; right: 20%;"></div>
         <div class="glow-blob blob-pink" style="position: absolute; width: 250px; height: 250px; border-radius: 50%; filter: blur(80px); z-index: 1; opacity: 0.5; pointer-events: none; background: rgba(244, 114, 182, 0.3); top: -120px; right: 5%;"></div>
@@ -1076,6 +1369,16 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 </div>
             </div>
             <div class="block-param" data-val="20" style="border-radius: 10px; min-width: 44px; padding: 2px 6px;">20 cm</div>
+        </div>
+
+        <!-- NEW 색 센서 빛 이벤트 블록: 반사 빛 / 주변 빛 -->
+        <div class="spike-block bg-yellow" draggable="true" data-action="event_reflect_sensor">
+            <div class="block-icon" style="display:flex; align-items:center; justify-content:center; position:relative;"><svg viewBox="0 0 40 40" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M6 6l9 12M34 6l-9 12" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/><path d="M15 18l5-4 5 4" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 0)"/><rect x="8" y="22" width="24" height="13" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="2"/><circle cx="15" cy="28.5" r="3.4" fill="#38bdf8"/><circle cx="25" cy="28.5" r="3.4" fill="#38bdf8"/></svg></div>
+            <div class="block-param" data-val="50" data-dir="up" style="border-radius: 10px; min-width: 44px; padding: 2px 6px;">▲ 50%</div>
+        </div>
+        <div class="spike-block bg-yellow" draggable="true" data-action="event_ambient_sensor">
+            <div class="block-icon" style="display:flex; align-items:center; justify-content:center; position:relative;"><svg viewBox="0 0 40 40" width="40" height="40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="12" r="5.2" fill="#f59e0b"/><g stroke="#f59e0b" stroke-width="2.6" stroke-linecap="round"><path d="M20 2.6v2.4M20 19v2.4M10.6 12h2.4M27 12h2.4M13.4 5.4l1.7 1.7M24.9 16.9l1.7 1.7M26.6 5.4l-1.7 1.7M15.1 16.9l-1.7 1.7"/></g><rect x="8" y="24" width="24" height="12" rx="4" fill="#fff" stroke="#cbd5e1" stroke-width="2"/><circle cx="15" cy="30" r="3.2" fill="#38bdf8"/><circle cx="25" cy="30" r="3.2" fill="#38bdf8"/></svg></div>
+            <div class="block-param" data-val="50" data-dir="up" style="border-radius: 10px; min-width: 44px; padding: 2px 6px;">▲ 50%</div>
         </div>
 
         <!-- NEW 기울기 센서 이벤트 블록 -->
@@ -1509,6 +1812,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
 
     </div>
 
+    <script src="block_icons.js"></script>
     <script>
         // 파라미터(숫자/아이콘) 클릭 시 커스텀 모달 팝업 띄우기 (옵션 선택기)
         let currentTargetParam = null;
@@ -1538,6 +1842,58 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         });
 
         // 블록 바로 아래에 모달을 딱 맞춰 열리게 하고 말풍선 꼬리를 추가하는 전용 함수
+        // 옵션 설정 창의 색을 그 블록의 색과 똑같이 맞춘다 (배경/테두리/글자색)
+        function bsPopupTheme(paramEl) {
+            const fallback = { main: '#0284c7', border: '#0369a1', light: '#0ea5e9', ink: '#ffffff', inkRgb: [255, 255, 255], onWhite: true };
+            try {
+                const blk = paramEl && paramEl.closest('.spike-block');
+                if (!blk) return fallback;
+                const m = getComputedStyle(blk).backgroundColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (!m) return fallback;
+                const r = +m[1], g = +m[2], b = +m[3];
+                const lin = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+                const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+                const mul = (k) => 'rgb(' + Math.round(r * k) + ', ' + Math.round(g * k) + ', ' + Math.round(b * k) + ')';
+                const mix = (k) => 'rgb(' + Math.round(r + (255 - r) * k) + ', ' + Math.round(g + (255 - g) * k) + ', ' + Math.round(b + (255 - b) * k) + ')';
+                const darkInk = L > 0.45;
+                const inkRgb = darkInk ? [Math.round(r * 0.28), Math.round(g * 0.28), Math.round(b * 0.28)] : [255, 255, 255];
+                return {
+                    main: 'rgb(' + r + ', ' + g + ', ' + b + ')', border: mul(0.72), light: mix(0.22),
+                    ink: darkInk ? 'rgb(' + inkRgb.join(', ') + ')' : '#ffffff', inkRgb: inkRgb, onWhite: !darkInk
+                };
+            } catch (e) { return fallback; }
+        }
+        // 창 안에 흰색으로 그려진 글자/테두리/장식을 그 색의 글자색으로 바꾼다 (노랑·연두처럼 밝은 블록일 때만)
+        function bsPopupInk(box, T) {
+            if (T.onWhite) return;
+            box.querySelectorAll('*').forEach((el) => {
+                const cs = getComputedStyle(el);
+                if (cs.color === 'rgb(255, 255, 255)') el.style.color = T.ink;
+                if (parseFloat(cs.borderTopWidth) > 0 && cs.borderTopColor === 'rgb(255, 255, 255)') el.style.borderColor = T.ink;
+                const bg = cs.backgroundColor.match(/^rgba\(255, 255, 255, ([0-9.]+)\)$/);
+                if (bg) el.style.backgroundColor = 'rgba(' + T.inkRgb.join(', ') + ', ' + bg[1] + ')';
+            });
+        }
+
+        // ▶ 실행 버튼: 신호를 보내는 동안 초록 위로 빛 띠가 계속 흐른다
+        function bsRunIndicator(ms) {
+            const b = document.querySelector('.run-btn');
+            if (!b) return;
+            b.classList.add('is-running');
+            const until = isFinite(ms) ? Date.now() + ms : Infinity;
+            if (until >= (window.__bsRunUntil || 0)) window.__bsRunUntil = until;
+            clearTimeout(window.__bsRunTimer);
+            if (isFinite(window.__bsRunUntil)) {
+                window.__bsRunTimer = setTimeout(() => { b.classList.remove('is-running'); window.__bsRunUntil = 0; }, Math.max(0, window.__bsRunUntil - Date.now()));
+            }
+        }
+        function bsRunIndicatorStop() {
+            clearTimeout(window.__bsRunTimer);
+            window.__bsRunUntil = 0;
+            const b = document.querySelector('.run-btn');
+            if (b) b.classList.remove('is-running');
+        }
+
         function positionModalUnder(paramEl, arrowColor) {
             const rect = paramEl.getBoundingClientRect();
             // 절대 좌표로 오버레이 내에서 블록의 바로 하단에 고정
@@ -1689,79 +2045,80 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         // 매트릭스 그리기 전용 팝업 (3x3 LED 그리기창) 완벽 재현
         function showMatrixModal(paramEl) {
             modalBox.innerHTML = '';
-            // 보라색 모달 외형 세팅 (오른쪽으로 더 넓어지게 구조 수정)
-            modalBox.style.cssText = 'background: #9f4cf6; padding: 16px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); display: flex; gap: 15px; border: 2px solid #8b3cde; max-width: none; flex-wrap: nowrap; position: relative; align-items:stretch;';
+            // 심플 흰 카드: LED 9개 + 색 점 + 아이콘 버튼 3개 (글자 없음)
+            modalBox.style.cssText = 'background: #fff; padding: 16px; border-radius: 18px; box-shadow: 0 4px 0 rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06); display: flex; flex-direction: column; align-items: center; gap: 14px; border: none; width: auto; max-width: none; flex-wrap: nowrap;';
 
             let matrixState = paramEl.getAttribute('data-matrix') ? JSON.parse(paramEl.getAttribute('data-matrix')) : Array(9).fill(0);
 
-            // 초기 흰색(비어 있는 시각 효과) 선택 상태 기준
+            // 초기 흰색 선택 상태 기준
             let selectedColorVal = 10;
-            let selectedColorHex = '#ffffff';
 
-            const leftCol = document.createElement('div');
-            leftCol.style.cssText = 'display: flex; flex-direction: column; gap: 6px; align-items: center;';
+            // 꺼진 LED 색
+            const offColor = '#94A3B8';
+
+            const paintCell = (cell, val) => {
+                let c = getColorHex(val);
+                const isOff = (val === 0 || c === '#fff');
+                if (isOff) c = offColor;
+                cell.style.background = c;
+                cell.style.border = (!isOff && c.toLowerCase() === '#ffffff') ? '2px solid #CBD5E1' : '2px solid transparent';
+            };
 
             const matrixContainer = document.createElement('div');
-            matrixContainer.style.cssText = 'display:grid; grid-template-columns: repeat(3, 44px); gap: 4px;';
-
-            // 불 꺼진 색은 보라색 배경과 구분을 위해 어두운 톤 적용
-            const offColor = '#581c87';
+            matrixContainer.style.cssText = 'display: grid; grid-template-columns: repeat(3, 44px); gap: 8px;';
 
             const cells = [];
             for (let i = 0; i < 9; i++) {
                 const cell = document.createElement('div');
-                let currentColor = getColorHex(matrixState[i]);
-                if (matrixState[i] === 0 || currentColor === '#fff') currentColor = offColor;
-
-                cell.style.cssText = `width:44px; height:44px; border-radius:4px; background:${currentColor}; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1); cursor:pointer; transition: background 0.1s; border: 1px solid #7e22ce;`;
+                cell.style.cssText = 'width: 44px; height: 44px; border-radius: 50%; box-sizing: border-box; cursor: pointer; transition: background 0.1s;';
+                paintCell(cell, matrixState[i]);
                 cell.onclick = (e) => {
                     e.stopPropagation(); // 모달 닫힘 방지
                     matrixState[i] = selectedColorVal;
-                    let applyColor = getColorHex(matrixState[i]);
-                    if (matrixState[i] === 0 || applyColor === '#fff') applyColor = offColor;
-                    cell.style.background = applyColor;
+                    paintCell(cell, selectedColorVal);
                     updateParamIcon(paramEl, matrixState);
                 };
                 matrixContainer.appendChild(cell);
                 cells.push(cell);
             }
-            leftCol.appendChild(matrixContainer);
 
-            // 하단 툴 (비우기, 채우기)
-            const bottomTools = document.createElement('div');
-            bottomTools.style.cssText = 'display: flex; justify-content: space-between; width: 100%; padding: 0 16px; margin-top: 6px;';
+            // 하단 아이콘 버튼 (비우기, 채우기, 확인)
+            const toolBase = 'width: 40px; height: 40px; border-radius: 50%; background: #EEF1F8; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; transition: transform 0.1s;';
 
-            const clearBtn = document.createElement('i');
-            clearBtn.className = 'fas fa-table-cells'; // 3x3 아이콘
-            clearBtn.style.cssText = `font-size: 20px; color: ${offColor}; cursor: pointer; transition: 0.1s; transform: scale(1.1);`;
+            const clearBtn = document.createElement('div');
+            clearBtn.style.cssText = toolBase + ' color: #64748B;';
+            clearBtn.innerHTML = '<i class="fas fa-eraser"></i>';
             clearBtn.onclick = (e) => {
                 e.stopPropagation();
                 matrixState.fill(0);
-                cells.forEach(c => c.style.background = offColor);
+                cells.forEach(c => paintCell(c, 0));
                 updateParamIcon(paramEl, matrixState);
             };
 
-            const fillBtn = document.createElement('i');
-            fillBtn.className = 'fas fa-table-cells';
-            fillBtn.style.cssText = `font-size: 20px; color: ${selectedColorHex}; cursor: pointer; transition: 0.1s; transform: scale(1.1);`;
+            const fillBtn = document.createElement('div');
+            fillBtn.style.cssText = toolBase + ' color: #94A3B8;';
+            fillBtn.innerHTML = '<i class="fas fa-fill-drip"></i>';
             fillBtn.onclick = (e) => {
                 e.stopPropagation();
                 matrixState.fill(selectedColorVal);
-                let applyColor = getColorHex(selectedColorVal);
-                if (selectedColorVal === 0 || applyColor === '#fff') applyColor = offColor;
-                cells.forEach(c => c.style.background = applyColor);
+                cells.forEach(c => paintCell(c, selectedColorVal));
                 updateParamIcon(paramEl, matrixState);
             };
 
-            bottomTools.appendChild(clearBtn);
-            bottomTools.appendChild(fillBtn);
-            leftCol.appendChild(bottomTools);
+            const okBtn = document.createElement('div');
+            okBtn.style.cssText = 'width: 56px; height: 40px; border-radius: 20px; background: #7ED957; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 18px; cursor: pointer; box-shadow: 0 3px 0 #5CB83A; transition: transform 0.1s;';
+            okBtn.innerHTML = '<i class="fas fa-check"></i>';
+            okBtn.onmousedown = () => { okBtn.style.transform = 'translateY(3px)'; okBtn.style.boxShadow = 'none'; };
+            okBtn.onmouseup = () => { okBtn.style.transform = 'none'; okBtn.style.boxShadow = '0 3px 0 #5CB83A'; };
+            okBtn.onclick = (e) => { e.stopPropagation(); modalOverlay.style.display = 'none'; };
 
-            const rightCol = document.createElement('div');
-            // 오른쪽 컬러 바 (테두리 살짝 감싸진 스택형구조)
-            rightCol.style.cssText = 'display: flex; flex-direction: column; width: 44px; background: #fff; padding: 2px; border-radius: 6px;';
+            const toolRow = document.createElement('div');
+            toolRow.style.cssText = 'display: flex; gap: 10px; align-items: center; justify-content: center;';
+            toolRow.appendChild(clearBtn);
+            toolRow.appendChild(fillBtn);
+            toolRow.appendChild(okBtn);
 
-            // SPIKE Prime 펌웨어 공식 컬러 인덱스 맵핑
+            // SPIKE Prime 펌웨어 공식 컬러 인덱스 맵핑 (값은 기존과 동일)
             const mColors = [
                 { hex: '#ec4899', val: 1 },  // 분홍
                 { hex: '#a855f7', val: 2 },  // 보라
@@ -1776,42 +2133,28 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 { hex: '#3b0764', val: 0 }   // 검보라 (꺼짐상태)
             ];
 
-            const colorSwatches = [];
-            mColors.forEach((col, idx) => {
-                const swatch = document.createElement('div');
-                swatch.style.cssText = `width: 100%; height: 16px; background: ${col.hex}; cursor: pointer; position: relative; box-sizing: border-box; transition: 0.1s;`;
+            const swatchRow = document.createElement('div');
+            swatchRow.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 176px;';
 
-                if (idx === 0) {
-                    swatch.style.borderTopLeftRadius = '4px';
-                    swatch.style.borderTopRightRadius = '4px';
-                }
-                if (idx === mColors.length - 1) {
-                    swatch.style.borderBottomLeftRadius = '4px';
-                    swatch.style.borderBottomRightRadius = '4px';
-                }
+            const colorSwatches = [];
+            mColors.forEach((col) => {
+                const swatch = document.createElement('div');
+                const isWhite = col.val === 10;
+                const isOffSwatch = col.val === 0;
+                swatch.style.cssText = 'width: 22px; height: 22px; border-radius: 50%; box-sizing: border-box; cursor: pointer; transition: 0.1s; background: ' + (isOffSwatch ? '#2D3050' : col.hex) + ';' + (isWhite ? ' border: 2px solid #CBD5E1;' : '');
 
                 swatch.onclick = (e) => {
                     e.stopPropagation();
                     selectedColorVal = col.val;
-                    selectedColorHex = (col.val === 0 || col.val === 10) ? offColor : col.hex;
-                    fillBtn.style.color = (col.val === 0 || col.val === 10) ? offColor : col.hex;
+                    fillBtn.style.color = (col.val === 0 || col.val === 10) ? '#94A3B8' : col.hex;
 
-                    colorSwatches.forEach(s => {
-                        s.style.border = 'none';
-                        s.style.zIndex = '1';
-                        s.style.transform = 'scale(1)';
-                    });
-
-                    // 선택된 컬러는 흰색 두꺼운 보더처리로 튀어나오게
-                    swatch.style.border = '3px solid white';
-                    swatch.style.borderRadius = '4px';
-                    swatch.style.zIndex = '10';
-                    swatch.style.transform = 'scale(1.25)';
-                    swatch.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+                    colorSwatches.forEach(s => { s.style.boxShadow = 'none'; });
+                    // 선택된 색은 바깥 링으로 표시
+                    swatch.style.boxShadow = '0 0 0 2px #fff, 0 0 0 4px #334155';
                 };
 
                 colorSwatches.push(swatch);
-                rightCol.appendChild(swatch);
+                swatchRow.appendChild(swatch);
             });
 
             // 초기 흰색(10번 인덱스, 배열상 9번째) 강제 클릭
@@ -1821,60 +2164,11 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 colorSwatches[0].onclick(new Event('click'));
             }
 
-            // 새로운 통합 섹션: 시간 설정 
-            const timeCol = document.createElement('div');
-            timeCol.style.cssText = 'display: none;';
+            modalBox.appendChild(matrixContainer);
+            modalBox.appendChild(swatchRow);
+            modalBox.appendChild(toolRow);
 
-            const timeLabel = document.createElement('div');
-            timeLabel.textContent = '';
-            timeLabel.style.cssText = 'display: none;';
-
-            const plusBtn = document.createElement('div');
-            plusBtn.innerHTML = '<i class="fas fa-chevron-up"></i>';
-            plusBtn.style.cssText = 'width: 36px; height: 36px; background: rgba(255,255,255,0.2); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 16px; transition: 0.1s; user-select:none;';
-
-            const timeDisplay = document.createElement('div');
-            let currentTime = parseFloat(paramEl.getAttribute('data-val')) || 2;
-            timeDisplay.textContent = currentTime;
-            timeDisplay.style.cssText = 'font-size: 28px; font-weight: 900; color: white; margin: 8px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);';
-
-            const minusBtn = document.createElement('div');
-            minusBtn.innerHTML = '<i class="fas fa-chevron-down"></i>';
-            minusBtn.style.cssText = 'width: 36px; height: 36px; background: rgba(255,255,255,0.2); color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 16px; transition: 0.1s; user-select:none;';
-
-            const updateTimeUI = (val) => {
-                currentTime = Math.max(0.1, Math.min((Math.round(val * 10) / 10), 99));
-                timeDisplay.textContent = currentTime;
-                paramEl.setAttribute('data-val', currentTime);
-            };
-
-            plusBtn.onmousedown = (e) => { e.stopPropagation(); plusBtn.style.background = 'rgba(255,255,255,0.4)'; updateTimeUI(currentTime + 1); };
-            plusBtn.onmouseup = () => plusBtn.style.background = 'rgba(255,255,255,0.2)';
-
-            minusBtn.onmousedown = (e) => { e.stopPropagation(); minusBtn.style.background = 'rgba(255,255,255,0.4)'; updateTimeUI(currentTime - 1); };
-            minusBtn.onmouseup = () => minusBtn.style.background = 'rgba(255,255,255,0.2)';
-
-            timeCol.appendChild(timeLabel);
-            timeCol.appendChild(plusBtn);
-            timeCol.appendChild(timeDisplay);
-            timeCol.appendChild(minusBtn);
-
-            modalBox.appendChild(leftCol);
-            modalBox.appendChild(rightCol);
-            modalBox.appendChild(timeCol); // 시간 컬럼 추가
-
-            // 하단 OK 버튼 (모달 닫기)
-            const okBtnWrapper = document.createElement('div');
-            okBtnWrapper.style.cssText = 'position: absolute; bottom: -50px; left: 50%; transform: translateX(-50%); width: 100px; height: 40px; background: #22c55e; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 16px; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 3px 0 #16a34a; transition: 0.1s;';
-            okBtnWrapper.innerHTML = '<i class="fas fa-check"></i>';
-            okBtnWrapper.onmousedown = () => { okBtnWrapper.style.transform = 'translate(-50%, 3px)'; okBtnWrapper.style.boxShadow = 'none'; };
-            okBtnWrapper.onmouseup = () => { okBtnWrapper.style.transform = 'translate(-50%, 0)'; okBtnWrapper.style.boxShadow = '0 3px 0 #16a34a'; };
-            okBtnWrapper.onclick = (e) => { e.stopPropagation(); modalOverlay.style.display = 'none'; };
-
-            modalBox.appendChild(okBtnWrapper);
-            modalBox.style.marginBottom = '50px'; // OK버튼 공간 여유
-
-            positionModalUnder(paramEl, '#9f4cf6'); // 말풍선 꼬리 연결 (보라색)
+            positionModalUnder(paramEl, '#ffffff'); // 말풍선 꼬리 연결 (흰색)
             modalOverlay.style.display = 'flex';
         }
 
@@ -1890,7 +2184,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     Array.from(iconContainer.children).forEach((child, idx) => {
                         if (child.className !== 'matrix-time-badge' && idx < 9) {
                             let c = getColorHex(matrixState[idx]);
-                            child.style.background = (matrixState[idx] === 0 || c === '#fff') ? '#fde047' : c; // 불 꺼진 상태는 노란색(기본색)
+                            child.style.background = (matrixState[idx] === 0 || c === '#fff') ? '#94A3B8' : c; // 불 꺼진 상태는 회색(꺼진 LED)
                         }
                     });
                 }
@@ -1929,29 +2223,43 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         // 🎵 신규: 음악 블록 전용 3x3 보라색 패드 
         function showMusicModal(paramEl) {
             modalBox.innerHTML = '';
-            modalBox.style.cssText = 'background: #c084fc; padding: 12px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; border: 2px solid #a855f7; width: 170px;';
+            // 블루베리 브릭 패널 + 3x3 둥근 버튼 (소리 1~8 + 무작위)
+            modalBox.style.cssText = 'background: #5B8DEF; padding: 14px; border-radius: 18px; box-shadow: 0 5px 0 rgba(0,0,0,0.2); display: flex; flex-direction: column; border: none; width: auto;';
+
+            [24, null].forEach(function (leftPx) {
+                const stud = document.createElement('div');
+                stud.style.cssText = 'position: absolute; top: -8px; width: 20px; height: 9px; border-radius: 4px 4px 0 0; background: #5B8DEF;' + (leftPx === null ? ' right: 24px;' : ' left: ' + leftPx + 'px;');
+                modalBox.appendChild(stud);
+            });
 
             const grid = document.createElement('div');
-            grid.style.cssText = 'display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;';
+            grid.style.cssText = 'display: grid; grid-template-columns: repeat(3, 58px); gap: 9px;';
+
+            const padColors = ['#FF6B6B', '#FF8A3D', '#E0B020', '#3DBE6B', '#14B8A6', '#4CC9F0', '#9A7BFF', '#FF7BAC'];
+            const currentVal = paramEl.getAttribute('data-val') !== null ? paramEl.getAttribute('data-val') : paramEl.textContent.trim();
 
             const sounds = [
                 { html: '1', val: 1 }, { html: '2', val: 2 }, { html: '3', val: 3 },
                 { html: '4', val: 4 }, { html: '5', val: 5 }, { html: '6', val: 6 },
-                { html: '7', val: 7 }, { html: '8', val: 8 }, { html: '<i class="fas fa-dice"></i>', val: -1 }
+                { html: '7', val: 7 }, { html: '8', val: 8 }
             ];
 
-            sounds.forEach(opt => {
+            sounds.forEach((opt, idx) => {
+                const isDice = opt.val === -1;
+                const ink = isDice ? '#8A6200' : padColors[idx];
+                const selected = String(currentVal) === String(opt.val);
                 const btn = document.createElement('div');
-                btn.style.cssText = 'height: 45px; background: #a855f7; border: 1px solid #9333ea; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; color: white; cursor: pointer; transition: 0.1s;';
+                btn.style.cssText = 'height: 58px; border-radius: 50%; box-sizing: border-box; background: ' + (isDice ? '#FFD23F' : '#fff') + '; color: ' + ink + '; display: flex; justify-content: center; align-items: center; font-size: ' + (isDice ? 26 : 22) + 'px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.18); border: 3px solid ' + (selected ? ink : 'transparent') + '; transition: transform 0.1s;';
 
                 btn.innerHTML = opt.html;
 
-                btn.onmousedown = () => { btn.style.background = '#9333ea'; };
-                btn.onmouseup = () => { btn.style.background = '#a855f7'; };
+                btn.onmousedown = () => { btn.style.transform = 'translateY(3px)'; btn.style.boxShadow = 'none'; };
+                btn.onmouseup = () => { btn.style.transform = 'none'; btn.style.boxShadow = '0 4px 0 rgba(0,0,0,0.18)'; };
                 btn.onmouseleave = btn.onmouseup;
 
                 btn.onclick = (e) => {
                     e.stopPropagation();
+                    try { if (window.SoundLib) SoundLib.stop(); if (window.KidMusic) KidMusic.play(opt.val, { pan: parseFloat(paramEl.getAttribute('data-pan')) || 0 }); } catch (x) { }
                     paramEl.innerHTML = opt.html.includes('dice') ? '<i class="fas fa-dice"></i>' : opt.html;
                     paramEl.setAttribute('data-val', opt.val);
                     modalOverlay.style.display = 'none';
@@ -1960,8 +2268,46 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 grid.appendChild(btn);
             });
 
+            // 🎤 내가 녹음한 소리: 번호 버튼들이 8번 뒤로 이어지고, 녹음 버튼이 한 칸씩 뒤로 밀린다
+            if (window.SoundLib) {
+                const recStyle = 'height: 58px; border-radius: 50%; box-sizing: border-box; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 0 rgba(0,0,0,0.18); transition: transform 0.1s; ';
+                SoundLib.list().forEach(function (s) {
+                    const rb = document.createElement('div');
+                    const rsel = String(currentVal) === 'rec:' + s.id;
+                    rb.style.cssText = recStyle + 'background: #fff; color: #5B3FD0; font-size: 22px; font-weight: bold; border: 3px solid ' + (rsel ? '#5B3FD0' : 'transparent') + ';';
+                    rb.innerHTML = '<i class="fas fa-microphone" style="font-size: 15px; margin-right: 2px;"></i>' + s.num;
+                    rb.title = s.name || '';
+                    rb.onmousedown = () => { rb.style.transform = 'translateY(3px)'; rb.style.boxShadow = 'none'; };
+                    rb.onmouseup = () => { rb.style.transform = 'none'; rb.style.boxShadow = '0 4px 0 rgba(0,0,0,0.18)'; };
+                    rb.onmouseleave = rb.onmouseup;
+                    rb.onclick = (e) => {
+                        e.stopPropagation();
+                        try { if (window.KidMusic) KidMusic.stop(); SoundLib.stop(); SoundLib.play('rec:' + s.id, { pan: parseFloat(paramEl.getAttribute('data-pan')) || 0 }); } catch (x) { }   // 누르면 녹음한 소리가 들린다
+                        paramEl.innerHTML = SoundLib.labelHtml('rec:' + s.id);
+                        paramEl.title = s.name || '';
+                        paramEl.setAttribute('data-val', 'rec:' + s.id);
+                        modalOverlay.style.display = 'none';
+                    };
+                    grid.appendChild(rb);
+                });
+                const recBtn = document.createElement('div');
+                recBtn.style.cssText = recStyle + 'background: #FFD23F; color: #8A6200; font-size: 26px; border: 3px solid transparent;';
+                recBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+                recBtn.title = localStorage.getItem('bricksync_lang') === 'en' ? 'Record / edit sounds' : '소리 녹음·편집';
+                recBtn.onmousedown = () => { recBtn.style.transform = 'translateY(3px)'; recBtn.style.boxShadow = 'none'; };
+                recBtn.onmouseup = () => { recBtn.style.transform = 'none'; recBtn.style.boxShadow = '0 4px 0 rgba(0,0,0,0.18)'; };
+                recBtn.onmouseleave = recBtn.onmouseup;
+                recBtn.onclick = (e) => { e.stopPropagation(); modalOverlay.style.display = 'none'; SoundLib.openStudio(); };
+                grid.appendChild(recBtn);
+            }
+
             modalBox.appendChild(grid);
-            positionModalUnder(paramEl, '#c084fc');
+            if (window.KidMusic) {   // 좌우 균형: 끌어서 왼쪽/오른쪽 소리 크기를 나눈다
+                modalBox.appendChild(KidMusic.panControl(paramEl, function (p) {
+                    try { const cur = paramEl.getAttribute('data-val'); if (/^[1-8]$/.test(String(cur))) KidMusic.play(parseInt(cur, 10), { pan: p }); else if (String(cur).indexOf('rec:') === 0 && window.SoundLib) { SoundLib.stop(); SoundLib.play(cur, { pan: p }); } } catch (x) { }
+                }));
+            }
+            positionModalUnder(paramEl, '#5B8DEF');
             modalOverlay.style.display = 'flex';
         }
 
@@ -2017,6 +2363,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 cell.onmouseout = () => { cell.style.filter = 'none'; };
                 cell.onclick = () => {
                     paramEl.setAttribute('data-val', col.val);
+                    try { const pb = paramEl.closest('.spike-block'); if (pb) pb.setAttribute('data-sensor-color', String(col.val)); } catch (e) { }
 
                     // 컬러 센서 버튼의 경우, 버튼 내용은 화살표로 놔두고 옆의 브릭 장식 색상을 변경
                     const parentBlock = paramEl.closest('.spike-block');
@@ -2106,7 +2453,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     transition: 0.2s;
                 `;
 
-                const iconHtml = getForceSensorIcon(opt.type).replace('width: 32px; height: 32px;', 'width: 48px; height: 48px; transform: scale(1.5);');
+                const iconHtml = window.BS_ICONS ? BS_ICONS.forcePopup(opt.type) : getForceSensorIcon(opt.type).replace('width: 32px; height: 32px;', 'width: 48px; height: 48px; transform: scale(1.5);');
                 btn.innerHTML = iconHtml;
 
                 btn.onmouseover = () => { if (!isSelected) btn.style.background = 'rgba(0,0,0,0.05)'; };
@@ -2117,7 +2464,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                     const parentBlock = paramEl.closest('.spike-block');
                     if (parentBlock) {
                         const iconContainer = parentBlock.querySelector('.block-icon');
-                        if (iconContainer) iconContainer.innerHTML = getForceSensorIcon(opt.type);
+                        if (iconContainer) iconContainer.innerHTML = (window.BS_ICONS ? BS_ICONS.forceBlock(opt.type) : getForceSensorIcon(opt.type));
                     }
                     modalOverlay.style.display = 'none';
                 };
@@ -2190,6 +2537,52 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 modalBox.appendChild(btn);
             });
             positionModalUnder(paramEl, '#a855f7');
+            modalOverlay.style.display = 'flex';
+        }
+
+        // 색 센서 빛 이벤트(반사 빛/주변 빛): 기준 값(0~100%)과 "밝아지면(▲)/어두워지면(▼)" 고르기
+        function showLightLevelModal(paramEl) {
+            modalBox.innerHTML = '';
+            modalBox.style.cssText = 'background: #facc15; display: flex; flex-direction: column; align-items: center; padding: 16px 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #eab308; min-width: 260px; gap: 12px; user-select: none;';
+            const en = localStorage.getItem('bricksync_lang') === 'en';
+            let cur = parseInt(paramEl.getAttribute('data-val'), 10); if (isNaN(cur)) cur = 50;
+            let dir = paramEl.getAttribute('data-dir') === 'down' ? 'down' : 'up';
+
+            const badge = document.createElement('div');
+            badge.style.cssText = 'font-size: 1.15rem; color: #78350f; font-weight: 800; background: rgba(255,255,255,0.9); padding: 4px 16px; border-radius: 20px; border: 1.5px solid #f59e0b;';
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; gap: 8px; width: 100%;';
+            const mkDir = (d, label) => {
+                const b = document.createElement('div');
+                b.textContent = label;
+                b.style.cssText = 'flex: 1; text-align: center; padding: 8px 6px; border-radius: 12px; font-weight: 800; font-size: 0.95rem; cursor: pointer; border: 2px solid transparent;';
+                b.onclick = (e) => { e.stopPropagation(); dir = d; paint(); };
+                row.appendChild(b);
+                return b;
+            };
+            const up = mkDir('up', en ? '▲ Brighter' : '▲ 밝아지면');
+            const down = mkDir('down', en ? '▼ Darker' : '▼ 어두워지면');
+            const slider = document.createElement('input');
+            slider.type = 'range'; slider.min = '0'; slider.max = '100'; slider.value = cur; slider.className = 'lego-slider';
+            slider.style.cssText = 'width: 100%; cursor: pointer;';
+            const paint = () => {
+                cur = parseInt(slider.value, 10);
+                badge.textContent = (dir === 'up' ? '▲ ' : '▼ ') + cur + ' %';
+                [[up, 'up'], [down, 'down']].forEach(x => {
+                    x[0].style.background = dir === x[1] ? '#fff' : 'rgba(255,255,255,0.35)';
+                    x[0].style.borderColor = dir === x[1] ? '#b45309' : 'transparent';
+                    x[0].style.color = '#78350f';
+                });
+                const pct = cur;
+                slider.style.background = 'linear-gradient(to right, #ffffff ' + pct + '%, transparent ' + pct + '%)';
+                paramEl.textContent = (dir === 'up' ? '▲ ' : '▼ ') + cur + '%';
+                paramEl.setAttribute('data-val', String(cur));
+                paramEl.setAttribute('data-dir', dir);
+            };
+            slider.oninput = paint;
+            modalBox.appendChild(badge); modalBox.appendChild(row); modalBox.appendChild(slider);
+            paint();
+            positionModalUnder(paramEl, '#facc15');
             modalOverlay.style.display = 'flex';
         }
 
@@ -2491,8 +2884,9 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
 
                                 // 새로 추가된 모터 속도 설정 모달 (4단계 바 그래프)
         function showMotorSpeedModal(paramEl) {
+            const T = bsPopupTheme(paramEl);
             modalBox.innerHTML = '';
-            modalBox.style.cssText = 'background: #0284c7; display: flex; gap: 8px; padding: 12px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #0369a1; user-select:none;';
+            modalBox.style.cssText = 'background: ' + T.main + '; display: flex; gap: 8px; padding: 12px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid ' + T.border + '; user-select:none;';
 
             const currentVal = parseInt(paramEl.getAttribute('data-val') || '40');
 
@@ -2508,9 +2902,9 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 const isSelected = (currentVal === speed.val) || (currentVal <= 25 && speed.val === 20) || (currentVal > 25 && currentVal <= 50 && speed.val === 40) || (currentVal > 50 && currentVal <= 80 && speed.val === 70) || (currentVal > 80 && speed.val === 100);
 
                 btn.style.cssText = `
-                    width: 52px; height: 56px; border-radius: 8px; border: 1.5px solid ${isSelected ? '#38bdf8' : '#0369a1'};
+                    width: 52px; height: 56px; border-radius: 8px; border: 1.5px solid ${isSelected ? T.ink : T.border};
                     display: flex; flex-direction: column; align-items: center; justify-content: flex-end; cursor: pointer; padding-bottom: 6px; gap: 4px;
-                    background: ${isSelected ? '#0369a1' : '#0ea5e9'};
+                    background: ${isSelected ? T.border : T.light};
                     transition: 0.2s; box-shadow: ${isSelected ? 'inset 0 3px 6px rgba(0,0,0,0.4), 0 0 8px rgba(56,189,248,0.5)' : 'none'};
                 `;
 
@@ -2539,8 +2933,8 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 btn.appendChild(barContainer);
                 btn.appendChild(lbl);
 
-                btn.onmouseover = () => { if (!isSelected) btn.style.background = '#0284c7'; };
-                btn.onmouseout = () => { if (!isSelected) btn.style.background = '#0ea5e9'; };
+                btn.onmouseover = () => { if (!isSelected) btn.style.background = T.main; };
+                btn.onmouseout = () => { if (!isSelected) btn.style.background = T.light; };
 
                 btn.onclick = () => {
                     paramEl.setAttribute('data-val', speed.val);
@@ -2565,7 +2959,8 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 modalBox.appendChild(btn);
             });
 
-            positionModalUnder(paramEl, '#0284c7');
+            bsPopupInk(modalBox, T);
+            positionModalUnder(paramEl, T.main);
             modalOverlay.style.display = 'flex';
         }
 
@@ -2573,19 +2968,9 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         function showMotorRotationModal(paramEl, blockAction) {
             modalBox.innerHTML = '';
             
-            let mainColor = '#0284c7';
-            let borderColor = '#0369a1';
-            
-            if (blockAction === 'flow_wait') {
-                mainColor = '#eab308';
-                borderColor = '#ca8a04';
-            } else if (blockAction && blockAction.startsWith('car_')) {
-                mainColor = '#f472b6';
-                borderColor = '#ec4899';
-            } else if (blockAction === 'sound_play' || blockAction === 'sound_note' || blockAction === 'sound_animal') {
-                mainColor = '#a855f7';
-                borderColor = '#9333ea';
-            }
+            const T = bsPopupTheme(paramEl);
+            let mainColor = T.main;
+            let borderColor = T.border;
 
             modalBox.style.cssText = `background: ${mainColor}; display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid ${borderColor}; width: 150px; user-select: none;`;
 
@@ -2718,14 +3103,16 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             });
 
             updateUI();
-            positionModalUnder(paramEl, '#0284c7');
+            bsPopupInk(modalBox, T);
+            positionModalUnder(paramEl, T.main);
             modalOverlay.style.display = 'flex';
         }
 
         // 반복 루프 전용 다이얼 모달 (Yellow Theme / Integer values)
         function showRepeatLoopModal(paramEl) {
+            const T = bsPopupTheme(paramEl);
             modalBox.innerHTML = '';
-            modalBox.style.cssText = 'background: #eab308; display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid #ca8a04; width: 150px; user-select: none;';
+            modalBox.style.cssText = 'background: ' + T.main + '; display: flex; flex-direction: column; align-items: center; padding: 20px 16px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid ' + T.border + '; width: 150px; user-select: none;';
 
             let currentVal = parseInt(paramEl.textContent || '4');
             if (isNaN(currentVal) || currentVal < 1) currentVal = 1;
@@ -2763,7 +3150,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
 
             // White center text circle
             const centerText = document.createElement('div');
-            centerText.style.cssText = 'position: absolute; width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #ca8a04; font-weight: bold; font-size: 16px; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
+            centerText.style.cssText = 'position: absolute; width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: ' + T.border + '; font-weight: bold; font-size: 16px; z-index: 2; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
 
             // Connection line and Knob
             const dialRotator = document.createElement('div');
@@ -2855,7 +3242,8 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             });
 
             updateUI();
-            positionModalUnder(paramEl, '#eab308');
+            bsPopupInk(modalBox, T);
+            positionModalUnder(paramEl, T.main);
             modalOverlay.style.display = 'flex';
         }
 
@@ -2888,6 +3276,8 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                         showColorSensorModal(param);
                     } else if (action === 'event_force_sensor') {
                         showForceSensorModal(param);
+                    } else if (action === 'event_reflect_sensor' || action === 'event_ambient_sensor') {
+                        showLightLevelModal(param);
                     } else if (action === 'event_distance_sensor') {
                         showDistanceSensorModal(param);
                     } else if (action === 'event_tilt_sensor') {
@@ -2908,9 +3298,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                         showMusicModal(param);
                     } else if (action === 'matrix_image' || action === 'matrix_pixel') {
                         // param-unified 클래스(통합 모달 트리거)이거나 다른 매트릭스 파라미터 클릭 시
-                        if (isMissionActive && ['1', '2', '3', '4', '5'].includes(unit)) {
-                            return; // 미션 모드일 때는 라이트 매트릭스 편집 창 비활성화
-                        }
+                        // 미션 모드에서도 이미 올려 둔 조명 블록의 편집 창을 열 수 있음 (요청에 따라 제한 해제)
                         showMatrixModal(param);
                     } else if (action === 'control_repeat') {
                         showRepeatLoopModal(param);
@@ -3689,7 +4077,22 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
             }
         };
 
+        // 소리 블록이 차지하는 시간(ms): 고른 노래/녹음의 실제 길이
+        function bsSoundMs(block) {
+            try {
+                const el = block.querySelector('.block-param') || block.querySelector('[data-val]');
+                const raw = el ? el.getAttribute('data-val') : '1';
+                if (raw && String(raw).indexOf('rec:') === 0 && window.SoundLib) return Math.ceil(SoundLib.durationOf(raw) * 1000) + 100;
+                const n = parseInt(raw, 10);
+                if (window.KidMusic && n >= 1 && n <= 8) return Math.ceil(KidMusic.duration(n) * 1000) + 150;
+            } catch (e) { }
+            return 5000;
+        }
+
         async function haltExecution() {
+            try { const hw = window.parent; if (hw && typeof hw.setColorSensorMode === 'function' && hw.colorSensorMode) hw.setColorSensorMode(0); } catch (e) { }
+            try { if (window.KidMusic) KidMusic.stop(); if (window.SoundLib) SoundLib.stop(); } catch (e) { }
+            try { bsRunIndicatorStop(); } catch (e) { }
             window.isBlockExecutionRunning = false;
             if (window.parent) window.parent.isBlockExecutionRunning = false;
             window.bleEngineRunCounter = (window.bleEngineRunCounter || 0) + 1;
@@ -3761,6 +4164,10 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         }
 
                 async function runBlocks(triggerAction = 'gui') {
+            if (triggerAction === 'gui') {
+                try { triggerSystemLog('INFO', '▶ 실행 시작'); } catch (e) { }
+                try { if (document.querySelector('#workspaceArea .spike-block[data-action="matrix_pixel"] .param-unified:not([data-matrix])')) triggerSystemLog('INFO', '💡 조명 블록에 아직 색을 칠하지 않았어요. 블록 아래 화살표를 눌러 칸에 색을 칠해 주세요.'); } catch (e) { }
+            }
             window.isBlockExecutionRunning = true;
             if (window.parent) window.parent.isBlockExecutionRunning = true;
             // 실행 가능한 스택 찾기 (동작 블록이 연결된 정상 스택 우선 필터링, 빈 시작 블록 조기종료 방어)
@@ -3775,6 +4182,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 return blocks.length > 1 || firstAction.startsWith('event_');
             });
             if (validStacks.length === 0) validStacks = allCandidateStacks;
+            if (triggerAction === 'gui' && validStacks.length === 0) { try { triggerSystemLog('INFO', '⚠ 실행할 블록이 없어요. "시작하면" 블록이나 센서 이벤트 블록으로 시작해 주세요.'); } catch (e) { } }
 
             // 스택들을 왼쪽에서 오른쪽으로 나타나는 순서 (X 좌표)대로 정렬
             validStacks.sort((a, b) => {
@@ -3983,7 +4391,7 @@ print("BrickSync Sandbox Run")
                         case 'matrix_pixel':
                         case 'matrix_pixel_red':
                             const matEl = block.querySelector(':scope > .param-unified') || block.querySelector(':scope > .block-param:not(.param-time)') || paramEl;
-                            let matrixArr = matEl ? (matEl.getAttribute('data-matrix') || JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0])) : JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0]);
+                            let matrixArr = matEl ? (matEl.getAttribute('data-matrix') || JSON.stringify([0, 0, 0, 0, 0, 0, 0, 0, 0])) : JSON.stringify([0, 0, 0, 0, 0, 0, 0, 0, 0]);
                             let lightDuration = matEl ? (parseFloat(matEl.getAttribute('data-val')) || 2) : 2;
                             localActionsQueue.push({ action: 'LIGHT_ON', delay: cumulativeDelayMs });
                             cumulativeDelayMs += (lightDuration * 1000);
@@ -3994,6 +4402,17 @@ print("BrickSync Sandbox Run")
                             localActionsQueue.push({ action: 'LIGHT_OFF', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 300;
                             break;
+                        case 'sound_note':
+                        case 'sound_animal':
+                        case 'sound_play': {
+                            const sndEl = block.querySelector('.block-param') || block.querySelector('[data-val]');
+                            const sndRaw = sndEl ? sndEl.getAttribute('data-val') : '1';
+                            const sndPan = sndEl ? (parseFloat(sndEl.getAttribute('data-pan')) || 0) : 0;
+                            const sndMs = bsSoundMs(block);
+                            localSoundsQueue.push({ track: sndRaw, delay: cumulativeDelayMs, pan: sndPan });
+                            cumulativeDelayMs += sndMs;
+                            break;
+                        }
                         case 'flow_wait':
                             pyCode += `${indent}utime.sleep_ms(int(${pythonVal} * 1000)) \n`;
                             cumulativeDelayMs += (paramVal * 1000);
@@ -4022,9 +4441,23 @@ print("BrickSync Sandbox Run")
             }
 
             buildPyCode(rootBlocks, "");
+            try { bsRunIndicator(cumulativeDelayMs + 1500); } catch (e) { }
 
             if (typeof window.bleEngineRunCounter === 'undefined') window.bleEngineRunCounter = 0;
             const currentRunId = ++window.bleEngineRunCounter;
+
+            // 🎵 소리 블록 재생 (앞선 블록들의 실행 시간에 맞춘다)
+            if (localSoundsQueue.length > 0) {
+                localSoundsQueue.forEach(item => {
+                    setTimeout(() => {
+                        if (window.bleEngineRunCounter !== currentRunId) return;
+                        try {
+                            if (String(item.track).indexOf('rec:') === 0 && window.SoundLib) SoundLib.play(item.track, { pan: item.pan });
+                            else if (window.KidMusic) KidMusic.play(parseInt(item.track, 10) || 1, { pan: item.pan });
+                        } catch (e) { }
+                    }, item.delay);
+                });
+            }
 
             // 🎮 포트나이트 연동 액션(localActionsQueue) 타이밍 송출
             if (localActionsQueue.length > 0) {
@@ -4058,7 +4491,7 @@ print("BrickSync Sandbox Run")
                 let maxGlobalDelay = 0;
                 let anySequenceFound = false;
 
-                validStacks.forEach((stack) => {
+                validStacks.forEach((stack, stackNo) => {
                     const firstBlock = stack.querySelector('.workspace-item');
                     if (!firstBlock) return;
                     const trigger = firstBlock.getAttribute('data-action');
@@ -4192,7 +4625,7 @@ print("BrickSync Sandbox Run")
                             case 'sound_note':
                             case 'sound_animal':
                             case 'sound_play':
-                                currentBleDelay += 5000;
+                                currentBleDelay += bsSoundMs(block);
                                 break;
                             case 'event_force_sensor': {
                                 const fEl = block.querySelector('.block-param') || block.querySelector('[data-val]');
@@ -4213,12 +4646,26 @@ print("BrickSync Sandbox Run")
                                 bleQueue.push({ action: 'wait_tilt', targetTilt: tiltVal, delay: currentBleDelay });
                                 break;
                             }
-                            case 'event_color_sensor':
-                                bleQueue.push({ action: 'wait_color', targetColor: paramVal, delay: currentBleDelay });
+                            case 'event_color_sensor': {
+                                // 색 번호를 있는 그대로 읽는다 (0 = 검정, -1 = 색 없음도 그대로). 아이콘 번호 → 허브 번호로 바꾼다.
+                                const colEl = block.querySelector('.block-param');
+                                let rawCol = parseInt(block.getAttribute('data-sensor-color'), 10);
+                                if (isNaN(rawCol)) rawCol = colEl ? parseInt(colEl.getAttribute('data-val'), 10) : NaN;
+                                if (isNaN(rawCol)) rawCol = 9;
+                                const hubCol = ({ 5: 6, 6: 7 })[rawCol] !== undefined ? ({ 5: 6, 6: 7 })[rawCol] : rawCol;
+const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [10], 0: [0], '-1': [-1] })[rawCol] || [hubCol];
+                                bleQueue.push({ action: 'wait_color', targetColor: hubCol, targetSet: hubSet, blockVal: rawCol, stackNo: stackNo + 1, delay: currentBleDelay });
                                 break;
+                            }
                             case 'event_distance_sensor':
                                 bleQueue.push({ action: 'wait_distance', targetDistance: paramVal, delay: currentBleDelay });
                                 break;
+                            case 'event_reflect_sensor':
+                            case 'event_ambient_sensor': {
+                                const lightEl = block.querySelector('.block-param');
+                                bleQueue.push({ action: 'wait_light', mode: action === 'event_ambient_sensor' ? 2 : 1, target: paramVal, dir: (lightEl && lightEl.getAttribute('data-dir')) === 'down' ? 'down' : 'up', delay: currentBleDelay });
+                                break;
+                            }
                             case 'flow_wait':
                                 currentBleDelay += (paramVal * 1000);
                                 break;
@@ -4332,7 +4779,7 @@ print("BrickSync Sandbox Run")
                                         case 'matrix_pixel':
                                         case 'matrix_pixel_red':
                                             const freshMatEl = inBlock.querySelector(':scope > .param-unified') || inBlock.querySelector(':scope > .block-param:not(.param-time)');
-                                            let matrixArrBLE = freshMatEl ? (freshMatEl.getAttribute('data-matrix') || JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0])) : JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0]);
+                                            let matrixArrBLE = freshMatEl ? (freshMatEl.getAttribute('data-matrix') || JSON.stringify([0, 0, 0, 0, 0, 0, 0, 0, 0])) : JSON.stringify([0, 0, 0, 0, 0, 0, 0, 0, 0]);
                                             let mBleTime = freshMatEl ? (parseFloat(freshMatEl.getAttribute('data-val')) || 2) : 2;
                                             innerBleQueue.push({ action: 'matrix', colors: JSON.parse(matrixArrBLE), delay: innerBleDelay });
                                             innerBleDelay += (mBleTime * 1000);
@@ -4348,7 +4795,7 @@ print("BrickSync Sandbox Run")
                             case 'matrix_pixel':
                             case 'matrix_pixel_red':
                                 const freshMatEl = block.querySelector(':scope > .param-unified') || block.querySelector(':scope > .block-param:not(.param-time)') || paramEl;
-                                let matrixArrBLE = freshMatEl ? (freshMatEl.getAttribute('data-matrix') || JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0])) : JSON.stringify([0, 9, 0, 0, 9, 0, 0, 9, 0]);
+                                let matrixArrBLE = freshMatEl ? (freshMatEl.getAttribute('data-matrix') || JSON.stringify([0, 0, 0, 0, 0, 0, 0, 0, 0])) : JSON.stringify([0, 0, 0, 0, 0, 0, 0, 0, 0]);
                                 let mBleTime = (String(unit) === '5' || String(unit) === '8') ? 5 : (freshMatEl ? (parseFloat(freshMatEl.getAttribute('data-val')) || 2) : 2);
                                 bleQueue.push({ action: 'matrix', colors: JSON.parse(matrixArrBLE), delay: currentBleDelay, duration: mBleTime });
                                 currentBleDelay += (mBleTime * 1000);
@@ -4569,44 +5016,79 @@ print("BrickSync Sandbox Run")
                                         await new Promise(r => setTimeout(r, 40));
                                     }
                                 } else if (cmd.action === 'wait_force') {
+                                    // 프라임 힘 센서: 눌렸는지(1) / 떼었는지(0)를 기다린다
                                     const targetForce = cmd.targetForce !== undefined ? cmd.targetForce : 1;
+                                    let lastFLog = 0;
                                     while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
                                         const hubWin = window.parent && window.parent.hubDevices ? window.parent : window;
-                                        const devs = hubWin.hubDevices || {};
-                                        let foundForceVal = null;
-                                        for (let p = 0; p < 6; p++) {
-                                            if (devs[p] === 63) {
-                                                if (hubWin.forceSensorValues && hubWin.forceSensorValues[p] !== undefined) {
-                                                    foundForceVal = hubWin.forceSensorValues[p];
-                                                }
-                                                break;
-                                            }
-                                        }
-                                        if (foundForceVal !== null) {
-                                            if (targetForce === 1 && foundForceVal > 0) break;
-                                            if (targetForce === 0 && foundForceVal === 0) break;
+                                        const fs = typeof hubWin.getForceState === 'function' ? hubWin.getForceState() : undefined;
+                                        if (fs !== undefined && (targetForce === 1 ? fs.pressed : !fs.pressed)) break;
+                                        if (Date.now() - lastFLog > 2000) {
+                                            lastFLog = Date.now();
+                                            try { triggerSystemLog('HUB', fs ? ('🔘 힘 센서 기다리는 중: 목표 ' + (targetForce === 1 ? '누름' : '뗌') + ' / 지금 ' + (fs.pressed ? '눌림' : '안 눌림') + '(' + fs.value + ')') : '🔘 힘 센서를 찾지 못했어요 (프라임 힘 센서가 허브에 꽂혀 있는지 확인해 주세요)'); } catch (e) { }
                                         }
                                         await new Promise(r => setTimeout(r, 60));
                                     }
                                 } else if (cmd.action === 'wait_distance') {
-                                    const thresholdDist = cmd.targetDistance || 20;
+                                    // 프라임 거리 센서: 목표(cm) 안에 물체가 들어올 때까지 기다린다 (센서 값은 mm)
+                                    const thresholdDist = parseFloat(cmd.targetDistance) || 20;
+                                    let lastDLog = 0;
                                     while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
                                         const hubWin = window.parent && window.parent.hubDevices ? window.parent : window;
-                                        const dist = hubWin.latestDistanceValue !== undefined ? hubWin.latestDistanceValue : 100;
-                                        if (dist <= thresholdDist) break;
+                                        const mm = typeof hubWin.getDistanceMm === 'function' ? hubWin.getDistanceMm() : undefined;
+                                        if (mm !== undefined && mm > 0 && mm / 10 <= thresholdDist) break;
+                                        if (Date.now() - lastDLog > 2000) {
+                                            lastDLog = Date.now();
+                                            try { triggerSystemLog('HUB', mm === undefined ? '📡 거리 센서를 찾지 못했어요 (프라임 거리 센서가 허브에 꽂혀 있는지 확인해 주세요)' : ('📡 거리 센서 기다리는 중: 목표 ' + thresholdDist + 'cm 이내 / 지금 ' + (mm < 0 ? '물체 없음' : (mm / 10).toFixed(1) + 'cm'))); } catch (e) { }
+                                        }
                                         await new Promise(r => setTimeout(r, 60));
                                     }
+                                } else if (cmd.action === 'wait_light') {
+                                    // 색 센서를 반사/주변 빛 모드로 바꾸고, 기준 값을 넘을 때까지 기다린다
+                                    const lw = window.parent && window.parent.hubDevices ? window.parent : window;
+                                    try { if (typeof lw.setColorSensorMode === 'function') lw.setColorSensorMode(cmd.mode); } catch (e) { }
+                                    await new Promise(r => setTimeout(r, 260));
+                                    const lkey = cmd.mode === 2 ? 'latestAmbientValue' : 'latestReflectValue';
+                                    while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
+                                        const lv = lw[lkey];
+                                        if (lv !== undefined) {
+                                            if (cmd.dir === 'down' ? lv <= cmd.target : lv >= cmd.target) break;
+                                        }
+                                        await new Promise(r => setTimeout(r, 60));
+                                    }
+                                    try { if (typeof lw.setColorSensorMode === 'function') lw.setColorSensorMode(0); } catch (e) { }
                                 } else if (cmd.action === 'wait_color') {
+                                const colorNames = { '-1': '색 없음', 0: '검정', 1: '분홍', 2: '보라', 3: '파랑', 4: '하늘', 5: '청록', 6: '초록', 7: '노랑', 8: '주황', 9: '빨강', 10: '하양' };
+                                const logColorWait = (cw, cv, tgt, blockVal, stackNo) => {   // 1초마다: 지금 센서가 뭘 보고 있는지 통신 로그에 남긴다
+                                    try {
+                                        const found = Object.keys(cw.hubDevices || {}).filter(k => Number(cw.hubDevices[k]) === 61).map(k => 'ABCDEF'.charAt(Number(k)));
+                                        const msg = found.length
+                                            ? '🎨 색 센서(포트 ' + found.join(',') + ') 기다리는 중: 목표 ' + (colorNames[tgt] || tgt) + ' (' + stackNo + '번째 묶음, 블록에 저장된 색 번호 ' + blockVal + ') / 지금 ' + (cv === undefined ? '값 없음' : (colorNames[cv] || cv) + '(' + cv + '번)')
+                                            : '🎨 색 센서를 찾지 못했어요 (연결된 장치: ' + JSON.stringify(cw.hubDevices || {}) + ')';
+                                        triggerSystemLog('HUB', msg);
+                                    } catch (e) { }
+                                };
+                                    let lastColLog = 0, hitSince = 0;
                                     while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
                                         const hubWin = window.parent && window.parent.hubDevices ? window.parent : window;
-                                        const col = hubWin.latestColorValue;
-                                        if (col === cmd.targetColor) break;
+                                        const col = typeof hubWin.getColorSensorValue === 'function' ? hubWin.getColorSensorValue() : undefined;     // 허브가 보내 준 색 번호
+                                        const hit = col !== undefined && (cmd.targetSet ? cmd.targetSet.indexOf(col) >= 0 : col === cmd.targetColor);
+                                        if (hit) {   // 지나가는 순간의 값에 속지 않도록 0.25초 동안 같은 색이 유지돼야 인정한다
+                                            if (!hitSince) hitSince = Date.now();
+                                            if (Date.now() - hitSince >= 250) { try { const cn = { '-1': '색 없음', 0: '검정', 1: '분홍', 2: '보라', 3: '파랑', 4: '하늘', 5: '청록', 6: '초록', 7: '노랑', 8: '주황', 9: '빨강', 10: '하양' }; triggerSystemLog('HUB', '✅ 색 인식: ' + (cn[col] || col) + '(' + col + '번) → 목표 색으로 인정'); } catch (e) { } break; }
+                                        } else hitSince = 0;
+                                        if (Date.now() - lastColLog > 1000) { lastColLog = Date.now(); logColorWait(hubWin, col, cmd.targetColor, cmd.blockVal, cmd.stackNo); }
                                         await new Promise(r => setTimeout(r, 60));
                                     }
                                 } else if (cmd.action === 'wait_tilt') {
+                                    // 허브 기울기: 지금 자세를 평평으로 잡고, 목표 방향으로 기울 때까지 기다린다
+                                    const tw = window.parent && window.parent.hubDevices ? window.parent : window;
+                                    if (cmd.targetTilt === 'shake') { try { triggerSystemLog('INFO', '허브 흔들기는 아직 준비 중이에요. 다른 방향을 골라 주세요.'); } catch (e) { } }
+                                    try { if (typeof tw.resetTiltBaseline === 'function') tw.resetTiltBaseline(); } catch (e) { }
+                                    await new Promise(r => setTimeout(r, 150));
                                     while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning) {
                                         const hubWin = window.parent && window.parent.hubDevices ? window.parent : window;
-                                        if (hubWin.latestTiltState === cmd.targetTilt) break;
+                                        if (typeof hubWin.getTiltName === 'function' && hubWin.getTiltName() === cmd.targetTilt) break;
                                         await new Promise(r => setTimeout(r, 60));
                                     }
                                 } else if (cmd.action === 'send_message') {
@@ -4629,7 +5111,7 @@ print("BrickSync Sandbox Run")
                                     for (const inCmd of (cmd.innerQueue || [])) {
                                         if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) break;
                                         const inWait = inCmd.delay - innerLastTime;
-                                        if (inWait > 0 && inCmd.action !== 'wait_color' && inCmd.action !== 'wait_distance' && inCmd.action !== 'wait_tilt' && inCmd.action !== 'wait_force') {
+                                        if (inWait > 0 && inCmd.action !== 'wait_color' && inCmd.action !== 'wait_distance' && inCmd.action !== 'wait_tilt' && inCmd.action !== 'wait_force' && inCmd.action !== 'wait_light') {
                                             await new Promise(r => setTimeout(r, inWait));
                                             innerLastTime = inCmd.delay;
                                         }
@@ -4643,7 +5125,7 @@ print("BrickSync Sandbox Run")
                             }
 
                             const waitTime = cmd.delay - lastExecutionTime;
-                            if (waitTime > 0 && cmd.action !== 'wait_color' && cmd.action !== 'wait_distance' && cmd.action !== 'wait_tilt' && cmd.action !== 'wait_force') {
+                            if (waitTime > 0 && cmd.action !== 'wait_color' && cmd.action !== 'wait_distance' && cmd.action !== 'wait_tilt' && cmd.action !== 'wait_force' && cmd.action !== 'wait_light') {
                                 await new Promise(r => setTimeout(r, waitTime));
                                 lastExecutionTime = cmd.delay;
                             }
@@ -4672,6 +5154,10 @@ print("BrickSync Sandbox Run")
                     }
                 });
 
+                try {
+                    const hasEventLoop = validStacks.some(st => { const fb = st.querySelector('.workspace-item'); const a = fb && fb.getAttribute('data-action'); return !!(a && a.startsWith('event_')); });
+                    bsRunIndicator(hasEventLoop ? Infinity : Math.max(maxGlobalDelay, cumulativeDelayMs) + 1500);
+                } catch (e) { }
                 setTimeout(() => {
                     if (blockCount > 1 && anySequenceFound && window.bleEngineRunCounter === currentRunId) {
                         const isMissionComplete = document.getElementById('m-progress') && document.getElementById('m-progress').dataset.completed === 'true';
@@ -4729,25 +5215,21 @@ print("BrickSync Sandbox Run")
                         function showPinCodeModal(pinStr) {
             document.getElementById('generatedPinCode').textContent = pinStr;
             
-            // Render the reward grid dynamically based on the current unit
+            // 지금 완료한 단원만 카드 한 장으로 보여 준다 (단원 번호 + 미션 이름)
             const gridContainer = document.getElementById('rewardBoardGrid');
             if (gridContainer) {
-                let html = '';
                 const currentUnitNum = parseInt(unit) || 1;
                 const isEn = localStorage.getItem('bricksync_lang') === 'en';
-                for (let i = 1; i <= 8; i++) {
-                    const isActive = (i === currentUnitNum);
-                    const slotText = isEn ? `Lesson ${i}` : `${i}단원`;
-                    html += `
-                        <div class="reward-slot ${isActive ? 'active' : ''}">
-                            <div class="slot-circle">
-                                ${isActive ? '★' : i}
-                            </div>
-                            <div class="slot-label">${slotText}</div>
-                        </div>
-                    `;
-                }
-                gridContainer.innerHTML = html;
+                const titleEl = document.getElementById('m-title');
+                const missionTitle = (titleEl ? titleEl.textContent : '').trim().replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                gridContainer.className = '';
+                gridContainer.style.cssText = 'border: 2px solid #facc15; background: #fffbeb; border-radius: 16px; padding: 14px 18px; margin: 22px 0 26px 0; display: flex; align-items: center; gap: 14px; text-align: left;';
+                gridContainer.innerHTML =
+                    '<div style="width: 46px; height: 46px; border-radius: 50%; background: #facc15; color: #7c2d12; display: flex; justify-content: center; align-items: center; font-size: 22px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(250, 204, 21, 0.4);">★</div>' +
+                    '<div style="min-width: 0;">' +
+                    '<div style="font-size: 0.85rem; font-weight: 800; color: #b45309;">' + (isEn ? 'Lesson ' + currentUnitNum + ' cleared' : currentUnitNum + '단원 완료') + '</div>' +
+                    '<div style="font-size: 1.1rem; font-weight: 900; color: #7c2d12; overflow-wrap: anywhere;">' + missionTitle + '</div>' +
+                    '</div>';
             }
 
             const modal = document.getElementById('pinCodeModal');
@@ -4858,8 +5340,9 @@ print("BrickSync Sandbox Run")
                         });
                         const paramEl = child.querySelector('.block-param');
                         if (paramEl) {
-                            paramEl.innerHTML = '';
-                            paramEl.style.backgroundColor = '#ef4444';
+                            paramEl.innerHTML = '<span style="flex:0 0 18px;width:18px;height:18px;min-width:18px;border-radius:50%;background:#EF4444;display:flex;align-items:center;justify-content:center;"><i class="fas fa-lock" style="font-size:9px;color:#fff;"></i></span>'; // 색 고정 표시(빨강 + 자물쇠)
+                            paramEl.style.backgroundColor = '#fff';
+                            paramEl.style.borderColor = 'rgba(0,0,0,0.1)'; // 빨간 테두리 제거(다른 알약과 동일)
                             paramEl.style.pointerEvents = 'none';
                             paramEl.setAttribute('data-val', '9');
                             paramEl.setAttribute('data-matrix', JSON.stringify([9,9,9,9,9,9,9,9,9]));
@@ -4893,12 +5376,13 @@ print("BrickSync Sandbox Run")
                 'motor_cw', 'motor_ccw', 'motor_stop'
             ];
 
+            // 미션 중에는 그 단원 미션에 꼭 필요한 블록만 보관함에 남긴다
             const allowedBlocksMap = {
-                '1': fortniteCompatibleBlocks,
-                '2': fortniteCompatibleBlocks,
-                '3': fortniteCompatibleBlocks,
-                '4': fortniteCompatibleBlocks,
-                '5': fortniteCompatibleBlocks
+                '1': ['start', 'flow_wait', 'car_forward', 'car_left', 'car_backward'],
+                '2': ['start', 'flow_wait', 'motor_cw', 'motor_ccw'],
+                '3': ['start', 'flow_wait', 'motor_cw', 'motor_ccw'],
+                '4': ['start', 'flow_wait', 'car_forward', 'car_right'],
+                '5': ['start', 'flow_wait']      // 5단원의 빨간 조명 블록은 아래에서 따로 만들어 붙인다
             };
 
             const allowed = allowedBlocksMap[targetUnit] || ['start'];
@@ -4942,16 +5426,19 @@ print("BrickSync Sandbox Run")
                 }
             });
 
-            // Automatically clear workspace ONLY if there are no existing user blocks (preserve user work)
+            // 미션을 처음 시작할 때 작업 공간을 비운다 (하던 작업은 따로 보관). 다시 도전하기를 눌러도 미션 작업은 지우지 않는다.
             const workspaceArea = document.getElementById('workspaceArea');
-            if (workspaceArea) {
-                const existingUserBlocks = workspaceArea.querySelectorAll('.block-stack .workspace-item');
-                if (existingUserBlocks.length === 0) {
-                    const stacks = workspaceArea.querySelectorAll('.block-stack');
-                    stacks.forEach(s => s.remove());
-                    const hint = document.querySelector('.hint-text');
-                    if (hint) hint.remove();
-                }
+            if (workspaceArea && !window.__missionWorkspaceCleared) {
+                window.__missionWorkspaceCleared = true;
+                try {
+                    const prevKey = _bsStudentName + '_project_unit_' + unit;
+                    const prev = localStorage.getItem(prevKey);
+                    if (prev) localStorage.setItem(_bsStudentName + '_before_mission_unit_' + unit, prev);
+                } catch (e) { }
+                const stacks = workspaceArea.querySelectorAll('.block-stack');
+                stacks.forEach(s => s.remove());
+                const hint = document.querySelector('.hint-text');
+                if (hint) hint.remove();
             }
 
             // Remove previous dynamic blocks
@@ -5037,7 +5524,7 @@ print("BrickSync Sandbox Run")
             '2': '5초 대기 후 시계방향 3번, 반시계방향 3번 작동하세요.',
             '3': '5초 대기 후 모터를 시계방향 3번, 반시계방향 2번 회전시켜보세요.',
             '4': '5초 대기 후 앞으로 4번 이동하고, 우회전 1번 후 앞으로 2번 이동하세요.',
-            '5': '5초 대기 후에 빨간 불이 켜지도록 만들어보세요.'
+            '5': '2초 대기 후에 빨간 불이 켜지도록 만들어보세요.'
         };
         const themeDescriptionsEn = {
             '1': 'Wait 5 seconds, move forward 3 times, turn left once, and move backward 2 times.',
@@ -5092,7 +5579,7 @@ print("BrickSync Sandbox Run")
                     ]
                 },
                 '5': {
-                    badge: 'STAGE 5', title: '사이렌을 켜줘', desc: '5초 대기 후에 빨간 불이 켜지도록 만들어보세요.',
+                    badge: 'STAGE 5', title: '사이렌을 켜줘', desc: '2초 대기 후에 빨간 불이 켜지도록 만들어보세요.',
                     pinCode: '9428',
                     tasks: [
                         { id: 'start', text: '재생(시작) 블록 연결하기' },
@@ -5600,6 +6087,21 @@ print("BrickSync Sandbox Run")
                 });
                 database.ref('bricksync_classroom/students/' + _bsStudentName + '/online').onDisconnect().set(false);
                 database.ref('bricksync_classroom/students/' + _bsStudentName + '/lastActive').onDisconnect().set(Date.now());
+                // 다른 기기/브라우저에서 쌓인 통계가 있으면 가져와 합친다 (0부터 다시 시작해 덮어쓰는 일 방지)
+                database.ref('bricksync_classroom/students/' + _bsStudentName + '/stats').once('value').then(function (snap) {
+                    var c = snap.val();
+                    if (!c) return;
+                    var key = 'dashboard_stats_' + _bsStudentName, l = {};
+                    try { l = JSON.parse(localStorage.getItem(key) || '{}') || {}; } catch (e) { l = {}; }
+                    var m = Object.assign({}, c, l);
+                    ['liveBlocks', 'cntMotor', 'cntSensor', 'liveMinutes'].forEach(function (k) { m[k] = Math.max(Number(c[k]) || 0, Number(l[k]) || 0); });
+                    m.liveSuccess = l.liveSuccess != null ? l.liveSuccess : (c.liveSuccess != null ? c.liveSuccess : 100);
+                    var cm = c.missions || [], lm = l.missions || [];
+                    m.missions = [];
+                    for (var i = 0; i < 8; i++) m.missions[i] = !!(cm[i] || lm[i]);
+                    if ((c.logs || []).length > (l.logs || []).length) m.logs = c.logs;
+                    localStorage.setItem(key, JSON.stringify(m));
+                }).catch(function () { });
 
                 // Firebase 실시간 DB 리셋 신호 감지 (원격/멀티 디바이스 초기화 연동)
                 database.ref('bricksync_classroom/reset_signal').on('value', (snapshot) => {
@@ -5641,8 +6143,8 @@ print("BrickSync Sandbox Run")
             let sLiveBlocks = 0;
             let sCntMotor = 0;
             let sCntSensor = 0;
-            let sLiveMinutes = studentName === '김민준' ? 65 : Math.floor(40 + Math.random() * 40);
-            let sLiveSuccess = studentName === '김민준' ? 79 : Math.floor(60 + Math.random() * 35);
+            let sLiveMinutes = studentName === '김민준' ? 65 : 0;
+            let sLiveSuccess = studentName === '김민준' ? 79 : 100;
             let sMissions = [false, false, false, false, false, false, false, false];
             let sLogs = [];
             let sAiComment = "대기 중...";
@@ -5747,8 +6249,8 @@ print("BrickSync Sandbox Run")
             let sLiveBlocks = 0;
             let sCntMotor = 0;
             let sCntSensor = 0;
-            let sLiveMinutes = studentName === '김민준' ? 65 : Math.floor(40 + Math.random() * 40);
-            let sLiveSuccess = studentName === '김민준' ? 79 : Math.floor(60 + Math.random() * 35);
+            let sLiveMinutes = studentName === '김민준' ? 65 : 0;
+            let sLiveSuccess = studentName === '김민준' ? 79 : 100;
             let sMissions = [false, false, false, false, false, false, false, false];
             let sLogs = [];
             let sAiComment = "대기 중...";
@@ -6050,7 +6552,14 @@ print("BrickSync Sandbox Run")
                                     const dropEl = block.querySelector('.block-param');
                                     if (dropEl) dropEl.setAttribute('data-val', blockData.paramVal);
                                 } else {
-                                    paramEl.innerText = blockData.paramVal;
+                                    if (String(blockData.paramVal) === "-1") {
+                                        paramEl.innerHTML = '<i class="fas fa-dice"></i>';
+                                    } else if (paramEl.children.length === 0) {
+                                        paramEl.innerText = /cms*$/.test(paramEl.textContent) ? blockData.paramVal + " cm" : blockData.paramVal;
+                                    } else if (/^#/.test(String(blockData.paramVal))) {
+                                        const dot = paramEl.querySelector("div");
+                                        if (dot) dot.style.background = blockData.paramVal;
+                                    }
                                 }
                             }
                         }
@@ -6058,7 +6567,7 @@ print("BrickSync Sandbox Run")
                         if (blockData.matrix !== undefined) {
                             const paramEl = block.querySelector('.param-unified') || block.querySelector('.block-param:not(.param-time)');
                             if (paramEl) {
-                                paramEl.setAttribute('data-matrix', blockData.matrix);
+                                paramEl.setAttribute('data-matrix', blockData.matrix); try { updateParamIcon(paramEl, JSON.parse(blockData.matrix)); } catch (e) {} // 복원 시 블록 아이콘의 켜진 칸도 다시 그림
                             }
                         }
 
@@ -6298,6 +6807,53 @@ print("BrickSync Sandbox Run")
         window.addSystemLog = addSystemLog;
     </script>
 
+    <!-- UEFN Verse 코드 창: 블록을 코드로 보여 주고, 블록에 마우스를 올리면 대응하는 코드 줄이 표시된다 -->
+    <script src="kid_music.js"></script>
+    <script src="sound_lib.js"></script>
+    <script src="verse_gen.js"></script>
+    <script src="verse_panel.js"></script>
+    <script>
+        (function () {
+            var area = document.getElementById('workspaceArea');
+            var ml = document.querySelector('.main-layout');
+            if (!area || !ml || !window.VersePanel) return;
+            var unitNo = new URLSearchParams(location.search).get('unit') || '1';
+            VersePanel.mount({
+                host: ml, rightPx: 0, root: area,
+                getProgram: function () {
+                    var p = VerseGen.fromIcon(area, unitNo);
+                    p.mission = (typeof isMissionActive !== 'undefined') && !!isMissionActive;
+                    return p;
+                },
+                idFromTarget: function (t) { var el = t.closest && t.closest('.workspace-item[data-vid]'); return el ? el.dataset.vid : null; },
+                getBlockEl: function (id) { return area.querySelector('[data-vid="' + id + '"]'); },
+                watch: function (cb) {
+                    new MutationObserver(cb).observe(area, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['data-val', 'data-matrix'] });
+                }
+            });
+        })();
+    </script>
+
+    <script>
+        /* 색 센서 블록의 색 동그라미는 항상 실제 값(data-val)과 같은 색을 보여 준다 (불러오기/복원/변경 모두) */
+        (function () {
+            var HEX = { '0': '#000000', '1': '#f9a8d4', '3': '#38bdf8', '4': '#7dd3fc', '5': '#4ade80', '6': '#facc15', '9': '#ef4444', '10': '#ffffff' };
+            function syncOne(b) {
+                var p = b.querySelector('.block-param'), brick = b.querySelector('.color-brick-icon');
+                if (!p || !brick) return;
+                var sv = b.getAttribute('data-sensor-color'), v = String(sv !== null ? sv : p.getAttribute('data-val'));
+                var none = v === '-1', hex = none ? '#ffffff' : (HEX[v] || '#ef4444');
+                if (brick.style.background !== hex && brick.style.backgroundColor !== hex) brick.style.background = hex;
+                brick.style.border = (hex === '#ffffff' && !none) ? '2.5px solid #cbd5e1' : '';
+                var slash = b.querySelector('.no-color-slash'); if (slash) slash.style.display = none ? 'block' : 'none';
+            }
+            function syncAll() { Array.prototype.forEach.call(document.querySelectorAll('.spike-block[data-action="event_color_sensor"]'), syncOne); }
+            var timer = null;
+            function later() { clearTimeout(timer); timer = setTimeout(syncAll, 60); }
+            syncAll();
+            try { new MutationObserver(later).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-val'] }); } catch (e) { }
+        })();
+    </script>
 </body>
 
 </html>

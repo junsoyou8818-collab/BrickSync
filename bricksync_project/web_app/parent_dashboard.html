@@ -95,18 +95,89 @@ body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
 
 .toast{position:fixed;bottom:20px;right:20px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:12px 20px;border-radius:10px;font-size:.85rem;font-weight:700;z-index:9999;transform:translateY(80px);transition:.3s;opacity:0}
 .toast.show{transform:translateY(0);opacity:1}
+
+/* ===== 메인 화면 스타일: 파스텔 배경 + 유리 사이드바 + 흰 카드 ===== */
+html{background-color:#cfd8ee}
+body{background:transparent!important;background-image:none!important;color:#2b1b4d;position:relative}
+body::before{content:'';position:fixed;inset:0;background:url('assets/main_bg.jpg') center/cover no-repeat;z-index:-1}
+.sidebar{background:rgba(255,255,255,.5);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-right:1px solid rgba(255,255,255,.75);box-shadow:0 0 40px rgba(43,27,77,.12)}
+.sidebar-subtext{color:#5b5478}
+.nav-item{color:#2b1b4d}
+.nav-item:hover{background:rgba(255,255,255,.78);color:#6c1f86;box-shadow:0 4px 14px rgba(43,27,77,.12)}
+.nav-item.active{background:#6c1f86;color:#fff;box-shadow:0 6px 18px rgba(108,31,134,.32)}
+.nav-item.active i{color:#facc15}
+.parent-badge{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.85)}
+.parent-badge .avatar,.child-avatar{background:#edbd95;color:#2b1b4d}
+.parent-badge .role-label{color:#6c1f86}
+.page-title{color:#2b1b4d}
+.page-subtitle{color:#3f3a63;font-weight:600}
+.child-card{background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.9);box-shadow:0 8px 24px rgba(43,27,77,.12)}
+.child-class{color:#5b5478}
+.stat-card,.panel{background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.9);box-shadow:0 8px 24px rgba(43,27,77,.12)}
+.stat-card::before{opacity:.5}
+.stat-card.pink::before{background:#e6a8b8}
+.stat-card.purple::before{background:#cfc3e6}
+.stat-card.blue::before{background:#a9c8e8}
+.stat-card.green::before{background:#a0c9c3}
+.stat-card .label{color:#5b5478}
+.stat-card .sub{color:#7a7396}
+.panel-title{color:#2b1b4d}
+.panel-title i{color:#6c1f86}
+.activity-item{background:#f6fbfe;border-left-color:#d6edf5}
+.activity-item.lesson{border-color:#a5b1d7}
+.activity-item.ai{border-color:#e6a8b8}
+.activity-item.mission{border-color:#a0c9c3}
+.activity-item.lesson .activity-dot{background:#a5b1d7}
+.activity-item.ai .activity-dot{background:#e6a8b8}
+.activity-item.mission .activity-dot{background:#a0c9c3}
+.activity-time{color:#7a7396}
+.mission-row{border-bottom-color:#d6edf5}
+.mission-bar-wrap{background:#e2f5f9}
+.mission-pct{color:#6c1f86}
+.week-bar-fill{background:linear-gradient(180deg,#edbd95,#a5b1d7)}
+.week-day{color:#7a7396}
+.empty-state,.loading{color:#7a7396}
+.badge-green{background:#e8f4f2;color:#2f7a4d}
+.badge-yellow{background:#fef3c7;color:#92400e}
+.badge-gray{background:#eef0f6;color:#7a7396}
+.toast{background:#fff;border:1.5px solid #cfe9f2;color:#2b1b4d;box-shadow:0 10px 30px rgba(43,27,77,.2)}
+.bs-stars{display:inline-flex;gap:2px;vertical-align:middle}
+.bs-star{fill:#e2dff0;stroke:#cfc9e6;stroke-width:1}
+.bs-star.on{fill:#f6b73c;stroke:#e09a14}
+.bs-rate{display:inline-flex;gap:4px}
+.bs-rate button{background:none;border:none;padding:2px;cursor:pointer;line-height:0}
+.bs-rate button:focus-visible{outline:3px solid #a5b1d7;border-radius:6px}
+.rp-item{border:1px solid #d6edf5;background:#f6fbfe;border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.rp-head{font-size:.8rem;color:#7a7396;margin-bottom:8px}
+.rp-body{white-space:pre-wrap;word-break:keep-all;color:#2b1b4d;font-size:.95rem;line-height:1.7}
+.rp-review{margin-top:14px;padding-top:12px;border-top:1px dashed #cfe9f2}
+.rp-review-title{font-size:.85rem;font-weight:800;color:#2b1b4d;margin-bottom:6px}
+.rp-review textarea{width:100%;min-height:76px;resize:vertical;margin-top:8px;background:#fff;border:1.5px solid #cfe9f2;border-radius:10px;padding:10px 12px;color:#2b1b4d;font-family:inherit;font-size:.9rem;line-height:1.55;outline:none}
+.rp-review textarea:focus{border-color:#a5b1d7;box-shadow:0 0 0 3px rgba(165,177,215,.35)}
+.rp-review-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px}
+.rp-saved{font-size:.78rem;color:#7a7396}
+.btn-rp{padding:9px 18px;background:#6c1f86;border:none;border-radius:10px;color:#fff;font-weight:800;font-family:inherit;cursor:pointer;box-shadow:0 4px 0 #4a1360}
+.btn-rp:active{transform:translateY(2px);box-shadow:0 2px 0 #4a1360}
+.btn-rp:disabled{opacity:.6;cursor:default}
+.sidebar-bottom{position:fixed;top:14px;right:22px;z-index:60;margin:0;display:flex;align-items:center;gap:8px}
+.teacher-badge,.parent-badge{margin:0 !important;padding:6px 16px 6px 8px !important;border-radius:999px !important;box-shadow:0 4px 14px rgba(43,27,77,.12)}
+.sidebar-bottom .nav-item{width:auto;padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.78);border:1px solid rgba(255,255,255,.9);font-size:.85rem;box-shadow:0 4px 14px rgba(43,27,77,.12);white-space:nowrap}
+.main{padding-top:36px}
+@media(max-width:760px){.sidebar-bottom{position:static;padding:8px 12px}}
+.detail-box{background:#e7f4fa;border:1.5px solid #a5b1d7;border-radius:16px;padding:12px;margin-bottom:20px}
+.detail-frame{width:100%;height:900px;border:0;background:transparent;display:block}
 </style>
 </head>
 <body>
 
 <aside class="sidebar">
   <div class="sidebar-brand">
-    <img src="./assets/bslogo.png" alt="BrickSync" class="sidebar-logo">
+    <img src="./assets/bs_logo_vertical.png" alt="BrickSync" class="sidebar-logo">
     <span class="sidebar-subtext">학부모 리포트</span>
   </div>
   <button class="nav-item active" onclick="showSection('report')"><i class="fas fa-chart-line"></i> 학습 리포트</button>
-  <button class="nav-item" onclick="showSection('missions')"><i class="fas fa-trophy"></i> 미션 현황</button>
-  <button class="nav-item" onclick="showSection('activity')"><i class="fas fa-history"></i> 활동 기록</button>
+</aside>
+
   <div class="sidebar-bottom">
     <div class="parent-badge">
       <div class="avatar" id="sidebarAvatar">P</div>
@@ -117,7 +188,6 @@ body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
     </div>
     <button class="nav-item" onclick="BrickSyncAuth.signOut()"><i class="fas fa-sign-out-alt"></i> 로그아웃</button>
   </div>
-</aside>
 
 <main class="main" id="mainContent">
   <div class="loading"><i class="fas fa-spinner"></i> 로딩 중...</div>
@@ -130,11 +200,11 @@ body{background:#0f172a;color:#f1f5f9;min-height:100vh;display:flex}
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase_config.js"></script>
 <script src="auth.js"></script>
+<script src="reports.js"></script>
 
 <script>
 let parentProfile = null;
 let studentProfile = null;
-let studentProjects = [];
 
 (async () => {
   const session = await BrickSyncAuth.requireRole(['parent']);
@@ -145,16 +215,16 @@ let studentProjects = [];
   document.getElementById('sidebarName').textContent = n;
   document.getElementById('sidebarAvatar').textContent = n[0];
 
-  // 연결된 자녀 프로필 로드
-  if (firestore && parentProfile.linkedStudentUid) {
-    const doc = await firestore.collection('users').doc(parentProfile.linkedStudentUid).get();
-    if (doc.exists) studentProfile = doc.data();
-
-    // 자녀 프로젝트 데이터 로드
-    const projSnap = await firestore.collection('projects')
-      .doc(parentProfile.linkedStudentUid).collection('items')
-      .orderBy('updatedAt', 'desc').limit(20).get();
-    studentProjects = projSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // 연결된 자녀 프로필 (클라우드 → 가입 때 저장한 정보 순서, 실패해도 화면은 계속 그린다)
+  const sUid = parentProfile.linkedStudentUid;
+  if (sUid && firestore) {
+    try {
+      const doc = await Promise.race([firestore.collection('users').doc(sUid).get(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 6000))]);
+      if (doc.exists) studentProfile = doc.data();
+    } catch (e) { console.warn('[Parent] 자녀 정보 조회 실패:', e); }
+  }
+  if (!studentProfile && parentProfile.linkedStudentName) {
+    studentProfile = { displayName: parentProfile.linkedStudentName, className: parentProfile.linkedClassName || '', email: '' };
   }
 
   showSection('report');
@@ -167,17 +237,12 @@ function showToast(msg) {
 }
 
 function showSection(section) {
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  const map = { report: 0, missions: 1, activity: 2 };
-  document.querySelectorAll('.nav-item')[map[section]]?.classList.add('active');
-  if (section === 'report') renderReport();
-  else if (section === 'missions') renderMissions();
-  else renderActivity();
+  renderReport();
 }
 
 // ── 자녀 헤더 카드 HTML ────────────────────────────────────────
 function childHeader() {
-  if (!studentProfile) return `<div class="child-card"><div class="child-avatar">?</div><div><div class="child-name">자녀 정보 없음</div><div class="child-class">연결된 학생이 없습니다</div></div></div>`;
+  if (!studentProfile) return `<div class="child-card"><div class="child-avatar">?</div><div><div class="child-name">자녀 정보 없음</div><div class="child-class">연결된 학생이 없습니다. 선생님께 받은 학부모 코드로 다시 가입해 주세요.</div></div></div>`;
   const initial = (studentProfile.displayName || '?')[0];
   return `<div class="child-card">
     <div class="child-avatar">${initial}</div>
@@ -189,142 +254,107 @@ function childHeader() {
   </div>`;
 }
 
-// ── 학습 리포트 ───────────────────────────────────────────────
+// ── 학습 리포트 (자녀 학습 현황 + 선생님 리포트 + 리뷰, 한 페이지) ──
 function renderReport() {
-  const lessonProjects = studentProjects.filter(p => !p.id.includes('ai'));
-  const aiProjects = studentProjects.filter(p => p.id.includes('ai'));
-  const totalBlocks = studentProjects.reduce((acc, p) => acc + (p.blocks?.length || 0), 0);
-  const lastActive = studentProjects[0]?.updatedAt
-    ? new Date(studentProjects[0].updatedAt).toLocaleDateString('ko-KR')
-    : '없음';
-
-  // 주간 가상 활동 데이터 (실제로는 Firestore 집계)
-  const weekDays = ['월', '화', '수', '목', '금', '토', '일'];
-  const weekData = [65, 80, 45, 90, 70, 30, 0];
-  const maxVal = Math.max(...weekData, 1);
-
+  const name = parentProfile.linkedStudentName || (studentProfile && studentProfile.displayName) || '';
   document.getElementById('mainContent').innerHTML = `
     <div class="page-title">학습 리포트</div>
-    <div class="page-subtitle">자녀의 BrickSync 학습 현황을 확인하세요.</div>
+    <div class="page-subtitle">자녀의 학습 현황과 선생님 리포트를 확인하고, 만족도와 의견을 남겨 주세요.</div>
     ${childHeader()}
+    ${name ? `<div class="detail-box"><iframe class="detail-frame" id="childFrame" src="dashboard_v2.html?student=${encodeURIComponent(name)}&embed=1" title="학습 현황"></iframe></div>` : ''}
+    <div class="panel">
+      <div class="panel-title"><i class="fas fa-pen-to-square"></i> 선생님 리포트</div>
+      <div id="trList"><div class="empty-state"><i class="fas fa-spinner"></i>불러오는 중...</div></div>
+    </div>`;
+  fillTeacherReports();
+}
 
-    <div class="stats-grid">
-      <div class="stat-card pink">
-        <div class="icon">📚</div>
-        <div class="label">완료된 프로젝트</div>
-        <div class="value">${studentProjects.length}</div>
-        <div class="sub">총 저장된 코드 작업</div>
-      </div>
-      <div class="stat-card purple">
-        <div class="icon">🧱</div>
-        <div class="label">사용한 블록 수</div>
-        <div class="value">${totalBlocks}</div>
-        <div class="sub">누적 코딩 블록</div>
-      </div>
-      <div class="stat-card blue">
-        <div class="icon">🤖</div>
-        <div class="label">AI 학습 단원</div>
-        <div class="value">${aiProjects.length}</div>
-        <div class="sub">완료된 AI 미션</div>
-      </div>
-      <div class="stat-card green">
-        <div class="icon">📅</div>
-        <div class="label">마지막 활동</div>
-        <div class="value" style="font-size:1.1rem;padding-top:4px">${lastActive}</div>
-        <div class="sub">가장 최근 저장</div>
-      </div>
-    </div>
+// iframe(학습 현황)이 알려 주는 높이에 맞춰 늘린다
+window.addEventListener('message', (e) => {
+  if (e.origin !== location.origin) return;
+  const h = e.data && e.data.bsEmbedHeight;
+  const f = document.getElementById('childFrame');
+  if (h && f && e.source === f.contentWindow) f.style.height = Math.ceil(h) + 'px';
+});
 
-    <div class="panel-grid">
-      <div class="panel">
-        <div class="panel-title"><i class="fas fa-chart-bar"></i> 이번 주 학습 활동</div>
-        <div class="week-chart">
-          ${weekDays.map((d, i) => `
-            <div class="week-bar-wrap">
-              <div class="week-bar-fill" style="height:${Math.round((weekData[i]/maxVal)*100)}%"></div>
-              <div class="week-day">${d}</div>
-            </div>`).join('')}
+// ── 선생님 리포트 + 리뷰/별점 ────────────────────────────────
+let reportIndex = {};
+let ratingDraft = {};
+
+function pEsc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function pDate(iso) {
+  const d = new Date(iso);
+  if (!iso || isNaN(d)) return '';
+  return d.getFullYear() + '.' + String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
+}
+
+function rateButtons(reportId, value) {
+  let h = '<span class="bs-rate" id="rate_' + pEsc(reportId) + '" role="radiogroup" aria-label="만족도 별점">';
+  for (let i = 1; i <= 5; i++) {
+    h += '<button type="button" role="radio" aria-checked="' + (i === value) + '" aria-label="' + i + '점" onclick="setRating(\'' + pEsc(reportId) + '\',' + i + ')">' + BrickSyncReports.starIcon(i <= value, 28) + '</button>';
+  }
+  return h + '</span>';
+}
+
+function setRating(reportId, v) {
+  ratingDraft[reportId] = v;
+  const box = document.getElementById('rate_' + reportId);
+  if (box) box.outerHTML = rateButtons(reportId, v);
+}
+
+async function fillTeacherReports() {
+  const sUid = parentProfile.linkedStudentUid;
+  const el = document.getElementById('trList');
+  if (!sUid) {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-link"></i>연결된 학생이 없습니다. 선생님께 받은 학부모 코드로 다시 가입해 주세요.</div>';
+    return;
+  }
+  const [rp, fb] = await Promise.all([BrickSyncReports.listReports(sUid), BrickSyncReports.listFeedback(sUid)]);
+  if (!document.getElementById('trList')) return;
+  reportIndex = {}; ratingDraft = {};
+  if (!rp.list.length) {
+    el.innerHTML = '<div class="empty-state"><i class="fas fa-pen-to-square"></i>아직 선생님이 남긴 리포트가 없습니다.</div>';
+    return;
+  }
+  const mine = {};
+  fb.list.filter(f => f.parentUid === parentProfile.uid).forEach(f => { mine[f.reportId] = f; });
+  el.innerHTML = rp.list.map(r => {
+    reportIndex[r.id] = r;
+    const m = mine[r.id];
+    ratingDraft[r.id] = m ? Number(m.rating) || 0 : 0;
+    return `<div class="rp-item">
+      <div class="rp-head">${pEsc(pDate(r.createdAt))} · ${pEsc(r.teacherName || '선생님')}${r.updatedAt && r.updatedAt !== r.createdAt ? ' (수정됨)' : ''}</div>
+      <div class="rp-body">${pEsc(r.text)}</div>
+      <div class="rp-review">
+        <div class="rp-review-title">이 리포트에 대한 만족도</div>
+        ${rateButtons(r.id, ratingDraft[r.id])}
+        <textarea id="fbText_${pEsc(r.id)}" maxlength="1000" placeholder="선생님께 전하고 싶은 의견을 적어 주세요. (선택)">${pEsc(m ? m.text : '')}</textarea>
+        <div class="rp-review-row">
+          <span class="rp-saved" id="fbSaved_${pEsc(r.id)}">${m ? pEsc(pDate(m.updatedAt)) + ' 저장됨' : ''}</span>
+          <button class="btn-rp" onclick="submitFeedback('${pEsc(r.id)}')">${m ? '수정하기' : '남기기'}</button>
         </div>
-        <div style="text-align:center;font-size:.75rem;color:#475569;margin-top:12px">활동 점수 기준</div>
-      </div>
-      <div class="panel">
-        <div class="panel-title"><i class="fas fa-folder-open"></i> 최근 프로젝트</div>
-        ${studentProjects.length === 0
-          ? `<div class="empty-state"><i class="fas fa-inbox"></i>아직 저장된 프로젝트가 없습니다.</div>`
-          : `<div class="activity-list">${studentProjects.slice(0, 5).map(p => `
-            <div class="activity-item ${p.id.includes('ai') ? 'ai' : 'lesson'}">
-              <div class="activity-dot"></div>
-              <div>
-                <div class="activity-text">${p.name || p.id}</div>
-                <div class="activity-time">${p.updatedAt ? new Date(p.updatedAt).toLocaleString('ko-KR') : ''}</div>
-              </div>
-            </div>`).join('')}</div>`}
       </div>
     </div>`;
+  }).join('');
 }
 
-// ── 미션 현황 ─────────────────────────────────────────────────
-function renderMissions() {
-  const units = [
-    { name: '단원 1: 탐험보트', key: '_project_1', color: '#6366f1' },
-    { name: '단원 2: 잠수함',   key: '_project_2', color: '#8b5cf6' },
-    { name: '단원 3: 빙글빙글', key: '_project_3', color: '#db2777' },
-    { name: '단원 4: 동굴자동차',key: '_project_4', color: '#f97316' },
-    { name: '단원 5: 게이트',   key: '_project_5', color: '#10b981' },
-    { name: 'AI 단원 1: 가위바위보', key: '_project_ai_1', color: '#06b6d4' },
-    { name: 'AI 단원 2: 몬스터', key: '_project_ai_2', color: '#db2777' },
-    { name: 'AI 단원 3: 과일인식', key: '_project_ai_3', color: '#eab308' },
-  ];
-
-  const getProgress = (key) => {
-    const match = studentProjects.find(p => p.id && p.id.includes(key.replace('_project_','')));
-    if (!match) return 0;
-    const blocks = match.blocks?.reduce((a, s) => a + (s.blocks?.length || 0), 0) || 0;
-    return Math.min(100, Math.round(blocks / 5 * 100));
-  };
-
-  document.getElementById('mainContent').innerHTML = `
-    <div class="page-title">미션 현황</div>
-    <div class="page-subtitle">자녀가 완료한 학습 단원과 진행도를 확인합니다.</div>
-    ${childHeader()}
-    <div class="panel">
-      <div class="panel-title"><i class="fas fa-trophy"></i> 학습 단원별 진행도</div>
-      ${units.map(u => {
-        const pct = getProgress(u.key);
-        return `<div class="mission-row">
-          <div class="mission-name">${u.name}</div>
-          <div class="mission-bar-wrap"><div class="mission-bar" style="width:${pct}%;background:linear-gradient(90deg,${u.color},${u.color}99)"></div></div>
-          <div class="mission-pct">${pct}%</div>
-          <span class="badge ${pct===100?'badge-green':pct>0?'badge-yellow':'badge-gray'}" style="margin-left:8px">${pct===100?'완료':pct>0?'진행중':'미시작'}</span>
-        </div>`;
-      }).join('')}
-    </div>`;
-}
-
-// ── 활동 기록 ─────────────────────────────────────────────────
-function renderActivity() {
-  document.getElementById('mainContent').innerHTML = `
-    <div class="page-title">활동 기록</div>
-    <div class="page-subtitle">자녀의 최근 학습 활동 기록입니다.</div>
-    ${childHeader()}
-    <div class="panel">
-      <div class="panel-title"><i class="fas fa-history"></i> 저장된 프로젝트 전체 기록</div>
-      ${studentProjects.length === 0
-        ? `<div class="empty-state"><i class="fas fa-history"></i>아직 활동 기록이 없습니다.</div>`
-        : `<div class="activity-list">${studentProjects.map(p => {
-            const type = p.id?.includes('ai') ? 'ai' : 'lesson';
-            const icon = type === 'ai' ? '🤖' : '🧱';
-            const blocks = p.blocks?.reduce((a,s)=>a+(s.blocks?.length||0),0)||0;
-            return `<div class="activity-item ${type}">
-              <div class="activity-dot"></div>
-              <div style="flex:1">
-                <div class="activity-text">${icon} ${p.name || p.id}</div>
-                <div class="activity-time">블록 ${blocks}개 · ${p.updatedAt ? new Date(p.updatedAt).toLocaleString('ko-KR') : '-'}</div>
-              </div>
-              <span class="badge badge-green">저장됨</span>
-            </div>`;
-          }).join('')}</div>`}
-    </div>`;
+async function submitFeedback(reportId) {
+  const r = reportIndex[reportId];
+  const rating = ratingDraft[reportId] || 0;
+  if (!r) return;
+  if (rating < 1) { showToast('별점을 먼저 선택해 주세요.'); return; }
+  const text = document.getElementById('fbText_' + reportId).value;
+  try {
+    const res = await BrickSyncReports.saveFeedback({
+      reportId, studentUid: r.studentUid, teacherUid: r.teacherUid,
+      parentUid: parentProfile.uid, parentName: parentProfile.displayName || '학부모', rating, text
+    });
+    showToast(res.cloudOk ? '소중한 의견 감사합니다.' : '이 기기에만 저장됐어요. 선생님께 보이려면 인터넷 연결을 확인해 주세요.');
+    const s = document.getElementById('fbSaved_' + reportId);
+    if (s) s.textContent = pDate(new Date().toISOString()) + ' 저장됨';
+  } catch (e) { showToast('저장하지 못했어요: ' + e.message); }
 }
 </script>
 <script src="settings.js"></script>

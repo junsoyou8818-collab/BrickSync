@@ -26,7 +26,10 @@
         // 타 탭 로그아웃 동기화
         window.addEventListener('storage', (e) => {
             if (e.key === 'bricksync_student_session' && !e.newValue) {
-                window.location.href = 'login.html';
+                // 지웠다가 곧바로 다시 쓰는 경우(게스트 입장 등)는 로그아웃이 아니다 → 잠깐 기다렸다가 확인
+                setTimeout(() => {
+                    if (!localStorage.getItem('bricksync_student_session')) window.location.href = 'login.html';
+                }, 600);
             }
         });
 
@@ -84,14 +87,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 요청하신 이미지처럼 약간 비스듬한 스플릿(105도) 배경에 등고선(Topography) 패턴 오버레이 적용 */
-            background:
-                /* 부드러운 하얀색 등고선 패턴 오버레이 */
-                url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 0h2v20H9V0zm25.134.84l1.414 1.414-14.14 14.14-1.414-1.414 14.14-14.14zm44.732 0l1.414 1.414-14.14 14.14-1.414-1.414 14.14-14.14zM111 0h2v20h-2V0zM35.636 11.364l1.414-1.414-14.14-14.14-1.414 1.414 14.14 14.14zM100.864 11.364l1.414-1.414-14.14-14.14-1.414 1.414 14.14 14.14zM0 9v2h20V9H0zm100 0v2h20V9h-20zm-10.743 27.257l1.414-1.414 14.14 14.14-1.414 1.414-14.14-14.14zM11.364 35.636l1.414-1.414 14.14 14.14-1.414 1.414-14.14-14.14zM0 100v2h20v-2H0zm100 0v2h20v-2h-20zm-10.743 27.257l1.414-1.414 14.14 14.14-1.414 1.414-14.14-14.14zM11.364 100.864l1.414-1.414 14.14 14.14-1.414 1.414-14.14-14.14z' fill='rgba(255,255,255,0.06)' fill-rule='evenodd'/%3E%3C/svg%3E"),
-                /* 퍼플 & 옐로우 비스듬한 배경 */
-                linear-gradient(108deg, #6c1f86 0%, #6c1f86 52%, #eab308 52%, #eab308 100%);
-            background-size: 151px 151px, cover;
-            background-repeat: repeat, no-repeat;
+            /* 메인 메뉴 배경 이미지 */
+            background: #cfd8ee url('assets/main_bg.jpg') center / cover no-repeat;
             overflow: hidden;
             color: #1e293b;
             position: relative;
@@ -208,7 +205,7 @@
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: #ffffff;
+            color: #2b1b4d;
             font-weight: 500;
             font-size: 1.594rem;
             text-decoration: none;
@@ -221,29 +218,30 @@
             width: 36px;
             height: 36px;
             margin-right: 16px;
-            color: #ffffff;
+            color: #2b1b4d;
             transition: all 0.3s ease;
         }
 
         .menu-item:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.15);
+            color: #6c1f86;
+            background: rgba(255, 255, 255, 0.78);
+            box-shadow: 0 4px 14px rgba(43, 27, 77, 0.12);
         }
 
         .menu-item:hover .menu-icon {
-            color: #ffffff;
+            color: #6c1f86;
         }
 
         /* 활성화된 위치(홈)의 스타일 - 목업처럼 둥근 흰색 박스 */
         .menu-item.active {
-            background: #ffffff;
+            background: #6c1f86;
             font-weight: 700;
-            color: #1e293b;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(108, 31, 134, 0.32);
         }
 
         .menu-item.active .menu-icon {
-            color: #ff8c00;
+            color: #facc15;
             /* 포인트 컬러(오렌지/옐로우)를 아이콘에만 부여 */
         }
 
@@ -261,7 +259,10 @@
             overflow-y: auto;
             overflow-x: hidden;
             min-width: 0;
+            scrollbar-width: none;          /* 스크롤바는 숨기고 마우스 휠 스크롤은 유지 */
+            -ms-overflow-style: none;
         }
+        .main-content::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
         /* 1) 상단 소개 배너 박스 (이미지의 큰 회색 박스 영역) */
         .banner-section {
@@ -604,6 +605,20 @@
             min-width: 0;
         }
 
+        .project-mode {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex: 1;
+            min-width: 0;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.85);
+            white-space: nowrap;
+        }
+
+        .project-mode svg { flex-shrink: 0; }
+
         .project-play-btn {
             width: 34px;
             height: 34px;
@@ -868,41 +883,118 @@
             0%, 100% { transform: scale(1); filter: brightness(1); }
             50% { transform: scale(1.04); filter: brightness(1.12) drop-shadow(0 0 6px rgba(250, 204, 21, 0.5)); }
         }
+        /* 앱 디자인의 확인 창 (브라우저 기본 confirm 대신) */
+        .bsc-ov { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; background: rgba(43, 27, 77, 0.38); backdrop-filter: blur(4px); animation: bscFade .15s ease; }
+        .bsc-card { width: min(380px, 92vw); border-radius: 26px; padding: 26px 24px 20px; text-align: center; color: #2b1b4d; background: #ffffff; border: 1.5px solid #cfe9f2; box-shadow: 0 24px 60px rgba(43, 27, 77, 0.3); animation: bscPop .18s cubic-bezier(.2, 1.3, .4, 1); }
+        .bsc-ic { width: 60px; height: 60px; margin: 0 auto 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; background: #fde8ec; color: #e11d48; box-shadow: inset 0 0 0 2px #f9c4cf; }
+        .bsc-t { font-size: 1.12rem; font-weight: 900; line-height: 1.45; margin-bottom: 6px; word-break: keep-all; }
+        .bsc-m { font-size: 0.9rem; color: #5b5478; margin-bottom: 18px; word-break: keep-all; }
+        .bsc-row { display: flex; gap: 10px; justify-content: center; margin-top: 18px; }
+        .bsc-b { flex: 1; max-width: 150px; border: none; cursor: pointer; border-radius: 14px; padding: 12px 10px; font-family: inherit; font-size: 0.98rem; font-weight: 800; transition: transform .08s; }
+        .bsc-b:active { transform: translateY(2px); }
+        .bsc-no { background: #ffffff; color: #4b4570; border: 1.5px solid #cfe9f2; }
+        .bsc-no:hover { background: #f6fbfe; }
+        .bsc-yes { background: #e11d48; color: #fff; box-shadow: 0 4px 0 #9f1239; }
+        .bsc-yes:hover { background: #ea2f58; }
+        .bsc-b:focus-visible { outline: 3px solid #a5b1d7; outline-offset: 2px; }
+        @keyframes bscFade { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bscPop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+    <style id="bs-light-cards">
+        /* 밝은 배경에 어울리는 밝은 유리 카드 (코인 진열대 / 내 프로젝트) */
+        .divider { background: rgba(43, 27, 77, 0.18); }
+        .projects-title { color: #2b1b4d; text-shadow: none; }
+        .new-project-btn { color: #2b1b4d; text-shadow: none; }
+        .reward-shelf-panel { background: rgba(255, 255, 255, 0.72); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 10px 30px rgba(43, 27, 77, 0.12); }
+        .shelf-title span { color: #2b1b4d; text-shadow: none; }
+        .shelf-title .shelf-subtitle { color: #5b5478; }
+        .shelf-slot { background: rgba(43, 27, 77, 0.06); border: 1.5px dashed rgba(43, 27, 77, 0.22); }
+        .shelf-slot:hover { background: rgba(43, 27, 77, 0.1); }
+        .shelf-slot.active { background: radial-gradient(circle, rgba(250, 204, 21, 0.3) 0%, rgba(255, 255, 255, 0.65) 100%); border: 1.5px solid rgba(202, 138, 4, 0.55); box-shadow: 0 4px 12px rgba(202, 138, 4, 0.2); }
+        .shelf-slot.active:hover { background: radial-gradient(circle, rgba(250, 204, 21, 0.4) 0%, rgba(255, 255, 255, 0.7) 100%); }
+        .shelf-coin.inactive { background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); border: 2px solid #cbd5e1; color: #64748b; }
+        .shelf-coin.inactive::after { border: 1px dashed rgba(100, 116, 139, 0.35); }
+        .slot-label { color: #5b5478; }
+        .shelf-slot.active .slot-label { color: #a16207; }
+        .project-card, .project-card.active-project { background: rgba(255, 255, 255, 0.72); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 8px 24px rgba(43, 27, 77, 0.12); }
+        .project-card:hover { background: rgba(255, 255, 255, 0.92); box-shadow: 0 15px 30px rgba(43, 27, 77, 0.18); }
+        .project-badge { background: #fef3c7; border: 1px solid #fcd34d; color: #92400e; }
+        .project-badge.ai-badge { background: #ede9fe; border: 1px solid #c4b5fd; color: #6d28d9; }
+        .project-delete-btn { color: #64748b; }
+        .project-delete-btn:hover { color: #ef4444; }
+        .project-card-name { color: #2b1b4d; }
+        .project-info-text { color: #5b5478; }
+        .project-mode { color: #3f3a63; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&display=swap" rel="stylesheet">
+    <style id="bs-lesson-cards">
+        /* 단원 카드: 사진은 그대로 두고, 왼쪽 위 번호 칸 + 아래 색깔 제목 띠 */
+        .learning-card { align-items: stretch; justify-content: flex-start; }
+        .learning-card::before { background: none; }
+        /* 카드 테두리: 처음부터 깔끔한 굵은 선(사진이 선 밑으로 비쳐 지저분하던 것 정리), 마우스를 올리면 하얀 선으로 */
+        .learning-card { border: 3px solid #2b1b4d; background-clip: padding-box; box-shadow: 0 8px 20px rgba(43, 27, 77, 0.18); }
+        .learning-card:hover { border-width: 3px; border-color: #ffffff; box-shadow: 0 12px 28px rgba(43, 27, 77, 0.3); }
+        .lc-badge { position: absolute; left: 14px; top: 14px; z-index: 2; width: 46px; height: 46px; border-radius: 14px; background: #fff; border: 3px solid #2b1b4d; box-shadow: 3px 4px 0 #2b1b4d; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.35rem; color: #2b1b4d; }
+        .lc-bar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; background: var(--bar, #edbd95); color: #2b1b4d; border-top: 3px solid #2b1b4d; padding: 12px 18px; font-size: 1.08rem; font-weight: 800; line-height: 1.35; text-align: left; word-break: keep-all; }
+        /* 크레용 손글씨: 단원 번호와 단원명만 */
+        .lc-num, .lc-title { font-family: 'Gaegu', 'Noto Sans KR', sans-serif; font-weight: 700; filter: url(#bs-crayon); }
+        .lc-title { display: block; font-size: 1.4rem; line-height: 1.25; white-space: nowrap; letter-spacing: -0.05em; }
+        .lc-num { font-size: 1.6rem; }
+        .learning-card[style*="span 2"] .lc-badge { width: 52px; height: 52px; font-size: 1.5rem; }
+        .learning-card[style*="span 2"] .lc-bar { padding: 14px 22px; }
+        .learning-card[style*="span 2"] .lc-title { font-size: 1.6rem; }
+
+        /* 업데이트 소식 배너 (메인 화면 좌우 여백) */
+        .bs-ub { position: fixed; top: 50%; transform: translateY(-50%); z-index: 5; padding: 0; border: 0; background: none; cursor: zoom-in;
+            width: calc((100vw - min(68vw, 1400px)) / 2 - 26px); max-width: 420px; transition: transform .2s ease; }
+        .bs-ub.left { right: calc(50vw + min(68vw, 1400px) / 2 + 20px); }
+        .bs-ub.right { left: calc(50vw + min(68vw, 1400px) / 2 + 20px); }
+        .bs-ub:hover { transform: translateY(-50%) scale(1.03); }
+        .bs-ub:focus { outline: none; }
+        .bs-ub:focus-visible { outline: none; }
+        .bs-ub img { display: block; width: 100%; height: auto; filter: drop-shadow(0 14px 28px rgba(43, 27, 77, .22)); }
+        @media (max-width: 1100px) { .bs-ub { display: none; } }
+        .bs-ub-view { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; background: rgba(43, 27, 77, .45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); cursor: zoom-out; animation: bsUbFade .15s ease; }
+        .bs-ub-view img { max-height: 92vh; max-width: 92vw; width: auto; height: auto; filter: drop-shadow(0 24px 50px rgba(43, 27, 77, .35)); }
+        @keyframes bsUbFade { from { opacity: 0 } to { opacity: 1 } }
     </style>
 </head>
 
 <body>
+    <!-- 크레용 질감 글씨용 효과 (글자 가장자리를 살짝 울퉁불퉁하게, 안쪽에 크레용 알갱이) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+        <filter id="bs-crayon" x="-4%" y="-12%" width="108%" height="124%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="3" result="warp"/>
+            <feDisplacementMap in="SourceGraphic" in2="warp" scale="2.2" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+            <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="7" result="grain"/>
+            <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  4 0 0 0 -0.62" result="holes"/>
+            <feComposite in="rough" in2="holes" operator="in"/>
+        </filter>
+    </defs></svg>
 
     <!-- 둥둥 떠다니는 배경 장식 (글래스 모피즘 블롭) -->
     <div class="bg-circle circle-1"></div>
     <div class="bg-circle circle-2"></div>
     <div class="bg-circle circle-3"></div>
 
-    <!-- 우측 라마(fortnite2) 데코레이션 -->
-    <img src="./assets/fortnite2.png" class="rabbit-deco" alt="">
-
-    <!-- 좌측 레고 로봇 데코레이션 (사이드바 뒤에 배치, z-index:3) -->
-    <img src="./assets/lego_robot.png" class="lego-robot-deco" alt="">
-
-    <!-- 좌측 하단 햄버거 데코레이션 (사이드바 앞, z-index:7) -->
-    <img src="./assets/Hambuerger.png" class="hamburger-deco" alt="">
-
     <!-- 좌측 상단 전체화면 글로벌 로고 영역 -->
     <div class="top-logo">
-        <img src="./assets/bslogo.png" class="bricksync-logo" alt="BrickSync">
+        <img src="./assets/bs_logo_vertical.png" class="bricksync-logo" alt="BrickSync">
     </div>
 
+    <button type="button" class="bs-ub left" data-banner="update_banner_left" data-src="assets/update_banner_left.webp" aria-label="업데이트 소식 1 크게 보기"><img src="assets/update_banner_left.webp" alt="업데이트 1: 새 아이콘 블록 디자인 2.0"></button>
+    <button type="button" class="bs-ub right" data-banner="update_banner_right" data-src="assets/update_banner_right.webp" aria-label="업데이트 소식 2, 3 크게 보기"><img src="assets/update_banner_right.webp" alt="업데이트 2: 워드블록 추가, 업데이트 3: 블럭과 Verse 코드 1:1 변환"></button>
     <div class="dashboard-container">
 
         <!-- 왼쪽 메뉴 영역 -->
         <div class="sidebar">
             <!-- 학생 프로필 카드 -->
-            <div class="student-profile-card" style="padding: 15px; background: rgba(255,255,255,0.06); border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between;">
+            <div class="student-profile-card" style="padding: 15px; background: rgba(255,255,255,0.55); border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.85); display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <i data-lucide="user" style="color: #facc15; width: 18px; height: 18px;"></i>
-                    <span id="display-student-name" style="color: #fff; font-weight: 700; font-size: 0.95rem;">학생</span>
+                    <i data-lucide="user" style="color: #6c1f86; width: 18px; height: 18px;"></i>
+                    <span id="display-student-name" style="color: #2b1b4d; font-weight: 700; font-size: 0.95rem;">학생</span>
                 </div>
-                <button onclick="doLogout()" style="background: none; border: none; color: #f43f5e; cursor: pointer; display: flex; align-items: center; padding: 4px; transition: color 0.2s;" title="로그아웃" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='#f43f5e'">
+                <button onclick="doLogout()" style="background: none; border: none; color: #e11d48; cursor: pointer; display: flex; align-items: center; padding: 4px; transition: color 0.2s;" title="로그아웃" onmouseover="this.style.color='#be123c'" onmouseout="this.style.color='#e11d48'">
                     <i data-lucide="log-out" style="width: 16px; height: 16px;"></i>
                 </button>
             </div>
@@ -1010,32 +1102,40 @@
             <!-- 학습단원 화면 뷰 (2열 그리드, 총 5개 단원) -->
             <div id="view-learning" class="learning-grid">
                 <div class="learning-card" style="background-image: url('assets/1.png');" onclick="location.href='mission.html?unit=1'">
-                    <span class="learning-card-text" data-i18n="lesson_1">1. 요리조리 기울여서 탐험보트를 출발시켜요</span>
+                    <span class="lc-badge"><span class="lc-num">1</span></span>
+                    <span class="lc-bar" style="--bar:#edbd95;"><span class="lc-title" data-i18n="lc_1">탐험보트를 출발시켜요</span></span>
                 </div>
                 <div class="learning-card" style="background-image: url('assets/2.png');" onclick="location.href='mission.html?unit=2'">
-                    <span class="learning-card-text" data-i18n="lesson_2">2. 바닷속 잠수함으로 바다를 탐험해요</span>
+                    <span class="lc-badge"><span class="lc-num">2</span></span>
+                    <span class="lc-bar" style="--bar:#a0c9c3;"><span class="lc-title" data-i18n="lc_2">바닷속 잠수함으로 바다를 탐험해요</span></span>
                 </div>
                 <div class="learning-card" style="background-image: url('assets/3.png');" onclick="location.href='mission.html?unit=3'">
-                    <span class="learning-card-text" data-i18n="lesson_3">3. 대관람차 회전하기</span>
+                    <span class="lc-badge"><span class="lc-num">3</span></span>
+                    <span class="lc-bar" style="--bar:#a5b1d7;"><span class="lc-title" data-i18n="lc_3">대관람차 회전하기</span></span>
                 </div>
                 <div class="learning-card" style="background-image: url('assets/4.png');" onclick="location.href='mission.html?unit=4'">
-                    <span class="learning-card-text" data-i18n="lesson_4">4. 탐험 자동차를 만들어요</span>
+                    <span class="lc-badge"><span class="lc-num">4</span></span>
+                    <span class="lc-bar" style="--bar:#f5e8b4;"><span class="lc-title" data-i18n="lc_4">탐험 자동차를 만들어요</span></span>
                 </div>
                 <div class="learning-card" style="grid-column: span 2; background-image: url('assets/5.png'); background-position: center top;" onclick="location.href='mission.html?unit=5'">
-                    <span class="learning-card-text" data-i18n="lesson_5">5. 사이렌을 켜줘</span>
+                    <span class="lc-badge"><span class="lc-num">5</span></span>
+                    <span class="lc-bar" style="--bar:#cfc3e6;"><span class="lc-title" data-i18n="lc_5">사이렌을 켜줘</span></span>
                 </div>
             </div>
 
             <!-- AI 학습단원 화면 뷰 (2열 그리드, 총 3개 단원) -->
             <div id="view-ai-learning" class="learning-grid">
                 <div class="learning-card" style="background-image: url('assets/6.png'); background-size: auto 110%; background-position: center top;" onclick="location.href='mission.html?unit=6'">
-                    <span class="learning-card-text" data-i18n="ai_lesson_1">6. 가위, 바위, 보로 여닫는 오두막 지붕</span>
+                    <span class="lc-badge"><span class="lc-num">6</span></span>
+                    <span class="lc-bar" style="--bar:#8bb9b7;"><span class="lc-title" data-i18n="lc_6">가위, 바위, 보로 여닫는 오두막 지붕</span></span>
                 </div>
                 <div class="learning-card" style="background-image: url('assets/8.png');" onclick="location.href='mission.html?unit=7'">
-                    <span class="learning-card-text" data-i18n="ai_lesson_2">7. 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네</span>
+                    <span class="lc-badge"><span class="lc-num">7</span></span>
+                    <span class="lc-bar" style="--bar:#e6a8b8;"><span class="lc-title" data-i18n="lc_7">마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네</span></span>
                 </div>
                 <div class="learning-card" style="grid-column: span 2; background-image: url('assets/7.png');" onclick="location.href='mission.html?unit=8'">
-                    <span class="learning-card-text" data-i18n="ai_lesson_3">8. 몬스터를 보여줘! 경보 알림켜기.</span>
+                    <span class="lc-badge"><span class="lc-num">8</span></span>
+                    <span class="lc-bar" style="--bar:#a9c8e8;"><span class="lc-title" data-i18n="lc_8">몬스터를 보여줘! 경보 알림켜기</span></span>
                 </div>
             </div>
 
@@ -1097,12 +1197,14 @@
                 if (!key) continue;
                 const isAi  = key.includes('_project_ai_');
                 const isUnit = key.includes('_project_unit_');
-                if (!isAi && !isUnit) continue;
+                const isWordKey = key.includes('_project_word_unit_');
+                if (!isAi && !isUnit && !isWordKey) continue;
                 try {
                     const data = JSON.parse(localStorage.getItem(key) || '{}');
-                    if (!data.blocks || data.blocks.length === 0) continue;
+                    const hasContent = isWordKey ? (data.stacks && data.stacks.length > 0) : (data.blocks && data.blocks.length > 0);
+                    if (!hasContent) continue;
                     if (!latest || (data.updatedAt || 0) > (latest.data.updatedAt || 0)) {
-                        latest = { key, data, isAi };
+                        latest = { key, data, isAi, isWord: isWordKey };
                     }
                 } catch(e) {}
             }
@@ -1110,6 +1212,10 @@
             if (latest) {
                 const m = latest.key.match(/_project_(?:ai|unit)_(.+)$/);
                 const unit = latest.data.unit || (m ? m[1] : '1');
+                if (latest.isWord) {
+                    location.href = `word_workspace.html?unit=${unit}&v=${Date.now()}`;
+                    return;
+                }
                 localStorage.setItem('bricksync_resume_data', JSON.stringify(latest.data));
                 location.href = latest.isAi
                     ? `ai_fusion.html?unit=${unit}&v=${Date.now()}`
@@ -1319,6 +1425,10 @@
 
         
 
+        // 최근 프로젝트 카드의 작업 방식 표시용 그림 (아이콘 블록 / 워드 블록)
+        const ICON_MODE_SVG = '<svg width="24" height="24" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="7" width="18" height="13" rx="3" fill="#FFD23F"/><rect x="5" y="3.5" width="4" height="4" rx="1.2" fill="#FFD23F"/><rect x="13" y="3.5" width="4" height="4" rx="1.2" fill="#FFD23F"/><path d="M9 10.5l5.5 3.5-5.5 3.5z" fill="#5A4300"/></svg>';
+        const WORD_MODE_SVG = '<svg width="24" height="24" viewBox="0 0 22 22" aria-hidden="true"><rect x="1" y="3" width="20" height="7" rx="2.5" fill="#5B8DEF"/><rect x="3" y="12" width="16" height="7" rx="2.5" fill="#8FB1F5"/><circle cx="5.5" cy="6.5" r="1.9" fill="#fff"/><rect x="9" y="5.5" width="9" height="2" rx="1" fill="#fff"/><circle cx="7" cy="15.5" r="1.9" fill="#fff"/><rect x="10.5" y="14.5" width="6" height="2" rx="1" fill="#fff"/></svg>';
+
         async function renderProjects() {
             const container = document.getElementById('projects-list-container');
             if (!container) return;
@@ -1334,12 +1444,12 @@
                 const existing = [];
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
-                    if (!key || !(key.includes('_project_unit_') || key.includes('_project_ai_'))) continue;
+                    if (!key || !(key.includes('_project_unit_') || key.includes('_project_ai_') || key.includes('_project_word_unit_'))) continue;
                     try {
                         const data = JSON.parse(localStorage.getItem(key) || '{}');
                         if (data && data.unit) {
                             const isAi = key.includes('_project_ai_');
-                            existing.push({ unit: String(data.unit), type: isAi ? 'ai' : 'lesson', time: data.updatedAt || Date.now() });
+                            existing.push({ unit: String(data.unit), type: key.includes('_project_word_unit_') ? 'word' : (isAi ? 'ai' : 'lesson'), time: data.updatedAt || Date.now() });
                         }
                     } catch(e) {}
                 }
@@ -1378,16 +1488,18 @@
                     const item = recentUnits[i];
                     const unit = item.unit;
                     const isAi = item.type === 'ai' || String(unit) >= '6';
+                    const isWord = item.type === 'word';
+                    const typeStr = isWord ? 'word' : (isAi ? 'ai' : 'lesson');
                     const badgeText = currentLang === 'en'
                         ? (isAi ? `AI Lesson ${unit}` : `Lesson ${unit}`)
                         : (isAi ? `AI 단원 ${unit}` : `일반 단원 ${unit}`);
                     const badgeClass = isAi ? 'project-badge ai-badge' : 'project-badge';
-                    const targetUrl = isAi ? `ai_fusion.html?unit=${unit}&v=${Date.now()}` : `lesson.html?unit=${unit}&v=${Date.now()}`;
+                    const targetUrl = isWord ? `word_workspace.html?unit=${unit}&v=${Date.now()}` : (isAi ? `ai_fusion.html?unit=${unit}&v=${Date.now()}` : `lesson.html?unit=${unit}&v=${Date.now()}`);
                     
                     // Check saved blocks count
                     let blocksCount = 1;
                     const studentName = getStudentName();
-                    const localKey = studentName + '_project_' + (isAi ? 'ai_' : 'unit_') + unit;
+                    const localKey = studentName + '_project_' + (isWord ? 'word_unit_' : (isAi ? 'ai_' : 'unit_')) + unit;
                     try {
                         const raw = localStorage.getItem(localKey);
                         if (raw) {
@@ -1399,20 +1511,22 @@
                     const blocksText = currentLang === 'en' ? `Blocks: ${blocksCount}` : `블록 수: ${blocksCount}개`;
                     const modifiedText = currentLang === 'en' ? 'Modified' : '최근 수정';
                     const displayName = (currentLang === 'en' ? unitTitlesEn[unit] : unitTitlesKo[unit]) || `Lesson ${unit}`;
+                    const modeLabel = isWord ? (currentLang === 'en' ? 'Word Blocks' : '워드 블록') : (currentLang === 'en' ? 'Icon Blocks' : '아이콘 블록');
+                    const modeIcon = isWord ? WORD_MODE_SVG : ICON_MODE_SVG;
 
                     html += `
-                        <div class="project-card active-project" style="cursor: pointer;" onclick="recordUnitVisited('${unit}','${isAi?'ai':'lesson'}'); location.href='${targetUrl}'">
+                        <div class="project-card active-project" style="cursor: pointer;" onclick="recordUnitVisited('${unit}','${typeStr}'); location.href='${targetUrl}'">
                             <div class="project-card-inner">
                                 <div class="project-card-top">
                                     <span class="${badgeClass}">${badgeText}</span>
-                                    <button class="project-delete-btn" onclick="deleteProject('${localKey}','', '${unit}','${isAi?'ai':'lesson'}'); event.stopPropagation();">
+                                    <button class="project-delete-btn" onclick="deleteProject('${localKey}','', '${unit}','${typeStr}'); event.stopPropagation();">
                                         <i data-lucide="trash-2"></i>
                                     </button>
                                 </div>
                                 <div class="project-card-name">${escapeHtml(displayName)}</div>
                                 <div class="project-card-bottom">
-                                    <div class="project-info-text">${blocksText}<br>${modifiedText}</div>
-                                    <button class="project-play-btn" onclick="event.stopPropagation(); recordUnitVisited('${unit}','${isAi?'ai':'lesson'}'); location.href='${targetUrl}'">
+                                    <div class="project-mode" title="${modeLabel}">${modeIcon}<span>${modeLabel}</span></div>
+                                    <button class="project-play-btn" onclick="event.stopPropagation(); recordUnitVisited('${unit}','${typeStr}'); location.href='${targetUrl}'">
                                         <i data-lucide="play" style="width:16px;height:16px;fill:currentColor;"></i>
                                     </button>
                                 </div>
@@ -1465,10 +1579,35 @@
                 : `lesson.html?unit=${unit}&v=${v}`;
         }
 
-                async function deleteProject(unitKey, cloudId, unit, type) {
+        // 앱 디자인의 확인 창. 확인이면 true, 취소/바깥 클릭/Esc 면 false 를 돌려준다.
+        function bsConfirm(opt) {
+            return new Promise(function (resolve) {
+                const lang = localStorage.getItem('bricksync_lang') || 'ko';
+                const ov = document.createElement('div'); ov.className = 'bsc-ov';
+                const card = document.createElement('div'); card.className = 'bsc-card';
+                card.setAttribute('role', 'alertdialog');
+                const ic = document.createElement('div'); ic.className = 'bsc-ic'; ic.innerHTML = '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"/></svg>';
+                const ti = document.createElement('div'); ti.className = 'bsc-t'; ti.textContent = opt.title;
+                const row = document.createElement('div'); row.className = 'bsc-row';
+                const no = document.createElement('button'); no.type = 'button'; no.className = 'bsc-b bsc-no'; no.textContent = opt.no || (lang === 'en' ? 'Cancel' : '취소');
+                const yes = document.createElement('button'); yes.type = 'button'; yes.className = 'bsc-b bsc-yes'; yes.textContent = opt.yes || (lang === 'en' ? 'Delete' : '삭제하기');
+                row.appendChild(no); row.appendChild(yes);
+                card.appendChild(ic); card.appendChild(ti);
+                if (opt.msg) { const m = document.createElement('div'); m.className = 'bsc-m'; m.textContent = opt.msg; card.appendChild(m); }
+                card.appendChild(row); ov.appendChild(card); document.body.appendChild(ov);
+                function done(v) { document.removeEventListener('keydown', key, true); ov.remove(); resolve(v); }
+                function key(e) { if (e.key === 'Escape') { e.preventDefault(); done(false); } }
+                document.addEventListener('keydown', key, true);
+                no.onclick = function () { done(false); }; yes.onclick = function () { done(true); };
+                ov.addEventListener('mousedown', function (e) { if (e.target === ov) done(false); });
+                no.focus();
+            });
+        }
+
+        async function deleteProject(unitKey, cloudId, unit, type) {
             const currentLang = localStorage.getItem('bricksync_lang') || 'ko';
             const confirmMsg = currentLang === 'en' ? 'Are you sure you want to delete this project?' : '정말 이 프로젝트를 삭제하시겠습니까?';
-            if (!confirm(confirmMsg)) return;
+            if (!(await bsConfirm({ title: confirmMsg }))) return;
 
             // 1. Remove from bricksync_recent_units
             try {
@@ -1484,7 +1623,7 @@
 
             // 3. Clean up any matching local project keys
             try {
-                const targetKeyPart = (type === 'ai' ? '_project_ai_' : '_project_unit_') + unit;
+                const targetKeyPart = (type === 'ai' ? '_project_ai_' : (type === 'word' ? '_project_word_unit_' : '_project_unit_')) + unit;
                 const toRemove = [];
                 for (let i = 0; i < localStorage.length; i++) {
                     const k = localStorage.key(i);
@@ -1570,6 +1709,69 @@
     <script src="settings.js"></script>
     <script>
         lucide.createIcons();
+    </script>
+<script>
+/* 단원 제목은 항상 한 줄: 자간을 줄인 뒤에도 넘치면 글씨 크기를 조금씩 줄여 띠 안에 맞춘다 */
+(function () {
+    function fitTitle(bar) {
+        var t = bar.querySelector('.lc-title');
+        if (!t || !bar.clientWidth) return;            // 숨겨진 화면은 나중에 보일 때 다시 맞춘다
+        t.style.fontSize = ''; t.style.whiteSpace = '';
+        var size = parseFloat(getComputedStyle(t).fontSize);
+        while (t.scrollWidth > t.clientWidth + 0.5 && size > 14) { size -= 0.5; t.style.fontSize = size + 'px'; }
+        // 화면이 아주 좁아 14px로도 한 줄에 안 들어가면, 알아볼 수 없을 만큼 작게 만들기보다 두 줄로 나눈다
+        if (t.scrollWidth > t.clientWidth + 0.5) { t.style.whiteSpace = 'normal'; t.style.fontSize = '15px'; }
+    }
+    function fitAll() { document.querySelectorAll('.lc-bar').forEach(fitTitle); }
+    var ro = window.ResizeObserver ? new ResizeObserver(function (es) { es.forEach(function (e) { fitTitle(e.target); }); }) : null;
+    document.querySelectorAll('.lc-bar').forEach(function (bar) {
+        if (ro) ro.observe(bar);
+        if (window.MutationObserver) new MutationObserver(function () { fitTitle(bar); }).observe(bar, { childList: true, characterData: true, subtree: true });
+    });
+    window.addEventListener('resize', fitAll);
+    // 화면을 바꿀 때(학습단원 ↔ AI 학습단원)도 보이는 카드에 다시 맞춘다
+    if (typeof window.showView === 'function') {
+        var _sv = window.showView;
+        window.showView = function () { var r = _sv.apply(this, arguments); setTimeout(fitAll, 60); setTimeout(fitAll, 600); return r; };
+    }
+    window.addEventListener('bricksync-language-changed', function () { setTimeout(fitAll, 50); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fitAll);   // 폰트 조각이 도착할 때마다 다시 맞춘다
+    document.addEventListener('DOMContentLoaded', fitAll);
+    setTimeout(fitAll, 1500);                         // 폰트 조각이 늦게 도착하는 경우
+})();
+</script>
+<script>
+        // 업데이트 소식 배너를 누르면 크게 보여 준다 (바깥을 누르거나 Esc로 닫기)
+        (function () {
+            // 언어에 따라 한국어/영어 배너 이미지를 쓴다
+            var ALT = {
+                ko: { update_banner_left: '업데이트 1: 새 아이콘 블록 디자인 2.0', update_banner_right: '업데이트 2: 워드블록 추가, 업데이트 3: 블록과 Verse 코드 1:1 변환' },
+                en: { update_banner_left: 'Update 1: New Icon Block Design 2.0', update_banner_right: 'Update 2: Word Block added, Update 3: Block to Verse code 1:1 translation' }
+            };
+            function applyBannerLang() {
+                var lang = 'ko';
+                try { lang = localStorage.getItem('bricksync_lang') === 'en' ? 'en' : 'ko'; } catch (e) {}
+                document.querySelectorAll('.bs-ub').forEach(function (b) {
+                    var name = b.getAttribute('data-banner');
+                    var src = 'assets/' + name + (lang === 'en' ? '_en' : '') + '.webp';
+                    b.setAttribute('data-src', src);
+                    var im = b.querySelector('img'); if (im) { im.src = src; im.alt = ALT[lang][name]; }
+                });
+            }
+            applyBannerLang();
+            window.addEventListener('bricksync-language-changed', applyBannerLang);
+            function close(v) { document.removeEventListener('keydown', onKey, true); v.remove(); if (v._opener && v._opener.blur) v._opener.blur(); }
+            var onKey = function (e) { if (e.key === 'Escape') { var v = document.querySelector('.bs-ub-view'); if (v) close(v); } };
+            document.querySelectorAll('.bs-ub').forEach(function (b) {
+                b.addEventListener('click', function () {
+                    var v = document.createElement('div'); v.className = 'bs-ub-view'; v._opener = b;
+                    var im = document.createElement('img'); im.src = b.getAttribute('data-src'); im.alt = '';
+                    v.appendChild(im); v.addEventListener('click', function () { close(v); });
+                    document.body.appendChild(v); document.addEventListener('keydown', onKey, true);
+                });
+            });
+        })();
     </script>
 </body>
 

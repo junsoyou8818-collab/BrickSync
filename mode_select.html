@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <!-- 최상위 윈도우 자동 래핑 리다이렉트 스크립트 (mission.html과 동일) -->
+    <script>
+        if (window === window.parent) {
+            let currentPage = window.location.pathname.split('/').pop() + window.location.search;
+            if (!currentPage || currentPage.startsWith('?')) {
+                currentPage = 'index.html' + window.location.search;
+            }
+            sessionStorage.setItem('brickSyncLastPage', currentPage);
+            window.location.href = 'app.html';
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코딩 방식 선택</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans KR', 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #4f1e73 0%, #6c1f86 50%, #eab308 100%);
+            overflow: auto;
+            color: #1e293b;
+            padding: 20px;
+        }
+
+        .container {
+            width: 86%;
+            max-width: 980px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            padding: 44px 48px 38px;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* 큰 화면: 폭을 980px로 고정하고 JS가 통째로 키운다 */
+        .bs-scaled .container { width: 980px; max-width: none; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 미션 설명 페이지(mission.html)와 같은 머리글 */
+        .mission-header .mission-badge { flex-shrink: 0; }
+        .mission-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 26px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+            padding-bottom: 20px;
+        }
+
+        .mission-title {
+            font-family: 'Gaegu', 'Noto Sans KR', sans-serif;   /* 크레용 손글씨 제목 */
+            font-size: 3rem;
+            font-weight: 700;
+            color: #6c1f86;
+            word-break: keep-all;
+            line-height: 1.25;
+            filter: url(#bs-crayon);
+            white-space: nowrap;
+            letter-spacing: -0.04em;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        .mission-badge {
+            background: #facc15;
+            color: #1e293b;
+            font-weight: 900;
+            font-size: 1.2rem;
+            padding: 8px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(250, 204, 21, 0.3);
+            white-space: nowrap;
+        }
+
+        .mission-content {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            color: #475569;
+            margin-bottom: 30px;
+            word-break: keep-all;
+        }
+
+        .mission-content:empty { display: none; }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 22px;
+            padding: 18px;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.07);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+            cursor: pointer;
+            text-align: center;
+            font-family: inherit;
+        }
+
+        .card:hover { transform: translateY(-4px); box-shadow: 0 10px 0 rgba(0, 0, 0, 0.08); }
+        .card.last { border-color: var(--accent); }
+        .card:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+        .preview {
+            background: #F1F5F9;
+            border-radius: 16px;
+            height: 200px;
+            padding: 20px 14px 14px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 미리보기: 실제 아이콘 블록 (스터드 브릭 + 아이콘 + 값 알약) */
+        .p-icons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: flex-start; padding-bottom: 14px; }
+        .ib {
+            position: relative;
+            width: 52px; height: 48px;
+            border-radius: 8px;
+            background: var(--c);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ib::before, .ib::after {
+            content: ''; position: absolute; top: -6px;
+            width: 12px; height: 7px; border-radius: 3px 3px 0 0; background: var(--c);
+        }
+        .ib::before { left: 8px; }
+        .ib::after { right: 8px; }
+        .ib svg { width: 36px; height: 36px; display: block; }
+        .ib .pm {
+            position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+            min-width: 22px; height: 20px; padding: 0 6px; border-radius: 10px;
+            background: #fff; color: #64748b; font-size: 11px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12); border: 1.5px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* 미리보기: 워드 블록 (아이콘 배지 + 문장 + 입력칸) */
+        .p-words { display: flex; flex-direction: column; align-items: flex-start; width: max-content; padding-top: 6px; }
+        .wm {
+            position: relative;
+            display: flex; align-items: center; gap: 7px;
+            height: 32px; padding: 0 12px 0 5px;
+            border-radius: 8px; background: var(--c); color: var(--tx);
+            font-size: 13px; font-weight: 700;
+            margin-bottom: 3px; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+        }
+        .wm.first::before, .wm.first::after {
+            content: ''; position: absolute; top: -5px;
+            width: 9px; height: 6px; border-radius: 2px 2px 0 0; background: var(--c);
+        }
+        .wm.first::before { left: 10px; }
+        .wm.first::after { left: 26px; }
+        .wm .bd { width: 24px; height: 24px; border-radius: 50%; background: #fff; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .wm .bd svg { width: 19px; height: 19px; display: block; filter: none !important; }
+        .wm .ch {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px;
+            background: #fff; color: var(--k); font-size: 12px; font-weight: 800;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.14);
+        }
+
+        .title {
+            font-size: 1.35rem;
+            font-weight: 900;
+            margin: 16px 0 4px;
+            display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+            color: #0f172a;
+            text-align: center;
+        }
+        .tag {
+            font-size: 0.75rem; font-weight: 700;
+            background: #E8F7DF; color: #2E6B1A;
+            border-radius: 9px; padding: 2px 10px;
+            display: none;
+        }
+        .card.last .tag { display: inline-block; }
+
+        .desc {
+            font-size: 0.95rem; line-height: 1.55; color: #64748b;
+            margin-bottom: 16px; min-height: 3em; word-break: keep-all; text-align: center;
+        }
+
+        .go {
+            margin-top: auto;
+            height: 48px; border-radius: 14px;
+            background: var(--accent); color: var(--accent-ink);
+            font-weight: 900; font-size: 1.05rem;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 0 5px 0 rgba(0, 0, 0, 0.16);
+            white-space: nowrap;
+        }
+
+        .actions { display: flex; justify-content: flex-start; margin-top: 26px; }
+
+        .btn-back {
+            padding: 14px 30px; font-size: 1.05rem; font-weight: 800;
+            border-radius: 14px; background: #e2e8f0; color: #475569;
+            border: none; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s; font-family: inherit;
+        }
+        .btn-back:hover { background: #cbd5e1; transform: translateY(-2px); }
+
+        .toast {
+            position: fixed; left: 50%; bottom: 36px; transform: translateX(-50%) translateY(20px);
+            background: #1e293b; color: #fff; padding: 12px 22px; border-radius: 14px;
+            font-weight: 700; opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 10;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 760px) {
+            .container { width: 100%; padding: 28px 22px; }
+            .cards { grid-template-columns: 1fr; }
+            .mission-title { font-size: 1.5rem; }
+            .mission-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- 크레용 질감 글씨용 효과 (글자 가장자리를 살짝 울퉁불퉁하게, 안쪽에 크레용 알갱이) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+        <filter id="bs-crayon" x="-4%" y="-12%" width="108%" height="124%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="3" result="warp"/>
+            <feDisplacementMap in="SourceGraphic" in2="warp" scale="2.2" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+            <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="7" result="grain"/>
+            <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  4 0 0 0 -0.62" result="holes"/>
+            <feComposite in="rough" in2="holes" operator="in"/>
+        </filter>
+    </defs></svg>
+    <div class="container">
+        <div class="mission-header">
+            <h1 class="mission-title" id="h1"></h1>
+            <div class="mission-badge" id="badge">STAGE 1</div>
+        </div>
+        <p class="mission-content" id="desc" style="display:none"></p>
+
+        <div class="cards">
+            <button class="card" id="cardIcon" style="--accent:#FFD23F;--accent-ink:#5A4300" onclick="choose('icon')">
+                <div class="preview"><div class="p-icons" id="pvIcon"></div></div>
+                <div class="title"><span id="iconTitle">아이콘 블록</span><span class="tag" id="iconTag">지난번 선택</span></div>
+                <p class="desc" id="iconDesc"></p>
+                <div class="go"><span id="iconGo">아이콘 블록으로 시작</span></div>
+            </button>
+
+            <button class="card" id="cardWord" style="--accent:#5B8DEF;--accent-ink:#fff" onclick="choose('word')">
+                <div class="preview"><div class="p-words" id="pvWord"></div></div>
+                <div class="title"><span id="wordTitle">워드 블록</span><span class="tag" id="wordTag">지난번 선택</span></div>
+                <p class="desc" id="wordDesc"></p>
+                <div class="go"><span id="wordGo">워드 블록으로 시작</span></div>
+            </button>
+        </div>
+
+        <div class="actions">
+            <button class="btn-back" id="btnBack" onclick="goBack()"><i data-lucide="arrow-left"></i><span id="backText">뒤로가기</span></button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="block_icons.js"></script>
+    <script>
+        lucide.createIcons();
+
+        const unit = new URLSearchParams(window.location.search).get('unit') || '1';
+        const MODE_KEY = 'bricksync_coding_mode';
+
+        const TEXT = {
+            ko: {
+                title: '어떻게 코딩해 볼까요?',
+                back: '뒤로가기',
+                last: '지난번 선택',
+                iconTitle: '아이콘 블록',
+                iconDesc: '그림 블록을 이어 붙여요. 처음 코딩을 시작한다면 추천해요.',
+                iconGo: '아이콘 블록으로 시작',
+                wordTitle: '워드 블록',
+                wordDesc: '글자로 된 블록들에 조건과 값을 직접 넣어 코딩해보세요.',
+                wordGo: '워드 블록으로 시작',
+                notReady: '워드 블록 작업 공간은 아직 준비 중이에요.',
+                units: {
+                    '1': '탐험보트를 출발시켜요', '2': '바닷속 잠수함으로 바다를 탐험해요', '3': '대관람차 회전하기',
+                    '4': '탐험 자동차를 만들어요', '5': '사이렌을 켜줘', '6': '가위, 바위, 보로 여닫는 오두막 지붕',
+                    '7': '마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네', '8': '몬스터를 보여줘! 경보 알림켜기'
+                },
+                words: {
+                    start: '시작하면', wait: '[n] 초 기다리기', fwd: '앞으로 [n] 번 이동', back: '뒤로 [n] 번 이동',
+                    left: '왼쪽으로 [n] 번 돌기', right: '오른쪽으로 [n] 번 돌기', cw: '모터를 시계 방향으로 [n] 번',
+                    ccw: '모터를 반시계 방향으로 [n] 번', matrix: '조명을 빨강으로 켜기',
+                    hand: '손 제스처가 보이면', mic: '말하면', monster: '몬스터가 보이면',
+                    sound: '소리 [n] 재생하기', repeat: '[n] 번 반복하기'
+                }
+            },
+            en: {
+                title: 'How do you want to code?',
+                back: 'Go Back',
+                last: 'Last time',
+                iconTitle: 'Icon Blocks',
+                iconDesc: 'Snap picture blocks together. Great if this is your first time coding.',
+                iconGo: 'Start with Icon Blocks',
+                wordTitle: 'Word Blocks',
+                wordDesc: 'Code by typing conditions and values directly into the word blocks.',
+                wordGo: 'Start with Word Blocks',
+                notReady: 'The Word Block workspace is not ready yet.',
+                units: {
+                    '1': 'Launch the exploration boat', '2': 'Explore the sea with a submarine', '3': 'Rotate the Ferris Wheel',
+                    '4': 'Build an exploration car', '5': 'Turn on the siren', '6': 'Rock-paper-scissors cabin roof',
+                    '7': 'Shout into the mic! Magic swing', '8': 'Show me the monster! Alarm'
+                },
+                words: {
+                    start: 'when started', wait: 'wait [n] seconds', fwd: 'move forward [n]', back: 'move backward [n]',
+                    left: 'turn left [n]', right: 'turn right [n]', cw: 'motor clockwise [n]',
+                    ccw: 'motor counter-clockwise [n]', matrix: 'light on red',
+                    hand: 'when hand gesture seen', mic: 'when I speak', monster: 'when monster seen',
+                    sound: 'play sound [n]', repeat: 'repeat [n] times'
+                }
+            }
+        };
+
+        // 미리보기는 모든 단원 공통의 일반 예시 (미션 정답과 무관하게 '블록이 어떤 모양인지'만 보여줌)
+        const GENERIC_SEQ = [['ev', 'start'], ['ai', 'sound', 1], ['lp', 'repeat', 2], ['mv', 'fwd', 1]];
+
+        // 블록 카테고리 색 (작업 공간 테마와 동일한 값)
+        const CAT = {
+            ev: { c: '#FFD23F', tx: '#5A4300', k: '#8A6200', a: ['#FF6B6B', '#5B8DEF', '#3DBE6B'] },
+            mv: { c: '#FF6B6B', tx: '#FFFFFF', k: '#B93030', a: ['#FFD23F', '#4CC9F0', '#7ED957'] },
+            mo: { c: '#7ED957', tx: '#1E4D12', k: '#3A8A22', a: ['#FFD23F', '#FF6B6B', '#5B8DEF'] },
+            ai: { c: '#5B8DEF', tx: '#FFFFFF', k: '#2F55B5', a: ['#FFD23F', '#FF8FB1', '#7EEAB0'] },
+            lp: { c: '#FF8A3D', tx: '#FFFFFF', k: '#B8530F', a: ['#FFD23F', '#4CC9F0', '#FFFFFF'] }
+        };
+
+        function catStyle(cat) {
+            const m = CAT[cat];
+            return '--c:' + m.c + ';--tx:' + m.tx + ';--k:' + m.k + ';--a1:' + m.a[0] + ';--a2:' + m.a[1] + ';--a3:' + m.a[2];
+        }
+
+        function iconSvg(key) {
+            return (window.BS_ICONS && BS_ICONS.ICON[key]) ? BS_ICONS.ICON[key] : '';
+        }
+
+        // 배지(흰 원) 안에서는 아이콘의 흰색과 진한 색을 서로 바꿔서 읽히게 함
+        function badgeSvg(key) {
+            return iconSvg(key).replace(/#fff/g, '@@W@@').replace(/var\(--k\)/g, '#fff').replace(/@@W@@/g, 'var(--k)');
+        }
+
+        function renderPreviews() {
+            const t = TEXT[lang()];
+            const seq = GENERIC_SEQ;
+
+            document.getElementById('pvIcon').innerHTML = seq.map(b =>
+                '<span class="ib" style="' + catStyle(b[0]) + '">' + iconSvg(b[1]) +
+                (b[2] !== undefined ? '<span class="pm">' + b[2] + '</span>' : '') + '</span>'
+            ).join('');
+
+            document.getElementById('pvWord').innerHTML = seq.map((b, i) => {
+                const sentence = (t.words[b[1]] || '').replace('[n]', '<span class="ch">' + (b[2] !== undefined ? b[2] : '') + '</span>');
+                return '<div class="wm' + (i === 0 ? ' first' : '') + '" style="' + catStyle(b[0]) + '">' +
+                    '<span class="bd">' + badgeSvg(b[1]) + '</span><span>' + sentence + '</span></div>';
+            }).join('');
+        }
+
+        function lang() {
+            try { return localStorage.getItem('bricksync_lang') === 'en' ? 'en' : 'ko'; } catch (e) { return 'ko'; }
+        }
+
+        function lastMode() {
+            try { return localStorage.getItem(MODE_KEY); } catch (e) { return null; }
+        }
+
+        function render() {
+            const t = TEXT[lang()];
+            document.documentElement.lang = lang();
+            document.title = lang() === 'en' ? 'Choose how to code' : '코딩 방식 선택';
+            // 제목/설명/배지는 mission.html이 저장해 둔 값을 사용 (없으면 간단한 단원 이름으로 대체)
+            let info = null;
+            try {
+                const raw = JSON.parse(sessionStorage.getItem('bricksync_mission_info') || 'null');
+                if (raw && String(raw.unit) === String(unit)) info = raw[lang()] || raw.ko || null;
+            } catch (e) { }
+            const fallbackName = t.units[unit] || '';
+            document.getElementById('h1').textContent = info ? info.title : (fallbackName ? fallbackName : t.title);
+            document.getElementById('desc').textContent = info ? info.desc : '';
+            document.getElementById('badge').textContent = info ? info.badge : 'STAGE ' + unit;
+            document.getElementById('backText').textContent = t.back;
+            document.getElementById('iconTitle').textContent = t.iconTitle;
+            document.getElementById('iconDesc').textContent = t.iconDesc;
+            document.getElementById('iconGo').textContent = t.iconGo;
+            document.getElementById('wordTitle').textContent = t.wordTitle;
+            document.getElementById('wordDesc').textContent = t.wordDesc;
+            document.getElementById('wordGo').textContent = t.wordGo;
+            document.getElementById('iconTag').textContent = t.last;
+            document.getElementById('wordTag').textContent = t.last;
+            renderPreviews();
+            const m = lastMode();
+            document.getElementById('cardIcon').classList.toggle('last', m === 'icon');
+            document.getElementById('cardWord').classList.toggle('last', m === 'word');
+        }
+
+        function navigate(url) {
+            if (window.parent && window.parent !== window && typeof window.parent.navigateIframe === 'function') {
+                window.parent.navigateIframe(url);
+            } else {
+                window.location.href = url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now();
+            }
+        }
+
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2600);
+        }
+
+        async function choose(mode) {
+            const isAi = Number(unit) >= 6;
+            const target = mode === 'word'
+                ? 'word_workspace.html?unit=' + encodeURIComponent(unit)
+                : (isAi ? 'ai_fusion.html' : 'lesson.html') + '?unit=' + encodeURIComponent(unit);
+
+            if (mode === 'word') {
+                // 워드 작업 공간 페이지가 아직 없으면 이동하지 않고 안내 (페이지가 생기면 자동으로 열림)
+                try {
+                    const res = await fetch('word_workspace.html', { method: 'HEAD', cache: 'no-store' });
+                    if (!res.ok) throw new Error('missing');
+                } catch (e) {
+                    showToast(TEXT[lang()].notReady);
+                    return;
+                }
+            }
+
+            try { localStorage.setItem(MODE_KEY, mode); } catch (e) { }
+            navigate(target);
+        }
+
+        function goBack() {
+            navigate('mission.html?unit=' + encodeURIComponent(unit));
+        }
+
+        window.addEventListener('bricksync-language-changed', render);
+        render();
+    </script>
+    <script src="settings.js"></script>
+<script>
+/* 단원 제목은 한 줄: 자간을 줄인 뒤에도 넘치면 글씨 크기를 줄여 맞춘다 (너무 작아지면 두 줄 허용) */
+(function () {
+    var t = document.getElementById('h1');
+    if (!t) return;
+    function fit() {
+        t.style.fontSize = ''; t.style.whiteSpace = '';
+        var size = parseFloat(getComputedStyle(t).fontSize);
+        while (t.scrollWidth > t.clientWidth + 0.5 && size > 26) { size -= 1; t.style.fontSize = size + 'px'; }
+        if (t.scrollWidth > t.clientWidth + 0.5) { t.style.whiteSpace = 'normal'; t.style.fontSize = ''; }
+    }
+    if (window.MutationObserver) new MutationObserver(fit).observe(t, { childList: true, characterData: true, subtree: true });
+    window.addEventListener('resize', fit);
+    window.addEventListener('bricksync-language-changed', function () { setTimeout(fit, 50); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fit);
+    document.addEventListener('DOMContentLoaded', fit);
+    setTimeout(fit, 1500);
+})();
+</script>
+<script>
+/* 큰 화면에서는 카드 전체(글자, 여백, 아이콘, 버튼)를 같은 비율로 키운다. 화면이 작으면 키우지 않고 예전 배치를 그대로 쓴다. */
+(function () {
+    var el = document.querySelector('.container');
+    if (!el) return;
+    var TARGET = 1.3;
+    function apply() {
+        if (window.innerWidth < 1000) { document.documentElement.classList.remove('bs-scaled'); el.style.zoom = ''; return; }
+        document.documentElement.classList.add('bs-scaled');
+        el.style.zoom = 1;                                   // 늘리기 전 크기를 재서
+        var w = el.offsetWidth, h = el.offsetHeight;
+        var f = Math.min(TARGET, window.innerWidth * 0.94 / w, (window.innerHeight - 40) * 0.96 / h);   // 화면 안에 들어가는 만큼만 키운다
+        el.style.zoom = Math.max(f, 0.7);
+    }
+    window.addEventListener('resize', apply);
+    window.addEventListener('load', apply);
+    window.addEventListener('bricksync-language-changed', function () { setTimeout(apply, 80); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(apply);
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', apply);
+    if (window.MutationObserver) new MutationObserver(function () { clearTimeout(apply._t); apply._t = setTimeout(apply, 40); }).observe(el, { childList: true, characterData: true, subtree: true });
+    document.addEventListener('DOMContentLoaded', apply);
+    setTimeout(apply, 300); setTimeout(apply, 1500);
+})();
+</script>
+</body>
+
+</html>

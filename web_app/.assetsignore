@@ -1,0 +1,9 @@
+# 배포(wrangler)에서 제외할 파일: 내부 작업용 스크립트와 옛 백업
+wrangler.toml
+*.py
+lesson_0dd634c.html
+lesson_0dd634c_utf8.html
+lesson_a420c9a.html
+lesson_copy.html
+app_copy.html
+.assetsignore

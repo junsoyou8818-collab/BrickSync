@@ -51,6 +51,9 @@
             animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
+        /* 큰 화면: 폭을 900px로 고정하고 JS가 통째로 키운다 */
+        .bs-scaled .mission-container { width: 900px; max-width: none; }
+
         @keyframes slideUp {
             from {
                 opacity: 0;
@@ -73,10 +76,17 @@
         }
 
         .mission-title {
-            font-size: 2.5rem;
-            font-weight: 900;
+            font-family: 'Gaegu', 'Noto Sans KR', sans-serif;   /* 크레용 손글씨 제목 */
+            font-size: 3rem;
+            font-weight: 700;
             color: #6c1f86;
+            filter: url(#bs-crayon);
+            white-space: nowrap;
+            letter-spacing: -0.04em;
+            min-width: 0;
+            flex: 1 1 auto;
         }
+        .mission-header .mission-badge { flex-shrink: 0; margin-left: 16px; }
 
         .mission-badge {
             background: #facc15;
@@ -194,9 +204,20 @@
         } catch(e) {}
     })();
 </script>
+    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&display=swap" rel="stylesheet">
 </head>
 
 <body>
+    <!-- 크레용 질감 글씨용 효과 (글자 가장자리를 살짝 울퉁불퉁하게, 안쪽에 크레용 알갱이) -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+        <filter id="bs-crayon" x="-4%" y="-12%" width="108%" height="124%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="3" result="warp"/>
+            <feDisplacementMap in="SourceGraphic" in2="warp" scale="2.2" xChannelSelector="R" yChannelSelector="G" result="rough"/>
+            <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" seed="7" result="grain"/>
+            <feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  4 0 0 0 -0.62" result="holes"/>
+            <feComposite in="rough" in2="holes" operator="in"/>
+        </filter>
+    </defs></svg>
 
     <div class="mission-container">
         <div class="mission-header">
@@ -204,7 +225,7 @@
             <div class="mission-badge" id="m-badge">STAGE 1</div>
         </div>
 
-        <div class="mission-content" id="m-desc">
+        <div class="mission-content" id="m-desc" style="display:none">
             레고 스파이크 에센셜 허브를 사용하여 새로운 코딩 모험을 시작할 준비가 되셨나요? <br>
             이번 학습에서는 포트나이트 캣 아일랜드와 현실의 레고 조명을 연동하는 방법을 배웁니다.
         </div>
@@ -239,49 +260,49 @@
         const missionData = {
             ko: {
                 '1': {
-                    title: '학습 1: 탐험보트를 출발시켜요',
+                    title: '탐험보트를 출발시켜요',
                     badge: 'STAGE 1',
                     desc: '5초 대기 후 앞으로 3번 이동하고, 좌회전 1번 후 뒤로 2번 이동해 보트를 출발시킵니다.',
                     goals: ['블루투스 혹은 USB로 스파이크 허브 연결하기', '대기 블록과 이동 블록 연결하기', '포트나이트 게임에 신호 보내기']
                 },
                 '2': {
-                    title: '학습 2: 바닷속 잠수함으로 바다를 탐험해요',
+                    title: '바닷속 잠수함으로 바다를 탐험해요',
                     badge: 'STAGE 2',
                     desc: '모터 블록을 활용하여 물리적인 회전을 만들고 포트나이트 장치와 싱크를 맞춰봅니다.',
                     goals: ['모터 회전 블록 사용법 이해하기', '모터 속도를 디테일하게 제어하기', '장애물 돌파를 위한 코드 작성']
                 },
                 '3': {
-                    title: '학습 3: 대관람차 회전하기',
+                    title: '대관람차 회전하기',
                     badge: 'STAGE 3',
                     desc: '모터 회전 블록을 활용해 시계방향 3번, 반시계방향 2번으로 대관람차를 안전하게 운행하세요.',
                     goals: ['모터 시계방향 및 반시계방향 블록 사용법 익히기', '시계방향 3번, 반시계방향 2번으로 대관람차 가동 완료하기']
                 },
                 '4': {
-                    title: '학습 4: 탐험 자동차를 만들어요',
+                    title: '탐험 자동차를 만들어요',
                     badge: 'STAGE 4',
                     desc: '모터 제어 블록을 활용하여, 탐험 자동차가 지정된 경로(앞으로 4번, 오른쪽으로 1번 회전, 앞으로 2번)를 따라 목적지까지 무사히 도착할 수 있도록 코딩해 봅니다.',
                     goals: ['재생(시작) 블록 연결하기', '전진 블록을 활용하여 앞으로 4번 이동하기', '우회전(오른쪽 회전) 블록을 사용해 방향 전환하기', '다시 전진 블록으로 앞으로 2번 더 이동하여 목적지 도착하기']
                 },
                 '5': {
-                    title: '학습 5: 사이렌을 켜줘',
+                    title: '사이렌을 켜줘',
                     badge: 'STAGE 5',
                     desc: '조명 블록과 대기 블록을 조합하여, 동굴 속에서 일정 시간 동안 불이 켜졌다가 자동으로 꺼지는 동굴 탐사선 전조등 제어 코드를 만들어 봅니다.',
                     goals: ['재생(시작) 블록 연결하기', '조명(라이트) 블록을 꺼내어 연결하기', '대기 블록을 연결하여 전조등이 켜져 있는 시간 조절하기', '코드 실행 완료 후 포트나이트 게임 내에서 황금 동전 수집하기']
                 },
                 '6': {
-                    title: 'AI 6: 가위, 바위, 보로 여닫는 오두막 지붕',
+                    title: '가위, 바위, 보로 여닫는 오두막 지붕',
                     badge: 'STAGE 6',
                     desc: '카메라에 가위, 바위, 보 제스처를 취해 오두막 지붕을 여닫고 포트나이트 장치와 연동해 봅니다.',
                     goals: ['웹캠 권한 허용 및 AI 제스처 인식 활성화하기', '가위, 바위, 보 제스처 이벤트 블록 연결하기', '모터 회전 및 5초 대기 블록 연결하여 지붕 제어하기']
                 },
                 '7': {
-                    title: 'AI 7: 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네',
+                    title: '마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네',
                     badge: 'STAGE 7',
                     desc: '마이크에 "앞으로 세 바퀴"를 말해 요술 그네 모터를 3회 회전시킵니다.',
                     goals: ['마이크 연결 및 음성 인식 활성화하기', 'AI 음성 인식 블록 연결하기', '5초 대기하기 및 모터를 앞으로(시계방향) 3회 회전하기']
                 },
                 '8': {
-                    title: 'AI 8: 몬스터를 보여줘! 경보 알림켜기',
+                    title: '몬스터를 보여줘! 경보 알림켜기',
                     badge: 'STAGE 8',
                     desc: '웹캠에 몬스터 블록이 감지될 때와 감지되지 않을 때의 상태를 학습시켜, 몬스터가 비춰지면 연결된 블록들의 기능을 실행시킵니다.',
                     goals: ['웹캠 및 AI 이미지 비전 엔진 연결하기', '몬스터 블록 감지 데이터 학습시키기', '2초 대기하기 및 빨간색 조명 연결하기']
@@ -289,55 +310,58 @@
             },
             en: {
                 '1': {
-                    title: 'Lesson 1: Launch the exploration boat',
+                    title: 'Launch the exploration boat',
                     badge: 'STAGE 1',
                     desc: 'Wait 5 seconds, move forward 3 times, turn left once, and move backward 2 times.',
                     goals: ['Connect Spike Hub via Bluetooth or USB', 'Connect wait and movement blocks', 'Send signals to Fortnite game']
                 },
                 '2': {
-                    title: 'Lesson 2: Explore the sea with an underwater submarine',
+                    title: 'Explore the sea with an underwater submarine',
                     badge: 'STAGE 2',
                     desc: 'Wait 5 seconds, run Clockwise rotation 3 times, Counter clockwise rotation 3 times.',
                     goals: ['Understand motor rotation blocks', 'Control motor speed in detail', 'Write code to bypass obstacles']
                 },
                 '3': {
-                    title: 'Lesson 3: Rotate the Ferris Wheel',
+                    title: 'Rotate the Ferris Wheel',
                     badge: 'STAGE 3',
                     desc: 'Wait 5 seconds, rotate the motor right 3 times and left 2 times.',
                     goals: ['Understand motor clockwise and counter-clockwise rotation blocks', 'Successfully run the Ferris Wheel with 3 right turns and 2 left turns']
                 },
                 '4': {
-                    title: 'Lesson 4: Ride a Cave Car and Travel',
+                    title: 'Ride a Cave Car and Travel',
                     badge: 'STAGE 4',
                     desc: 'Wait 5 seconds, move forward 4 times, turn right once, and move forward 2 times.',
                     goals: ['Connect play (start) block', 'Move forward 4 times using motor blocks', 'Use right turn block to change direction', 'Move forward 2 more times to reach the destination']
                 },
                 '5': {
-                    title: 'Lesson 5: Turn on the siren',
+                    title: 'Turn on the siren',
                     badge: 'STAGE 5',
                     desc: 'Make the red light turn on after waiting 2 seconds.',
                     goals: ['Connect play (start) block', 'Connect color light matrix block', 'Connect wait block to adjust lighting duration', 'Collect golden coins inside Fortnite once execution completes']
                 },
                 '6': {
-                    title: 'AI Lesson 6: RPS Gesture-Controlled Cabin Roof (Open/Close)',
+                    title: 'RPS Gesture-Controlled Cabin Roof (Open/Close)',
                     badge: 'STAGE 6',
                     desc: 'Use Rock-Paper-Scissors hand gestures via webcam to open and close the cabin roof and sync with Fortnite.',
                     goals: ['Allow webcam access and activate AI gesture recognition', 'Connect Rock-Paper-Scissors gesture event blocks', 'Connect motor rotation and 5-second wait blocks to control the roof']
                 },
                 '7': {
-                    title: 'AI Lesson 7: Shout into the Mic! Control the Magic Swing with Your Voice',
+                    title: 'Shout into the Mic! Control the Magic Swing with Your Voice',
                     badge: 'STAGE 7',
                     desc: 'Say "Turn Forward 3 Times" into the microphone to rotate the magic swing motor 3 times.',
                     goals: ['Connect microphone and activate voice recognition', 'Connect AI Voice Recognition block', 'Wait 5 seconds and rotate the motor forward 3 times']
                 },
                 '8': {
-                    title: 'AI Lesson 8: Animal Alert Ranger (Monster Camera)',
+                    title: 'Animal Alert Ranger (Monster Camera)',
                     badge: 'STAGE 8',
                     desc: 'Train webcam states for monster block detection, and trigger connected block actions when a monster is detected.',
                     goals: ['Connect webcam and AI image vision engine', 'Train monster block detection dataset', 'Wait 2 seconds and connect Red Light']
                 }
             }
         };
+
+        // 코딩 방식 선택 페이지(mode_select.html)가 같은 제목/설명을 쓰도록 두 언어 모두 보관
+        try { sessionStorage.setItem('bricksync_mission_info', JSON.stringify({ unit: String(unit), ko: missionData.ko[unit], en: missionData.en[unit] })); } catch (e) { }
 
         function renderBriefing() {
             const lang = localStorage.getItem('bricksync_lang') || 'ko';
@@ -357,8 +381,8 @@
                 });
 
                 // 미션 시작 버튼의 href에 파라미터 전달
-                const isAiUnit = String(unit) >= '6';
-                document.getElementById('m-start-btn').href = isAiUnit ? `ai_fusion.html?unit=${unit}&v=${Date.now()}` : `lesson.html?unit=${unit}&v=${Date.now()}`;
+                // 시작 버튼: 코딩 방식(아이콘/워드) 선택 페이지로 이동 (이후 선택한 모드의 작업 공간으로 진입)
+                document.getElementById('m-start-btn').href = `mode_select.html?unit=${unit}&v=${Date.now()}`;
             }
 
             // Static UI elements translations
@@ -402,6 +426,50 @@
         });
     </script>
 <script src="settings.js"></script>
+<script>
+/* 단원 제목은 한 줄: 자간을 줄인 뒤에도 넘치면 글씨 크기를 줄여 맞춘다 (너무 작아지면 두 줄 허용) */
+(function () {
+    var t = document.getElementById('m-title');
+    if (!t) return;
+    function fit() {
+        t.style.fontSize = ''; t.style.whiteSpace = '';
+        var size = parseFloat(getComputedStyle(t).fontSize);
+        while (t.scrollWidth > t.clientWidth + 0.5 && size > 26) { size -= 1; t.style.fontSize = size + 'px'; }
+        if (t.scrollWidth > t.clientWidth + 0.5) { t.style.whiteSpace = 'normal'; t.style.fontSize = ''; }
+    }
+    if (window.MutationObserver) new MutationObserver(fit).observe(t, { childList: true, characterData: true, subtree: true });
+    window.addEventListener('resize', fit);
+    window.addEventListener('bricksync-language-changed', function () { setTimeout(fit, 50); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fit);
+    document.addEventListener('DOMContentLoaded', fit);
+    setTimeout(fit, 1500);
+})();
+</script>
+<script>
+/* 큰 화면에서는 카드 전체(글자, 여백, 아이콘, 버튼)를 같은 비율로 키운다. 화면이 작으면 키우지 않고 예전 배치를 그대로 쓴다. */
+(function () {
+    var el = document.querySelector('.mission-container');
+    if (!el) return;
+    var TARGET = 1.3;
+    function apply() {
+        if (window.innerWidth < 1000) { document.documentElement.classList.remove('bs-scaled'); el.style.zoom = ''; return; }
+        document.documentElement.classList.add('bs-scaled');
+        el.style.zoom = 1;                                   // 늘리기 전 크기를 재서
+        var w = el.offsetWidth, h = el.offsetHeight;
+        var f = Math.min(TARGET, window.innerWidth * 0.94 / w, (window.innerHeight - 40) * 0.96 / h);   // 화면 안에 들어가는 만큼만 키운다
+        el.style.zoom = Math.max(f, 0.7);
+    }
+    window.addEventListener('resize', apply);
+    window.addEventListener('load', apply);
+    window.addEventListener('bricksync-language-changed', function () { setTimeout(apply, 80); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(apply);
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', apply);
+    if (window.MutationObserver) new MutationObserver(function () { clearTimeout(apply._t); apply._t = setTimeout(apply, 40); }).observe(el, { childList: true, characterData: true, subtree: true });
+    document.addEventListener('DOMContentLoaded', apply);
+    setTimeout(apply, 300); setTimeout(apply, 1500);
+})();
+</script>
 </body>
 
 </html>

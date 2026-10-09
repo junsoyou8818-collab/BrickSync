@@ -17,11 +17,11 @@
             nav_settings: "설정",
 
             // Settings Modal
-            modal_title: "⚙️ BrickSync 설정",
-            sec_profile: "👤 학생 프로필",
+            modal_title: "BrickSync 설정",
+            sec_profile: "학생 프로필",
             logout_btn: "로그아웃",
-            sec_lang: "🌐 언어 설정 (Language)",
-            sec_volume: "🔊 효과음 볼륨 (Volume)",
+            sec_lang: "언어 설정 (Language)",
+            sec_volume: "효과음 볼륨 (Volume)",
             sec_backup: "💾 프로젝트 로컬 백업 & 복구",
             backup_export: "📤 내 컴퓨터로 백업하기",
             backup_import: "📥 컴퓨터에서 복원하기",
@@ -30,6 +30,21 @@
             diag_connecting: "클라우드 서버 연결 확인 중...",
             diag_online: "● Firebase 클라우드 연결됨 (정상 연동 중)",
             diag_offline: "● 오프라인 모드 안전 작동 중",
+            // exe 다운로드 / 서버 연결 (설정창)
+            sec_exe: "BrickSync.exe 다운로드 / 버전",
+            exe_check_btn: "버전 확인",
+            exe_download_btn: "BrickSync.exe 다운로드",
+            exe_checking: "버전을 확인하는 중...",
+            exe_status_ok: "현재 버전 : v{cur} - 최신 버전 입니다.",
+            exe_status_old: "현재 버전 : v{cur} - 새 버전 v{latest}이 있어요. 아래 버튼으로 받아 주세요.",
+            exe_status_unknown_cur: "현재 버전 : 알 수 없음 - 서버가 꺼져 있거나 구버전이에요. (최신 v{latest})",
+            exe_status_unknown_latest: "현재 버전 : v{cur} - 최신 버전을 확인하지 못했어요.",
+            exe_status_none: "버전을 확인하지 못했어요. 인터넷 연결을 확인해 주세요",
+            sec_server: "서버 연결",
+            server_retry_btn: "재연결",
+            server_checking: "서버를 확인하는 중...",
+            server_ok: "로컬 서버 연결됨 (포트 8000)",
+            server_off: "로컬 서버 연결 안 됨 — BrickSync.exe를 실행해 주세요",
             alert_import_success: "프로젝트 복원이 완료되었습니다. 화면을 새로고침합니다.",
             alert_import_fail: "올바르지 않은 백업 파일입니다.",
             session_expires: "대기 시간 만료 예정",
@@ -45,6 +60,8 @@
             lbl_connect_hub: "허브 연결",
             lbl_hub_not_connected: "허브 연결 안 됨",
             lbl_workspace_title: "BrickSync Essential 아이콘 코딩",
+            lbl_mode_icon: "아이콘 블록 코딩",
+            lbl_mode_word: "워드 블록 코딩",
             btn_back_home: "홈으로 가기",
             btn_run: "실행",
             btn_stop: "정지",
@@ -150,7 +167,7 @@
             // Guide
             lbl_guide_hero_title: "BrickSync 9단계 가이드",
             lbl_guide_banner_title: "BrickSync 시작 가이드",
-            lbl_guide_banner_subtitle: "레고 스파이크 에센셜과 포트나이트 연동을 9단계로 완벽 마스터하세요",
+            lbl_guide_banner_subtitle: "레고 스파이크와 포트나이트 연동을 9단계로 완벽 마스터하세요",
             lbl_guide_menu_header: "시작하기",
             lbl_guide_setup_header: "퀵스타트 가이드",
             lbl_guide_setup_tag: "인터랙티브 셋업",
@@ -166,9 +183,9 @@
             lbl_guide_step4_desc: "일반 학습단원(1~5단원) 또는 AI 융합 단원(6~8단원) 중 원하는 미션을 선택합니다.",
             lbl_guide_step5_title: "5. 레고 허브 연결 (블루투스 / USB)",
             lbl_guide_step5_desc: "화면 상단 버튼으로 블루투스 무선 페어링 또는 USB 유선으로 허브를 연결합니다.",
-            lbl_guide_step6_title: "6. 아이콘 블록 코딩",
+            lbl_guide_step6_title: "6. 아이콘 / 워드 블록 코딩 / Verse 코딩",
             lbl_guide_step6_desc: "미션 과제를 확인한 후 하단의 아이콘 블록을 조립하여 코드를 작성합니다.",
-            lbl_guide_step7_title: "7. AI 머신러닝 학습 (6~8단원)",
+            lbl_guide_step7_title: "7. AI 머신러닝 / LLM 기반 바이브 코딩 학습",
             lbl_guide_step7_desc: "웹캠과 마이크로 제스처, 음성, 사물 인식 모델을 학습시켜 AI 코딩을 경험합니다.",
             lbl_guide_step8_title: "8. 포트나이트 맵 접속",
             lbl_guide_step8_desc: "포트나이트에서 'The Brick Island' (맵 코드: 7603-2493-0825) 맵에 접속합니다.",
@@ -210,6 +227,14 @@
             ai_lesson_1: "6. 가위, 바위, 보로 여닫는 오두막 지붕",
             ai_lesson_2: "7. 마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네",
             ai_lesson_3: "8. 몬스터를 보여줘! 경보 알림켜기.",
+            lc_1: "탐험보트를 출발시켜요",
+            lc_2: "바닷속 잠수함으로 바다를 탐험해요",
+            lc_3: "대관람차 회전하기",
+            lc_4: "탐험 자동차를 만들어요",
+            lc_5: "사이렌을 켜줘",
+            lc_6: "가위, 바위, 보로 여닫는 오두막 지붕",
+            lc_7: "마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네",
+            lc_8: "몬스터를 보여줘! 경보 알림켜기",
 
             // Modal & Workspace UI
             lbl_required_tasks: "📋 미션 달성 과제",
@@ -226,7 +251,7 @@
             lbl_conn_bt: "무선 블루투스 연결",
 
             // Extra UI Keys
-            login_slogan: "레고 에센셜과 포트나이트를 연결하는 스마트 코딩 플랫폼",
+            login_slogan: "레고 스파이크와 포트나이트를 연결하는 스마트 코딩 플랫폼",
             lbl_map_play_now: "지금 플레이하기",
             lbl_system_check: "시스템 연결 점검",
             lbl_code_injection: "포트나이트 코드 주입",
@@ -265,22 +290,24 @@
             lbl_guide_step2_b2: "학급 코드 연결",
             lbl_guide_step2_b3: "교사/학부모 모드 전환 지원",
             lbl_guide_step2_b4: "게스트 즉시 체험 가능",
-            lbl_guide_step3_b1: "스파이크 에센셜 허브 준비",
+            lbl_guide_step3_b1: "스파이크 에센셜/프라임 허브 준비",
             lbl_guide_step3_b2: "모터, 센서, 라이트 연결",
             lbl_guide_step4_b1: "1~5단원 기본 코딩 학습",
-            lbl_guide_step4_b2: "6~8단원 AI 머신러닝 학습",
+            lbl_guide_step4_b2: "6~8단원 AI 학습단원",
             lbl_guide_step5_b1: "블루투스 페어링",
             lbl_guide_step5_b2: "USB 유선 연결 지원",
             lbl_guide_step5_b3: "단원 이동 시 연결 유지",
-            lbl_guide_step6_b1: "아이콘 블록 드래그 앤 드롭",
+            lbl_guide_step6_b1: "아이콘 블록 / 워드 블록 드래그 앤 드롭",
             lbl_guide_step6_b2: "실시간 문법 및 파라미터 조절",
-            lbl_guide_step7_b1: "카메라 제스처 인식 모델",
-            lbl_guide_step7_b2: "마이크 음성 명령 모델",
-            lbl_guide_step8_b1: "포트나이트 디스커버 접속",
+            lbl_guide_step6_b3: "블록 코드를 Verse 코드로 1:1 변환 학습",
+            lbl_guide_step7_b1: "카메라 제스처·사물 인식 AI 모델",
+            lbl_guide_step7_b2: "마이크 음성 명령 AI 모델",
+            lbl_guide_step7_b3: "LLM 기반 바이브 코딩 AI 모델",
+            lbl_guide_step8_b1: "The Brick Island 포트나이트 맵 접속",
             lbl_guide_step8_b2: "섬 코드 입력 (7603-2493-0825)",
-            lbl_guide_step9_b1: "런 버튼으로 동시 실행",
+            lbl_guide_step9_b1: "앱 내 명령 코드 실행 시 포트나이트에 신호 전달",
             lbl_guide_step9_b2: "포트나이트 3D 에셋 조종",
-            lbl_guide_step9_b3: "황금 동전 미션 완수"
+            lbl_guide_step9_b3: "학습 단원 미션 달성으로 포트나이트 황금 동전 획득"
         },
         en: {
             // Sidebar / UI Shell
@@ -293,11 +320,11 @@
             nav_settings: "Settings",
 
             // Settings Modal
-            modal_title: "⚙️ BrickSync Settings",
-            sec_profile: "👤 Student Profile",
+            modal_title: "BrickSync Settings",
+            sec_profile: "Student Profile",
             logout_btn: "Logout",
-            sec_lang: "🌐 Language Settings",
-            sec_volume: "🔊 SFX Volume",
+            sec_lang: "Language Settings",
+            sec_volume: "SFX Volume",
             sec_backup: "💾 Local Backup & Restore",
             backup_export: "Export to PC",
             backup_import: "Import from PC",
@@ -306,6 +333,21 @@
             diag_connecting: "Checking cloud connection...",
             diag_online: "● Firebase Connected (Syncing Live)",
             diag_offline: "● Operating safely in Offline Mode",
+            // exe download / server connection (settings)
+            sec_exe: "Download BrickSync.exe / Version",
+            exe_check_btn: "Check version",
+            exe_download_btn: "Download BrickSync.exe",
+            exe_checking: "Checking version...",
+            exe_status_ok: "Current version: v{cur} - You are up to date.",
+            exe_status_old: "Current version: v{cur} - A new version v{latest} is available. Use the button below.",
+            exe_status_unknown_cur: "Current version: unknown - the server is off or an old version. (Latest v{latest})",
+            exe_status_unknown_latest: "Current version: v{cur} - Could not check the latest version.",
+            exe_status_none: "Could not check the version. Please check your internet connection",
+            sec_server: "Server Connection",
+            server_retry_btn: "Reconnect",
+            server_checking: "Checking the server...",
+            server_ok: "Local server connected (port 8000)",
+            server_off: "Local server not connected — please run BrickSync.exe",
             alert_import_success: "Project restore completed. Reloading page.",
             alert_import_fail: "Invalid backup file format.",
             session_expires: "Session expiring soon",
@@ -321,6 +363,8 @@
             lbl_connect_hub: "Connect Hub",
             lbl_hub_not_connected: "Hub Disconnected",
             lbl_workspace_title: "BrickSync Essential Icon Coding",
+            lbl_mode_icon: "Icon Block Coding",
+            lbl_mode_word: "Word Block Coding",
             btn_back_home: "Go Back Home",
             btn_run: "Run",
             btn_stop: "Stop",
@@ -426,7 +470,7 @@
             // Guide
             lbl_guide_hero_title: "BrickSync 9-Step Guide",
             lbl_guide_banner_title: "BrickSync Starter Guide",
-            lbl_guide_banner_subtitle: "Master the Lego Spike Essential & Fortnite Integration in 9 Easy Steps",
+            lbl_guide_banner_subtitle: "Master the Lego Spike & Fortnite Integration in 9 Easy Steps",
             lbl_guide_menu_header: "Getting Started",
             lbl_guide_setup_header: "Quick Start Guide",
             lbl_guide_setup_tag: "Interactive Setup",
@@ -442,9 +486,9 @@
             lbl_guide_step4_desc: "Choose from standard units (1~5) or AI fusion units (6~8) to begin your mission.",
             lbl_guide_step5_title: "5. Connect Lego Hub",
             lbl_guide_step5_desc: "Pair your Hub wirelessly via Bluetooth or connect via USB cable.",
-            lbl_guide_step6_title: "6. Icon Block Coding",
+            lbl_guide_step6_title: "6. Icon / Word Block Coding / Verse Coding",
             lbl_guide_step6_desc: "Review mission objectives and assemble icon blocks to code movements and sensor logic.",
-            lbl_guide_step7_title: "7. AI Machine Learning (Units 6~8)",
+            lbl_guide_step7_title: "7. AI Machine Learning / LLM Vibe Coding",
             lbl_guide_step7_desc: "Train gesture, voice, or vision models with webcam and microphone for AI-powered coding.",
             lbl_guide_step8_title: "8. Enter Fortnite Island",
             lbl_guide_step8_desc: "Jump into 'The Brick Island' (Island Code: 7603-2493-0825) inside Fortnite.",
@@ -486,6 +530,14 @@
             ai_lesson_1: "6. RPS Gesture-Controlled Cabin Roof",
             ai_lesson_2: "7. Voice-Controlled Magic Swing",
             ai_lesson_3: "8. Animal Alert Ranger (Monster Camera)",
+            lc_1: "Launch the Exploration Boat",
+            lc_2: "Explore the Sea with a Submarine",
+            lc_3: "Rotate the Ferris Wheel",
+            lc_4: "Ride a Cave Car and Travel",
+            lc_5: "Turn on the Siren",
+            lc_6: "RPS Gesture-Controlled Cabin Roof",
+            lc_7: "Voice-Controlled Magic Swing",
+            lc_8: "Animal Alert Ranger (Monster Camera)",
 
             // Modal & Workspace UI
             lbl_required_tasks: "📋 Required Tasks",
@@ -502,7 +554,7 @@
             lbl_conn_bt: "Wireless Bluetooth Connection",
 
             // Extra UI Keys
-            login_slogan: "Smart Coding Platform Connecting Lego Essential & Fortnite",
+            login_slogan: "Smart Coding Platform Connecting Lego Spike & Fortnite",
             lbl_map_play_now: "Play Now",
             lbl_system_check: "System Integrity Check",
             lbl_code_injection: "Fortnite Code Injection",
@@ -541,22 +593,24 @@
             lbl_guide_step2_b2: "Connect Class Code",
             lbl_guide_step2_b3: "Teacher/Parent Switch Supported",
             lbl_guide_step2_b4: "Instant Guest Entry Available",
-            lbl_guide_step3_b1: "Prepare Spike Essential Hub",
+            lbl_guide_step3_b1: "Prepare Spike Essential / Prime Hub",
             lbl_guide_step3_b2: "Connect Motors, Sensors, Lights",
             lbl_guide_step4_b1: "Units 1~5 Core Block Coding",
-            lbl_guide_step4_b2: "Units 6~8 AI Machine Learning",
+            lbl_guide_step4_b2: "Units 6~8 AI Lessons",
             lbl_guide_step5_b1: "Bluetooth Wireless Pairing",
             lbl_guide_step5_b2: "USB Cable Connection",
             lbl_guide_step5_b3: "Connection Preserved Across Units",
-            lbl_guide_step6_b1: "Drag & Drop Icon Blocks",
+            lbl_guide_step6_b1: "Drag & Drop Icon / Word Blocks",
             lbl_guide_step6_b2: "Real-time Parameter Adjustment",
-            lbl_guide_step7_b1: "Webcam Gesture Recognition",
-            lbl_guide_step7_b2: "Microphone Voice Command Model",
-            lbl_guide_step8_b1: "Open Fortnite Discover Tab",
+            lbl_guide_step6_b3: "Learn 1:1 Block-to-Verse Code Conversion",
+            lbl_guide_step7_b1: "Webcam Gesture & Object Recognition AI Model",
+            lbl_guide_step7_b2: "Microphone Voice Command AI Model",
+            lbl_guide_step7_b3: "LLM-based Vibe Coding AI Model",
+            lbl_guide_step8_b1: "Enter The Brick Island Fortnite Map",
             lbl_guide_step8_b2: "Enter Island Code (7603-2493-0825)",
-            lbl_guide_step9_b1: "Simultaneous Run with Code",
+            lbl_guide_step9_b1: "Running Code in the App Sends Signals to Fortnite",
             lbl_guide_step9_b2: "Drive 3D Fortnite Vehicles",
-            lbl_guide_step9_b3: "Collect Golden Mission Coins"
+            lbl_guide_step9_b3: "Complete Lesson Missions to Earn Fortnite Golden Coins"
         }
     };
 
@@ -600,9 +654,9 @@
         .bs-settings-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(15, 7, 32, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(43, 27, 77, 0.28);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: flex; justify-content: center; align-items: center;
             z-index: 99999;
             opacity: 0; pointer-events: none;
@@ -612,13 +666,13 @@
             opacity: 1; pointer-events: auto;
         }
         .bs-settings-card {
-            background: rgba(43, 17, 79, 0.85);
-            border: 2px solid rgba(250, 204, 21, 0.3);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(167, 139, 250, 0.2);
-            border-radius: 36px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1.5px solid #cfe9f2;
+            box-shadow: 0 24px 60px rgba(43, 27, 77, 0.28);
+            border-radius: 32px;
             width: 720px; max-width: 92%;
-            padding: 45px;
-            color: #f8fafc;
+            padding: 38px 42px;
+            color: #2b1b4d;
             transform: scale(0.9);
             transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
@@ -630,100 +684,100 @@
         }
         .bs-settings-header {
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 22px; margin-bottom: 30px;
+            border-bottom: 1px solid #d6edf5;
+            padding-bottom: 18px; margin-bottom: 22px;
         }
         .bs-settings-title {
-            font-size: 2.1rem; font-weight: 800; color: #facc15;
-            text-shadow: 0 0 10px rgba(250, 204, 21, 0.4);
+            font-size: 2rem; font-weight: 800; color: #2b1b4d;
         }
         .bs-settings-close {
-            background: none; border: none; color: #cbd5e1;
+            background: none; border: none; color: #7a7396;
             font-size: 2.25rem; cursor: pointer; transition: color 0.2s;
         }
-        .bs-settings-close:hover { color: #f43f5e; }
-        
+        .bs-settings-close:hover { color: #e11d48; }
+
         .bs-settings-section {
-            margin-bottom: 30px;
+            margin-bottom: 22px;
         }
         .bs-settings-sec-title {
-            font-size: 1.425rem; font-weight: 700; color: #c4b5fd;
-            margin-bottom: 15px; display: flex; align-items: center; gap: 12px;
+            font-size: 1.3rem; font-weight: 700; color: #6c1f86;
+            margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
         }
-        
+
         /* Profile Row */
         .bs-profile-row {
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255,255,255,0.05); padding: 18px 27px; border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.08);
+            background: #e2f5f9; padding: 16px 24px; border-radius: 16px;
+            border: 1px solid #cfe9f2;
         }
-        .bs-profile-name { font-weight: 700; font-size: 1.575rem; }
+        .bs-profile-name { font-weight: 700; font-size: 1.5rem; color: #2b1b4d; }
         .bs-btn-danger {
-            background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.4);
-            color: #f43f5e; padding: 9px 21px; border-radius: 12px; font-weight: 700;
-            font-size: 1.05rem; cursor: pointer; transition: 0.2s;
+            background: #fde8ec; border: 1px solid #f9c4cf;
+            color: #e11d48; padding: 8px 20px; border-radius: 12px; font-weight: 700;
+            font-size: 1rem; cursor: pointer; transition: 0.2s;
         }
-        .bs-btn-danger:hover { background: #f43f5e; color: #fff; }
+        .bs-btn-danger:hover { background: #e11d48; color: #fff; }
 
         /* Button Groups (Language / Zoom) */
         .bs-btn-group {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
         }
         .bs-btn-group.three-cols {
             grid-template-columns: repeat(3, 1fr);
         }
         .bs-btn-option {
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            color: #cbd5e1; padding: 15px; border-radius: 15px; font-weight: 600;
-            font-size: 1.2rem; cursor: pointer; text-align: center; transition: 0.2s;
+            background: #fff; border: 1.5px solid #cfe9f2;
+            color: #4b4570; padding: 14px; border-radius: 14px; font-weight: 700;
+            font-size: 1.1rem; cursor: pointer; text-align: center; transition: 0.2s;
         }
-        .bs-btn-option:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .bs-btn-option:hover { background: #f6fbfe; color: #2b1b4d; }
         .bs-btn-option.active {
-            background: var(--fn-yellow, #facc15); color: #000;
-            border-color: var(--fn-yellow, #facc15);
-            box-shadow: 0 0 12px rgba(250, 204, 21, 0.3); font-weight: 800;
+            background: #edbd95; color: #2b1b4d;
+            border-color: #edbd95; font-weight: 800;
         }
-        
+
         /* Volume Range */
         .bs-volume-container {
-            display: flex; align-items: center; gap: 22px;
+            display: flex; align-items: center; gap: 20px;
         }
         .bs-volume-slider {
             flex: 1; height: 9px; -webkit-appearance: none; appearance: none;
-            background: rgba(255,255,255,0.15); border-radius: 5px; outline: none;
+            background: #a5b1d7; border-radius: 5px; outline: none;
         }
         .bs-volume-slider::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none; width: 27px; height: 27px;
-            border-radius: 50%; background: #facc15; cursor: pointer;
-            box-shadow: 0 0 8px rgba(250, 204, 21, 0.5);
+            border-radius: 50%; background: #edbd95; cursor: pointer;
+            border: 3px solid #fff; box-shadow: 0 2px 6px rgba(43, 27, 77, 0.25);
         }
-        .bs-volume-val { font-family: 'Outfit', monospace; font-weight: 700; font-size: 1.2rem; width: 52px; text-align: right; }
+        .bs-volume-val { font-family: 'Outfit', monospace; font-weight: 700; font-size: 1.1rem; width: 52px; text-align: right; color: #2b1b4d; }
 
         /* Backup Buttons */
         .bs-backup-group {
-            display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
         }
         .bs-btn-accent {
-            background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.4);
-            color: #38bdf8; padding: 15px; border-radius: 15px; font-weight: 700;
+            background: #e8f4f2; border: 1.5px solid #a0c9c3;
+            color: #2f6f66; padding: 14px; border-radius: 14px; font-weight: 700;
             font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;
             transition: 0.2s;
         }
-        .bs-btn-accent:hover { background: #38bdf8; color: #000; }
-        
-        /* Diagnostics Panel */
+        .bs-btn-accent:hover { background: #a0c9c3; color: #2b1b4d; }
+        .bs-btn-wide { width: 100%; margin-top: 12px; }
+
+        /* 상태 줄 (exe 버전 / 서버 연결) */
         .bs-diag-box {
-            background: rgba(0,0,0,0.2); padding: 18px 27px; border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.05); font-size: 1.35rem; min-height: 67px;
-            display: flex; align-items: center; justify-content: space-between;
+            background: #f6fbfe; padding: 16px 24px; border-radius: 16px;
+            border: 1px solid #d6edf5; font-size: 1.05rem; min-height: 58px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
         }
-        .bs-diag-status { font-weight: 600; color: #94a3b8; }
+        .bs-diag-status { font-weight: 600; color: #5b5478; line-height: 1.4; }
         .bs-diag-btn {
-            background: rgba(167, 139, 250, 0.15); border: 1px solid rgba(167, 139, 250, 0.4);
-            color: #c4b5fd; padding: 6px 15px; border-radius: 9px; font-size: 1.2rem;
-            font-weight: 700; cursor: pointer; transition: 0.2s;
+            background: #a5b1d7; border: none;
+            color: #2b1b4d; padding: 7px 16px; border-radius: 10px; font-size: 0.95rem;
+            font-weight: 700; cursor: pointer; transition: 0.2s; white-space: nowrap; flex-shrink: 0;
         }
-        .bs-diag-btn:hover { background: #8b5cf6; color: #fff; }
+        .bs-diag-btn:hover { background: #8f9cc9; }
+        .bs-diag-btn:disabled { opacity: 0.6; cursor: default; }
     `;
 
     // ----------------------------------------------------
@@ -744,13 +798,13 @@
         overlay.innerHTML = `
             <div class="bs-settings-card">
                 <div class="bs-settings-header">
-                    <span class="bs-settings-title" data-settings-i18n="modal_title">⚙️ BrickSync 설정</span>
+                    <span class="bs-settings-title" data-settings-i18n="modal_title">BrickSync 설정</span>
                     <button class="bs-settings-close" onclick="closeSettingsModal()">&times;</button>
                 </div>
                 
                 <!-- 1. Profile Section -->
                 <div class="bs-settings-section">
-                    <div class="bs-settings-sec-title" data-settings-i18n="sec_profile">👤 학생 프로필</div>
+                    <div class="bs-settings-sec-title" data-settings-i18n="sec_profile">학생 프로필</div>
                     <div class="bs-profile-row">
                         <span class="bs-profile-name" id="bs-settings-profile-name">최민</span>
                         <button class="bs-btn-danger" onclick="settingsLogout()" data-settings-i18n="logout_btn">로그아웃</button>
@@ -759,7 +813,7 @@
                 
                 <!-- 2. Language Section -->
                 <div class="bs-settings-section">
-                    <div class="bs-settings-sec-title" data-settings-i18n="sec_lang">🌐 언어 설정 (Language)</div>
+                    <div class="bs-settings-sec-title" data-settings-i18n="sec_lang">언어 설정 (Language)</div>
                     <div class="bs-btn-group">
                         <button class="bs-btn-option" id="btn-lang-ko" onclick="changeSettingsLanguage('ko')">한국어</button>
                         <button class="bs-btn-option" id="btn-lang-en" onclick="changeSettingsLanguage('en')">English</button>
@@ -768,29 +822,29 @@
                 
                 <!-- 3. Volume Section -->
                 <div class="bs-settings-section">
-                    <div class="bs-settings-sec-title" data-settings-i18n="sec_volume">🔊 효과음 볼륨 (Volume)</div>
+                    <div class="bs-settings-sec-title" data-settings-i18n="sec_volume">효과음 볼륨 (Volume)</div>
                     <div class="bs-volume-container">
                         <input type="range" class="bs-volume-slider" id="settings-volume-slider" min="0" max="100" value="100" oninput="changeSettingsVolume(this.value)">
                         <span class="bs-volume-val" id="settings-volume-display">100%</span>
                     </div>
                 </div>
                 
-                <!-- 4. Backup Section -->
+                <!-- 4. exe 다운로드 / 버전 -->
                 <div class="bs-settings-section">
-                    <div class="bs-settings-sec-title" data-settings-i18n="sec_backup">💾 프로젝트 로컬 백업 & 복구</div>
-                    <div class="bs-backup-group">
-                        <button class="bs-btn-accent" onclick="exportSettingsProjects()" data-settings-i18n="backup_export">📤 백업하기</button>
-                        <button class="bs-btn-accent" onclick="document.getElementById('bs-backup-file-input').click()" data-settings-i18n="backup_import">📥 복원하기</button>
-                    </div>
-                    <input type="file" id="bs-backup-file-input" style="display:none;" accept=".json" onchange="importSettingsProjects(event)">
-                </div>
-                
-                <!-- 6. Connectivity Section -->
-                <div class="bs-settings-section" style="margin-bottom: 0;">
-                    <div class="bs-settings-sec-title" data-settings-i18n="sec_diagnostics">📡 실시간 통신 진단</div>
+                    <div class="bs-settings-sec-title" data-settings-i18n="sec_exe">BrickSync.exe 다운로드 / 버전</div>
                     <div class="bs-diag-box">
-                        <span class="bs-diag-status" id="bs-settings-diag-status" data-settings-i18n="diag_offline">● 오프라인 모드 안전 작동 중</span>
-                        <button class="bs-diag-btn" onclick="runSettingsDiagnostics()" data-settings-i18n="diag_btn">자가 진단 시작</button>
+                        <span class="bs-diag-status" id="bs-exe-status"></span>
+                        <button class="bs-diag-btn" id="bs-exe-check-btn" onclick="checkExeVersion()" data-settings-i18n="exe_check_btn">버전 확인</button>
+                    </div>
+                    <button class="bs-btn-accent bs-btn-wide" onclick="downloadExe()" data-settings-i18n="exe_download_btn">BrickSync.exe 다운로드</button>
+                </div>
+
+                <!-- 5. 서버 연결 -->
+                <div class="bs-settings-section" style="margin-bottom: 0;">
+                    <div class="bs-settings-sec-title" data-settings-i18n="sec_server">서버 연결</div>
+                    <div class="bs-diag-box">
+                        <span class="bs-diag-status" id="bs-server-status"></span>
+                        <button class="bs-diag-btn" id="bs-server-retry-btn" onclick="reconnectBridgeServer()" data-settings-i18n="server_retry_btn">재연결</button>
                     </div>
                 </div>
             </div>
@@ -839,21 +893,116 @@
             display.textContent = Math.round(currentVolume * 100) + '%';
         }
         
-        // 3. 통신 자가진단 기본값 렌더링
-        const statusText = document.getElementById('bs-settings-diag-status');
-        if (statusText) {
-            const isOnline = (typeof isFirebaseOnline !== 'undefined' && isFirebaseOnline);
-            statusText.setAttribute('data-settings-i18n', isOnline ? 'diag_online' : 'diag_offline');
-            statusText.textContent = isOnline ? i18n[currentLang].diag_online : i18n[currentLang].diag_offline;
-        }
-
         // 모달 내 텍스트 전체 번역 적용
         translateSettingsModal(currentLang);
+        renderExeStatus(); renderServerStatus();
+        window.checkExeVersion(); window.refreshServerStatus();
 
         // 오픈 애니메이션 구동
         const modal = document.getElementById('bs-settings-modal');
         modal.classList.add('show');
     };
+
+    // ----------------------------------------------------
+    // 4-2. exe 버전 확인 / 다운로드, 로컬 서버 연결 상태 / 재연결
+    // ----------------------------------------------------
+    const EXE_DOWNLOAD_URL = 'https://edu.bricksync.org/Bricksync.exe';
+    const exeState = { kind: 'checking', cur: '', latest: '' };
+    const serverState = { kind: 'checking' };
+
+    function settingsLang() { return localStorage.getItem('bricksync_lang') === 'en' ? 'en' : 'ko'; }
+    function fmt(s, o) { return String(s).replace(/\{(\w+)\}/g, (m, k) => (o && o[k] !== undefined ? o[k] : m)); }
+    // 로컬 서버(포트 8000) 주소: 로컬에서 열었으면 같은 주소, 인터넷 주소에서 열었으면 127.0.0.1:8000
+    function bridgeBase() {
+        const h = location.hostname;
+        return (h === 'localhost' || h === '127.0.0.1') ? '' : 'http://127.0.0.1:8000';
+    }
+    function bridgeWsUrl() {
+        const h = location.hostname;
+        if (h === 'localhost' || h === '127.0.0.1') return (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
+        return 'ws://127.0.0.1:8000/ws';
+    }
+    function shellWin() {
+        try { if (window.parent && window.parent !== window && typeof window.parent.getBridgeStatus === 'function') return window.parent; } catch (e) { }
+        return typeof window.getBridgeStatus === 'function' ? window : null;
+    }
+    function versionNewer(a, b) {   // a가 b보다 새 버전이면 true
+        const pa = String(a).split('.').map(n => parseInt(n, 10) || 0), pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+        for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+            const x = pa[i] || 0, y = pb[i] || 0;
+            if (x !== y) return x > y;
+        }
+        return false;
+    }
+    function renderExeStatus() {
+        const el = document.getElementById('bs-exe-status'); if (!el) return;
+        const t = i18n[settingsLang()];
+        const v = { cur: exeState.cur, latest: exeState.latest };
+        const map = { checking: t.exe_checking, ok: t.exe_status_ok, old: t.exe_status_old, unknown_cur: t.exe_status_unknown_cur, unknown_latest: t.exe_status_unknown_latest, none: t.exe_status_none };
+        el.textContent = fmt(map[exeState.kind] || t.exe_checking, v);
+    }
+    function renderServerStatus() {
+        const el = document.getElementById('bs-server-status'); if (!el) return;
+        const t = i18n[settingsLang()];
+        el.textContent = serverState.kind === 'ok' ? t.server_ok : (serverState.kind === 'off' ? t.server_off : t.server_checking);
+        el.style.color = serverState.kind === 'ok' ? '#2f7a4d' : (serverState.kind === 'off' ? '#e11d48' : '');
+    }
+    window.checkExeVersion = async function () {
+        const btn = document.getElementById('bs-exe-check-btn'); if (btn) btn.disabled = true;
+        exeState.kind = 'checking'; renderExeStatus();
+        let cur = '', latest = '';
+        try {   // 지금 실행 중인 exe가 알려 주는 버전 (구버전 exe는 알려 주지 못한다)
+            const r = await fetch(bridgeBase() + '/api/version', { cache: 'no-store' });
+            if (r.ok) { const j = await r.json(); cur = String(j.version || ''); }
+        } catch (e) { }
+        try {   // 웹앱이 알고 있는 최신 exe 버전
+            const r = await fetch(new URL('version.json', location.href).href + '?t=' + Date.now(), { cache: 'no-store' });
+            if (r.ok) { const j = await r.json(); latest = String(j.exe_version || ''); }
+        } catch (e) { }
+        exeState.cur = cur; exeState.latest = latest;
+        if (!latest && !cur) exeState.kind = 'none';
+        else if (!latest) exeState.kind = 'unknown_latest';
+        else if (!cur) exeState.kind = 'unknown_cur';
+        else exeState.kind = versionNewer(latest, cur) ? 'old' : 'ok';
+        renderExeStatus();
+        if (btn) btn.disabled = false;
+    };
+    window.downloadExe = function () {
+        const a = document.createElement('a');
+        a.href = EXE_DOWNLOAD_URL; a.target = '_blank'; a.rel = 'noopener'; a.download = 'Bricksync.exe';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    };
+    // 서버 연결 상태: 앱 화면(app.html)이 쓰는 연결을 그대로 보고, 없으면 잠깐 직접 접속해 본다
+    function probeBridge() {
+        return new Promise(resolve => {
+            let done = false;
+            const finish = ok => { if (!done) { done = true; resolve(ok); } };
+            try {
+                const s = new WebSocket(bridgeWsUrl());
+                s.onopen = () => { finish(true); try { s.close(); } catch (e) { } };
+                s.onerror = () => finish(false);
+                s.onclose = () => finish(false);
+                setTimeout(() => { finish(false); try { s.close(); } catch (e) { } }, 2500);
+            } catch (e) { finish(false); }
+        });
+    }
+    window.refreshServerStatus = async function () {
+        const sh = shellWin();
+        if (sh) serverState.kind = sh.getBridgeStatus() ? 'ok' : 'off';
+        else serverState.kind = (await probeBridge()) ? 'ok' : 'off';
+        renderServerStatus();
+    };
+    window.reconnectBridgeServer = async function () {
+        const btn = document.getElementById('bs-server-retry-btn'); if (btn) btn.disabled = true;
+        serverState.kind = 'checking'; renderServerStatus();
+        const sh = shellWin();
+        try { if (sh && typeof sh.reconnectBridge === 'function') sh.reconnectBridge(); } catch (e) { }
+        await new Promise(r => setTimeout(r, 1500));
+        await window.refreshServerStatus();
+        if (btn) btn.disabled = false;
+    };
+    window.addEventListener('bs-bridge-status', () => { if (document.getElementById('bs-server-status')) window.refreshServerStatus(); });
+    try { if (window.parent && window.parent !== window) window.parent.addEventListener('bs-bridge-status', () => { if (document.getElementById('bs-server-status')) window.refreshServerStatus(); }); } catch (e) { }
 
     window.closeSettingsModal = function () {
         const modal = document.getElementById('bs-settings-modal');
@@ -897,6 +1046,7 @@
 
         // 모달 내부 텍스트 번역
         translateSettingsModal(lang);
+        renderExeStatus(); renderServerStatus();
 
         // 부모 페이지의 data-i18n 마크업이 부착된 노드 전체 번역
         window.applyBrickSyncLanguage(lang);

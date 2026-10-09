@@ -1,10 +1,59 @@
 import asyncio
 from aiohttp import web
+
+# BrickSync.exe 버전 (설정창의 "버전 확인"이 /api/version 으로 읽어 간다. exe를 새로 만들 때마다 올린다)
+APP_VERSION = "1.3.0"
 import json
 import os
 import threading
 import time
 import ctypes
+import builtins
+
+# ── 터미널에 찍히는 내용을 브릭싱크 화면의 "통신 로그"에도 똑같이 보낸다 ──────────────────
+_ws_clients = set()        # 지금 연결된 브라우저들
+_main_loop = None          # 웹소켓이 도는 이벤트 루프 (다른 스레드에서 보낼 때 사용)
+_SKIP_BROADCAST = ("[LEGO HUB LOG]",)   # 웹앱이 이미 HUB 로그로 보여 주는 줄은 중복이라 뺀다
+
+def _broadcast_log(text):
+    loop = _main_loop
+    if not loop or not _ws_clients:
+        return
+    if any(k in text for k in _SKIP_BROADCAST):
+        return
+    try:
+        payload = json.dumps({"type": "SERVER_LOG", "msg": text, "t": time.strftime("%H:%M:%S")}, ensure_ascii=False)
+        for client in list(_ws_clients):
+            try:
+                asyncio.run_coroutine_threadsafe(client.send_str(payload), loop)
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+def print(*args, **kwargs):
+    """터미널 출력 + 연결된 브라우저의 통신 로그로 전송 (이 모듈 안의 모든 print 가 이 함수를 쓴다)"""
+    builtins.print(*args, **kwargs)
+    try:
+        if kwargs.get("file") is None:
+            text = str(kwargs.get("sep", " ") if kwargs.get("sep") is not None else " ").join(str(a) for a in args)
+            if text.strip():
+                _broadcast_log(text)
+    except Exception:
+        pass
+
+async def _install_loop_handler(app):
+    """브라우저를 새로고침하거나 닫을 때 윈도우가 남기는 무해한 연결 끊김 오류(WinError 10054)는 출력하지 않는다"""
+    loop = asyncio.get_running_loop()
+    default = loop.get_exception_handler()
+    def handler(l, context):
+        if isinstance(context.get("exception"), (ConnectionResetError, ConnectionAbortedError)):
+            return
+        if default:
+            default(l, context)
+        else:
+            l.default_exception_handler(context)
+    loop.set_exception_handler(handler)
 
 def get_active_window_title():
     try:
@@ -55,21 +104,88 @@ for _cand in _candidate_dirs:
 
 
 
+# 포트나이트 창이 앞으로 올 때까지 키를 보내지 않기 위한 시각 (창 전환 중에 눌린 첫 키가 씹히는 것을 막는다)
+_focus_ok_at = 0.0
+_nf_logged_at = 0.0
+_target_hwnd = 0
+_focus_lock = threading.Lock()
+
+def _find_fortnite():
+    user32 = ctypes.windll.user32
+    # Search for "Fortnite  " (standard client) first, then "Fortnite"
+    hwnd = user32.FindWindowW(None, "Fortnite  ")
+    if not hwnd:
+        hwnd = user32.FindWindowW(None, "Fortnite")
+    return hwnd
+
+def _force_foreground(hwnd, use_alt=False):
+    """백그라운드 프로그램도 창을 맨 앞으로 가져올 수 있게 하는 표준 방법.
+    (윈도우는 지금 앞에 있는 프로그램만 다른 창을 앞으로 보낼 수 있게 막아 둔다 → 입력 스레드를 잠깐 연결해서 통과)
+    전체화면 크기는 건드리지 않는다. 최소화된 경우에만 복원한다."""
+    user32 = ctypes.windll.user32
+    kernel32 = ctypes.windll.kernel32
+    with _focus_lock:
+        try:
+            if user32.IsIconic(hwnd):
+                user32.ShowWindow(hwnd, 9)   # SW_RESTORE: 최소화 상태일 때만
+            fg = user32.GetForegroundWindow()
+            cur_tid = kernel32.GetCurrentThreadId()
+            fg_tid = user32.GetWindowThreadProcessId(fg, None) if fg else 0
+            tgt_tid = user32.GetWindowThreadProcessId(hwnd, None)
+            if use_alt:
+                # 마지막 수단: Alt 키 입력을 한 번 흉내 내서 포그라운드 잠금을 푼다
+                user32.keybd_event(0x12, 0, 0, 0)
+                user32.keybd_event(0x12, 0, 2, 0)
+            attached = []
+            for tid in {fg_tid, tgt_tid}:
+                if tid and tid != cur_tid:
+                    if user32.AttachThreadInput(cur_tid, tid, True):
+                        attached.append(tid)
+            try:
+                user32.BringWindowToTop(hwnd)
+                user32.ShowWindow(hwnd, 5)   # SW_SHOW: 현재 크기 그대로 표시 (전체화면 유지)
+                user32.SetForegroundWindow(hwnd)
+            finally:
+                for tid in attached:
+                    user32.AttachThreadInput(cur_tid, tid, False)
+            return user32.GetForegroundWindow() == hwnd
+        except Exception as e:
+            print(f"[FOCUS] force foreground error: {e}")
+            return False
+
+def wait_focus_ready():
+    delay = _focus_ok_at - time.time()
+    if delay > 0:
+        time.sleep(delay)
+    # 그래도 포트나이트가 앞에 없으면 한 번 더 강하게 시도한다
+    hwnd = _target_hwnd
+    if hwnd:
+        try:
+            if ctypes.windll.user32.GetForegroundWindow() != hwnd:
+                if not _force_foreground(hwnd, use_alt=True):
+                    time.sleep(0.3)
+                    _force_foreground(hwnd, use_alt=True)
+                time.sleep(0.4)
+        except Exception:
+            pass
+
 def focus_fortnite():
+    global _focus_ok_at, _target_hwnd
     try:
-        # Search for "Fortnite  " (standard client) first, then "Fortnite"
-        hwnd = ctypes.windll.user32.FindWindowW(None, "Fortnite  ")
+        hwnd = _find_fortnite()
         if not hwnd:
-            hwnd = ctypes.windll.user32.FindWindowW(None, "Fortnite")
-            
-        if hwnd:
-            # Restore window if minimized
-            ctypes.windll.user32.ShowWindow(hwnd, 9) # SW_RESTORE
-            # Set foreground window
-            ctypes.windll.user32.SetForegroundWindow(hwnd)
-            print(f"[FOCUS] Focused Fortnite window (HWND: {hwnd})")
-        else:
-            print("[FOCUS] Fortnite window not found via FindWindow")
+            global _nf_logged_at
+            if time.time() - _nf_logged_at > 60:
+                _nf_logged_at = time.time()
+                print("[FOCUS] Fortnite window not found via FindWindow")
+            return
+        _target_hwnd = hwnd
+        # 이미 맨 앞에 있으면 아무것도 하지 않는다 (신호마다 창을 건드리지 않는다)
+        if ctypes.windll.user32.GetForegroundWindow() == hwnd and not ctypes.windll.user32.IsIconic(hwnd):
+            return
+        _focus_ok_at = time.time() + (1.2 if ctypes.windll.user32.IsIconic(hwnd) else 0.8)
+        ok = _force_foreground(hwnd)
+        print(f"[FOCUS] Focused Fortnite window (HWND: {hwnd}) {'OK' if ok else '(전환 재시도 예정)'} - 창 전환 완료까지 키 입력 대기")
     except Exception as e:
         print(f"[FOCUS] Failed to focus Fortnite: {e}")
 
@@ -79,6 +195,7 @@ print("Starting Fortnite Bridge Server (Discrete Block Movement Mode with Global
 pydirectinput_lock = threading.Lock()
 
 def safe_press(key):
+    wait_focus_ready()
     with pydirectinput_lock:
         try:
             print(f"🔑 [실제 키 입력] '{key}' 눌림 - {time.strftime('%H:%M:%S')}.{int(time.time()*1000)%1000:03d}")
@@ -89,6 +206,7 @@ def safe_press(key):
             pass
 
 def safe_key_down(key):
+    wait_focus_ready()
     with pydirectinput_lock:
         try:
             pydirectinput.keyDown(key)
@@ -163,6 +281,9 @@ async def handle_websocket(request):
     ws = web.WebSocketResponse()
     
     await ws.prepare(request)
+    global _main_loop
+    _main_loop = asyncio.get_running_loop()
+    _ws_clients.add(ws)
     print("웹브라우저(브릭싱크)가 연결되었습니다!")
     
     try:
@@ -172,7 +293,7 @@ async def handle_websocket(request):
                     data = json.loads(msg.data)
                     action = data.get("action")
                     
-                    if action and action in ["STEER_UP", "STEER_DOWN", "STEER_LEFT", "STEER_RIGHT", "STEER_UP_TAP", "STEER_DOWN_TAP", "STEER_LEFT_TAP", "STEER_RIGHT_TAP", "MWHEEL_LEFT", "MWHEEL_RIGHT", "SWING_CONTROL", "motor_cw", "motor_ccw", "CAT_FEED_REWARD", "MONSTER_ALERT", "ACTION_LIGHT", "HUB_LOG"]:
+                    if action and action in ["STEER_UP", "STEER_DOWN", "STEER_LEFT", "STEER_RIGHT", "STEER_UP_TAP", "STEER_DOWN_TAP", "STEER_LEFT_TAP", "STEER_RIGHT_TAP", "MWHEEL_LEFT", "MWHEEL_RIGHT", "SWING_CONTROL", "motor_cw", "motor_ccw", "CAT_FEED_REWARD", "MONSTER_ALERT", "ACTION_LIGHT", "HUB_LOG", "FOCUS_FORTNITE"]:
                         focus_fortnite()
                     
                     if action == "STEER_UP":
@@ -249,6 +370,9 @@ async def handle_websocket(request):
                             safe_key_up('t')
                         threading.Thread(target=press_speed_key, args=(duration,), daemon=True).start()
 
+                    elif action == "FOCUS_FORTNITE":
+                        pass   # 위에서 focus_fortnite() 가 이미 창을 앞으로 가져왔다 (첫 신호가 오기 전에 미리 준비)
+
                     elif action == "CLEANUP_KEYS":
                         print("🧹 [CLEANUP] 모든 조작 가상 키 강제 해제 실행")
                         release_all_steering_keys()
@@ -256,6 +380,7 @@ async def handle_websocket(request):
                     elif action in ["ACTION_LIGHT", "MONSTER_ALERT"]:
                         print(f"▶ 몬스터 경보/조명 발동 수신 ({action} ➔ 조명 키 combo 정밀 전송)")
                         def press_light_key():
+                            wait_focus_ready()
                             with pydirectinput_lock:
                                 try:
                                     for edit_k in ['g', 'f']:
@@ -321,6 +446,7 @@ async def handle_websocket(request):
                     pydirectinput.keyUp(k)
         except Exception:
             pass
+        _ws_clients.discard(ws)
         print("연결 종료됨")
         
     return ws
@@ -360,13 +486,24 @@ async def no_cache_middleware(request, handler):
         ex.headers['Expires'] = '0'
         raise ex
 
+# 서버를 새로 켤 때마다 바뀌는 실행 번호 (웹이 이전 로그인을 지울지 판단하는 데 쓴다)
+BOOT_ID = str(int(time.time() * 1000))
+
+async def version_handler(request):
+    return web.json_response({"app": "BrickSync", "version": APP_VERSION, "boot": BOOT_ID})
+
 async def index_handler(request):
-    return web.FileResponse(os.path.join(web_app_dir, 'app.html'))
+    # 127.0.0.1:8000 주소로 들어오면 인트로 화면부터 보여 준다 (인트로 → 로그인 → 앱)
+    intro = os.path.join(web_app_dir, 'intro.html')
+    target = intro if os.path.isfile(intro) else os.path.join(web_app_dir, 'app.html')
+    return web.FileResponse(target)
 
 def init_app():
     app = web.Application(middlewares=[no_cache_middleware])
     # WebSocket 엔드포인트 (항상 등록 - 포트나이트 연동 핵심)
     app.router.add_get('/ws', handle_websocket)
+    # 버전 확인 (설정창에서 사용)
+    app.router.add_get('/api/version', version_handler)
     # web_app 폴더가 있을 때만 정적 파일 서빙 등록
     # BrickSync.exe로 다른 PC에서 실행 시 web_app 폴더가 없어도 정상 동작
     # (웹앱은 https://www.bricksync.org 에서 Cloudflare로 서빙됨)
@@ -420,6 +557,12 @@ def is_port_open(port=8000):
 
 def open_browser_when_ready():
     BRICKSYNC_URL = "https://www.bricksync.org/intro.html"
+    try:
+        # 이 PC에 웹앱 폴더가 있으면(개발 PC) 로컬 인트로로, 없으면 실제 사이트의 인트로로 연다
+        if os.path.isfile(os.path.join(web_app_dir, "intro.html")):
+            BRICKSYNC_URL = "http://127.0.0.1:8000/intro.html"
+    except Exception:
+        pass
     chrome_paths = [
         r"C:\Program Files\Google\Chrome\Application\chrome.exe",
         r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
@@ -470,7 +613,7 @@ if __name__ == "__main__":
     free_port(8000)
     
     print("=" * 60)
-    print(" 🎮 BrickSync - 포트나이트 & 레고 브릿지 서버 가동 중")
+    print(f" 🎮 BrickSync v{APP_VERSION} - 포트나이트 & 레고 브릿지 서버 가동 중")
     print(" 🌐 포트: http://127.0.0.1:8000 (ws://127.0.0.1:8000/ws)")
     print(" 🚀 브라우저를 열고 브릭싱크(https://www.bricksync.org)에 연결합니다...")
     print("=" * 60)
@@ -478,4 +621,5 @@ if __name__ == "__main__":
     threading.Thread(target=open_browser_when_ready, daemon=True).start()
     
     app = init_app()
+    app.on_startup.append(_install_loop_handler)
     web.run_app(app, host="127.0.0.1", port=8000)

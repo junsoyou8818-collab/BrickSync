@@ -150,6 +150,7 @@ const BrickSyncAuth = (function () {
                 const doc = await firestore.collection('parentCodes').doc(normalized).get();
                 if (doc.exists) {
                     const data = doc.data();
+                    if (isParentCodeExpired(data)) return null;
                     return { id: normalized, ...data };
                 }
             } catch (e) {
@@ -159,9 +160,17 @@ const BrickSyncAuth = (function () {
         try {
             const localParentCodes = JSON.parse(localStorage.getItem(LOCAL_PARENT_CODES_KEY) || '{}');
             const p = localParentCodes[normalized];
-            if (p) return { id: normalized, ...p };
+            if (p && !isParentCodeExpired(p)) return { id: normalized, ...p };
         } catch (e) {}
         return null;
+    }
+
+    // 학부모 코드는 발급 후 7일간만 유효하다 (아직 쓰이지 않은 코드 기준)
+    const PARENT_CODE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+    function isParentCodeExpired(data) {
+        if (!data || data.usedByUid || !data.createdAt) return false;
+        const t0 = Date.parse(data.createdAt);
+        return !isNaN(t0) && (Date.now() - t0) > PARENT_CODE_TTL_MS;
     }
 
     async function getCurrentUser() {
@@ -383,6 +392,19 @@ const BrickSyncAuth = (function () {
         } catch (e) {}
 
         const parentInfo = await validateParentCode(parentCode);
+        const codeText = (parentCode || '').trim().toUpperCase();
+        if (!parentInfo) {
+            const err = new Error(codeText.startsWith('BS-')
+                ? 'BS-로 시작하는 것은 클래스 코드예요. 선생님께 받은 PRT-로 시작하는 학부모 코드를 입력해 주세요.'
+                : '유효하지 않거나 만료된 학부모 코드예요. 선생님께 새 코드를 받아 주세요.');
+            err.code = 'bs/invalid-parent-code';
+            throw err;
+        }
+        if (parentInfo.usedByUid) {
+            const err = new Error('이미 사용된 학부모 코드예요. 선생님께 새 코드를 받아 주세요.');
+            err.code = 'bs/used-parent-code';
+            throw err;
+        }
 
         try {
             const existingCloud = await findUserByEmailFromFirestore(cleanEmail);
@@ -408,10 +430,12 @@ const BrickSyncAuth = (function () {
                         parentCode: parentCode ? parentCode.trim().toUpperCase() : '',
                         linkedStudentUid: parentInfo?.studentUid || '',
                         linkedStudentName: parentInfo?.studentName || '',
+                        linkedClassName: parentInfo?.className || '',
                         teacherUid: parentInfo?.teacherUid || '',
                         createdAt: new Date().toISOString()
                     };
                     await saveUserProfileToFirestore(cred.user.uid, profile);
+                    await markParentCodeUsed(codeText, cred.user.uid);
                     saveLocalUser(cleanEmail, password, profile);
                     setLocalSession(profile);
                     return { user: cred.user, profile };
@@ -431,11 +455,13 @@ const BrickSyncAuth = (function () {
             parentCode: parentCode ? parentCode.trim().toUpperCase() : '',
             linkedStudentUid: parentInfo?.studentUid || '',
             linkedStudentName: parentInfo?.studentName || '',
+            linkedClassName: parentInfo?.className || '',
             teacherUid: parentInfo?.teacherUid || '',
             createdAt: new Date().toISOString()
         };
 
         await saveUserProfileToFirestore(uid, profile);
+        await markParentCodeUsed(codeText, uid);
         saveLocalUser(cleanEmail, password, profile);
         setLocalSession(profile);
 
@@ -489,28 +515,62 @@ const BrickSyncAuth = (function () {
         return code;
     }
 
-    async function createParentCode(teacherUid, studentUid, studentName) {
+    // 마지막 학부모 코드 발급이 클라우드에 저장되지 못했는지 (규칙/연결 문제 알림용)
+    let parentCodeCloudFailed = false;
+
+    async function createParentCode(teacherUid, studentUid, studentName, className) {
         const code = 'PRT-' + Math.random().toString(36).substring(2, 9).toUpperCase();
         const codeData = {
             teacherUid: teacherUid || 'teacher',
             studentUid: studentUid || '',
             studentName: studentName || '학생',
+            className: className || '',
             usedByUid: null,
             createdAt: new Date().toISOString()
         };
         if (firestore) {
             try {
                 await firestore.collection('parentCodes').doc(code).set(codeData);
+                parentCodeCloudFailed = false;
             } catch (e) {
+                parentCodeCloudFailed = true;
                 console.warn('[Auth] Firestore 학부모 코드 발급 실패, 로컬 저장:', e);
             }
-        }
+        } else { parentCodeCloudFailed = true; }
         try {
             const localParentCodes = JSON.parse(localStorage.getItem(LOCAL_PARENT_CODES_KEY) || '{}');
             localParentCodes[code] = codeData;
             localStorage.setItem(LOCAL_PARENT_CODES_KEY, JSON.stringify(localParentCodes));
         } catch (e) {}
         return code;
+    }
+
+    // 학부모가 가입하면 코드를 사용 처리한다 (한 코드는 한 번만)
+    async function markParentCodeUsed(code, parentUid) {
+        if (!code) return;
+        if (firestore) {
+            try { await firestore.collection('parentCodes').doc(code).update({ usedByUid: parentUid, usedAt: new Date().toISOString() }); }
+            catch (e) { console.warn('[Auth] Firestore 학부모 코드 사용 처리 실패:', e); }
+        }
+        try {
+            const m = JSON.parse(localStorage.getItem(LOCAL_PARENT_CODES_KEY) || '{}');
+            if (m[code]) { m[code].usedByUid = parentUid; localStorage.setItem(LOCAL_PARENT_CODES_KEY, JSON.stringify(m)); }
+        } catch (e) {}
+    }
+
+    // 아직 쓰이지 않은 학부모 코드를 지운다 (학생 한 명당 유효 코드 하나 유지용)
+    async function revokeParentCode(code) {
+        if (!code) return;
+        const id = String(code).trim().toUpperCase();
+        if (firestore) {
+            try { await firestore.collection('parentCodes').doc(id).delete(); }
+            catch (e) { console.warn('[Auth] Firestore 학부모 코드 삭제 실패:', e); }
+        }
+        try {
+            const m = JSON.parse(localStorage.getItem(LOCAL_PARENT_CODES_KEY) || '{}');
+            delete m[id];
+            localStorage.setItem(LOCAL_PARENT_CODES_KEY, JSON.stringify(m));
+        } catch (e) {}
     }
 
     return {
@@ -524,6 +584,9 @@ const BrickSyncAuth = (function () {
         requireRole,
         createClassCode,
         createParentCode,
+        revokeParentCode,
+        parentCodeCloudFailed: () => parentCodeCloudFailed,
+        isParentCodeExpired,
         getUserProfile: getUserProfileFromFirestore,
         validateClassCode,
         validateParentCode,
