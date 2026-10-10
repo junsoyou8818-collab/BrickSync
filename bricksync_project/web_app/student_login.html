@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+    <script src="bs_scale.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BrickSync - 로그인</title>
@@ -17,7 +18,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: calc(100vh / var(--bs-z, 1));
             background-image: radial-gradient(circle at 50% -20%, #312e81 0%, #0f172a 70%);
         }
         .login-card {

@@ -70,7 +70,7 @@
     <title>BrickSync - 메인 메뉴</title>
     <!-- 폰트: 한글은 Noto Sans, 영문은 Outfit -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap"
         rel="stylesheet">
     <!-- 깃허브 오픈소스 기반 심플 라인 아이콘 (Lucide) 로드 -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -926,7 +926,6 @@
         .project-info-text { color: #5b5478; }
         .project-mode { color: #3f3a63; }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&display=swap" rel="stylesheet">
     <style id="bs-lesson-cards">
         /* 단원 카드: 사진은 그대로 두고, 왼쪽 위 번호 칸 + 아래 색깔 제목 띠 */
         .learning-card { align-items: stretch; justify-content: flex-start; }
@@ -935,14 +934,13 @@
         .learning-card { border: 3px solid #2b1b4d; background-clip: padding-box; box-shadow: 0 8px 20px rgba(43, 27, 77, 0.18); }
         .learning-card:hover { border-width: 3px; border-color: #ffffff; box-shadow: 0 12px 28px rgba(43, 27, 77, 0.3); }
         .lc-badge { position: absolute; left: 14px; top: 14px; z-index: 2; width: 46px; height: 46px; border-radius: 14px; background: #fff; border: 3px solid #2b1b4d; box-shadow: 3px 4px 0 #2b1b4d; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.35rem; color: #2b1b4d; }
-        .lc-bar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; background: var(--bar, #edbd95); color: #2b1b4d; border-top: 3px solid #2b1b4d; padding: 12px 18px; font-size: 1.08rem; font-weight: 800; line-height: 1.35; text-align: left; word-break: keep-all; }
-        /* 크레용 손글씨: 단원 번호와 단원명만 */
-        .lc-num, .lc-title { font-family: 'Gaegu', 'Noto Sans KR', sans-serif; font-weight: 700; filter: url(#bs-crayon); }
-        .lc-title { display: block; font-size: 1.4rem; line-height: 1.25; white-space: nowrap; letter-spacing: -0.05em; }
-        .lc-num { font-size: 1.6rem; }
+        .lc-bar { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; background: var(--bar, #edbd95); color: #2b1b4d; border-top: 3px solid #2b1b4d; padding: 12px 18px; font-size: 1.08rem; font-weight: 800; line-height: 1.35; text-align: center; word-break: keep-all; }
+        /* 단원 번호와 단원명: 기본 고딕 글꼴 */
+        .lc-title { display: block; font-size: 1.08rem; font-weight: 900; line-height: 1.35; text-align: center; }
+        .lc-num { font-size: 1.4rem; font-weight: 800; }
         .learning-card[style*="span 2"] .lc-badge { width: 52px; height: 52px; font-size: 1.5rem; }
         .learning-card[style*="span 2"] .lc-bar { padding: 14px 22px; }
-        .learning-card[style*="span 2"] .lc-title { font-size: 1.6rem; }
+        .learning-card[style*="span 2"] .lc-title { font-size: 1.2rem; }
 
         /* 업데이트 소식 팝업 (메인 화면에 처음 들어올 때) */
         .bsn-ov { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; background: rgba(43, 27, 77, .5); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); animation: bsnFade .2s ease; }

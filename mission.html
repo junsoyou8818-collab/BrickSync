@@ -76,13 +76,12 @@
         }
 
         .mission-title {
-            font-family: 'Gaegu', 'Noto Sans KR', sans-serif;   /* 크레용 손글씨 제목 */
-            font-size: 3rem;
-            font-weight: 700;
+            font-size: 2.5rem;
+            font-weight: 900;
             color: #6c1f86;
-            filter: url(#bs-crayon);
-            white-space: nowrap;
-            letter-spacing: -0.04em;
+            line-height: 1.25;
+            word-break: keep-all;
+            white-space: pre-line;
             min-width: 0;
             flex: 1 1 auto;
         }
@@ -204,7 +203,6 @@
         } catch(e) {}
     })();
 </script>
-    <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@700&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -296,7 +294,7 @@
                     goals: ['웹캠 권한 허용 및 AI 제스처 인식 활성화하기', '가위, 바위, 보 제스처 이벤트 블록 연결하기', '모터 회전 및 5초 대기 블록 연결하여 지붕 제어하기']
                 },
                 '7': {
-                    title: '마이크에 대고 외쳐봐! 목소리로 조종하는 요술 그네',
+                    title: '마이크에 대고 외쳐봐!\n목소리로 조종하는 요술 그네',
                     badge: 'STAGE 7',
                     desc: '마이크에 "앞으로 세 바퀴"를 말해 요술 그네 모터를 3회 회전시킵니다.',
                     goals: ['마이크 연결 및 음성 인식 활성화하기', 'AI 음성 인식 블록 연결하기', '5초 대기하기 및 모터를 앞으로(시계방향) 3회 회전하기']
@@ -352,7 +350,7 @@
                     goals: ['Connect microphone and activate voice recognition', 'Connect AI Voice Recognition block', 'Wait 5 seconds and rotate the motor forward 3 times']
                 },
                 '8': {
-                    title: 'Animal Alert Ranger (Monster Camera)',
+                    title: 'Animal Alert Ranger\n(Monster Camera)',
                     badge: 'STAGE 8',
                     desc: 'Train webcam states for monster block detection, and trigger connected block actions when a monster is detected.',
                     goals: ['Connect webcam and AI image vision engine', 'Train monster block detection dataset', 'Wait 2 seconds and connect Red Light']
