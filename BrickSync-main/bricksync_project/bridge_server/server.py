@@ -2,7 +2,7 @@ import asyncio
 from aiohttp import web
 
 # BrickSync.exe 버전 (설정창의 "버전 확인"이 /api/version 으로 읽어 간다. exe를 새로 만들 때마다 올린다)
-APP_VERSION = "1.3.0"
+APP_VERSION = "1.3.1"
 import json
 import os
 import threading
