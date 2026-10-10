@@ -474,7 +474,8 @@
         .btn-kakao{background:#a5b1d7;border:none;color:#2b1b4d}
         .btn-kakao:hover{background:#8f9cc9;color:#2b1b4d}
             html.bs-gate body{visibility:hidden}
-        html.bs-embed, html.bs-embed body{background:transparent !important;background-image:none !important;min-height:0 !important}
+        html.bs-embed, html.bs-embed body{background:#e7f4fa !important;background-image:none !important;min-height:0 !important}
+        html.bs-embed body::before{display:none !important}
         html.bs-embed .sidebar, html.bs-embed .header, html.bs-embed .btn-kakao, html.bs-embed .report-header, html.bs-embed .report-card{display:none !important}
         html.bs-embed .grid-4 > *, html.bs-embed .grid-2 > *, html.bs-embed .grid-3 > *{background:#fff !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
         html.bs-embed .main-content{padding:0 !important;overflow:visible !important;flex:1 1 auto}
@@ -1312,6 +1313,7 @@
             } catch (e) { window.location.href = 'login.html'; }
         })();
     </script>
+    <script src="dash_i18n.js"></script>
     <script src="settings.js"></script>
 </body>
 </html>

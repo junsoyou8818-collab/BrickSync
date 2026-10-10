@@ -165,7 +165,7 @@
             position: relative;
             z-index: 10;
             /* 박스 1cm 아래로 */
-            margin-top: 1cm;
+            margin-top: 1.8cm;
 
             /* 대시보드 부드러운 등장 애니메이션 */
             opacity: 0;
@@ -671,8 +671,8 @@
         /* 전체화면 좌측 상단 레고 포트나이트 공식 로고 */
         .top-logo {
             position: absolute;
-            /* 대시보드 위 공간 = 9vh + 1cm(margin-top) → 중앙 = (9vh+1cm)/2 = 4.5vh+0.5cm */
-            top: calc(4.5vh + 0.5cm);
+            /* 대시보드를 0.8cm 아래로 내려(0.4cm 이동) 로고 위에 여유 공간을 더 둔다. 로고도 같은 0.4cm만큼 내려 대시보드와의 간격은 그대로 */
+            top: calc(4.5vh + 0.9cm);
             /* 화면 좌우 정중앙 */
             left: 50%;
             transform: translate(-50%, -50%);
@@ -944,19 +944,28 @@
         .learning-card[style*="span 2"] .lc-bar { padding: 14px 22px; }
         .learning-card[style*="span 2"] .lc-title { font-size: 1.6rem; }
 
-        /* 업데이트 소식 배너 (메인 화면 좌우 여백) */
-        .bs-ub { position: fixed; top: 50%; transform: translateY(-50%); z-index: 5; padding: 0; border: 0; background: none; cursor: zoom-in;
-            width: calc((100vw - min(68vw, 1400px)) / 2 - 26px); max-width: 420px; transition: transform .2s ease; }
-        .bs-ub.left { right: calc(50vw + min(68vw, 1400px) / 2 + 20px); }
-        .bs-ub.right { left: calc(50vw + min(68vw, 1400px) / 2 + 20px); }
-        .bs-ub:hover { transform: translateY(-50%) scale(1.03); }
-        .bs-ub:focus { outline: none; }
-        .bs-ub:focus-visible { outline: none; }
-        .bs-ub img { display: block; width: 100%; height: auto; filter: drop-shadow(0 14px 28px rgba(43, 27, 77, .22)); }
-        @media (max-width: 1100px) { .bs-ub { display: none; } }
-        .bs-ub-view { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; background: rgba(43, 27, 77, .45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); cursor: zoom-out; animation: bsUbFade .15s ease; }
-        .bs-ub-view img { max-height: 92vh; max-width: 92vw; width: auto; height: auto; filter: drop-shadow(0 24px 50px rgba(43, 27, 77, .35)); }
-        @keyframes bsUbFade { from { opacity: 0 } to { opacity: 1 } }
+        /* 업데이트 소식 팝업 (메인 화면에 처음 들어올 때) */
+        .bsn-ov { position: fixed; inset: 0; z-index: 100000; display: flex; align-items: center; justify-content: center; background: rgba(43, 27, 77, .5); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); animation: bsnFade .2s ease; }
+        .bsn-box { position: relative; display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 98vw; font-family: "Noto Sans KR", "Outfit", sans-serif; }
+        .bsn-stage { position: relative; display: flex; align-items: center; justify-content: center; height: min(74vh, 780px); width: min(96vw, 1000px); }
+        .bsn-slide { position: absolute; max-width: calc(100% - 150px); max-height: 100%; width: auto; height: auto; opacity: 0; transform: translateX(22px) scale(.98); transition: opacity .28s ease, transform .28s ease; pointer-events: none; border-radius: 26px; filter: drop-shadow(0 20px 40px rgba(43, 27, 77, .35)); }
+        .bsn-slide.on { opacity: 1; transform: none; pointer-events: auto; }
+        .bsn-nav, .bsn-close { position: absolute; border: 0; background: #fff; color: #2b1b4d; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(43, 27, 77, .3); z-index: 3; padding: 0; transition: transform .1s ease; }
+        .bsn-nav:active, .bsn-close:active { transform: scale(.94); }
+        .bsn-nav { top: 50%; width: 52px; height: 52px; margin-top: -26px; border-radius: 50%; }
+        .bsn-prev { left: calc(50% - var(--sw, 600px) / 2 - 68px); } .bsn-next { left: calc(50% + var(--sw, 600px) / 2 + 16px); }
+        .bsn-close { top: calc(50% - var(--sh, 600px) / 2); left: calc(50% + var(--sw, 600px) / 2 + 20px); width: 44px; height: 44px; border-radius: 50%; }
+        .bsn-nav svg, .bsn-close svg { width: 22px; height: 22px; }
+        .bsn-nav:focus-visible, .bsn-close:focus-visible, .bsn-ok:focus-visible, .bsn-dots button:focus-visible { outline: 3px solid #a5b1d7; outline-offset: 3px; }
+        .bsn-dots { display: flex; gap: 8px; }
+        .bsn-dots button { width: 10px; height: 10px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: rgba(255, 255, 255, .55); transition: all .2s ease; }
+        .bsn-dots button.on { background: #fff; width: 26px; border-radius: 6px; }
+        .bsn-bar { display: flex; align-items: center; justify-content: space-between; gap: 18px; width: min(92vw, 560px); }
+        .bsn-skip { display: inline-flex; align-items: center; gap: 8px; color: #fff; font-size: .92rem; font-weight: 700; cursor: pointer; user-select: none; text-shadow: 0 1px 3px rgba(43, 27, 77, .5); }
+        .bsn-skip input { width: 18px; height: 18px; accent-color: #6c1f86; cursor: pointer; }
+        .bsn-ok { border: 0; cursor: pointer; font-family: inherit; font-weight: 800; font-size: .98rem; padding: 11px 34px; border-radius: 14px; background: #6c1f86; color: #fff; box-shadow: 0 4px 0 #4a1360; }
+        .bsn-ok:active { transform: translateY(2px); box-shadow: 0 2px 0 #4a1360; }
+        @keyframes bsnFade { from { opacity: 0 } to { opacity: 1 } }
     </style>
 </head>
 
@@ -982,8 +991,6 @@
         <img src="./assets/bs_logo_vertical.png" class="bricksync-logo" alt="BrickSync">
     </div>
 
-    <button type="button" class="bs-ub left" data-banner="update_banner_left" data-src="assets/update_banner_left.webp" aria-label="업데이트 소식 1 크게 보기"><img src="assets/update_banner_left.webp" alt="업데이트 1: 새 아이콘 블록 디자인 2.0"></button>
-    <button type="button" class="bs-ub right" data-banner="update_banner_right" data-src="assets/update_banner_right.webp" aria-label="업데이트 소식 2, 3 크게 보기"><img src="assets/update_banner_right.webp" alt="업데이트 2: 워드블록 추가, 업데이트 3: 블럭과 Verse 코드 1:1 변환"></button>
     <div class="dashboard-container">
 
         <!-- 왼쪽 메뉴 영역 -->
@@ -1742,35 +1749,83 @@
 })();
 </script>
 <script>
-        // 업데이트 소식 배너를 누르면 크게 보여 준다 (바깥을 누르거나 Esc로 닫기)
+        // 업데이트 소식 팝업: 메인 화면에 처음 들어오면(브라우저를 연 뒤 한 번) 3장짜리로 뜬다. 닫기 / Esc / 바깥 클릭으로 끄고, '다시 보지 않기'를 고르면 이 버전에서는 더 안 뜬다
         (function () {
-            // 언어에 따라 한국어/영어 배너 이미지를 쓴다
-            var ALT = {
-                ko: { update_banner_left: '업데이트 1: 새 아이콘 블록 디자인 2.0', update_banner_right: '업데이트 2: 워드블록 추가, 업데이트 3: 블록과 Verse 코드 1:1 변환' },
-                en: { update_banner_left: 'Update 1: New Icon Block Design 2.0', update_banner_right: 'Update 2: Word Block added, Update 3: Block to Verse code 1:1 translation' }
+            var VER = '1.3.1', SKEY = 'bricksync_news_session', HKEY = 'bricksync_news_hide', COUNT = 3;
+            var TXT = {
+                ko: { skip: '다시 보지 않기', ok: '닫기', prev: '이전', next: '다음', close: '닫기', alt: ['업데이트 1: 새 아이콘 블록 디자인 2.0', '업데이트 2: 워드블록 코드 기능 추가', '업데이트 3: 블록과 Verse 코드 1:1 변환 학습 기능 추가'] },
+                en: { skip: "Don't show again", ok: 'Close', prev: 'Previous', next: 'Next', close: 'Close', alt: ['Update 1: New Icon Block Design 2.0', 'Update 2: Word Block feature added', 'Update 3: 1:1 conversion feature for Block and Verse'] }
             };
-            function applyBannerLang() {
-                var lang = 'ko';
-                try { lang = localStorage.getItem('bricksync_lang') === 'en' ? 'en' : 'ko'; } catch (e) {}
-                document.querySelectorAll('.bs-ub').forEach(function (b) {
-                    var name = b.getAttribute('data-banner');
-                    var src = 'assets/' + name + (lang === 'en' ? '_en' : '') + '.webp';
-                    b.setAttribute('data-src', src);
-                    var im = b.querySelector('img'); if (im) { im.src = src; im.alt = ALT[lang][name]; }
-                });
+            var ARROW_L = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+            var ARROW_R = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+            var X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+            function lang() { try { return localStorage.getItem('bricksync_lang') === 'en' ? 'en' : 'ko'; } catch (e) { return 'ko'; } }
+
+            var ov = null, idx = 0;
+            function show(i) {
+                idx = (i + COUNT) % COUNT;
+                ov.querySelectorAll('.bsn-slide').forEach(function (im, n) { im.classList.toggle('on', n === idx); });
+                ov.querySelectorAll('.bsn-dots button').forEach(function (d, n) { d.classList.toggle('on', n === idx); });
+                place();
             }
-            applyBannerLang();
-            window.addEventListener('bricksync-language-changed', applyBannerLang);
-            function close(v) { document.removeEventListener('keydown', onKey, true); v.remove(); if (v._opener && v._opener.blur) v._opener.blur(); }
-            var onKey = function (e) { if (e.key === 'Escape') { var v = document.querySelector('.bs-ub-view'); if (v) close(v); } };
-            document.querySelectorAll('.bs-ub').forEach(function (b) {
-                b.addEventListener('click', function () {
-                    var v = document.createElement('div'); v.className = 'bs-ub-view'; v._opener = b;
-                    var im = document.createElement('img'); im.src = b.getAttribute('data-src'); im.alt = '';
-                    v.appendChild(im); v.addEventListener('click', function () { close(v); });
-                    document.body.appendChild(v); document.addEventListener('keydown', onKey, true);
-                });
-            });
+            function place() {
+                var im = ov && ov.querySelector('.bsn-slide.on'), st = ov && ov.querySelector('.bsn-stage');
+                if (!im || !st || !im.offsetWidth) return;
+                st.style.setProperty('--sw', im.offsetWidth + 'px'); st.style.setProperty('--sh', im.offsetHeight + 'px');
+            }
+            function texts() {
+                var L = lang(), T = TXT[L];
+                ov.querySelectorAll('.bsn-slide').forEach(function (im, n) { im.src = 'assets/news_' + L + '_' + (n + 1) + '.webp'; im.alt = T.alt[n]; });
+                ov.querySelector('.bsn-prev').setAttribute('aria-label', T.prev);
+                ov.querySelector('.bsn-next').setAttribute('aria-label', T.next);
+                ov.querySelector('.bsn-close').setAttribute('aria-label', T.close);
+                ov.querySelector('.bsn-skip span').textContent = T.skip;
+                ov.querySelector('.bsn-ok').textContent = T.ok;
+                ov.querySelectorAll('.bsn-dots button').forEach(function (d, n) { d.setAttribute('aria-label', (n + 1) + ' / ' + COUNT); });
+            }
+            function close() {
+                if (!ov) return;
+                try { if (ov.querySelector('.bsn-skip input').checked) localStorage.setItem(HKEY, VER); } catch (e) { }
+                document.removeEventListener('keydown', onKey, true);
+                window.removeEventListener('bricksync-language-changed', texts);
+                window.removeEventListener('resize', place);
+                ov.remove(); ov = null;
+            }
+            function onKey(e) {
+                if (e.key === 'Escape') { e.preventDefault(); close(); }
+                else if (e.key === 'ArrowRight') { e.preventDefault(); show(idx + 1); }
+                else if (e.key === 'ArrowLeft') { e.preventDefault(); show(idx - 1); }
+            }
+            function open() {
+                if (ov) return;
+                ov = document.createElement('div'); ov.className = 'bsn-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true');
+                var slides = '', dots = '';
+                for (var n = 0; n < COUNT; n++) { slides += '<img class="bsn-slide' + (n === 0 ? ' on' : '') + '" alt="" draggable="false">'; dots += '<button type="button"></button>'; }
+                ov.innerHTML = '<div class="bsn-box"><div class="bsn-stage">' + slides +
+                    '<button type="button" class="bsn-nav bsn-prev">' + ARROW_L + '</button><button type="button" class="bsn-nav bsn-next">' + ARROW_R + '</button>' +
+                    '<button type="button" class="bsn-close">' + X_ICON + '</button></div>' +
+                    '<div class="bsn-dots">' + dots + '</div>' +
+                    '<div class="bsn-bar"><label class="bsn-skip"><input type="checkbox"><span></span></label><button type="button" class="bsn-ok"></button></div></div>';
+                document.body.appendChild(ov);
+                texts(); show(0);
+                ov.querySelectorAll('.bsn-slide').forEach(function (im) { im.addEventListener('load', place); });
+                window.addEventListener('resize', place);
+                ov.querySelector('.bsn-prev').addEventListener('click', function () { show(idx - 1); });
+                ov.querySelector('.bsn-next').addEventListener('click', function () { show(idx + 1); });
+                ov.querySelector('.bsn-close').addEventListener('click', close);
+                ov.querySelector('.bsn-ok').addEventListener('click', close);
+                ov.querySelectorAll('.bsn-dots button').forEach(function (d, n) { d.addEventListener('click', function () { show(n); }); });
+                ov.addEventListener('mousedown', function (e) { if (e.target === ov) close(); });
+                document.addEventListener('keydown', onKey, true);
+                window.addEventListener('bricksync-language-changed', texts);
+                ov.querySelector('.bsn-ok').focus();
+            }
+            var go = true;
+            try { if (localStorage.getItem(HKEY) === VER || sessionStorage.getItem(SKEY) === VER) go = false; } catch (e) { }
+            if (go) {
+                try { sessionStorage.setItem(SKEY, VER); } catch (e) { }
+                setTimeout(open, 500);
+            }
         })();
     </script>
 </body>

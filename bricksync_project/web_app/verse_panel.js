@@ -41,6 +41,7 @@
         '.vl.on::before{color:#7dd3fc}' +
         '.vc{color:#6a9955}.vk{color:#569cd6}.vt{color:#4ec9b0}.vs{color:#ce9178}.vn{color:#b5cea8}.vf{color:#dcdcaa}' +
         '.bs-verse-hl{outline:4px solid #38bdf8 !important;outline-offset:3px;border-radius:10px;position:relative;z-index:30}' +
+        '.trash-area{transition:right .28s ease}' +
         '@media (max-width:760px){.vp-panel{width:92vw}}';
 
     var KEYWORDS = /^(using|class|if|else|then|for|loop|break|return|set|var|spawn|and|or|not|true|false|array|block|defer|in)$/;
@@ -100,6 +101,15 @@
         tab.style.right = right + 'px';
         host.appendChild(tab);
 
+        // Verse 창이 열리면 코딩 공간이 그만큼 줄어든 것으로 보고, 휴지통과 하단 버튼 묶음을 줄어든 공간에 맞춰 옮긴다
+        var trash = host.querySelector('.trash-area');
+        var trashBase = trash ? (parseFloat(getComputedStyle(trash).right) || 0) : 0;
+        function shiftWithPanel() {
+            var w = panel.classList.contains('open') ? panel.offsetWidth : 0;
+            host.style.setProperty('--vp-w', w + 'px');
+            if (trash) trash.style.right = (trashBase + w) + 'px';
+        }
+
         var codeEl = panel.querySelector('#vpCode');
         var current = { lines: [], text: '' };
         var litIds = '';
@@ -133,13 +143,14 @@
 
         function setOpen(on) {
             panel.classList.toggle('open', on);
+            shiftWithPanel();
             tab.style.right = on ? (right + panel.offsetWidth) + 'px' : right + 'px';
             try { localStorage.setItem('bricksync_verse_open', on ? '1' : '0'); } catch (e) { }
             if (on) render();
         }
         tab.addEventListener('click', function () { setOpen(!panel.classList.contains('open')); });
         panel.querySelector('#vpClose').addEventListener('click', function () { setOpen(false); });
-        window.addEventListener('resize', function () { if (panel.classList.contains('open')) tab.style.right = (right + panel.offsetWidth) + 'px'; });
+        window.addEventListener('resize', function () { if (panel.classList.contains('open')) tab.style.right = (right + panel.offsetWidth) + 'px'; shiftWithPanel(); });
 
         // 복사
         panel.querySelector('#vpCopy').addEventListener('click', function () {

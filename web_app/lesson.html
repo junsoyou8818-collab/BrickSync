@@ -75,6 +75,8 @@ function triggerSystemLog(category, msg) {
     <script src="firebase_config.js"></script>
     <script src="auth.js"></script>
     <script src="cloud_storage.js"></script>
+    <script src="hub_ports.js"></script>
+    <script src="control_dock.js"></script>
     <style>
         * {
             margin: 0;
@@ -1164,6 +1166,9 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
         #missionStatusBar .glow-blob.blob-pink { top: -180px !important; }
         .bs-mode-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; z-index: 3; pointer-events: none; white-space: nowrap; font-size: 1.25rem; font-weight: 800; color: #1e293b; }
         .bs-mode-label img { display: block; width: auto; }
+    </style>
+    <style id="bs-hide-mission-desc">/* 상단 미션 설명 글은 보여 주지 않는다 (단원 이름만 표시) */
+    #m-desc { display: none !important; }
     </style>
 </head>
 
@@ -4598,10 +4603,9 @@ print("BrickSync Sandbox Run")
                                 else if (currentSpeed <= 80) oneTurnMs = 600;
                                 else oneTurnMs = 300;
                                 const rotationDuration = Math.round(timeVal * oneTurnMs);
-                                bleQueue.push({ action: 'motor_cw', speed: currentSpeed, delay: currentBleDelay });
-                                currentBleDelay += rotationDuration;
-                                bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
-                                currentBleDelay += 600;
+                                const turnEstMs = bsTurnEstMs(timeVal, currentSpeed);
+                                bleQueue.push({ action: 'motor_turn', turns: timeVal, speed: currentSpeed, estMs: turnEstMs, delay: currentBleDelay });
+                                currentBleDelay += turnEstMs + 600;
                                 break;
                             }
                             case 'motor_ccw': {
@@ -4612,10 +4616,9 @@ print("BrickSync Sandbox Run")
                                 else if (currentSpeed <= 80) oneTurnMs = 600;
                                 else oneTurnMs = 300;
                                 const rotationDuration = Math.round(timeVal * oneTurnMs);
-                                bleQueue.push({ action: 'motor_ccw', speed: -currentSpeed, delay: currentBleDelay });
-                                currentBleDelay += rotationDuration;
-                                bleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: currentBleDelay });
-                                currentBleDelay += 600;
+                                const turnEstMs = bsTurnEstMs(timeVal, -currentSpeed);
+                                bleQueue.push({ action: 'motor_turn', turns: timeVal, speed: -currentSpeed, estMs: turnEstMs, delay: currentBleDelay });
+                                currentBleDelay += turnEstMs + 600;
                                 break;
                             }
                             case 'motor_stop':
@@ -4752,10 +4755,9 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             else if (currentSpeed <= 80) oneTurnMs = 600;
                                             else oneTurnMs = 300;
                                             const rotationDuration = Math.round(inTimeVal * oneTurnMs);
-                                            innerBleQueue.push({ action: 'motor_cw', speed: currentSpeed, delay: innerBleDelay });
-                                            innerBleDelay += rotationDuration;
-                                            innerBleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: innerBleDelay });
-                                            innerBleDelay += 600;
+                                            const turnEstMs = bsTurnEstMs(inTimeVal, currentSpeed);
+                                innerBleQueue.push({ action: 'motor_turn', turns: inTimeVal, speed: currentSpeed, estMs: turnEstMs, delay: innerBleDelay });
+                                innerBleDelay += turnEstMs + 600;
                                             break;
                                         }
                                         case 'motor_ccw': {
@@ -4766,10 +4768,9 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             else if (currentSpeed <= 80) oneTurnMs = 600;
                                             else oneTurnMs = 300;
                                             const rotationDuration = Math.round(inTimeVal * oneTurnMs);
-                                            innerBleQueue.push({ action: 'motor_ccw', speed: -currentSpeed, delay: innerBleDelay });
-                                            innerBleDelay += rotationDuration;
-                                            innerBleQueue.push({ action: 'motor_stop_generic', speed: 0, delay: innerBleDelay });
-                                            innerBleDelay += 600;
+                                            const turnEstMs = bsTurnEstMs(inTimeVal, -currentSpeed);
+                                innerBleQueue.push({ action: 'motor_turn', turns: inTimeVal, speed: -currentSpeed, estMs: turnEstMs, delay: innerBleDelay });
+                                innerBleDelay += turnEstMs + 600;
                                             break;
                                         }
                                         case 'flow_wait':
@@ -4821,7 +4822,40 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                         const executeSingleCmd = async (cmd) => {
                             if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return;
                             try {
-                                                                if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
+                                                                if (cmd.action === 'motor_turn') {
+                                    // 허브의 '각도만큼 돌리기'(StartSpeedForDegrees)로 바퀴 수 x 360도를 정확히 돌린 뒤, 다 돌았다는 신호를 기다린다
+                                    try {
+                                        const turnMsg = `⚡ 레고 허브 모터: ${cmd.speed >= 0 ? '시계' : '반시계'}방향 ${cmd.turns}바퀴 (${Math.round(Math.abs(cmd.turns) * 360)}°, 속도: ${Math.abs(cmd.speed)})`;
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', turnMsg);
+                                        if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: turnMsg });
+                                    } catch (e) { }
+                                    let hubWin = window;
+                                    for (let i = 0; i < 5; i++) {
+                                        if (hubWin.hubDevices && hubWin.writeToHub) break;
+                                        if (hubWin.parent && hubWin.parent !== hubWin) hubWin = hubWin.parent;
+                                        else break;
+                                    }
+                                    const sendFn = hubWin.writeToHub;
+                                    const mp = bsMotorPorts(hubWin.hubDevices || {})[0];
+                                    if (typeof sendFn !== 'function' || !mp) {
+                                        console.error('[MOTOR TURN ERROR] 허브 또는 모터를 찾지 못했습니다.');
+                                    } else {
+                                        const p = mp.port;
+                                        const deg = Math.max(1, Math.round(Math.abs(cmd.turns) * 360));
+                                        const sp = Math.max(10, Math.min(100, Math.abs(Math.round(cmd.speed)))) * (cmd.speed < 0 ? -1 : 1);
+                                        const spHex = sp < 0 ? 256 + sp : sp;
+                                        hubWin.hubMotorDone = hubWin.hubMotorDone || {};
+                                        const t0 = Date.now();
+                                        try {
+                                            await sendFn(new Uint8Array([14, 0x00, 0x81, p, 0x11, 0x0B, deg & 255, (deg >>> 8) & 255, (deg >>> 16) & 255, (deg >>> 24) & 255, spHex, 100, 127, 0x00]));
+                                        } catch (e) { console.error(`[MOTOR TURN ERROR] port ${p} 전송 실패:`, e); }
+                                        const limit = (cmd.estMs || 3000) + 1200;      // 완료 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다
+                                        while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning && Date.now() - t0 < limit) {
+                                            if ((hubWin.hubMotorDone[p] || 0) > t0) break;
+                                            await new Promise(r => setTimeout(r, 30));
+                                        }
+                                    }
+                                } else if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 모터: ${cmd.action} (속도: ${cmd.speed || 0})`;
                                         if (typeof addSystemLog === 'function') triggerSystemLog('HUB', hubLogMsg);
@@ -4846,10 +4880,9 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                         let speedInt = Math.round(cmd.speed);
                                         let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
 
-                                        for (let p = 0; p < 2; p++) {
-                                            const dev = attached[p];
-                                            console.log(`[MOTOR DEBUG] port ${p} device type:`, dev); // 🔍 실제 device type 확인용
-                                            if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue; // 센서/라이트매트릭스 제외
+                                        for (const mp of bsMotorPorts(attached)) {
+                                            const p = mp.port;
+                                            console.log(`[MOTOR DEBUG] port ${p} device type:`, attached[p]); // 🔍 실제 device type 확인용
                                             try {
                                                 await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, speedHex]));
                                             } catch (e) {
@@ -4878,12 +4911,11 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                     const sendFn = hubWin.writeToHub;
 
                                     if (typeof sendFn === 'function') {
-                                        for (let p = 0; p < 2; p++) {
-                                            const dev = attached[p];
-                                            if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
+                                        for (const mp of bsMotorPorts(attached)) {
+                                            const p = mp.port;
                                             let p0_s = (cmd.action === 'car_forward' || cmd.action === 'car_right') ? -1 : 1;
                                             let p1_s = (cmd.action === 'car_forward' || cmd.action === 'car_left') ? 1 : -1;
-                                            let spd = p === 0 ? (cmd.speed * p0_s) : (cmd.speed * p1_s);
+                                            let spd = mp.role === 0 ? (cmd.speed * p0_s) : (cmd.speed * p1_s);
                                             let speedInt = Math.round(spd);
                                             let speedHex = speedInt < 0 ? (256 + speedInt) : speedInt;
                                             try {
@@ -4906,9 +4938,8 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                     const attached = hubWin.hubDevices || {};
                                     const sendFn = hubWin.writeToHub;
                                     if (typeof sendFn === 'function') {
-                                        for (let p = 0; p < 2; p++) {
-                                            const dev = attached[p];
-                                            if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
+                                        for (const mp of bsMotorPorts(attached)) {
+                                            const p = mp.port;
                                             try {
                                                 await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, 0]));
                                             } catch (e) {}
@@ -4916,9 +4947,8 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                         }
                                     }
                                 } else if (cmd.action === 'car_stop') {
-                                    for (let p = 0; p < 2; p++) {
-                                        const dev = window.parent.hubDevices ? window.parent.hubDevices[p] : undefined;
-                                        if (dev === 64 || dev === 61 || dev === 62 || dev === 63) continue;
+                                    for (const mp of bsMotorPorts(window.parent.hubDevices || {})) {
+                                        const p = mp.port;
 
                                         await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, 0])).catch(e => { });
                                         await new Promise(r => setTimeout(r, 60));
@@ -5117,6 +5147,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                         }
                                         if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) break;
                                         await executeSingleCmd(inCmd);
+                                        if (inCmd.action === 'motor_turn') innerLastTime = Math.max(innerLastTime, inCmd.delay + (inCmd.estMs || 0));
                                     }
                                     await new Promise(r => setTimeout(r, 60));
                                 }
@@ -5131,6 +5162,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                             }
                             if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) return;
                             await executeSingleCmd(cmd);
+                            if (cmd.action === 'motor_turn') lastExecutionTime = Math.max(lastExecutionTime, cmd.delay + (cmd.estMs || 0));
                         }
 
                         if (isMissionActive && blockCount > 1 && anySequenceFound && window.bleEngineRunCounter === currentRunId) {

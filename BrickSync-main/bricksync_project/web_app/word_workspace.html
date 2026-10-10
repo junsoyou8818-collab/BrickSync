@@ -658,6 +658,9 @@
         .bs-mode-label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; z-index: 3; pointer-events: none; white-space: nowrap; font-size: 1.25rem; font-weight: 800; color: #1e293b; }
         .bs-mode-label img { display: block; width: auto; }
     </style>
+    <style id="bs-hide-mission-desc">/* 상단 미션 설명 글은 보여 주지 않는다 (단원 이름만 표시) */
+    #m-desc { display: none !important; }
+    </style>
 </head>
 
 <body>
@@ -1098,6 +1101,7 @@
         updateStatusBarText();
     </script>
     <script src="verse_gen.js"></script>
+    <script src="control_dock.js"></script>
     <script src="verse_panel.js"></script>
     <script>
         // UEFN Verse 코드 창 (블록 보관함 왼쪽에 붙는다)

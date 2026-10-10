@@ -1218,6 +1218,13 @@ function handleBLEData(event) {
                 const portID = value.byteLength > 3 ? value.getUint8(3) : 0;
                 const feedback = value.byteLength > 4 ? value.getUint8(4) : 0;
                 console.log(`[LWP3 Port Feedback] Port: ${portID}, Status: 0x${feedback.toString(16).padStart(2,'0')} (Bit0:InProgress=${(feedback&1)!==0}, Bit1:Completed=${(feedback&2)!==0}, Bit3:Idle=${(feedback&8)!==0}, Bit4:Busy=${(feedback&16)!==0})`);
+                // 모터가 '각도만큼 돌리기'를 끝냈거나(0x02) 다른 명령으로 대체됐을 때(0x04) 시각을 남긴다 (아이콘 모드 회전 블록이 다음 블록으로 넘어갈 때 쓴다)
+                try {
+                    if (!window.hubMotorDone) window.hubMotorDone = {};
+                    for (let fi = 3; fi + 1 < value.byteLength; fi += 2) {
+                        if (value.getUint8(fi + 1) & 0x06) window.hubMotorDone[value.getUint8(fi)] = Date.now();
+                    }
+                } catch (e) { }
             } else if (msgType === 0x45) {
                 const portID = value.getUint8(3);
                 if (!window.sensorData) window.sensorData = {};
