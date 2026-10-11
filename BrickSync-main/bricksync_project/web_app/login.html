@@ -513,6 +513,7 @@ function doGuestLogin() {
   localStorage.setItem('bricksync_student_session', JSON.stringify(guestSession));
   localStorage.setItem('bricksync_user_session', JSON.stringify(guestSession));
   sessionStorage.setItem('brickSyncLastPage', 'index.html');
+  sessionStorage.setItem('bs_entered', '1');
   // 이 로그인 화면이 앱 틀 안(iframe)에 떠 있어도 바깥 틀 전체를 새로 연다 (틀 안에 틀이 겹치지 않게)
   try { window.top.location.href = 'app.html'; } catch (e) { window.location.href = 'app.html'; }
 }
@@ -539,9 +540,24 @@ function _tryReveal() { if (_i18nReady && _authChecked && window.bsRevealLogin) 
       if (s && s.name && (!s.expires || Date.now() < s.expires)) role = 'student';
     }
     if (role) {
+      // 로그인 화면과 앱이 서로 계속 넘기는 경우(15초 안에 3번 이상)를 끊는다: 저장된 로그인 정보를 지우고 로그인 화면을 보여 준다
+      let bounce = { n: 0, t: 0 };
+      try { bounce = JSON.parse(sessionStorage.getItem('bs_bounce') || '{"n":0,"t":0}'); } catch (e) { }
+      if (Date.now() - bounce.t > 15000) bounce = { n: 0, t: Date.now() };
+      bounce.n++;
+      try { sessionStorage.setItem('bs_bounce', JSON.stringify(bounce)); } catch (e) { }
+      if (bounce.n >= 3) {
+        console.warn('[Login] 로그인 화면 이동이 반복되어 저장된 로그인 정보를 지웁니다.');
+        ['bricksync_student_session', 'bricksync_user_session'].forEach(k => localStorage.removeItem(k));
+        sessionStorage.removeItem('brickSyncLastPage'); sessionStorage.removeItem('bs_entered'); sessionStorage.removeItem('bs_bounce');
+        role = '';
+      }
+    }
+    if (role) {
       if (role === 'teacher' || role === 'parent') { BrickSyncAuth.redirectToHome(role); return; }
       sessionStorage.setItem('brickSyncLastPage', 'index.html');
-      window.location.href = 'app.html';
+      sessionStorage.setItem('bs_entered', '1');
+      try { window.top.location.href = 'app.html'; } catch (e) { window.location.href = 'app.html'; }
       return;
     }
   } catch (e) { console.warn('[Login] 로그인 상태 확인 실패:', e); }

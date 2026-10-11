@@ -92,9 +92,9 @@
 
             // Dashboard
             dashboard_title: "BrickSync 학습 대시보드",
-            tab_student: "학생 모드",
-            tab_teacher: "교사 모드",
-            tab_parent: "학부모 모드",
+            tab_student: "학생",
+            tab_teacher: "교사",
+            tab_parent: "학부모",
             nav_dashboard_all: "교사/학부모용 대시보드",
             nav_dashboard_teacher: "교사 대시보드",
             nav_dashboard_parent: "학부모 대시보드",
@@ -176,7 +176,7 @@
             lbl_guide_step1_title: "1. BrickSync 런처 실행",
             lbl_guide_step1_desc: "바탕화면의 BrickSync.exe를 실행하여 로컬 브릿지 서버와 웹 플랫폼을 시작합니다.",
             lbl_guide_step2_title: "2. 학생 & 교사 로그인",
-            lbl_guide_step2_desc: "학생, 교사, 학부모 모드를 선택하여 로그인하고 맞춤형 워크스페이스를 불러옵니다.",
+            lbl_guide_step2_desc: "학생, 교사, 학부모 중 해당하는 계정을 선택하여 로그인하고 맞춤형 워크스페이스를 불러옵니다.",
             lbl_guide_step3_title: "3. 레고 모델 조립",
             lbl_guide_step3_desc: "레고 브릭을 조립하고 허브에 모터, 센서, 라이트 등 상호작용 부품을 연결합니다.",
             lbl_guide_step4_title: "4. 학습단원 & AI 단원 선택",
@@ -288,7 +288,7 @@
             lbl_guide_step1_b3: "웹 화면 자동 접속",
             lbl_guide_step2_b1: "학생 닉네임 입력",
             lbl_guide_step2_b2: "학급 코드 연결",
-            lbl_guide_step2_b3: "교사/학부모 모드 전환 지원",
+            lbl_guide_step2_b3: "교사/학부모 계정 전환 지원",
             lbl_guide_step2_b4: "게스트 즉시 체험 가능",
             lbl_guide_step3_b1: "스파이크 에센셜/프라임 허브 준비",
             lbl_guide_step3_b2: "모터, 센서, 라이트 연결",
@@ -395,9 +395,9 @@
 
             // Dashboard
             dashboard_title: "BrickSync Learning Dashboard",
-            tab_student: "Student View",
-            tab_teacher: "Teacher View",
-            tab_parent: "Parent View",
+            tab_student: "Student",
+            tab_teacher: "Teacher",
+            tab_parent: "Parent",
             nav_dashboard_all: "Teacher/Parent Dashboard",
             nav_dashboard_teacher: "Teacher Dashboard",
             nav_dashboard_parent: "Parent Dashboard",
@@ -479,7 +479,7 @@
             lbl_guide_step1_title: "1. Launch BrickSync Launcher",
             lbl_guide_step1_desc: "Run BrickSync.exe on your desktop to start the local bridge server and web platform.",
             lbl_guide_step2_title: "2. Student & Teacher Login",
-            lbl_guide_step2_desc: "Select Student, Teacher, or Parent mode and log in to load your personalized workspace.",
+            lbl_guide_step2_desc: "Select Student, Teacher, or Parent account and log in to load your personalized workspace.",
             lbl_guide_step3_title: "3. Build Lego Model",
             lbl_guide_step3_desc: "Assemble your Lego Spike Essential model and connect motors, sensors, and lights to the Hub.",
             lbl_guide_step4_title: "4. Choose Learning Unit",
@@ -1166,8 +1166,14 @@
 
     // 5.6 학생 로그아웃 (Session Clear & Logout)
     window.settingsLogout = function () {
-        localStorage.removeItem('bricksync_student_session');
-        location.href = 'student_login.html';
+        try {
+            localStorage.removeItem('bricksync_student_session');
+            localStorage.removeItem('bricksync_user_session');
+            sessionStorage.removeItem('brickSyncLastPage');
+            sessionStorage.removeItem('bs_entered');
+        } catch (e) { }
+        // 앱 틀(app.html) 안에서 눌러도 바깥 창 전체가 로그인 화면으로 가야 틀 안에 틀이 겹치지 않는다
+        try { window.top.location.href = 'login.html'; } catch (e) { location.href = 'login.html'; }
     };
 
     // 5.7 Firebase 실시간 통신 진단 툴 (Run Connection Diagnostics)
@@ -1206,7 +1212,7 @@
         const savedLang = localStorage.getItem('bricksync_lang');
         if (savedLang) {
             // 언어 자동 번역 1차 적용
-            setTimeout(() => changeSettingsLanguage(savedLang), 100);
+            setTimeout(() => { changeSettingsLanguage(savedLang); window.dispatchEvent(new Event("bs-lang-ready")); }, 100);
         }
 
         // 이전 구버전 배율 캐시 완전 정리

@@ -2,6 +2,10 @@
 <html lang="ko" data-bs-own-scale>
 
 <head>
+    <script>
+        // 로그인 화면을 거치지 않고 주소로 바로 열렸다면(새 탭 등) 인트로부터 시작한다. 앱 틀 안쪽(iframe)에서는 해당 없음
+        try { if (window.top === window && !sessionStorage.getItem('bs_entered')) location.replace('intro.html'); } catch (e) { }
+    </script>
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">

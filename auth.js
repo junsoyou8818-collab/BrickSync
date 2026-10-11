@@ -471,10 +471,14 @@ const BrickSyncAuth = (function () {
     async function signOut() {
         localStorage.removeItem('bricksync_student_session');
         localStorage.removeItem(LOCAL_SESSION_KEY);
-        window.location.href = 'login.html';
+        try { sessionStorage.removeItem('brickSyncLastPage'); sessionStorage.removeItem('bs_entered'); } catch (e) { }
+        // 앱 틀(app.html) 안쪽 화면에서 불려도 바깥 창 전체를 로그인 화면으로 보낸다
+        try { window.top.location.href = 'login.html'; } catch (e) { window.location.href = 'login.html'; }
     }
 
     function redirectToHome(role) {
+        // 로그인 화면을 거쳐 들어왔다는 표시 (새 탭에서 주소만 입력해 들어온 경우와 구분: 그때는 인트로부터 시작)
+        try { sessionStorage.setItem('bs_entered', '1'); } catch (e) { }
         const dest = ROLE_HOME[role] || 'index.html';
         window.location.href = dest;
     }
