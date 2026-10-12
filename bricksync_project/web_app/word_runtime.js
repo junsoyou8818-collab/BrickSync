@@ -51,6 +51,8 @@
     function oneStepMs(s) { return s <= 25 ? 3200 : (s <= 50 ? 1280 : (s <= 80 ? 640 : 305)); }    // 자동차 1칸
     function oneTurnMs(s) { return s <= 25 ? 1660 : (s <= 50 ? 665 : (s <= 80 ? 330 : 160)); }      // 자동차 회전 1번
     function motorTurnMs(s) { return s <= 25 ? 3730 : (s <= 50 ? 1400 : (s <= 80 ? 600 : 300)); }   // 모터 1바퀴
+    // 모터 "n바퀴"는 n x 360도를 허브의 '각도만큼 돌리기'로 정확히 돌린다. 예상 소요 시간(ms)은 완료 신호가 안 와도 넘어가기 위한 상한
+    function turnEstMs(turns, s) { return Math.round(Math.abs(turns) * 360 * 1000 / (Math.max(10, Math.abs(s)) * 6)) + 300; }
 
     var COLOR_ID = { black: 0, pink: 1, violet: 2, blue: 3, azure: 4, green: 6, yellow: 7, orange: 8, red: 9, white: 10 };
 
@@ -176,11 +178,16 @@
     function emitMotor(ctx, ind, dirCw, amt) {
         var s = ctx.speed;
         var turns = amt.steps, ms = amt.ms;
-        var bleMs = ms !== null ? Math.round(ms) : Math.round(turns * motorTurnMs(s));
-        ctx.ble.push({ a: 'motor', tag: dirCw ? 'motor_cw' : 'motor_ccw', speed: dirCw ? s : -s, delay: ctx.bleT });
-        ctx.bleT += bleMs;
-        ctx.ble.push({ a: 'motor_stop', tag: 'motor_stop_generic', delay: ctx.bleT });
-        ctx.bleT += 600;
+        if (ms === null) {
+            var estMs = turnEstMs(turns, s);
+            ctx.ble.push({ a: 'motor_turn', tag: dirCw ? 'motor_cw' : 'motor_ccw', turns: turns, speed: dirCw ? s : -s, est: estMs, blocking: true, port: null, delay: ctx.bleT });
+            ctx.bleT += estMs + 600;
+        } else {
+            ctx.ble.push({ a: 'motor', tag: dirCw ? 'motor_cw' : 'motor_ccw', speed: dirCw ? s : -s, delay: ctx.bleT });
+            ctx.bleT += Math.round(ms);
+            ctx.ble.push({ a: 'motor_stop', tag: 'motor_stop_generic', delay: ctx.bleT });
+            ctx.bleT += 600;
+        }
         if (unit === '7') {
             // 그네: 음성의 방향/횟수로 한 번에 보낸다 (아이콘 모드 7단원과 같음)
             var swings = ms !== null ? Math.max(1, Math.round(ms / 2300)) : Math.max(1, Math.round(turns));
@@ -327,11 +334,17 @@
             /* ---- 포트를 고른 모터 (허브 직결에서만 동작: 포트나이트/USB에는 같은 동작이 없다) ---- */
             case 'motor_port_run': {
                 var pr = lightPortOf(v.p), pcw = v.dir !== 'ccw', pam = amount(num(v.n, 1), v.unit);
-                var pms = pam.ms !== null ? Math.round(pam.ms) : Math.round(pam.steps * motorTurnMs(ctx.speed));
-                ctx.ble.push({ a: 'motor_p', port: pr, tag: 'motor_port_' + v.p, speed: pcw ? ctx.speed : -ctx.speed, delay: ctx.bleT });
-                ctx.bleT += pms;
-                ctx.ble.push({ a: 'motor_p', port: pr, tag: 'motor_port_stop_' + v.p, speed: 0, delay: ctx.bleT });
-                ctx.bleT += 600;
+                if (pam.ms === null) {
+                    var pest = turnEstMs(pam.steps, ctx.speed);
+                    ctx.ble.push({ a: 'motor_turn', tag: 'motor_port_' + v.p, turns: pam.steps, speed: pcw ? ctx.speed : -ctx.speed, est: pest, blocking: true, port: pr, delay: ctx.bleT });
+                    ctx.bleT += pest + 600;
+                } else {
+                    var pms = Math.round(pam.ms);
+                    ctx.ble.push({ a: 'motor_p', port: pr, tag: 'motor_port_' + v.p, speed: pcw ? ctx.speed : -ctx.speed, delay: ctx.bleT });
+                    ctx.bleT += pms;
+                    ctx.ble.push({ a: 'motor_p', port: pr, tag: 'motor_port_stop_' + v.p, speed: 0, delay: ctx.bleT });
+                    ctx.bleT += 600;
+                }
                 ctx.py += ind + '# 포트 ' + v.p + ' 모터는 블루투스 허브 연결에서만 움직여요\n';
                 break;
             }
@@ -492,7 +505,9 @@
             var wait = cmd.delay - last;
             if (wait > 0) { await sleep(wait); last = cmd.delay; }
             if (token.id !== counter) return;
+            var execStart = Date.now();
             await exec(cmd);
+            if (cmd.blocking) last = cmd.delay + (Date.now() - execStart);
         }
     }
 
@@ -516,6 +531,28 @@
                     await send(pkt(ports[0], cmd.a === 'motor' ? cmd.speed : 0));
                     await sleep(60);
                 }
+            } else if (cmd.a === 'motor_turn') {
+                var tp = cmd.port;
+                if (tp === null || tp === undefined) {
+                    var mps = (typeof window.bsMotorPorts === 'function') ? window.bsMotorPorts(attached) : motorPorts(attached).map(function (q) { return { port: q }; });
+                    tp = mps.length ? mps[0].port : null;
+                }
+                if (tp === null) { slog('HUB', '⚠ 연결된 모터를 찾지 못했어요.'); return; }
+                var tdeg = Math.max(1, Math.round(Math.abs(cmd.turns) * 360));
+                var tsp = Math.max(10, Math.min(100, Math.abs(Math.round(cmd.speed)))) * (cmd.speed < 0 ? -1 : 1);
+                var tmsg = '⚡ 레고 허브 모터: ' + (cmd.speed >= 0 ? '시계' : '반시계') + '방향 ' + cmd.turns + '바퀴 (' + tdeg + '°, 속도: ' + Math.abs(tsp) + ')';
+                slog('HUB', tmsg);
+                sendWS({ action: 'HUB_LOG', msg: tmsg });
+                hw.hubMotorDone = hw.hubMotorDone || {};
+                var myRun = counter, tstart = Date.now();
+                // StartSpeedForDegrees: 각도(4바이트), 속도(부호로 방향), 최대 힘 100, 끝나면 브레이크(127), 가감속 없음
+                await send(new Uint8Array([14, 0x00, 0x81, tp, 0x11, 0x0B, tdeg & 255, (tdeg >>> 8) & 255, (tdeg >>> 16) & 255, (tdeg >>> 24) & 255, spd(tsp), 100, 127, 0x00]));
+                var tlimit = (cmd.est || 3000) + 1200;   // 완료 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다
+                while (counter === myRun && Date.now() - tstart < tlimit) {
+                    if ((hw.hubMotorDone[tp] || 0) > tstart) break;
+                    await sleep(30);
+                }
+                if (counter !== myRun || !((hw.hubMotorDone[tp] || 0) > tstart)) { try { await send(pkt(tp, 0)); } catch (e2) { } }   // 멈춤 / 신호 없음: 안전하게 정지
             } else if (cmd.a === 'motor_p') {
                 var mp = cmd.port === null || cmd.port === undefined ? (motorPorts(attached)[0] || 0) : cmd.port;
                 slog('HUB', '⚡ 레고 허브 포트 ' + 'ABCDEF'.charAt(mp) + ' 모터 (속도: ' + cmd.speed + ')');
@@ -1278,6 +1315,7 @@
         compileForTest: function (stackBlocks, opts) {            // 검증용: 한 스택의 신호 목록
             var c = newCtx(opts); emitBlocks(stackBlocks, c, ''); return c;
         },
+        playForTest: function (queue) { var tk = { id: counter }; return play(queue, tk, hubExec); },      // 검증용: 허브 명령 목록을 실제 재생 경로로 실행
         parseTurns: parseTurns
     };
 })();
