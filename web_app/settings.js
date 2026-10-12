@@ -969,7 +969,9 @@
     };
     window.downloadExe = function () {
         const a = document.createElement('a');
-        a.href = EXE_DOWNLOAD_URL; a.target = '_blank'; a.rel = 'noopener'; a.download = 'Bricksync.exe';
+        // 서버가 exe 를 몇 시간 동안 캐시해도 된다고 알리므로, 주소에 버전과 시각을 붙여 항상 새로 받는다 (이전에 받은 옛 파일이 재사용되지 않게)
+        const bust = '?v=' + encodeURIComponent(exeState.latest || 'latest') + '&t=' + Date.now();
+        a.href = EXE_DOWNLOAD_URL + bust; a.target = '_blank'; a.rel = 'noopener'; a.download = 'Bricksync.exe';
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
     };
     // 서버 연결 상태: 앱 화면(app.html)이 쓰는 연결을 그대로 보고, 없으면 잠깐 직접 접속해 본다
