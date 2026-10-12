@@ -133,6 +133,12 @@
             var dl = Math.round(wholeDeg * Math.abs(a) / topSpd), dr = Math.round(wholeDeg * Math.abs(b) / topSpd);
             ctx.ble.push({ a: 'car_deg', l: Math.round(a), r: Math.round(b), dl: dl, dr: dr, delay: ctx.bleT, tag: dir });
             ctx.bleT += Math.round(wholeDeg / (topSpd * DEG_PER_PCT) * 1000) + 400;
+        } else if (ms === null && steer === undefined && typeof window.bsCarDriveDeg === 'function') {
+            // 시간이 아니라 바퀴 각도로 정확히: 기본 블록은 칸/회전 기준 각도(hub_ports.js BS_CAR), '[n] 회전/도 이동하기'는 바퀴 n x 360도 / n도
+            var wdeg = amt.basic ? window.bsCarWheelDeg(dir, steps) : Math.max(1, Math.round(Math.abs(steps) * 360));
+            var west = window.bsCarEstMs(wdeg, s);
+            ctx.ble.push({ a: 'wheels_deg', dir: dir, deg: wdeg, speed: s, est: west, blocking: true, delay: ctx.bleT, tag: dir });
+            ctx.bleT += west + 500;
         } else {
             ctx.ble.push({ a: 'car', l: Math.round(a), r: Math.round(b), delay: ctx.bleT, tag: dir });
             ctx.bleT += bleMs;
@@ -284,7 +290,7 @@
             /* ---- 기본 이동(아이콘 블록과 같은 값) ---- */
             case 'fwd': case 'back': case 'left': case 'right': {
                 var cnt = ctx.turns && (unit === '7') ? ctx.turns : num(v.n, 1);
-                emitCar(ctx, ind, t, { ms: null, steps: cnt });
+                emitCar(ctx, ind, t, { ms: null, steps: cnt, basic: true });
                 break;
             }
             /* ---- 동작 ---- */
@@ -507,7 +513,7 @@
             if (token.id !== counter) return;
             var execStart = Date.now();
             await exec(cmd);
-            if (cmd.blocking) last = cmd.delay + (Date.now() - execStart);
+            if (cmd.blocking) last = cmd.delay + (cmd.est || 0);
         }
     }
 
@@ -531,6 +537,15 @@
                     await send(pkt(ports[0], cmd.a === 'motor' ? cmd.speed : 0));
                     await sleep(60);
                 }
+            } else if (cmd.a === 'wheels_deg') {
+                var wmsg = '⚡ 레고 허브 자동차: ' + ({ fwd: '앞으로', back: '뒤로', left: '왼쪽 회전', right: '오른쪽 회전' }[cmd.dir] || cmd.dir) + ' (바퀴 ' + cmd.deg + '°, 속도: ' + cmd.speed + ')';
+                slog('HUB', wmsg);
+                sendWS({ action: 'HUB_LOG', msg: wmsg });
+                var wRun = counter;
+                var wres = await window.bsCarDriveDeg(hw, cmd.dir, cmd.deg, cmd.speed, cmd.est, function () { return counter === wRun; });
+                var wline = window.bsCarDriveLine(wres);
+                slog('HUB', wline);
+                sendWS({ action: 'HUB_LOG', msg: wline });
             } else if (cmd.a === 'motor_turn') {
                 var tp = cmd.port;
                 if (tp === null || tp === undefined) {

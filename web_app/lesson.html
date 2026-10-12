@@ -4575,10 +4575,10 @@ print("BrickSync Sandbox Run")
                                 else if (currentSpeed <= 80) oneStepMs = 640;
                                 else oneStepMs = 305;
                                 const moveDuration = Math.round(timeVal * oneStepMs);
-                                bleQueue.push({ action: action, speed: currentSpeed, delay: currentBleDelay });
-                                currentBleDelay += moveDuration;
-                                bleQueue.push({ action: 'car_stop', speed: 0, dir: action, delay: currentBleDelay });
-                                currentBleDelay += 500;
+                                const wDir = action === 'car_backward' ? 'back' : 'fwd';
+                                const wDeg = bsCarWheelDeg(wDir, timeVal), wEst = bsCarEstMs(wDeg, currentSpeed);   // 시간이 아니라 바퀴 각도로 정확히
+                                bleQueue.push({ action: 'wheels_deg', dir: wDir, deg: wDeg, speed: currentSpeed, estMs: wEst, delay: currentBleDelay });
+                                currentBleDelay += wEst + 500;
                                 break;
                             }
                             case 'car_left':
@@ -4590,10 +4590,10 @@ print("BrickSync Sandbox Run")
                                 else if (currentSpeed <= 80) oneTurnMs = 330;
                                 else oneTurnMs = 160;
                                 const turnDuration = Math.round(timeVal * oneTurnMs);
-                                bleQueue.push({ action: action, speed: currentSpeed, delay: currentBleDelay });
-                                currentBleDelay += turnDuration;
-                                bleQueue.push({ action: 'car_stop', speed: 0, dir: action, delay: currentBleDelay });
-                                currentBleDelay += 500;
+                                const wDir = action === 'car_left' ? 'left' : 'right';
+                                const wDeg = bsCarWheelDeg(wDir, timeVal), wEst = bsCarEstMs(wDeg, currentSpeed);   // 시간이 아니라 바퀴 각도로 정확히
+                                bleQueue.push({ action: 'wheels_deg', dir: wDir, deg: wDeg, speed: currentSpeed, estMs: wEst, delay: currentBleDelay });
+                                currentBleDelay += wEst + 500;
                                 break;
                             }
                                                                                                                                                                         case 'motor_cw': {
@@ -4727,10 +4727,10 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             else if (currentSpeed <= 80) oneStepMs = 640;
                                             else oneStepMs = 305;
                                             const moveDuration = Math.round(inTimeVal * oneStepMs);
-                                            innerBleQueue.push({ action: inAction, speed: currentSpeed, delay: innerBleDelay });
-                                            innerBleDelay += moveDuration;
-                                            innerBleQueue.push({ action: 'car_stop', speed: 0, dir: inAction, delay: innerBleDelay });
-                                            innerBleDelay += 500;
+                                            const wDir = inAction === 'car_backward' ? 'back' : 'fwd';
+                                            const wDeg = bsCarWheelDeg(wDir, inTimeVal), wEst = bsCarEstMs(wDeg, currentSpeed);   // 시간이 아니라 바퀴 각도로 정확히
+                                            innerBleQueue.push({ action: 'wheels_deg', dir: wDir, deg: wDeg, speed: currentSpeed, estMs: wEst, delay: innerBleDelay });
+                                            innerBleDelay += wEst + 500;
                                             break;
                                         }
                                         case 'car_left':
@@ -4742,10 +4742,10 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             else if (currentSpeed <= 80) oneTurnMs = 330;
                                             else oneTurnMs = 160;
                                             const turnDuration = Math.round(inTimeVal * oneTurnMs);
-                                            innerBleQueue.push({ action: inAction, speed: currentSpeed, delay: innerBleDelay });
-                                            innerBleDelay += turnDuration;
-                                            innerBleQueue.push({ action: 'car_stop', speed: 0, dir: inAction, delay: innerBleDelay });
-                                            innerBleDelay += 500;
+                                            const wDir = inAction === 'car_left' ? 'left' : 'right';
+                                            const wDeg = bsCarWheelDeg(wDir, inTimeVal), wEst = bsCarEstMs(wDeg, currentSpeed);   // 시간이 아니라 바퀴 각도로 정확히
+                                            innerBleQueue.push({ action: 'wheels_deg', dir: wDir, deg: wDeg, speed: currentSpeed, estMs: wEst, delay: innerBleDelay });
+                                            innerBleDelay += wEst + 500;
                                             break;
                                         }
                                                                                                                                                                                                                                                 case 'motor_cw': {
@@ -4856,6 +4856,25 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             await new Promise(r => setTimeout(r, 30));
                                         }
                                     }
+                                } else if (cmd.action === 'wheels_deg') {
+                                    // 자동차 이동/회전: 두 바퀴에 '각도만큼 돌리기'를 동시에 보내고, 두 바퀴가 다 돌았다는 신호를 기다린다
+                                    try {
+                                        const wMsg = '⚡ 레고 허브 자동차: ' + ({ fwd: '앞으로', back: '뒤로', left: '왼쪽 회전', right: '오른쪽 회전' }[cmd.dir] || cmd.dir) + ' (바퀴 ' + cmd.deg + '°, 속도: ' + cmd.speed + ')';
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', wMsg);
+                                        if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: wMsg });
+                                    } catch (e) { }
+                                    let wHub = window;
+                                    for (let i = 0; i < 5; i++) {
+                                        if (wHub.hubDevices && wHub.writeToHub) break;
+                                        if (wHub.parent && wHub.parent !== wHub) wHub = wHub.parent;
+                                        else break;
+                                    }
+                                    const wRes = await bsCarDriveDeg(wHub, cmd.dir, cmd.deg, cmd.speed, cmd.estMs, () => window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning);
+                                    try {
+                                        const wLine = bsCarDriveLine(wRes);
+                                        if (typeof addSystemLog === 'function') triggerSystemLog('HUB', wLine);
+                                        if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: wLine });
+                                    } catch (e) { }
                                 } else if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
                                     try {
                                         const hubLogMsg = `⚡ 레고 허브 모터: ${cmd.action} (속도: ${cmd.speed || 0})`;
@@ -5148,7 +5167,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                         }
                                         if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) break;
                                         await executeSingleCmd(inCmd);
-                                        if (inCmd.action === 'motor_turn') innerLastTime = Math.max(innerLastTime, inCmd.delay + (inCmd.estMs || 0));
+                                        if (inCmd.action === 'motor_turn' || inCmd.action === 'wheels_deg') innerLastTime = Math.max(innerLastTime, inCmd.delay + (inCmd.estMs || 0));
                                     }
                                     await new Promise(r => setTimeout(r, 60));
                                 }
@@ -5163,7 +5182,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                             }
                             if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) return;
                             await executeSingleCmd(cmd);
-                            if (cmd.action === 'motor_turn') lastExecutionTime = Math.max(lastExecutionTime, cmd.delay + (cmd.estMs || 0));
+                            if (cmd.action === 'motor_turn' || cmd.action === 'wheels_deg') lastExecutionTime = Math.max(lastExecutionTime, cmd.delay + (cmd.estMs || 0));
                         }
 
                         if (isMissionActive && blockCount > 1 && anySequenceFound && window.bleEngineRunCounter === currentRunId) {

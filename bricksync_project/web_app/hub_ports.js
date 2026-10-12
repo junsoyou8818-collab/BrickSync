@@ -30,4 +30,58 @@
         var sp = Math.max(10, Math.abs(Number(speed) || 40));
         return Math.round(Math.abs(Number(turns) || 1) * 360 * 1000 / (sp * 6)) + 300;
     };
+
+    /* ---- 자동차 이동/회전: 시간이 아니라 "바퀴 각도"로 (허브가 각자 정해진 각도에서 멈춘다) ----
+     *   앞으로/뒤로 1번 = 바퀴 stepDeg 도 (360 = 바퀴 한 바퀴, 약 13cm)
+     *   왼쪽/오른쪽 1번 = 차체 turnAngle 도 회전 = 두 바퀴가 서로 반대로 trackMm * turnAngle / wheelMm 도
+     *   값을 바꾸려면 아래 숫자만 고치면 된다. */
+    window.BS_CAR = { wheelMm: 42, trackMm: 80, stepDeg: 360, turnAngle: 90 };
+    window.bsCarWheelDeg = function (dir, n) {
+        var C = window.BS_CAR, isTurn = (dir === 'left' || dir === 'right');
+        var per = isTurn ? C.trackMm * C.turnAngle / C.wheelMm : C.stepDeg;
+        return Math.max(1, Math.round(Math.abs(Number(n) || 1) * per));
+    };
+    window.bsCarEstMs = function (deg, speed) {   // 예상 소요 시간(ms): 완료 신호가 안 와도 넘어가기 위한 넉넉한 상한
+        return Math.round(Math.abs(deg) * 1000 / (Math.max(10, Math.abs(Number(speed) || 40)) * 6)) + 300;
+    };
+    // 바퀴별 방향 부호 [첫째 바퀴(포트 번호 낮은 쪽), 둘째 바퀴]: 앞으로 = (-, +), 뒤로 = (+, -), 오른쪽 = (-, -), 왼쪽 = (+, +)
+    window.bsCarSigns = function (dir) {
+        if (dir === 'fwd') return [-1, 1];
+        if (dir === 'back') return [1, -1];
+        if (dir === 'right') return [-1, -1];
+        return [1, 1];
+    };
+    // 두 바퀴에 "각도만큼 돌리기"(StartSpeedForDegrees)를 기다림 없이 연달아 보내고, 두 바퀴가 다 돌았다는 신호를 기다린다
+    // hw = 허브 연결을 가진 창(hubDevices / writeToHub / hubMotorDone), alive() = 아직 실행 중인지. 반환: 신호로 끝났으면 true
+    window.bsCarDriveDeg = async function (hw, dir, deg, speed, est, alive) {
+        var attached = hw.hubDevices || {}, send = hw.writeToHub;
+        var mps = window.bsMotorPorts(attached).slice(0, 2);
+        if (typeof send !== 'function' || !mps.length) return { ok: false, ms: 0, ports: [], sent: false, doneAt: {} };
+        var sg = window.bsCarSigns(dir);
+        var sp = Math.max(10, Math.min(100, Math.abs(Math.round(speed || 40))));
+        hw.hubMotorDone = hw.hubMotorDone || {};
+        var t0 = Date.now(), ports = [], writes = [];
+        mps.forEach(function (mp) {
+            var v = sp * (mp.role === 0 ? sg[0] : sg[1]);
+            ports.push(mp.port);
+            writes.push(Promise.resolve(send(new Uint8Array([14, 0x00, 0x81, mp.port, 0x11, 0x0B, deg & 255, (deg >>> 8) & 255, (deg >>> 16) & 255, (deg >>> 24) & 255, v < 0 ? 256 + v : v, 100, 127, 0x00]))).catch(function () { }));
+        });
+        await Promise.all(writes);
+        var limit = (est || 3000) + 1200;      // 완료 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다
+        var isDone = function () { return ports.every(function (p) { return (hw.hubMotorDone[p] || 0) > t0; }); };
+        while ((!alive || alive()) && Date.now() - t0 < limit && !isDone()) await new Promise(function (r) { setTimeout(r, 30); });
+        var doneAt = {};
+        ports.forEach(function (p) { var d = hw.hubMotorDone[p] || 0; doneAt[p] = d > t0 ? (d - t0) : null; });
+        var ok = isDone(), ms = Date.now() - t0;
+        if (!ok) {                             // 멈춤 / 신호 없음: 안전하게 정지
+            for (var i = 0; i < ports.length; i++) { try { await send(new Uint8Array([8, 0, 0x81, ports[i], 0x10, 0x51, 0x00, 0])); } catch (e) { } }
+        }
+        return { ok: ok, ms: ms, ports: ports, sent: true, doneAt: doneAt };
+    };
+    // 통신 로그에 남길 한 줄 요약
+    window.bsCarDriveLine = function (r) {
+        if (!r.sent) return '⚠ 자동차 이동 명령을 보내지 못했어요 (허브 또는 모터를 찾지 못함)';
+        var pd = r.ports.map(function (p) { return 'ABCDEF'.charAt(p) + ':' + (r.doneAt[p] === null ? '신호없음' : (r.doneAt[p] / 1000).toFixed(2) + '초'); }).join(' ');
+        return (r.ok ? '✓ 두 바퀴 완료 ' : '⚠ 완료 신호 없음 → 정지 ') + '(' + (r.ms / 1000).toFixed(2) + '초, ' + pd + ')';
+    };
 })();
