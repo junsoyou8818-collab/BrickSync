@@ -60,11 +60,15 @@
         var sg = window.bsCarSigns(dir);
         var sp = Math.max(10, Math.min(100, Math.abs(Math.round(speed || 40))));
         hw.hubMotorDone = hw.hubMotorDone || {};
-        var t0 = Date.now(), ports = [], writes = [];
+        var t0 = Date.now(), ports = [], writes = [], wres = {};
         mps.forEach(function (mp) {
             var v = sp * (mp.role === 0 ? sg[0] : sg[1]);
             ports.push(mp.port);
-            writes.push(Promise.resolve(send(new Uint8Array([14, 0x00, 0x81, mp.port, 0x11, 0x0B, deg & 255, (deg >>> 8) & 255, (deg >>> 16) & 255, (deg >>> 24) & 255, v < 0 ? 256 + v : v, 100, 127, 0x00]))).catch(function () { }));
+            var pkt = new Uint8Array([14, 0x00, 0x81, mp.port, 0x11, 0x0B, deg & 255, (deg >>> 8) & 255, (deg >>> 16) & 255, (deg >>> 24) & 255, v < 0 ? 256 + v : v, 100, 127, 0x00]);
+            writes.push((async function (port) {            // 쓰기 결과를 남기고, 실패하면 한 번 더 시도한다
+                try { await send(pkt); wres[port] = 'ok'; }
+                catch (e1) { try { await new Promise(function (r) { setTimeout(r, 40); }); await send(pkt); wres[port] = '재시도ok'; } catch (e2) { wres[port] = '오류:' + String((e2 && e2.message) || e2).slice(0, 40); } }
+            })(mp.port));
         });
         await Promise.all(writes);
         var limit = (est || 3000) + 1200;      // 완료 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다
@@ -76,12 +80,15 @@
         if (!ok) {                             // 멈춤 / 신호 없음: 안전하게 정지
             for (var i = 0; i < ports.length; i++) { try { await send(new Uint8Array([8, 0, 0x81, ports[i], 0x10, 0x51, 0x00, 0])); } catch (e) { } }
         }
-        return { ok: ok, ms: ms, ports: ports, sent: true, doneAt: doneAt };
+        var types = {}; ports.forEach(function (p) { types[p] = attached[p]; });
+        return { ok: ok, ms: ms, ports: ports, sent: true, doneAt: doneAt, wres: wres, types: types };
     };
     // 통신 로그에 남길 한 줄 요약
     window.bsCarDriveLine = function (r) {
         if (!r.sent) return '⚠ 자동차 이동 명령을 보내지 못했어요 (허브 또는 모터를 찾지 못함)';
         var pd = r.ports.map(function (p) { return 'ABCDEF'.charAt(p) + ':' + (r.doneAt[p] === null ? '신호없음' : (r.doneAt[p] / 1000).toFixed(2) + '초'); }).join(' ');
-        return (r.ok ? '✓ 두 바퀴 완료 ' : '⚠ 완료 신호 없음 → 정지 ') + '(' + (r.ms / 1000).toFixed(2) + '초, ' + pd + ')';
+        var wr = r.ports.map(function (p) { return 'ABCDEF'.charAt(p) + ':' + ((r.wres && r.wres[p]) || '?'); }).join(' ');
+        var ty = r.ports.map(function (p) { return 'ABCDEF'.charAt(p) + '=' + (r.types ? r.types[p] : '?'); }).join(' ');
+        return (r.ok ? '✓ 두 바퀴 완료 ' : '⚠ 완료 신호 없음 → 정지 ') + '(' + (r.ms / 1000).toFixed(2) + '초, ' + pd + ' | 전송 ' + wr + ' | 장치 ' + ty + ')';
     };
 })();
