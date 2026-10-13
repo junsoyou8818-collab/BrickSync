@@ -67,13 +67,13 @@
             var pkt = new Uint8Array([14, 0x00, 0x81, mp.port, 0x11, 0x0B, deg & 255, (deg >>> 8) & 255, (deg >>> 16) & 255, (deg >>> 24) & 255, v < 0 ? 256 + v : v, 100, 127, 0x00]);
             writes.push((async function (port) {            // 쓰기 결과를 남기고, 실패하면 한 번 더 시도한다
                 try { await send(pkt); wres[port] = 'ok'; }
-                catch (e1) { try { await new Promise(function (r) { setTimeout(r, 40); }); await send(pkt); wres[port] = '재시도ok'; } catch (e2) { wres[port] = '오류:' + String((e2 && e2.message) || e2).slice(0, 40); } }
+                catch (e1) { try { await (window.bsSleep || function (x) { return new Promise(function (r) { setTimeout(r, x); }); })(40); await send(pkt); wres[port] = '재시도ok'; } catch (e2) { wres[port] = '오류:' + String((e2 && e2.message) || e2).slice(0, 40); } }
             })(mp.port));
         });
         await Promise.all(writes);
         var limit = (est || 3000) + 1200;      // 완료 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다
         var isDone = function () { return ports.every(function (p) { return (hw.hubMotorDone[p] || 0) > t0; }); };
-        while ((!alive || alive()) && Date.now() - t0 < limit && !isDone()) await new Promise(function (r) { setTimeout(r, 30); });
+        while ((!alive || alive()) && Date.now() - t0 < limit && !isDone()) await (window.bsSleep || function (x) { return new Promise(function (r) { setTimeout(r, x); }); })(30);
         var doneAt = {};
         ports.forEach(function (p) { var d = hw.hubMotorDone[p] || 0; doneAt[p] = d > t0 ? (d - t0) : null; });
         var ok = isDone(), ms = Date.now() - t0;

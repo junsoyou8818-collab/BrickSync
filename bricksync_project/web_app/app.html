@@ -12,6 +12,7 @@
     <meta http-equiv="Expires" content="0">
     <title>BrickSync</title>
     <script src="bs_scale.js"></script>
+    <script src="bs_timer.js"></script>
     <!-- 폰트 적용 -->
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap"
@@ -641,7 +642,7 @@ html, body { background: #cfd8ee; }
                                     await window.txCharacteristic.writeValue(chunk);
                                 } catch(e2) {}
                             }
-                            await new Promise(r => setTimeout(r, 20));
+                            await bsSleep(20);   // 가려진 탭에서도 20ms (워커 타이머)
                         }
                     }
                 }).catch(() => {});

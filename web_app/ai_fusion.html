@@ -89,6 +89,7 @@ function triggerSystemLog(category, msg) {
     <script src="firebase_config.js"></script>
     <script src="auth.js"></script>
     <script src="cloud_storage.js"></script>
+    <script src="bs_timer.js"></script>
     <script src="hub_ports.js"></script>
     <script src="control_dock.js"></script>
     <style>
@@ -4412,14 +4413,14 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                         0x01
                     ]);
                     await sendFn(modeSetupPacket).catch(() => {});
-                    await new Promise(r => setTimeout(r, 40));
+                    await bsSleep(40);
 
                     const matrixPacket = new Uint8Array([
                         16, 0x00, 0x81, p, 0x11, 0x51, 0x02,
                         ...pixelPayload
                     ]);
                     await sendFn(matrixPacket).catch(() => {});
-                    await new Promise(r => setTimeout(r, 40));
+                    await bsSleep(40);
                 }
 
                 // ⏱️ 정확히 5초 후 자동 끄기 패킷 송출
@@ -4430,7 +4431,7 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                             0, 0, 0, 0, 0, 0, 0, 0, 0
                         ]);
                         await sendFn(offMatrix).catch(() => {});
-                        await new Promise(r => setTimeout(r, 40));
+                        await bsSleep(40);
                     }
                     window.isLightSequenceRunning = false;
                     try { triggerSystemLog('HUB', '💡 조명 5초 후 자동 OFF 완료 (재실행 가능)'); } catch(e) {}
@@ -4507,7 +4508,7 @@ async function writeToHub(data) {
                 for (let i = 0; i < activePorts.length; i++) {
                     const p = activePorts[i];
                     await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, 0])).catch(e => { });
-                    await new Promise(r => setTimeout(r, 30)); // 30ms 안전 마진 지연시간 (15ms 기본 지연 결합)
+                    await bsSleep(30); // 30ms 안전 마진 지연시간 (15ms 기본 지연 결합)
                 }
             } else if (window.parent && window.parent.connectionType === 'USB') {
                 let pyStop = '\\x03\\x03\\x01import motor\ntry:\n for i in range(6):\n  try: motor.stop(i)\n  except: pass\nexcept: pass\n\\x04';
@@ -5043,7 +5044,7 @@ ${indent}  utime.sleep_ms(50)
             // 포트나이트 연동 액션(localActionsQueue)은 허브 연결 여부와 상관없이 작동하도록 변경 (시뮬레이션 모드 지원)
             if (localActionsQueue.length > 0) {
                 localActionsQueue.forEach(item => {
-                    setTimeout(() => {
+                    bsTimeout(() => {
                         if (window.bleEngineRunCounter !== currentRunId) return;
                         try {
                                                         if (window.parent && typeof window.parent.sendWebSocketAction === 'function') {
@@ -5551,7 +5552,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                         const limit = (cmd.estMs || 3000) + 1200;      // 완료 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다
                                         while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning && Date.now() - t0 < limit) {
                                             if ((hubWin.hubMotorDone[p] || 0) > t0) break;
-                                            await new Promise(r => setTimeout(r, 30));
+                                            await bsSleep(30);
                                         }
                                     }
                                 } else if (cmd.action === 'motor' || cmd.action === 'motor_cw' || cmd.action === 'motor_ccw' || cmd.action.startsWith('motor_stop')) {
@@ -5587,7 +5588,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             } catch (e) {
                                                 console.error(`[MOTOR ERROR] port ${p} 전송 실패:`, e);
                                             }
-                                            await new Promise(r => setTimeout(r, 60));
+                                            await bsSleep(60);
                                             break; // 단일 모터는 1개 포트만 회전
                                         }
                                     }
@@ -5622,7 +5623,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             } catch (e) {
                                                 console.error(`[CAR ERROR] port ${p} 전송 실패:`, e);
                                             }
-                                            await new Promise(r => setTimeout(r, 60));
+                                            await bsSleep(60);
                                         }
                                     } else {
                                         console.error('[CAR ERROR] writeToHub 함수를 찾지 못했습니다.');
@@ -5642,7 +5643,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             try {
                                                 await sendFn(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, 0]));
                                             } catch (e) {}
-                                            await new Promise(r => setTimeout(r, 60));
+                                            await bsSleep(60);
                                         }
                                     }
                                 } else if (cmd.action === 'car_stop') {
@@ -5650,7 +5651,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                         const p = mp.port;
 
                                         await window.parent.writeToHub(new Uint8Array([8, 0, 0x81, p, 0x10, 0x51, 0x00, 0])).catch(e => { });
-                                        await new Promise(r => setTimeout(r, 60));
+                                        await bsSleep(60);
                                     }
                                 } else if (cmd.action === 'MONSTER_ALERT') {
                                     try { window.sendWebSocketAction({ action: 'MONSTER_ALERT' }); } catch (e) { }
@@ -5700,7 +5701,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             0x01
                                         ]);
                                         await sendFn(modeSetupPacket).catch(e => console.error('[HUB] mode setup 실패', e));
-                                        await new Promise(r => setTimeout(r, 40));
+                                        await bsSleep(40);
 
                                         const matrixPacket = new Uint8Array([
                                             16, 0x00, 0x81, p, 0x11, 0x51, 0x02,
@@ -5712,7 +5713,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                         } catch (e) {
                                             console.error(`[HUB ERROR] port ${p} 전송 실패:`, e);
                                         }
-                                        await new Promise(r => setTimeout(r, 40));
+                                        await bsSleep(40);
                                     }
 
                                     setTimeout(async () => {
@@ -5722,7 +5723,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                                 0, 0, 0, 0, 0, 0, 0, 0, 0
                                             ]);
                                             await sendFn(offMatrix).catch(() => {});
-                                            await new Promise(r => setTimeout(r, 40));
+                                            await bsSleep(40);
                                         }
                                         window.isLightSequenceRunning = false;
                                         try { triggerSystemLog('HUB', '💡 조명 5초 후 자동 OFF 완료 (재실행 가능)'); } catch(e) {}
@@ -5757,9 +5758,9 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                     for (const port of targetPorts) {
                                         let payload = [16, 0, 0x81, port, 0x10, 0x51, 0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0];
                                         await writeWin.writeToHub(new Uint8Array(payload)).catch(e => { });
-                                        if (targetPorts.length > 1) await new Promise(r => setTimeout(r, 80));
+                                        if (targetPorts.length > 1) await bsSleep(80);
                                     }
-                                    await new Promise(r => setTimeout(r, 40));
+                                    await bsSleep(40);
                                                                 } else if (cmd.action === 'wait_force') {
                                     // 프라임 힘 센서: 눌렸는지(1) / 떼었는지(0)를 기다린다
                                     let matched = false, lastFLog = 0;
@@ -5771,7 +5772,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             lastFLog = Date.now();
                                             try { triggerSystemLog('HUB', fs ? ('🔘 힘 센서 기다리는 중: 목표 ' + (cmd.targetForce === 1 ? '누름' : '뗌') + ' / 지금 ' + (fs.pressed ? '눌림' : '안 눌림') + '(' + fs.value + ')') : '🔘 힘 센서를 찾지 못했어요 (프라임 힘 센서가 허브에 꽂혀 있는지 확인해 주세요)'); } catch (e) { }
                                         }
-                                        if (!matched) await new Promise(r => setTimeout(r, 60));
+                                        if (!matched) await bsSleep(60);
                                     }
                                     if (!matched) return;
                                 } else if (cmd.action === 'wait_tilt') {
@@ -5793,7 +5794,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                     hubWinForReset.consecutiveXFrames = 0;
                                     hubWinForReset.consecutiveYFrames = 0;
 
-                                    await new Promise(r => setTimeout(r, 150));
+                                    await bsSleep(150);
 
                                     while (!matched && window.bleEngineRunCounter === currentRunId) {
                                         let hubWin = window;
@@ -5822,20 +5823,20 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             console.log(`✅ [BLE_ENGINE] 자이로 조건 [${cmd.targetTilt}] 감지 성공! 동작 실행.`);
                                             break;
                                         }
-                                        await new Promise(r => setTimeout(r, 60));
+                                        await bsSleep(60);
                                     }
                                 } else if (cmd.action === 'wait_light') {
                                     // 색 센서를 반사/주변 빛 모드로 바꾸고, 기준 값을 넘을 때까지 기다린다
                                     const lw = window.parent && window.parent.hubDevices ? window.parent : window;
                                     try { if (typeof lw.setColorSensorMode === 'function') lw.setColorSensorMode(cmd.mode); } catch (e) { }
-                                    await new Promise(r => setTimeout(r, 260));
+                                    await bsSleep(260);
                                     const lkey = cmd.mode === 2 ? 'latestAmbientValue' : 'latestReflectValue';
                                     while (window.bleEngineRunCounter === currentRunId) {
                                         const lv = lw[lkey];
                                         if (lv !== undefined) {
                                             if (cmd.dir === 'down' ? lv <= cmd.target : lv >= cmd.target) break;
                                         }
-                                        await new Promise(r => setTimeout(r, 60));
+                                        await bsSleep(60);
                                     }
                                     try { if (typeof lw.setColorSensorMode === 'function') lw.setColorSensorMode(0); } catch (e) { }
                                 } else if (cmd.action === 'wait_color') {
@@ -5860,7 +5861,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             if (Date.now() - hitSince >= 250) { matched = true; try { const cn = { '-1': '색 없음', 0: '검정', 1: '분홍', 2: '보라', 3: '파랑', 4: '하늘', 5: '청록', 6: '초록', 7: '노랑', 8: '주황', 9: '빨강', 10: '하양' }; triggerSystemLog('HUB', '✅ 색 인식: ' + (cn[cv] || cv) + '(' + cv + '번) → 목표 색으로 인정'); } catch (e) { } }
                                         } else hitSince = 0;
                                         if (!matched && Date.now() - lastColLog > 1000) { lastColLog = Date.now(); logColorWait(cw, cv, cmd.targetColor, cmd.blockVal, cmd.stackNo); }
-                                        if (!matched) await new Promise(r => setTimeout(r, 80));
+                                        if (!matched) await bsSleep(80);
                                     }
                                     if (!matched) return;
                                 } else if (cmd.action === 'wait_distance') {
@@ -5875,7 +5876,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                             lastDLog = Date.now();
                                             try { triggerSystemLog('HUB', mm === undefined ? '📡 거리 센서를 찾지 못했어요 (프라임 거리 센서가 허브에 꽂혀 있는지 확인해 주세요)' : ('📡 거리 센서 기다리는 중: 목표 ' + thresholdDist + 'cm 이내 / 지금 ' + (mm < 0 ? '물체 없음' : (mm / 10).toFixed(1) + 'cm'))); } catch (e) { }
                                         }
-                                        if (!matched) await new Promise(r => setTimeout(r, 60));
+                                        if (!matched) await bsSleep(60);
                                     }
                                     if (!matched) return;
                                 }
@@ -5896,14 +5897,14 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                         if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) break;
                                         const inWait = inCmd.delay - innerLastTime;
                                         if (inWait > 0 && inCmd.action !== 'wait_color' && inCmd.action !== 'wait_distance' && inCmd.action !== 'wait_tilt' && inCmd.action !== 'wait_force' && inCmd.action !== 'wait_light') {
-                                            await new Promise(r => setTimeout(r, inWait));
+                                            await bsSleep(inWait);
                                             innerLastTime = inCmd.delay;
                                         }
                                         if (window.bleEngineRunCounter !== currentRunId || !window.isBlockExecutionRunning) break;
                                         await executeSingleCmd(inCmd);
                                         if (inCmd.action === 'motor_turn') innerLastTime = Math.max(innerLastTime, inCmd.delay + (inCmd.estMs || 0));
                                     }
-                                    await new Promise(r => setTimeout(r, 60));
+                                    await bsSleep(60);
                                 }
                                 console.log('⏹ [BLE_ENGINE] 무한 반복 루프 정상 종료');
                                 return;
@@ -5911,7 +5912,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
 
                             const waitTime = cmd.delay - lastExecutionTime;
                             if (waitTime > 0 && cmd.action !== 'wait_color' && cmd.action !== 'wait_distance' && cmd.action !== 'wait_tilt' && cmd.action !== 'wait_force' && cmd.action !== 'wait_light') {
-                                await new Promise(r => setTimeout(r, waitTime));
+                                await bsSleep(waitTime);
                                 lastExecutionTime = cmd.delay;
                             }
                             if (window.bleEngineRunCounter !== currentRunId && !window.isBlockExecutionRunning) return;
@@ -5931,7 +5932,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                         (async () => {
                             while (window.bleEngineRunCounter === currentRunId) {
                                 await executeBleQueue();
-                                await new Promise(r => setTimeout(r, 500));
+                                await bsSleep(500);
                             }
                         })();
                     } else {

@@ -16,7 +16,7 @@
     var running = false;
     var audioCtx = null, soundFx = { pitch: 0, pan: 0, vol: 100 };
 
-    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+    function sleep(ms) { return window.bsSleep ? window.bsSleep(ms) : new Promise(function (r) { setTimeout(r, ms); }); }      // 가려진 탭에서도 정확하게 (bs_timer.js)
     // 통신 로그 창(아래쪽 "통신 로그")에 남긴다
     function slog(category, msg) { try { if (typeof window.addSystemLog === 'function') window.addSystemLog(category, msg); } catch (e) { } }
     function lang() { try { return localStorage.getItem('bricksync_lang') === 'en' ? 'en' : 'ko'; } catch (e) { return 'ko'; } }
