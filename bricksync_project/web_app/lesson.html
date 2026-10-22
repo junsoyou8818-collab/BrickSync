@@ -4851,11 +4851,12 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                                         try {
                                             await sendFn(new Uint8Array([14, 0x00, 0x81, p, 0x11, 0x0B, deg & 255, (deg >>> 8) & 255, (deg >>> 16) & 255, (deg >>> 24) & 255, spHex, 100, 127, 0x00]));
                                         } catch (e) { console.error(`[MOTOR TURN ERROR] port ${p} 전송 실패:`, e); }
-                                        const limit = (cmd.estMs || 3000) + 1200;      // 완료 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다
-                                        while (window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning && Date.now() - t0 < limit) {
-                                            if ((hubWin.hubMotorDone[p] || 0) > t0) break;
-                                            await bsSleep(30);
-                                        }
+                                        const tRes = await bsMotorTurnWait(hubWin, p, t0, deg, sp, cmd.estMs, () => window.bleEngineRunCounter === currentRunId && window.isBlockExecutionRunning);
+                                        try {
+                                            const tLine = bsMotorTurnLine(tRes);
+                                            if (typeof addSystemLog === 'function') triggerSystemLog('HUB', tLine);
+                                            if (window.parent && window.parent.sendWebSocketAction) window.parent.sendWebSocketAction({ action: 'HUB_LOG', msg: tLine });
+                                        } catch (e) { }
                                     }
                                 } else if (cmd.action === 'wheels_deg') {
                                     // 자동차 이동/회전: 두 바퀴에 '각도만큼 돌리기'를 동시에 보내고, 두 바퀴가 다 돌았다는 신호를 기다린다

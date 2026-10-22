@@ -83,6 +83,30 @@
         var types = {}; ports.forEach(function (p) { types[p] = attached[p]; });
         return { ok: ok, ms: ms, ports: ports, sent: true, doneAt: doneAt, wres: wres, types: types };
     };
+    /* 모터 "N바퀴" 회전이 끝날 때까지 기다린다 (아이콘/워드 모드 공통)
+     *   - 허브의 "다 돌았다" 신호(hubMotorDone)가 와야 끝난 것으로 본다.
+     *   - 그런데 이전 명령의 늦은 신호나 중복 신호가 먼저 도착하면 회전이 끝나기 전에 다음 명령이 나가서 회전이 짧아진다.
+     *     그래서 이론상 걸리는 시간(속도 1%당 약 6도/초)의 80% 가 지나기 전에 온 신호는 무시하고 계속 기다린다.
+     *   - 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다. 끝난 뒤에는 브레이크가 자리 잡도록 0.15초 더 쉰다.
+     * 반환: { ok: 신호로 끝남, ms: 걸린 시간, theoryMs: 이론 시간, early: 일찍 온 신호를 무시한 횟수 } */
+    window.bsMotorTurnWait = async function (hw, port, t0, deg, speed, est, alive) {
+        var sleep = window.bsSleep || function (x) { return new Promise(function (r) { setTimeout(r, x); }); };
+        var theory = Math.round(Math.abs(deg) * 1000 / (Math.max(10, Math.abs(Number(speed) || 40)) * 6));
+        var minMs = Math.round(theory * 0.8), limit = (est || theory + 300) + 1200, early = 0, seen = 0, ok = false;
+        while ((!alive || alive()) && Date.now() - t0 < limit) {
+            var d = (hw.hubMotorDone || {})[port] || 0;
+            if (d > t0) {
+                if (d - t0 >= minMs) { ok = true; break; }
+                if (d !== seen) { seen = d; early++; }          // 너무 일찍 온 신호: 무시
+            }
+            await sleep(30);
+        }
+        if (ok) await sleep(150);
+        return { ok: ok, ms: Date.now() - t0, theoryMs: theory, early: early };
+    };
+    window.bsMotorTurnLine = function (r) {
+        return (r.ok ? '✓ 모터 회전 완료 ' : '⚠ 완료 신호 없음 ') + '(' + (r.ms / 1000).toFixed(2) + '초, 이론 ' + (r.theoryMs / 1000).toFixed(2) + '초' + (r.early ? ', 너무 일찍 온 신호 ' + r.early + '번 무시' : '') + ')';
+    };
     // 통신 로그에 남길 한 줄 요약
     window.bsCarDriveLine = function (r) {
         if (!r.sent) return '⚠ 자동차 이동 명령을 보내지 못했어요 (허브 또는 모터를 찾지 못함)';

@@ -562,12 +562,11 @@
                 var myRun = counter, tstart = Date.now();
                 // StartSpeedForDegrees: 각도(4바이트), 속도(부호로 방향), 최대 힘 100, 끝나면 브레이크(127), 가감속 없음
                 await send(new Uint8Array([14, 0x00, 0x81, tp, 0x11, 0x0B, tdeg & 255, (tdeg >>> 8) & 255, (tdeg >>> 16) & 255, (tdeg >>> 24) & 255, spd(tsp), 100, 127, 0x00]));
-                var tlimit = (cmd.est || 3000) + 1200;   // 완료 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다
-                while (counter === myRun && Date.now() - tstart < tlimit) {
-                    if ((hw.hubMotorDone[tp] || 0) > tstart) break;
-                    await sleep(30);
-                }
-                if (counter !== myRun || !((hw.hubMotorDone[tp] || 0) > tstart)) { try { await send(pkt(tp, 0)); } catch (e2) { } }   // 멈춤 / 신호 없음: 안전하게 정지
+                var tres = await window.bsMotorTurnWait(hw, tp, tstart, tdeg, tsp, cmd.est, function () { return counter === myRun; });
+                var tline = window.bsMotorTurnLine(tres);
+                slog('HUB', tline);
+                sendWS({ action: 'HUB_LOG', msg: tline });
+                if (counter !== myRun || !tres.ok) { try { await send(pkt(tp, 0)); } catch (e2) { } }   // 멈춤 / 신호 없음: 안전하게 정지
             } else if (cmd.a === 'motor_p') {
                 var mp = cmd.port === null || cmd.port === undefined ? (motorPorts(attached)[0] || 0) : cmd.port;
                 slog('HUB', '⚡ 레고 허브 포트 ' + 'ABCDEF'.charAt(mp) + ' 모터 (속도: ' + cmd.speed + ')');
