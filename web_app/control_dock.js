@@ -47,6 +47,23 @@
         /* 설정 버튼과 미션 도전하기 버튼은 크기를 똑같이 맞춘다 */
         '.top-actions #settings-menu-btn, .btn-go-mission { box-sizing: border-box; width: 168px; height: 42px; padding: 0 16px; font-size: 1.02rem; line-height: 1; gap: 10px; justify-content: center; align-items: center; }',
         '.top-actions #settings-menu-btn i, .btn-go-mission i { font-size: 1.25rem; line-height: 1; }',
+        /* ---- 안내 애니메이션 1: 코딩 화면에 들어왔는데 허브가 연결되지 않았을 때 — 화면을 살짝 어둡게 하고 허브 버튼에 물결과 말풍선 ---- */
+        '.main-layout > .bs-hint-ov { position: absolute; inset: 0; z-index: 25; background: rgba(43,27,77,.42); opacity: 0; transition: opacity .35s ease; cursor: pointer; }',
+        '.main-layout > .bs-hint-ov.in { opacity: 1; }',
+        '.bs-dock.hinting .run, .bs-dock.hinting .stop, .bs-dock.hinting .gyro { opacity: .35; transition: opacity .35s ease; }',
+        '.bs-dock .hub.hint::before, .bs-dock .hub.hint::after { content: ""; position: absolute; inset: -4px; border-radius: 40px; border: 5px solid #ffc93a; opacity: 0; animation: bsPing 1.7s ease-out infinite; pointer-events: none; }',
+        '.bs-dock .hub.hint::after { animation-delay: .85s; }',
+        '@keyframes bsPing { 0% { transform: scale(.92); opacity: .95; } 70% { opacity: .25; } 100% { transform: scale(1.38); opacity: 0; } }',
+        '.bs-dock .hub .bs-bubble { position: absolute; left: 50%; bottom: calc(100% + 26px); transform: translateX(-50%); z-index: 3; width: max-content; max-width: 400px; word-break: keep-all; padding: 16px 40px 16px 20px; border-radius: 18px; background: #fff; color: #2b1b4d; font-size: 1.15rem; font-weight: 800; line-height: 1.4; text-align: center; box-shadow: 0 10px 26px rgba(43,27,77,.3); animation: bsBubble .45s cubic-bezier(.2,1.4,.4,1) both; }',
+        '.bs-dock .hub .bs-bubble::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -12px; border: 12px solid transparent; border-top-color: #fff; border-bottom: 0; }',
+        '.bs-dock .hub .bs-bubble .x { position: absolute; right: 8px; top: 8px; width: 26px; height: 26px; border: 0; border-radius: 50%; background: transparent; color: #7a7396; font-size: 1.1rem; line-height: 26px; cursor: pointer; padding: 0; }',
+        '.bs-dock .hub .bs-bubble .x:hover { background: #eef0fa; color: #2b1b4d; }',
+        '@keyframes bsBubble { from { opacity: 0; transform: translateX(-50%) translateY(10px) scale(.92); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }',
+        /* ---- 안내 애니메이션 2: 미션 블록을 100% 연결했을 때 — 실행 버튼 둘레로 물결이 퍼진다 ---- */
+        '.bs-dock .run.nudge::before, .bs-dock .run.nudge::after { content: ""; position: absolute; left: 50%; top: 50%; width: 124px; height: 124px; margin: -62px 0 0 -65px; border-radius: 50%; border: 7px solid #4fb82a; box-shadow: 0 0 14px rgba(107,202,64,.55); opacity: 0; animation: bsRunPing 1.7s ease-out infinite; pointer-events: none; }',
+        '.bs-dock .run.nudge::after { border-color: #8fe05f; animation-delay: .85s; }',
+        '@keyframes bsRunPing { 0% { transform: scale(.7); opacity: .95; } 70% { opacity: .3; } 100% { transform: scale(1.5); opacity: 0; } }',
+        '@media (prefers-reduced-motion: reduce) { .bs-dock .hub.hint::before, .bs-dock .hub.hint::after, .bs-dock .run.nudge::before, .bs-dock .run.nudge::after { animation: none; opacity: .8; transform: scale(1.15); } }',
         '@media (max-width: 760px) { .bs-dock .hb { width: 84px; height: 84px; } .main-layout > .bs-dock { gap: 16px; } }'
     ].join('\n');
 
@@ -174,6 +191,52 @@
             if (mountDot) new MutationObserver(syncGyro).observe(mountDot, { attributes: true, attributeFilter: ['style'] });
         } catch (e) { }
         syncHub(); syncRun(); syncGyro();
+
+        /* ---- 안내 1: 허브 연결 유도 ---- */
+        var HINT = { ko: '허브를 연결하려면 이 버튼을 누르세요', en: 'Press this button to connect your hub' };
+        var hintOv = null, hintBub = null, hintTimer = null;
+        function hideHubHint() {
+            clearTimeout(hintTimer);
+            if (!hintOv) return;
+            var ov = hintOv, bub = hintBub; hintOv = null; hintBub = null;
+            bHub.classList.remove('hint'); dock.classList.remove('hinting');
+            ov.classList.remove('in');
+            if (bub && bub.parentNode) bub.parentNode.removeChild(bub);
+            setTimeout(function () { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 400);
+            document.removeEventListener('keydown', onHintKey, true);
+        }
+        function onHintKey(e) { if (e.key === 'Escape') hideHubHint(); }
+        function showHubHint() {
+            if (hintOv || hubConnected()) return;
+            hintOv = document.createElement('div'); hintOv.className = 'bs-hint-ov';
+            layout.appendChild(hintOv);
+            hintBub = document.createElement('div'); hintBub.className = 'bs-bubble';
+            hintBub.innerHTML = '<span class="t"></span><button type="button" class="x" aria-label="close">\u00d7</button>';
+            hintBub.querySelector('.t').textContent = HINT[lang()];
+            hintBub.querySelector('.x').addEventListener('click', function (e) { e.stopPropagation(); hideHubHint(); });
+            bHub.appendChild(hintBub);
+            bHub.classList.add('hint'); dock.classList.add('hinting');
+            requestAnimationFrame(function () { if (hintOv) hintOv.classList.add('in'); });
+            hintOv.addEventListener('click', hideHubHint);
+            document.addEventListener('keydown', onHintKey, true);
+            hintTimer = setTimeout(hideHubHint, 7000);
+        }
+        bHub.addEventListener('click', hideHubHint);
+        window.addEventListener('bricksync-language-changed', function () { if (hintBub) hintBub.querySelector('.t').textContent = HINT[lang()]; });
+        var oldSyncHub = syncHub;
+        syncHub = function () { oldSyncHub(); if (hubConnected()) hideHubHint(); };
+        try {
+            if (hubDot) new MutationObserver(syncHub).observe(hubDot, { attributes: true, attributeFilter: ['style'] });
+        } catch (e) { }
+        // 화면이 자리 잡은 뒤(허브 연결 상태가 반영된 뒤)에도 연결이 안 돼 있으면 보여 준다
+        setTimeout(function () { if (!document.hidden) showHubHint(); }, 1100);
+
+        /* ---- 안내 2: 미션 블록 100% 연결 → 실행 유도 ---- */
+        function missionDone() { var m = document.getElementById('m-progress'); return !!(m && m.dataset && m.dataset.completed === 'true'); }
+        function syncNudge() { bRun.classList.toggle('nudge', missionDone() && !run.classList.contains('is-running')); }
+        setInterval(syncNudge, 500);
+        bRun.addEventListener('click', function () { bRun.classList.remove('nudge'); });
+        try { new MutationObserver(syncNudge).observe(run, { attributes: true, attributeFilter: ['class'] }); } catch (e) { }
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
