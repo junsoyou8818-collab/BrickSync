@@ -1894,6 +1894,15 @@ body[data-unit="7"] .spike-block[data-action="event_ai_gesture"] .block-param {
                 window.__bsRunTimer = setTimeout(() => { b.classList.remove('is-running'); window.__bsRunUntil = 0; }, Math.max(0, window.__bsRunUntil - Date.now()));
             }
         }
+        // 레고가 실제로 다 끝난 뒤에는 (예상 시간이 아니라) 실제 끝난 시각 + 1초에 표시를 끈다 (포트나이트 신호가 더 남았으면 그 끝까지)
+        function bsRunIndicatorCap(absMs) {
+            if (!isFinite(window.__bsRunUntil || 0) || !window.__bsRunUntil) return;
+            const b = document.querySelector('.run-btn');
+            if (!b || !b.classList.contains('is-running')) return;
+            window.__bsRunUntil = Math.min(window.__bsRunUntil, absMs);
+            clearTimeout(window.__bsRunTimer);
+            window.__bsRunTimer = setTimeout(() => { b.classList.remove('is-running'); window.__bsRunUntil = 0; }, Math.max(0, window.__bsRunUntil - Date.now()));
+        }
         function bsRunIndicatorStop() {
             clearTimeout(window.__bsRunTimer);
             window.__bsRunUntil = 0;
@@ -4279,6 +4288,8 @@ print("BrickSync Sandbox Run")
             const localSoundsQueue = [];
             const localActionsQueue = [];
             let cumulativeDelayMs = 0;
+            let fnSpeed = 40;                                  // 포트나이트 일정을 레고 완료 시각에 맞추기 위해 현재 모터 속도를 따라간다
+            const fnSyncLego = (typeof bsHubIsBle === 'function') && bsHubIsBle(window);
 
             function buildPyCode(blockArray, indent) {
                 blockArray.forEach((block) => {
@@ -4326,6 +4337,7 @@ print("BrickSync Sandbox Run")
                         case 'motor_speed_set':
                         case 'car_speed_set':
                             pyCode += `${indent}global_motor_speed = ${pythonVal} \n${indent}print("Global Motor Speed Set:", global_motor_speed, "%") \n`;
+                            fnSpeed = paramVal === -1 ? 40 : paramVal;
                             let speedLevelUSB = 2;
                             if (paramVal <= 15) speedLevelUSB = 1;
                             else if (paramVal <= 40) speedLevelUSB = 2;
@@ -4341,11 +4353,13 @@ print("BrickSync Sandbox Run")
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_forward' ? 'UP' : 'DOWN';
+                            const fnT0 = cumulativeDelayMs;
                             for (let step = 0; step < timeVal; step++) {
                                 localActionsQueue.push({ action: 'STEER_' + fws + '_TAP', delay: cumulativeDelayMs });
                                 cumulativeDelayMs += 850;
                             }
                             cumulativeDelayMs += 100;
+                            if (fnSyncLego) cumulativeDelayMs = Math.max(cumulativeDelayMs, fnT0 + bsLegoBlockMs(action === 'car_forward' ? 'fwd' : 'back', timeVal, fnSpeed));
                             break;
                         }
                         case 'car_left':
@@ -4356,33 +4370,39 @@ print("BrickSync Sandbox Run")
                             pyCode += `${indent}dm(${p0_sign}global_motor_speed, ${p1_sign}global_motor_speed)\n${indent}utime.sleep_ms(${pythonDuration}) \n${indent}sm() \n`;
 
                             let fws = action === 'car_left' ? 'LEFT' : 'RIGHT';
+                            const fnT0 = cumulativeDelayMs;
                             for (let step = 0; step < timeVal; step++) {
                                 localActionsQueue.push({ action: 'STEER_' + fws + '_TAP', delay: cumulativeDelayMs });
                                 cumulativeDelayMs += 650;
                             }
                             cumulativeDelayMs += 100;
+                            if (fnSyncLego) cumulativeDelayMs = Math.max(cumulativeDelayMs, fnT0 + bsLegoBlockMs(action === 'car_left' ? 'left' : 'right', timeVal, fnSpeed));
                             break;
                         }
                         case 'motor_cw': {
                             pyCode += `${indent}rm(global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1000)) \n${indent}sm() \n`;
                             const oneTurnDurationMs = 1400;
+                            const fnT0 = cumulativeDelayMs;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_RIGHT', delay: cumulativeDelayMs });
                                 cumulativeDelayMs += oneTurnDurationMs;
                             }
                             localActionsQueue.push({ action: 'STOP_MWHEEL_RIGHT', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800;
+                            if (fnSyncLego) cumulativeDelayMs = Math.max(cumulativeDelayMs, fnT0 + bsLegoBlockMs('motor', timeVal, fnSpeed));   // 게임 회전 시간은 그대로, 다음 블록만 레고가 끝난 뒤에 시작
                             break;
                         }
                         case 'motor_ccw': {
                             pyCode += `${indent}rm(-global_motor_speed) \n${indent}utime.sleep_ms(int(${pythonTimeVal} * 1000)) \n${indent}sm() \n`;
                             const oneTurnDurationMs = 1400;
+                            const fnT0 = cumulativeDelayMs;
                             for (let i = 0; i < timeVal; i++) {
                                 localActionsQueue.push({ action: 'MWHEEL_LEFT', delay: cumulativeDelayMs });
                                 cumulativeDelayMs += oneTurnDurationMs;
                             }
                             localActionsQueue.push({ action: 'STOP_MWHEEL_LEFT', delay: cumulativeDelayMs });
                             cumulativeDelayMs += 800;
+                            if (fnSyncLego) cumulativeDelayMs = Math.max(cumulativeDelayMs, fnT0 + bsLegoBlockMs('motor', timeVal, fnSpeed));   // 게임 회전 시간은 그대로, 다음 블록만 레고가 끝난 뒤에 시작
                             break;
                         }
                         case 'motor_stop':
@@ -4466,6 +4486,7 @@ print("BrickSync Sandbox Run")
                 });
             }
 
+            const runStartMs = Date.now();
             // 🎮 포트나이트 연동 액션(localActionsQueue) 타이밍 송출
             if (localActionsQueue.length > 0) {
                 localActionsQueue.forEach(item => {
@@ -5187,6 +5208,7 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
                             if (cmd.action === 'motor_turn' || cmd.action === 'wheels_deg') lastExecutionTime = Math.max(lastExecutionTime, cmd.delay + (cmd.estMs || 0));
                         }
 
+                        try { if (window.bleEngineRunCounter === currentRunId) bsRunIndicatorCap(Math.max(runStartMs + cumulativeDelayMs, Date.now()) + 1000); } catch (e) { }
                         if (isMissionActive && blockCount > 1 && anySequenceFound && window.bleEngineRunCounter === currentRunId) {
                             if (unit !== '7' && unit !== '2') {
                                 console.log('🎉 [BLE_ENGINE] Sequence 100% finished! Popping up Mission Modal.');

@@ -63,7 +63,8 @@
             ble: [], local: [], fort: [], py: '',
             bleT: 0, fortT: 0, speed: 40, wheelMm: 43.2,
             light: { base: [0, 0, 0, 0, 0, 0, 0, 0, 0], bright: 100, rot: 0 },
-            turns: opts && opts.turns, voiceDir: opts && opts.voiceDir, depth: (opts && opts.depth) || 0, stopped: false, fortLit: false
+            turns: opts && opts.turns, voiceDir: opts && opts.voiceDir, depth: (opts && opts.depth) || 0, stopped: false, fortLit: false,
+            sync: !!(opts && opts.sync !== undefined ? opts.sync : (typeof window.bsHubIsBle === 'function' && window.bsHubIsBle(hubWin())))
         };
     }
 
@@ -115,6 +116,7 @@
         var s = ctx.speed;
         var steps = amt.steps, ms = amt.ms;
         var isTurn = (dir === 'left' || dir === 'right');
+        var legoDur = 0;      // 레고가 이 블록을 실제로 끝내는 시간 (각도 이동일 때만)
         var unitMs = isTurn ? oneTurnMs(s) : oneStepMs(s);
         var bleMs = ms !== null ? Math.round(ms) : Math.round(steps * unitMs);
         // 각 바퀴 값 (아이콘 모드: 앞으로 = A -, B +)
@@ -137,6 +139,7 @@
             // 시간이 아니라 바퀴 각도로 정확히: 기본 블록은 칸/회전 기준 각도(hub_ports.js BS_CAR), '[n] 회전/도 이동하기'는 바퀴 n x 360도 / n도
             var wdeg = amt.basic ? window.bsCarWheelDeg(dir, steps) : Math.max(1, Math.round(Math.abs(steps) * 360));
             var west = window.bsCarEstMs(wdeg, s);
+            legoDur = Math.round(wdeg * 1000 / (Math.max(10, s) * 5.5)) + 650;
             ctx.ble.push({ a: 'wheels_deg', dir: dir, deg: wdeg, speed: s, est: west, blocking: true, delay: ctx.bleT, tag: dir });
             ctx.bleT += west + 500;
         } else {
@@ -155,8 +158,11 @@
         fgap = fturn ? 650 : 850;
         var key = { fwd: 'UP', back: 'DOWN', left: 'LEFT', right: 'RIGHT' }[fdir];
         var taps = ms !== null ? Math.max(1, Math.round(ms / fgap)) : Math.max(1, Math.round(steps));
+        var fort0 = ctx.fortT;
         for (var k = 0; k < taps; k++) { ctx.fort.push({ a: 'ws', action: 'STEER_' + key + '_TAP', delay: ctx.fortT }); ctx.fortT += fgap; }
         ctx.fortT += 100;
+        // 허브가 연결돼 있으면 포트나이트의 다음 블록도 레고가 이 블록을 끝낸 뒤에 시작 (키 간격과 횟수는 그대로)
+        if (ctx.sync && legoDur) ctx.fortT = Math.max(ctx.fortT, fort0 + legoDur);
 
         // USB(파이썬) 시간
         var pyUnit = isTurn ? 835 : 1600;
@@ -184,6 +190,7 @@
     function emitMotor(ctx, ind, dirCw, amt) {
         var s = ctx.speed;
         var turns = amt.steps, ms = amt.ms;
+        var motorFort0 = ctx.fortT, motorLegoDur = (ms === null) ? Math.round(Math.abs(turns) * 360 * 1000 / (Math.max(10, s) * 5.5)) + 650 : 0;
         if (ms === null) {
             var estMs = turnEstMs(turns, s);
             ctx.ble.push({ a: 'motor_turn', tag: dirCw ? 'motor_cw' : 'motor_ccw', turns: turns, speed: dirCw ? s : -s, est: estMs, blocking: true, port: null, delay: ctx.bleT });
@@ -211,6 +218,7 @@
             ctx.fort.push({ a: 'ws', action: 'STOP_' + key, delay: ctx.fortT });
             ctx.fortT += 800;
         }
+        if (ctx.sync && motorLegoDur) ctx.fortT = Math.max(ctx.fortT, motorFort0 + motorLegoDur);      // 게임 회전은 그대로, 다음 블록만 레고가 끝난 뒤에 시작
         var pyMs = ms !== null ? Math.round(ms) : Math.round(turns * 1000);
         ctx.py += ind + 'rm(' + (dirCw ? '' : '-') + 'global_motor_speed) \n' + ind + 'utime.sleep_ms(' + pyMs + ') \n' + ind + 'sm() \n';
     }

@@ -28,7 +28,7 @@
     // 회전 블록의 예상 소요 시간(ms): 바퀴 수 x 360도를 속도로 나눈 값 (넉넉하게 잡는다. 실제로는 허브의 완료 신호로 넘어간다)
     window.bsTurnEstMs = function (turns, speed) {
         var sp = Math.max(10, Math.abs(Number(speed) || 40));
-        return Math.round(Math.abs(Number(turns) || 1) * 360 * 1000 / (sp * 6)) + 300;
+        return Math.round(Math.abs(Number(turns) || 1) * 360 * 1000 / (sp * 5)) + 300;      // 실측 약 200~240도/초(속도 40) 보다 20% 정도만 넉넉하게: 실행 표시와 일정이 실제와 크게 어긋나지 않게
     };
 
     /* ---- 자동차 이동/회전: 시간이 아니라 "바퀴 각도"로 (허브가 각자 정해진 각도에서 멈춘다) ----
@@ -42,7 +42,7 @@
         return Math.max(1, Math.round(Math.abs(Number(n) || 1) * per));
     };
     window.bsCarEstMs = function (deg, speed) {   // 예상 소요 시간(ms): 완료 신호가 안 와도 넘어가기 위한 넉넉한 상한
-        return Math.round(Math.abs(deg) * 1000 / (Math.max(10, Math.abs(Number(speed) || 40)) * 6)) + 300;
+        return Math.round(Math.abs(deg) * 1000 / (Math.max(10, Math.abs(Number(speed) || 40)) * 5)) + 300;      // 실측 약 200~240도/초(속도 40) 보다 20% 정도만 넉넉하게
     };
     // 바퀴별 방향 부호 [첫째 바퀴(포트 번호 낮은 쪽), 둘째 바퀴]: 앞으로 = (-, +), 뒤로 = (+, -), 오른쪽 = (-, -), 왼쪽 = (+, +)
     window.bsCarSigns = function (dir) {
@@ -71,7 +71,7 @@
             })(mp.port));
         });
         await Promise.all(writes);
-        var limit = (est || 3000) + 1200;      // 완료 신호가 안 와도 예상 시간 + 1.2초 뒤에는 넘어간다
+        var limit = Math.round((est || 3000) * 1.5) + 1500;      // 완료 신호가 안 와도 예상 시간의 1.5배 + 1.5초 뒤에는 넘어간다 (부하로 느려져도 중간에 끊기지 않게 넉넉히)
         var isDone = function () { return ports.every(function (p) { return (hw.hubMotorDone[p] || 0) > t0; }); };
         while ((!alive || alive()) && Date.now() - t0 < limit && !isDone()) await (window.bsSleep || function (x) { return new Promise(function (r) { setTimeout(r, x); }); })(30);
         var doneAt = {};
@@ -92,7 +92,7 @@
     window.bsMotorTurnWait = async function (hw, port, t0, deg, speed, est, alive) {
         var sleep = window.bsSleep || function (x) { return new Promise(function (r) { setTimeout(r, x); }); };
         var theory = Math.round(Math.abs(deg) * 1000 / (Math.max(10, Math.abs(Number(speed) || 40)) * 6));
-        var minMs = Math.round(theory * 0.8), limit = (est || theory + 300) + 1200, early = 0, seen = 0, ok = false;
+        var minMs = Math.round(theory * 0.8), limit = Math.round((est || theory + 300) * 1.5) + 1500, early = 0, seen = 0, ok = false;
         while ((!alive || alive()) && Date.now() - t0 < limit) {
             var d = (hw.hubMotorDone || {})[port] || 0;
             if (d > t0) {
@@ -106,6 +106,24 @@
     };
     window.bsMotorTurnLine = function (r) {
         return (r.ok ? '✓ 모터 회전 완료 ' : '⚠ 완료 신호 없음 ') + '(' + (r.ms / 1000).toFixed(2) + '초, 이론 ' + (r.theoryMs / 1000).toFixed(2) + '초' + (r.early ? ', 너무 일찍 온 신호 ' + r.early + '번 무시' : '') + ')';
+    };
+    /* 레고 허브와 포트나이트 일정 맞추기
+     *   레고는 "다 돌았다" 신호로 다음 블록으로 넘어가고, 포트나이트는 정해 둔 간격으로 키를 누른다.
+     *   블록이 끝나는 시각이 서로 다르면 두 쪽의 다음 동작이 어긋나므로, 허브가 연결된 경우에는 포트나이트 쪽도
+     *   그 블록이 끝난 뒤에 다음 블록을 시작하게 한다 (키 누르는 간격과 횟수는 그대로, 블록 사이만 맞춘다).
+     *   bsLegoBlockMs: 레고가 이 블록을 실제로 끝내는 데 걸리는 시간(ms) = 각도 / (속도 x 약 5.5도/초) + 완료 후 쉬는 시간 */
+    window.bsHubIsBle = function (win) {
+        var w = win || window;
+        for (var i = 0; i < 5 && w; i++) {
+            try { if (w.connectionType === 'BLE' || w.isBluetoothMode || w.txCharacteristic) return true; } catch (e) { }
+            var p = null; try { p = w.parent; } catch (e) { }
+            if (p && p !== w) w = p; else break;
+        }
+        return false;
+    };
+    window.bsLegoBlockMs = function (kind, n, speed) {
+        var deg = kind === 'motor' ? Math.abs(Number(n) || 1) * 360 : window.bsCarWheelDeg(kind, n);
+        return Math.round(deg * 1000 / (Math.max(10, Math.abs(Number(speed) || 40)) * 5.5)) + 650;
     };
     // 통신 로그에 남길 한 줄 요약
     window.bsCarDriveLine = function (r) {

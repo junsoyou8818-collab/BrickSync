@@ -2,6 +2,7 @@
 <html lang="ko">
 
 <head>
+    <script>function bsCntUnit() { try { return localStorage.getItem('bricksync_lang') === 'en' ? '' : '개'; } catch (e) { return '개'; } }</script>
     <script src="bs_lang_guard.js"></script>
     <!-- 최상위 윈도우 자동 래핑 리다이렉트 스크립트 -->
     <script>
@@ -7964,13 +7965,13 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
 
             const nu = getNormUnit(unit);
             if (nu === '8') {
-                if (elRock) elRock.innerText = `${examplesCount[0] || 0}개`;
-                if (elNone) elNone.innerText = `${examplesCount[1] || 0}개`;
+                if (elRock) elRock.innerText = `${examplesCount[0] || 0}${bsCntUnit()}`;
+                if (elNone) elNone.innerText = `${examplesCount[1] || 0}${bsCntUnit()}`;
             } else {
-                if (elRock) elRock.innerText = `${examplesCount[0] || 0}개`;
-                if (elPaper) elPaper.innerText = `${examplesCount[1] || 0}개`;
-                if (elScissors) elScissors.innerText = `${examplesCount[2] || 0}개`;
-                if (elNone) elNone.innerText = `${examplesCount[3] || 0}개`;
+                if (elRock) elRock.innerText = `${examplesCount[0] || 0}${bsCntUnit()}`;
+                if (elPaper) elPaper.innerText = `${examplesCount[1] || 0}${bsCntUnit()}`;
+                if (elScissors) elScissors.innerText = `${examplesCount[2] || 0}${bsCntUnit()}`;
+                if (elNone) elNone.innerText = `${examplesCount[3] || 0}${bsCntUnit()}`;
             }
         }
 
@@ -8512,6 +8513,24 @@ const hubSet = ({ 1: [1, 2], 3: [3], 4: [4], 5: [5, 6], 6: [7, 8], 9: [9], 10: [
             try { new MutationObserver(later).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-val'] }); } catch (e) { }
         })();
     </script>
+<script>
+    // 가위바위보/몬스터 학습 개수의 단위: 한국어는 "3개", 영어는 숫자만 ("3")
+    function bsCntUnit() { try { return localStorage.getItem('bricksync_lang') === 'en' ? '' : '개'; } catch (e) { return '개'; } }
+    window.bsFixCounts = function () {
+        var u = bsCntUnit();
+        ['count-rock', 'count-paper', 'count-scissors', 'count-none'].forEach(function (id) {
+            var e = document.getElementById(id); if (!e) return;
+            var m = /^\s*(\d+)\s*개?\s*$/.exec(e.textContent || ''); if (!m) return;
+            var want = m[1] + u; if (e.textContent !== want) e.textContent = want;
+        });
+    };
+    (function () {
+        var tm = null;
+        function later() { clearTimeout(tm); tm = setTimeout(window.bsFixCounts, 30); }
+        document.addEventListener('DOMContentLoaded', function () { window.bsFixCounts(); try { new MutationObserver(later).observe(document.body, { childList: true, subtree: true, characterData: true }); } catch (e) { } });
+        window.addEventListener('bricksync-language-changed', later);
+    })();
+</script>
 </body>
 
 </html>
