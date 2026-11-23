@@ -484,6 +484,9 @@
             padding: 8px;
         }
 
+        .fn-keys-img { width: auto; max-width: 510px; height: auto; margin: 18px auto 0; }
+        .fn-keys-img img { height: auto; }
+
         .fn-img-wrap:hover {
             transform: scale(1.02);
             border-color: rgba(250, 204, 21, 0.6);
@@ -993,7 +996,7 @@
                         <img data-src-ko="./assets/fortnite_step3_actions_ko.webp" data-src-en="./assets/fortnite_step3_actions.png" alt="Creative Input Actions Custom Keybindings">
                     </div>
                     <div class="fn-step-desc" data-i18n="lbl_guide_fn_step3_desc">
-                        스크롤을 내려 <strong>크리에이티브 입력 동작</strong> 섹션의 <strong>사용자 지정 입력 6 ~ 10</strong> 항목을 지정된 단축키로 변경합니다.
+                        스크롤을 내려 <strong>크리에이티브 입력 동작</strong> 섹션의 <strong>사용자 지정 입력 6 ~ 10, 15 ~ 17</strong> 항목을 지정된 단축키로 변경합니다.
                     </div>
                 </div>
 
@@ -1001,7 +1004,7 @@
 
             <!-- 커스텀 키 요약표 -->
             <div class="keybinding-summary-box">
-                <div class="kb-summary-title" data-i18n="lbl_guide_fn_summary_title">🔑 필수 커스텀 입력 키 설정 목록 (사용자 지정 입력 6 ~ 10)</div>
+                <div class="kb-summary-title" data-i18n="lbl_guide_fn_summary_title">🔑 필수 커스텀 입력 키 설정 목록 (사용자 지정 입력 6 ~ 10, 15 ~ 17)</div>
                 <div class="kb-grid">
                     <div class="kb-item">
                         <div style="display:flex; flex-direction:column; gap:2px; flex:1;">
@@ -1047,6 +1050,37 @@
                         <span class="kb-arrow">→</span>
                         <span class="key-cap">O</span>
                     </div>
+
+                    <div class="kb-item">
+                        <div style="display:flex; flex-direction:column; gap:2px; flex:1;">
+                            <span class="kb-name" data-i18n="lbl_guide_fn_in15_name">사용자 지정 입력 15 (Rotate CW)</span>
+                            <span class="kb-role" data-i18n="lbl_guide_fn_in15_role">시계방향 회전 (오른쪽으로)</span>
+                        </div>
+                        <span class="kb-arrow">→</span>
+                        <span class="key-cap">H</span>
+                    </div>
+
+                    <div class="kb-item">
+                        <div style="display:flex; flex-direction:column; gap:2px; flex:1;">
+                            <span class="kb-name" data-i18n="lbl_guide_fn_in16_name">사용자 지정 입력 16 (Rotate CCW)</span>
+                            <span class="kb-role" data-i18n="lbl_guide_fn_in16_role">반시계방향 회전 (왼쪽으로)</span>
+                        </div>
+                        <span class="kb-arrow">→</span>
+                        <span class="key-cap">J</span>
+                    </div>
+
+                    <div class="kb-item">
+                        <div style="display:flex; flex-direction:column; gap:2px; flex:1;">
+                            <span class="kb-name" data-i18n="lbl_guide_fn_in17_name">사용자 지정 입력 17 (Stop)</span>
+                            <span class="kb-role" data-i18n="lbl_guide_fn_in17_role">회전 멈춤</span>
+                        </div>
+                        <span class="kb-arrow">→</span>
+                        <span class="key-cap">K</span>
+                    </div>
+                </div>
+
+                <div class="fn-img-wrap fn-keys-img" onclick="openImageModal(this.querySelector('img').getAttribute('src'))">
+                    <img data-src-ko="./assets/fortnite_custom_keys_list.png" data-src-en="./assets/fortnite_custom_keys_list_en.png" alt="Creative Input Actions - Custom Input 6 to 17">
                 </div>
             </div>
 
